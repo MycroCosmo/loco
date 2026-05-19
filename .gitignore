@@ -1,0 +1,38 @@
+# Node / NestJS
+node_modules/
+dist/
+.env
+*.log
+
+# Prisma
+apps/server/prisma/migrations/
+
+# 업로드 이미지 (로컬 파일시스템)
+apps/server/uploads/
+
+# Flutter
+apps/mobile/android/.gradle/
+apps/mobile/android/local.properties
+apps/mobile/android/key.properties
+*.jks
+*.keystore
+apps/mobile/.dart_tool/
+apps/mobile/.flutter-plugins
+apps/mobile/.flutter-plugins-dependencies
+apps/mobile/build/
+apps/mobile/.packages
+apps/mobile/pubspec.lock
+apps/mobile/ios/Flutter/Generated.xcconfig
+apps/mobile/ios/Flutter/flutter_export_environment.sh
+
+# Local agent settings
+.claude/settings.local.json
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db

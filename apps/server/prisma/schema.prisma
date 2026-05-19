@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum ReportTargetType {
+  MAP
+  PLACE
+  USER
+}
+
+enum Provider {
+  LOCAL
+  GOOGLE
+  KAKAO
+  NAVER
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  nickname        String
+  profileImageUrl String?
+  provider        Provider  @default(LOCAL)
+  providerId      String?
+  password        String?
+  fcmToken        String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  maps      Map[]
+  places    Place[]
+  placeReviews PlaceReview[]
+  favorites Favorite[]
+  mapMemberships MapMember[]
+  feedbacks Feedback[]
+  reports   Report[]
+  refreshTokens RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Map {
+  id            String     @id @default(uuid())
+  ownerId       String
+  title         String
+  description   String?
+  tags          String[]
+  coverImageUrl String?
+  visibility    Visibility @default(PUBLIC)
+  inviteCode    String?    @unique
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  owner     User       @relation(fields: [ownerId], references: [id])
+  places    Place[]
+  markerCells PlaceMarkerCell[]
+  favorites Favorite[]
+  members   MapMember[]
+
+  @@map("maps")
+}
+
+model PlaceMarkerCell {
+  mapId         String
+  precision     Int
+  cellLatKey    String
+  cellLngKey    String
+  latitude      Float
+  longitude     Float
+  minLat        Float
+  maxLat        Float
+  minLng        Float
+  maxLng        Float
+  count         Int
+  exactKeyCount Int
+  groupKey      String?
+  placeId       String?
+  placeName     String?
+  updatedAt     DateTime @updatedAt
+
+  map Map @relation(fields: [mapId], references: [id], onDelete: Cascade)
+
+  @@id([mapId, precision, cellLatKey, cellLngKey])
+  @@index([mapId, precision, minLat, maxLat, minLng, maxLng])
+  @@index([mapId, precision, maxLat])
+  @@index([mapId, precision, maxLng])
+  @@map("place_marker_cells")
+}
+
+model MapMember {
+  id        String   @id @default(uuid())
+  mapId     String
+  userId    String
+  createdAt DateTime @default(now())
+
+  map  Map  @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([mapId, userId])
+  @@map("map_members")
+}
+
+model Place {
+  id          String   @id @default(uuid())
+  mapId       String
+  createdById String
+  name        String
+  address     String
+  roadAddress String?
+  latitude    Float
+  longitude   Float
+  phone       String?
+  category    String?
+  memo        String?
+  tags        String[]
+  imageUrls   String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  map       Map  @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  createdBy User @relation(fields: [createdById], references: [id])
+  reviews   PlaceReview[]
+
+  @@index([mapId, latitude, longitude])
+  @@map("places")
+}
+
+model PlaceReview {
+  id        String   @id @default(uuid())
+  placeId   String
+  userId    String
+  rating    Int
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([placeId, userId])
+  @@map("place_reviews")
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  mapId     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  map  Map  @relation(fields: [mapId], references: [id])
+
+  @@unique([userId, mapId])
+  @@map("favorites")
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String?
+  content   String
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("feedbacks")
+}
+
+model Report {
+  id         String           @id @default(uuid())
+  reporterId String
+  targetType ReportTargetType
+  targetId   String
+  reason     String
+  detail     String?
+  createdAt  DateTime         @default(now())
+
+  reporter User @relation(fields: [reporterId], references: [id])
+
+  @@map("reports")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}

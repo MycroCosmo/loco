@@ -1,0 +1,50 @@
+### 환경 변수 설정
+@baseUrl = http://localhost:3000/api
+@email = test@naver.com
+@password = qwer1234
+
+
+### ① 로그인 (응답의 accessToken을 아래 @token에 복사)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+
+### ② @token과 @mapId를 직접 채워주세요
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5MzEzYzljMC0wMzY1LTRjODctODkwZi03ZWM3MzRiMTQ2YTciLCJlbWFpbCI6InRlc3RAbmF2ZXIuY29tIiwiaWF0IjoxNzc5MDA4NDQ1LCJleHAiOjE3Nzk2MTMyNDV9.wj0vN9nt7I6qcCOSKZxmqPcPZ7wZ1HMUCvM_RTkWrRo
+@mapId = d014be24-cdcf-45e9-9f68-6f1849b98c40
+
+
+### ③ 테스트 장소 10,000개 시드 (서울 반경 15km)
+POST {{baseUrl}}/admin/seed-test-places
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "mapId": "{{mapId}}",
+  "count": 10000,
+  "centerLat": 37.5665,
+  "centerLng": 126.9780,
+  "radiusKm": 15
+}
+
+
+### ④ 기존 장소 PlaceMarkerCell 백필 (클러스터 수동 재생성)
+POST {{baseUrl}}/admin/backfill-marker-cells
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+### ⑤ 마커 조회 테스트 (줌 레벨 10 - 클러스터 모드)
+GET {{baseUrl}}/maps/{{mapId}}/places/markers?swLat=37.4&swLng=126.7&neLat=37.7&neLng=127.2&level=10
+Authorization: Bearer {{token}}
+
+
+### ⑥ 마커 조회 테스트 (줌 레벨 5 - 개별 마커 모드)
+GET {{baseUrl}}/maps/{{mapId}}/places/markers?swLat=37.5&swLng=126.9&neLat=37.6&neLng=127.0&level=5
+Authorization: Bearer {{token}}
+
