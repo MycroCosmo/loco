@@ -30,9 +30,8 @@ android {
 
     defaultConfig {
         applicationId "com.loco.app"
-        // flutter_secure_storage: minSdk 18 이상
-        // webview_flutter: minSdk 20 이상
-        minSdk 20
+        // shared_preferences_android requires minSdk 21.
+        minSdk 21
         targetSdk flutter.targetSdkVersion
         versionCode flutter.versionCode
         versionName flutter.versionName
