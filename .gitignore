@@ -12,6 +12,7 @@ apps/server/uploads/
 
 # Flutter
 apps/mobile/android/.gradle/
+apps/mobile/android/app/.cxx/
 apps/mobile/android/local.properties
 apps/mobile/android/key.properties
 *.jks
