@@ -87,10 +87,17 @@ export class UsersService {
   }
 
   async deleteMe(userId: string) {
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { deletedAt: new Date() },
-    });
+    const deletedAt = new Date();
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { deletedAt, fcmToken: null },
+      }),
+      this.prisma.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: deletedAt },
+      }),
+    ]);
 
     return { message: '회원 탈퇴가 완료되었습니다.' };
   }
