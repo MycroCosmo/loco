@@ -217,34 +217,40 @@ export class AuthService {
       throw new UnauthorizedException('유효하지 않은 요청입니다.');
     }
 
+    const now = new Date();
     const token = await this.prisma.passwordResetToken.findFirst({
       where: {
         userId: user.id,
         tokenHash: this.hashToken(code),
         usedAt: null,
+        expiresAt: { gt: now },
       },
     });
 
-    if (!token || token.expiresAt <= new Date()) {
+    if (!token) {
       throw new UnauthorizedException('유효하지 않거나 만료된 코드입니다.');
     }
 
     const hashed = await bcrypt.hash(newPassword, 10);
 
-    await this.prisma.$transaction([
-      this.prisma.passwordResetToken.update({
-        where: { id: token.id },
+    await this.prisma.$transaction(async (tx) => {
+      const consumed = await tx.passwordResetToken.updateMany({
+        where: { id: token.id, usedAt: null, expiresAt: { gt: new Date() } },
         data: { usedAt: new Date() },
-      }),
-      this.prisma.user.update({
+      });
+      if (consumed.count !== 1) {
+        throw new UnauthorizedException('유효하지 않거나 만료된 코드입니다.');
+      }
+
+      await tx.user.update({
         where: { id: user.id },
         data: { password: hashed },
-      }),
-      this.prisma.refreshToken.updateMany({
+      });
+      await tx.refreshToken.updateMany({
         where: { userId: user.id, revokedAt: null },
         data: { revokedAt: new Date() },
-      }),
-    ]);
+      });
+    });
 
     return { message: '비밀번호가 재설정되었습니다.' };
   }
