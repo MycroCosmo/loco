@@ -110,7 +110,7 @@ export class AuthService {
               profile.profileImageUrl ?? existingByProvider.profileImageUrl,
           },
         })
-      : await this.createOrLinkOAuthUser(profile);
+      : await this.createOAuthUser(profile);
 
     if (user.deletedAt) {
       throw new UnauthorizedException('탈퇴한 계정입니다.');
@@ -255,7 +255,7 @@ export class AuthService {
     return { message: '비밀번호가 재설정되었습니다.' };
   }
 
-  private async createOrLinkOAuthUser(profile: OAuthProfile) {
+  private async createOAuthUser(profile: OAuthProfile) {
     const existingByEmail = await this.prisma.user.findUnique({
       where: { email: profile.email },
     });
@@ -272,23 +272,9 @@ export class AuthService {
       });
     }
 
-    if (
-      existingByEmail.provider !== Provider.LOCAL &&
-      (existingByEmail.provider !== profile.provider ||
-        existingByEmail.providerId !== profile.providerId)
-    ) {
-      throw new ConflictException('이미 다른 간편 로그인으로 가입된 이메일입니다.');
-    }
-
-    return this.prisma.user.update({
-      where: { id: existingByEmail.id },
-      data: {
-        provider: profile.provider,
-        providerId: profile.providerId,
-        profileImageUrl:
-          existingByEmail.profileImageUrl ?? profile.profileImageUrl,
-      },
-    });
+    throw new ConflictException(
+      '이미 가입된 이메일입니다. 기존 계정으로 로그인한 뒤 계정을 연결해주세요.',
+    );
   }
 
   private async getKakaoProfile(dto: OAuthLoginDto): Promise<OAuthProfile> {
