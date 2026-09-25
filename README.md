@@ -1,174 +1,89 @@
 # LOCO
 
-좋아하는 맛집과 장소를 지도에 저장하고 다른 사용자와 공유하는 서비스입니다.
+좋아하는 맛집과 장소를 지도에 저장하고 다른 사용자와 공유하는 서비스입니다. 기존 React·Spring Boot 프로젝트 이후 Flutter·NestJS·PostgreSQL/Prisma로 개인 재구현했습니다.
 
-기존 React + Spring Boot 프로젝트 이후, **Flutter + NestJS + PostgreSQL/Prisma** 구조로 개인 재구현했습니다.  
-단순 CRUD 구현보다 인증 상태, 권한, 토큰 생명주기, 지도 조회 전략과 같은 백엔드 문제를 중심으로 개선하고 있습니다.
-
-## 아키텍처
+## 구성
 
 ```text
-Flutter App
-   │
-   ▼
-NestJS REST API
-   │
-   ├── 인증 / OAuth / Token Rotation
-   ├── 지도방 / 멤버 / 초대
-   ├── 장소 / 리뷰 / 즐겨찾기
-   ├── 지도 Marker 조회 / Cluster
-   ├── 이미지 처리
-   └── FCM 알림
-   │
-   ▼
-PostgreSQL (Prisma)
+Flutter 앱
+  └─ NestJS REST API
+       ├─ 인증·OAuth·토큰 재발급
+       ├─ 지도방·멤버·초대 코드
+       ├─ 장소·리뷰·즐겨찾기
+       ├─ 지도 영역별 마커 조회·집계
+       ├─ 이미지 변환·로컬 파일 저장
+       └─ FCM 알림
+            └─ PostgreSQL / Prisma
 ```
-
-## 기술 스택
 
 | 영역 | 기술 |
-|---|---|
-| Mobile | Flutter |
-| Backend | NestJS, TypeScript |
-| Database | PostgreSQL |
-| ORM | Prisma |
-| Authentication | JWT, bcrypt, OAuth |
-| Map | Kakao API |
-| Image | Sharp, WebP |
-| Push | Firebase Cloud Messaging |
-| Test | Jest, Nest Testing |
+| --- | --- |
+| 앱 | Flutter |
+| 백엔드 | NestJS, TypeScript |
+| 데이터베이스 | PostgreSQL, Prisma |
+| 인증 | JWT, bcrypt, Kakao/Naver OAuth |
+| 지도 | Kakao API |
+| 이미지 | Sharp, WebP, 로컬 파일 시스템 |
+| 알림 | Firebase Cloud Messaging |
+| 테스트 도구 | Jest, Nest Testing, Supertest |
 
-## 주요 백엔드 설계
+## 구현에서 다룬 문제
 
-### 1. Refresh Token 일회성 사용
+### 리프레시 토큰의 중복 소비
 
-Refresh Token 원문은 저장하지 않고 hash 형태로 저장합니다.
-
-재발급 시 기존 token을 단순 조회 후 갱신하는 대신, `revokedAt IS NULL` 조건으로 UPDATE합니다.
+리프레시 토큰은 원문 대신 해시로 저장합니다. 재발급 시 만료·폐기·탈퇴 여부를 확인하고, `revokedAt IS NULL` 조건으로 기존 토큰을 갱신합니다. 갱신 건수가 1인 요청만 다음 토큰을 저장하도록 기존 토큰 폐기와 새 토큰 저장을 하나의 트랜잭션으로 묶었습니다.
 
 ```text
-Refresh 요청
-  → Token Hash 조회
-  → 사용자 / 만료 / 폐기 상태 검증
-  → revokedAt IS NULL 조건 UPDATE
-  → UPDATE에 성공한 요청만 다음 Refresh Token 생성
+동일 토큰으로 재발급 요청 A / B
+  → 폐기되지 않은 행에 조건부 UPDATE
+  → 갱신에 성공한 요청만 다음 토큰 저장
 ```
 
-동시에 같은 Refresh Token으로 두 요청이 들어오더라도 하나의 요청만 기존 token을 소비할 수 있도록 했습니다.
+비밀번호 재설정은 비밀번호 변경과 활성 리프레시 토큰 폐기를 같은 트랜잭션에서 처리합니다. 로그아웃은 전달받은 리프레시 토큰을 폐기합니다.
 
-기존 token 폐기와 다음 token 생성은 하나의 transaction 안에서 처리합니다.
+**현재 기본 브랜치의 제한:** 회원 탈퇴는 `deletedAt`을 기록하며, 이후 로그인·재발급에서는 탈퇴 여부를 검사합니다. 그러나 탈퇴와 전체 토큰 폐기가 하나의 트랜잭션으로 구현되어 있지는 않고, 기존 액세스 토큰의 요청마다 사용자 상태를 확인하는 처리도 아직 없습니다. 따라서 기존 액세스 토큰의 즉시 무효화를 완료 기능으로 설명하지 않습니다.
 
-비밀번호 변경이나 회원 상태 변경 시에도 기존 Refresh Token을 폐기해 이전 세션이 계속 유지되지 않도록 했습니다.
+### 조회 권한과 수정 권한의 분리
 
-### 2. 공개 여부와 권한을 분리했습니다
+공개/비공개 지도방의 조회 정책과 방장·가입자·작성자의 수정 정책을 구분합니다. 비공개 지도방 접근은 방장 또는 멤버 여부로 확인하고, 장소 수정은 작성자, 지도방 수정·삭제는 방장 권한을 검사합니다. 공개 지도방도 현재 API에서는 인증 가드를 통과해야 합니다.
 
-지도방의 공개/비공개 여부와 수정 권한을 같은 개념으로 처리하지 않았습니다.
+### 목록과 지도 마커의 조회 분리
 
-예를 들어:
+장소 목록에는 커서 기반 페이지 처리, 검색·태그 필터, 페이지 내 장소의 리뷰 통계 묶음 조회를 적용했습니다. 마커는 현재 지도 영역과 확대 수준을 기준으로 조회하며, 장소가 많으면 여러 정밀도의 `PlaceMarkerCell` 집계를 사용합니다. 실제 운영 처리량이나 응답 시간 개선 수치는 별도로 측정하지 않은 상태입니다.
 
-- 공개 지도방: 공개 조회 정책 적용
-- 비공개 지도방: owner / member만 접근
-- 초대 코드: 비공개 지도방 가입에 사용
-- 수정·삭제: 조회 가능 여부와 별도로 작성자/방장 권한 확인
+### 이미지와 데이터베이스의 실패 처리
 
-읽기 권한과 쓰기 권한을 각각 명시적으로 검사하도록 구성했습니다.
+지도 커버·프로필 이미지는 새 파일 저장 후 DB를 변경하고, DB 변경이 실패하면 새 파일 삭제를 시도합니다. 기존 파일은 DB 변경 성공 후 삭제합니다. 파일 삭제 함수는 오류를 삼키는 최선 노력 방식이므로, 삭제 실패 시 파일이 남을 수 있습니다. 지속적인 재시도나 고아 파일 정리까지 보장하는 구조는 아닙니다.
 
-### 3. 목록 조회와 지도 Marker 조회를 분리했습니다
+## 주요 데이터 제약
 
-장소 목록과 지도 화면은 필요한 데이터 형태가 다르다고 판단했습니다.
+| 데이터 | 중복 방지 조건 |
+| --- | --- |
+| 지도방 멤버 | `(mapId, userId)` |
+| 장소 리뷰 | `(placeId, userId)` |
+| 즐겨찾기 | `(userId, mapId)` |
+| 리프레시 토큰 | `tokenHash` 고유 제약 |
+| 비공개방 초대 코드 | `inviteCode` 고유 제약 |
 
-장소 목록은:
+## 로컬 실행
 
-- cursor pagination
-- 검색/태그 필터
-- 리뷰 통계 묶음 조회
+명령은 저장소 루트에서 시작합니다. Node.js, Flutter SDK와 개발용 PostgreSQL이 필요합니다. 운영 DB를 아래 개발 명령에 연결하지 마세요.
 
-방식으로 처리합니다.
-
-지도 Marker 조회는 현재 viewport와 zoom level을 기준으로 필요한 범위만 조회합니다.
-
-장소가 많아지는 경우 모든 장소를 그대로 반환하지 않고 여러 precision의 marker cell을 이용해 cluster 형태로 반환하도록 구성했습니다.
-
-### 4. 파일과 DB 실패 흐름을 분리했습니다
-
-이미지 업로드와 DB 변경은 서로 다른 저장소를 사용하므로 하나의 transaction으로 묶을 수 없습니다.
-
-따라서 새 이미지를 저장한 뒤 DB 변경이 실패하면 새 파일을 삭제하고, 기존 이미지는 DB 변경이 성공한 이후에 삭제하도록 실패 시점을 구분했습니다.
-
-## 주요 도메인
-
-```text
-User
- ├── RefreshToken
- ├── PasswordResetToken
- ├── Map
- ├── MapMember
- ├── Place
- ├── PlaceReview
- └── Favorite
-
-Map
- ├── MapMember
- ├── Place
- └── PlaceMarkerCell
-```
-
-주요 제약 조건:
-
-- `(mapId, userId)` 멤버 중복 방지
-- `(placeId, userId)` 리뷰 중복 방지
-- `(mapId, userId)` 즐겨찾기 중복 방지
-- Refresh/Reset Token 만료 및 폐기 상태 관리
-
-## 주요 기능
-
-- 이메일 회원가입/로그인
-- 비밀번호 재설정
-- Kakao/Naver OAuth
-- Access/Refresh Token 인증
-- 공개/비공개 지도방
-- 초대 코드 가입
-- 장소 등록/검색/태그/이미지
-- 리뷰 및 평균 평점
-- 즐겨찾기
-- viewport 기반 Marker 조회 및 Cluster
-- FCM 알림
-- 회원 탈퇴 및 Session 무효화
-
-## 프로젝트 구조
-
-```text
-loco/
-├── apps/
-│   ├── mobile/        # Flutter
-│   └── server/        # NestJS
-│       ├── src/
-│       │   ├── auth/
-│       │   ├── maps/
-│       │   ├── places/
-│       │   ├── users/
-│       │   ├── notifications/
-│       │   └── tasks/
-│       └── prisma/
-│           └── schema.prisma
-└── README.md
-```
-
-## 실행
-
-### Backend
+### 서버
 
 ```bash
 cd apps/server
-npm install
+npm ci
 cp .env.example .env
+# .env의 DATABASE_URL, JWT_SECRET 등을 본인 개발 환경에 맞게 설정
+npx prisma generate
 npx prisma migrate dev
 npm run start:dev
 ```
 
-필요한 환경 변수는 `apps/server/.env.example`에 정의되어 있습니다.
+기본 API 주소는 `http://localhost:3000/api`입니다. 마이그레이션 명령에는 개발 DB 및 필요한 권한이 있어야 합니다. SMTP·OAuth·FCM 기능은 각 외부 서비스 설정도 필요합니다. 기존 장소 데이터의 마커 집계를 다시 만들 때는 서버 디렉터리에서 `npm run marker-cells:rebuild`를 실행합니다.
 
-### Flutter
+### 앱 — 새 터미널에서 저장소 루트 기준
 
 ```bash
 cd apps/mobile
@@ -176,10 +91,21 @@ flutter pub get
 flutter run
 ```
 
-## 보안 관련
+API 주소 설정과 Kakao 설정은 [API 안내](docs/api.md), [Kakao 설정](docs/kakao-setup.md), [Android 빌드 안내](docs/android-release.md)를 참고하세요.
 
-- 실제 `.env` 파일은 Git에서 제외
-- JWT / SMTP / OAuth / Firebase credential은 환경 변수로 주입
-- 비밀번호는 bcrypt hash로 저장
-- HTTP security middleware와 throttling 적용
-- 저장소 예시는 placeholder만 사용
+## 검증 범위
+
+현재 커밋된 `apps/server/test/app.e2e-spec.ts`에는 잘못된 로그인 입력의 400 응답, 인증 없는 사용자·지도 조회의 401 응답을 확인하는 테스트가 있습니다.
+
+```bash
+cd apps/server
+npm run test:e2e
+```
+
+E2E 실행에는 개발 DB와 서버 환경 변수가 필요합니다. 테스트 파일의 존재를 테스트 통과 결과로 간주하지 않습니다. 탈퇴 후 기존 토큰 차단, 동시 재발급, 파일 삭제 실패는 별도 회귀 검증이 필요한 항목입니다.
+
+## 보안과 배포 전 확인
+
+실제 환경 변수·개인 키·서명 키는 저장소에 넣지 않습니다. `.gitignore`만으로 이미 커밋된 값이나 과거 이력이 정리되지는 않습니다. 현재 문서는 전체 이력의 비밀정보 검사나 운영 보안 감사를 통과했다는 의미가 아닙니다.
+
+소스 저장소의 공개 범위는 변경하지 않았으며, 현재 비공개로 유지합니다.
