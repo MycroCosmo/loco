@@ -7,7 +7,7 @@
 
 ## 아키텍처
 
-\`\`\`text
+```text
 Flutter App
    │
    ▼
@@ -22,7 +22,7 @@ NestJS REST API
    │
    ▼
 PostgreSQL (Prisma)
-\`\`\`
+```
 
 ## 기술 스택
 
@@ -44,15 +44,15 @@ PostgreSQL (Prisma)
 
 Refresh Token 원문은 저장하지 않고 hash 형태로 저장합니다.
 
-재발급 시 기존 token을 단순 조회 후 갱신하는 대신, \`revokedAt IS NULL\` 조건으로 UPDATE합니다.
+재발급 시 기존 token을 단순 조회 후 갱신하는 대신, `revokedAt IS NULL` 조건으로 UPDATE합니다.
 
-\`\`\`text
+```text
 Refresh 요청
   → Token Hash 조회
   → 사용자 / 만료 / 폐기 상태 검증
   → revokedAt IS NULL 조건 UPDATE
   → UPDATE에 성공한 요청만 다음 Refresh Token 생성
-\`\`\`
+```
 
 동시에 같은 Refresh Token으로 두 요청이 들어오더라도 하나의 요청만 기존 token을 소비할 수 있도록 했습니다.
 
@@ -97,7 +97,7 @@ Refresh 요청
 
 ## 주요 도메인
 
-\`\`\`text
+```text
 User
  ├── RefreshToken
  ├── PasswordResetToken
@@ -111,13 +111,13 @@ Map
  ├── MapMember
  ├── Place
  └── PlaceMarkerCell
-\`\`\`
+```
 
 주요 제약 조건:
 
-- \`(mapId, userId)\` 멤버 중복 방지
-- \`(placeId, userId)\` 리뷰 중복 방지
-- \`(mapId, userId)\` 즐겨찾기 중복 방지
+- `(mapId, userId)` 멤버 중복 방지
+- `(placeId, userId)` 리뷰 중복 방지
+- `(mapId, userId)` 즐겨찾기 중복 방지
 - Refresh/Reset Token 만료 및 폐기 상태 관리
 
 ## 주요 기능
@@ -137,7 +137,7 @@ Map
 
 ## 프로젝트 구조
 
-\`\`\`text
+```text
 loco/
 ├── apps/
 │   ├── mobile/        # Flutter
@@ -152,33 +152,33 @@ loco/
 │       └── prisma/
 │           └── schema.prisma
 └── README.md
-\`\`\`
+```
 
 ## 실행
 
 ### Backend
 
-\`\`\`bash
+```bash
 cd apps/server
 npm install
 cp .env.example .env
 npx prisma migrate dev
 npm run start:dev
-\`\`\`
+```
 
-필요한 환경 변수는 \`apps/server/.env.example\`에 정의되어 있습니다.
+필요한 환경 변수는 `apps/server/.env.example`에 정의되어 있습니다.
 
 ### Flutter
 
-\`\`\`bash
+```bash
 cd apps/mobile
 flutter pub get
 flutter run
-\`\`\`
+```
 
 ## 보안 관련
 
-- 실제 \`.env\` 파일은 Git에서 제외
+- 실제 `.env` 파일은 Git에서 제외
 - JWT / SMTP / OAuth / Firebase credential은 환경 변수로 주입
 - 비밀번호는 bcrypt hash로 저장
 - HTTP security middleware와 throttling 적용
