@@ -1,98 +1,107 @@
 # LOCO
 
-LOCO is a map-based place sharing service for collecting and sharing restaurants, cafés, and places with a group.
+좋아하는 맛집과 장소를 지도에 저장하고 다른 사용자와 공유하는 서비스입니다.
 
-The current implementation is a personal rebuild using **Flutter + NestJS + PostgreSQL/Prisma**. The project focuses on backend state management, authorization, token lifecycle, and map-query behavior rather than only CRUD screens.
+기존 React + Spring Boot 프로젝트 이후, **Flutter + NestJS + PostgreSQL/Prisma** 구조로 개인 재구현했습니다.  
+단순 CRUD 구현보다 인증 상태, 권한, 토큰 생명주기, 지도 조회 전략과 같은 백엔드 문제를 중심으로 개선하고 있습니다.
 
-## Architecture
+## 아키텍처
 
-```text
-Flutter app
+\`\`\`text
+Flutter App
    │
    ▼
 NestJS REST API
    │
-   ├── Auth / OAuth / token rotation
-   ├── Maps / membership / invitations
-   ├── Places / reviews / favorites
-   ├── Marker query / clustering
-   ├── Image processing
-   └── FCM notifications
+   ├── 인증 / OAuth / Token Rotation
+   ├── 지도방 / 멤버 / 초대
+   ├── 장소 / 리뷰 / 즐겨찾기
+   ├── 지도 Marker 조회 / Cluster
+   ├── 이미지 처리
+   └── FCM 알림
    │
    ▼
 PostgreSQL (Prisma)
-```
+\`\`\`
 
-## Tech stack
+## 기술 스택
 
-| Area | Technology |
+| 영역 | 기술 |
 |---|---|
 | Mobile | Flutter |
 | Backend | NestJS, TypeScript |
 | Database | PostgreSQL |
 | ORM | Prisma |
 | Authentication | JWT, bcrypt, OAuth |
-| Map search | Kakao APIs |
-| Image processing | Sharp, WebP |
+| Map | Kakao API |
+| Image | Sharp, WebP |
 | Push | Firebase Cloud Messaging |
-| Tests | Jest / Nest testing tools |
+| Test | Jest, Nest Testing |
 
-## Backend decisions
+## 주요 백엔드 설계
 
-### Single-use refresh-token rotation
+### 1. Refresh Token 일회성 사용
 
-Refresh tokens are stored as hashes rather than raw token values.
+Refresh Token 원문은 저장하지 않고 hash 형태로 저장합니다.
 
-When a refresh request succeeds, the server updates the existing token only when `revokedAt IS NULL`. The next token is issued inside the same transaction.
+재발급 시 기존 token을 단순 조회 후 갱신하는 대신, \`revokedAt IS NULL\` 조건으로 UPDATE합니다.
 
-This means two concurrent requests cannot both consume the same refresh token successfully.
+\`\`\`text
+Refresh 요청
+  → Token Hash 조회
+  → 사용자 / 만료 / 폐기 상태 검증
+  → revokedAt IS NULL 조건 UPDATE
+  → UPDATE에 성공한 요청만 다음 Refresh Token 생성
+\`\`\`
 
-```text
-refresh request
-  → hash token
-  → validate user/token state
-  → UPDATE ... WHERE revokedAt IS NULL
-  → only the successful request creates the next refresh token
-```
+동시에 같은 Refresh Token으로 두 요청이 들어오더라도 하나의 요청만 기존 token을 소비할 수 있도록 했습니다.
 
-Password reset and account-state changes also revoke active refresh tokens so an old session cannot continue only because an access token still exists.
+기존 token 폐기와 다음 token 생성은 하나의 transaction 안에서 처리합니다.
 
-### Authorization is modeled separately from visibility
+비밀번호 변경이나 회원 상태 변경 시에도 기존 Refresh Token을 폐기해 이전 세션이 계속 유지되지 않도록 했습니다.
 
-A map can be public or private, but write/read decisions also depend on ownership and membership.
+### 2. 공개 여부와 권한을 분리했습니다
 
-Examples:
+지도방의 공개/비공개 여부와 수정 권한을 같은 개념으로 처리하지 않았습니다.
 
-- public map: readable according to public rules;
-- private map: owner/member only;
-- invite codes: used only for private-map membership;
-- editing/deleting: checked independently from read access.
+예를 들어:
 
-This avoids treating “can view” and “can modify” as the same permission.
+- 공개 지도방: 공개 조회 정책 적용
+- 비공개 지도방: owner / member만 접근
+- 초대 코드: 비공개 지도방 가입에 사용
+- 수정·삭제: 조회 가능 여부와 별도로 작성자/방장 권한 확인
 
-### Place list and map markers use different query strategies
+읽기 권한과 쓰기 권한을 각각 명시적으로 검사하도록 구성했습니다.
 
-A place list and a map viewport have different access patterns.
+### 3. 목록 조회와 지도 Marker 조회를 분리했습니다
 
-The list API uses cursor pagination, search/tag filters, and batched review summaries.
+장소 목록과 지도 화면은 필요한 데이터 형태가 다르다고 판단했습니다.
 
-Marker requests are bounded by the current viewport and zoom level. For larger result sets, the server switches to clustered marker cells instead of returning every place.
+장소 목록은:
 
-The data model keeps precomputed marker-cell rows at multiple precisions to limit map payload size.
+- cursor pagination
+- 검색/태그 필터
+- 리뷰 통계 묶음 조회
 
-### File/DB failure paths are handled explicitly
+방식으로 처리합니다.
 
-Image replacement is not treated as a single happy-path operation.
+지도 Marker 조회는 현재 viewport와 zoom level을 기준으로 필요한 범위만 조회합니다.
 
-For example, when a new cover image is stored, a failed database update removes the newly created file. The previous image is removed only after the database update succeeds.
+장소가 많아지는 경우 모든 장소를 그대로 반환하지 않고 여러 precision의 marker cell을 이용해 cluster 형태로 반환하도록 구성했습니다.
 
-## Main domain model
+### 4. 파일과 DB 실패 흐름을 분리했습니다
 
-```text
+이미지 업로드와 DB 변경은 서로 다른 저장소를 사용하므로 하나의 transaction으로 묶을 수 없습니다.
+
+따라서 새 이미지를 저장한 뒤 DB 변경이 실패하면 새 파일을 삭제하고, 기존 이미지는 DB 변경이 성공한 이후에 삭제하도록 실패 시점을 구분했습니다.
+
+## 주요 도메인
+
+\`\`\`text
 User
  ├── RefreshToken
  ├── PasswordResetToken
- ├── Map (owner)
+ ├── Map
  ├── MapMember
  ├── Place
  ├── PlaceReview
@@ -102,36 +111,37 @@ Map
  ├── MapMember
  ├── Place
  └── PlaceMarkerCell
-```
+\`\`\`
 
-Important constraints include:
+주요 제약 조건:
 
-- unique membership per `(mapId, userId)`;
-- unique review per `(placeId, userId)`;
-- unique favorite per `(mapId, userId)`;
-- hashed refresh/reset tokens with explicit expiration/revocation state.
+- \`(mapId, userId)\` 멤버 중복 방지
+- \`(placeId, userId)\` 리뷰 중복 방지
+- \`(mapId, userId)\` 즐겨찾기 중복 방지
+- Refresh/Reset Token 만료 및 폐기 상태 관리
 
-## Main features
+## 주요 기능
 
-- Email registration/login and password reset
-- Kakao/Naver OAuth flow
-- Access/refresh-token authentication
-- Public/private map rooms
-- Invite-code membership
-- Place creation, search, tagging, and image upload
-- Reviews and average-rating summaries
-- Favorites
-- Viewport-aware markers and clustering
-- FCM notifications
-- Account deletion and session invalidation
+- 이메일 회원가입/로그인
+- 비밀번호 재설정
+- Kakao/Naver OAuth
+- Access/Refresh Token 인증
+- 공개/비공개 지도방
+- 초대 코드 가입
+- 장소 등록/검색/태그/이미지
+- 리뷰 및 평균 평점
+- 즐겨찾기
+- viewport 기반 Marker 조회 및 Cluster
+- FCM 알림
+- 회원 탈퇴 및 Session 무효화
 
-## Repository structure
+## 프로젝트 구조
 
-```text
+\`\`\`text
 loco/
 ├── apps/
-│   ├── mobile/        # Flutter client
-│   └── server/        # NestJS API
+│   ├── mobile/        # Flutter
+│   └── server/        # NestJS
 │       ├── src/
 │       │   ├── auth/
 │       │   ├── maps/
@@ -142,36 +152,34 @@ loco/
 │       └── prisma/
 │           └── schema.prisma
 └── README.md
-```
+\`\`\`
 
-## Local setup
+## 실행
 
-### Server
+### Backend
 
-```bash
+\`\`\`bash
 cd apps/server
 npm install
 cp .env.example .env
 npx prisma migrate dev
 npm run start:dev
-```
+\`\`\`
 
-Required environment values are documented in `apps/server/.env.example`.
+필요한 환경 변수는 \`apps/server/.env.example\`에 정의되어 있습니다.
 
 ### Flutter
 
-```bash
+\`\`\`bash
 cd apps/mobile
 flutter pub get
 flutter run
-```
+\`\`\`
 
-For Android emulator development, the default server address can use `10.0.2.2`. Production endpoints are passed with `--dart-define`.
+## 보안 관련
 
-## Security notes
-
-- Real `.env` files are ignored.
-- JWT/SMTP/OAuth/Firebase credentials are supplied through environment variables.
-- Passwords are hashed with bcrypt.
-- The server includes throttling and HTTP security middleware.
-- Repository examples contain placeholders only; production credentials must never be committed.
+- 실제 \`.env\` 파일은 Git에서 제외
+- JWT / SMTP / OAuth / Firebase credential은 환경 변수로 주입
+- 비밀번호는 bcrypt hash로 저장
+- HTTP security middleware와 throttling 적용
+- 저장소 예시는 placeholder만 사용
