@@ -1,0 +1,30 @@
+name: Account regression
+on:
+  pull_request:
+    paths:
+      - 'apps/server/**'
+      - '.github/workflows/account-regression.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/server
+    env:
+      DATABASE_URL: postgresql://test:test@localhost:5432/loco_test
+      JWT_SECRET: ci-only-secret-not-for-production-1234567890
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: apps/server/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm test -- --runInBand
+      - run: npm run build

@@ -11,8 +11,8 @@ export class UsersService {
   ) {}
 
   async findMe(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
       select: {
         id: true,
         email: true,
@@ -87,9 +87,22 @@ export class UsersService {
   }
 
   async deleteMe(userId: string) {
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { deletedAt: new Date() },
+    const deletedAt = new Date();
+
+    // All database changes succeed together or are rolled back by Prisma.
+    await this.prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: { deletedAt, fcmToken: null },
+      });
+      await tx.refreshToken.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: deletedAt },
+      });
+      await tx.passwordResetToken.updateMany({
+        where: { userId, usedAt: null },
+        data: { usedAt: deletedAt },
+      });
     });
 
     return { message: '회원 탈퇴가 완료되었습니다.' };
