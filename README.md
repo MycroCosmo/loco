@@ -1,120 +1,177 @@
-# LOCO - Local Collection
+# LOCO
 
-좋아하는 맛집과 명소를 지도에 저장하고 공유하는 커뮤니티 플랫폼
+LOCO is a map-based place sharing service for collecting and sharing restaurants, cafés, and places with a group.
 
-## 기술 스택
+The current implementation is a personal rebuild using **Flutter + NestJS + PostgreSQL/Prisma**. The project focuses on backend state management, authorization, token lifecycle, and map-query behavior rather than only CRUD screens.
 
-| 영역 | 기술 |
-|------|------|
-| 모바일 앱 | Flutter (Android / iOS / Web) |
-| 백엔드 | NestJS (TypeScript) |
-| 데이터베이스 | PostgreSQL (Supabase) |
-| ORM | Prisma |
-| 인증 | JWT (Access + Refresh Token), 이메일 인증, 비밀번호 재설정 |
-| 지도 | Kakao Map API |
-| 이미지 저장 | 로컬 파일시스템 (WebP 변환) |
-| 푸시 알림 | Firebase Cloud Messaging (FCM) |
+## Architecture
 
-## 주요 기능
-
-- **지도방** — 공개/비공개 지도방 생성·가입·초대 코드 참여
-- **장소 관리** — 카카오 장소 검색으로 추가, 메모·태그·이미지(최대 3장) 첨부
-- **리뷰** — 별점 + 텍스트 리뷰, 평균 평점 집계
-- **즐겨찾기** — 지도방 북마크
-- **푸시 알림** — 장소 추가·멤버 가입 시 FCM 알림, 마이페이지에서 on/off 토글
-- **계정** — 회원가입·로그인·프로필 수정·회원 탈퇴
-
-## 프로젝트 구조
-
+```text
+Flutter app
+   │
+   ▼
+NestJS REST API
+   │
+   ├── Auth / OAuth / token rotation
+   ├── Maps / membership / invitations
+   ├── Places / reviews / favorites
+   ├── Marker query / clustering
+   ├── Image processing
+   └── FCM notifications
+   │
+   ▼
+PostgreSQL (Prisma)
 ```
+
+## Tech stack
+
+| Area | Technology |
+|---|---|
+| Mobile | Flutter |
+| Backend | NestJS, TypeScript |
+| Database | PostgreSQL |
+| ORM | Prisma |
+| Authentication | JWT, bcrypt, OAuth |
+| Map search | Kakao APIs |
+| Image processing | Sharp, WebP |
+| Push | Firebase Cloud Messaging |
+| Tests | Jest / Nest testing tools |
+
+## Backend decisions
+
+### Single-use refresh-token rotation
+
+Refresh tokens are stored as hashes rather than raw token values.
+
+When a refresh request succeeds, the server updates the existing token only when `revokedAt IS NULL`. The next token is issued inside the same transaction.
+
+This means two concurrent requests cannot both consume the same refresh token successfully.
+
+```text
+refresh request
+  → hash token
+  → validate user/token state
+  → UPDATE ... WHERE revokedAt IS NULL
+  → only the successful request creates the next refresh token
+```
+
+Password reset and account-state changes also revoke active refresh tokens so an old session cannot continue only because an access token still exists.
+
+### Authorization is modeled separately from visibility
+
+A map can be public or private, but write/read decisions also depend on ownership and membership.
+
+Examples:
+
+- public map: readable according to public rules;
+- private map: owner/member only;
+- invite codes: used only for private-map membership;
+- editing/deleting: checked independently from read access.
+
+This avoids treating “can view” and “can modify” as the same permission.
+
+### Place list and map markers use different query strategies
+
+A place list and a map viewport have different access patterns.
+
+The list API uses cursor pagination, search/tag filters, and batched review summaries.
+
+Marker requests are bounded by the current viewport and zoom level. For larger result sets, the server switches to clustered marker cells instead of returning every place.
+
+The data model keeps precomputed marker-cell rows at multiple precisions to limit map payload size.
+
+### File/DB failure paths are handled explicitly
+
+Image replacement is not treated as a single happy-path operation.
+
+For example, when a new cover image is stored, a failed database update removes the newly created file. The previous image is removed only after the database update succeeds.
+
+## Main domain model
+
+```text
+User
+ ├── RefreshToken
+ ├── PasswordResetToken
+ ├── Map (owner)
+ ├── MapMember
+ ├── Place
+ ├── PlaceReview
+ └── Favorite
+
+Map
+ ├── MapMember
+ ├── Place
+ └── PlaceMarkerCell
+```
+
+Important constraints include:
+
+- unique membership per `(mapId, userId)`;
+- unique review per `(placeId, userId)`;
+- unique favorite per `(mapId, userId)`;
+- hashed refresh/reset tokens with explicit expiration/revocation state.
+
+## Main features
+
+- Email registration/login and password reset
+- Kakao/Naver OAuth flow
+- Access/refresh-token authentication
+- Public/private map rooms
+- Invite-code membership
+- Place creation, search, tagging, and image upload
+- Reviews and average-rating summaries
+- Favorites
+- Viewport-aware markers and clustering
+- FCM notifications
+- Account deletion and session invalidation
+
+## Repository structure
+
+```text
 loco/
 ├── apps/
-│   ├── mobile/          # Flutter 앱
-│   │   ├── lib/
-│   │   │   ├── core/    # 네트워크, 상수, 공통 위젯
-│   │   │   └── features/ # auth, maps, places, profile, notifications …
-│   │   └── pubspec.yaml
-│   └── server/          # NestJS API 서버
+│   ├── mobile/        # Flutter client
+│   └── server/        # NestJS API
 │       ├── src/
 │       │   ├── auth/
 │       │   ├── maps/
 │       │   ├── places/
 │       │   ├── users/
 │       │   ├── notifications/
-│       │   ├── tasks/   # 만료 토큰 자동 정리 (cron)
-│       │   └── …
+│       │   └── tasks/
 │       └── prisma/
 │           └── schema.prisma
 └── README.md
 ```
 
-## 환경 변수
+## Local setup
 
-### 서버 (`apps/server/.env`)
-
-```env
-DATABASE_URL=postgresql://...
-JWT_SECRET=your-secret
-JWT_REFRESH_SECRET=your-refresh-secret
-PORT=3000
-ALLOWED_ORIGINS=http://localhost:8080,https://your-app.com
-
-# 이메일 인증 / 비밀번호 재설정
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=no-reply@example.com
-SMTP_PASS=your-smtp-password
-SMTP_FROM=LOCO <no-reply@example.com>
-
-# FCM 푸시 알림
-FIREBASE_SERVICE_ACCOUNT={"type":"service_account", ...}
-```
-
-### Flutter 앱 (빌드 시 `--dart-define`)
-
-| 변수 | 설명 | 기본값 (개발) |
-|------|------|------|
-| `API_BASE_URL` | API 서버 주소 + `/api` | `http://10.0.2.2:3000/api` |
-| `SERVER_URL` | 이미지 등 서버 루트 주소 | `http://10.0.2.2:3000` |
-
-## 실행 방법
-
-### 백엔드
+### Server
 
 ```bash
 cd apps/server
 npm install
-cp .env.example .env   # .env 값 설정
+cp .env.example .env
 npx prisma migrate dev
 npm run start:dev
 ```
 
-서버: `http://localhost:3000/api`
+Required environment values are documented in `apps/server/.env.example`.
 
-### Flutter 앱 (개발)
+### Flutter
 
 ```bash
 cd apps/mobile
 flutter pub get
-# Android 에뮬레이터
 flutter run
-# 웹
-flutter run -d chrome --web-port 8080
 ```
 
-### Flutter 앱 (프로덕션 빌드)
+For Android emulator development, the default server address can use `10.0.2.2`. Production endpoints are passed with `--dart-define`.
 
-```bash
-flutter build apk --release \
-  --dart-define=API_BASE_URL=https://api.example.com/api \
-  --dart-define=SERVER_URL=https://api.example.com
-```
+## Security notes
 
-## 배포 전 체크리스트
-
-- [ ] `apps/mobile/android/app/google-services.json` 추가 (Firebase Android)
-- [ ] `apps/mobile/ios/Runner/GoogleService-Info.plist` 추가 (Firebase iOS)
-- [ ] 서버 `.env` — `SMTP_*`, `FIREBASE_SERVICE_ACCOUNT`, `ALLOWED_ORIGINS` 설정
-- [ ] 앱 아이콘 교체 (`flutter_launcher_icons` 패키지 활용)
-- [ ] `pubspec.yaml` version 업데이트 (현재 `0.1.0+1`)
-- [ ] 앱스토어 개인정보처리방침 URL 준비 (구글·애플 필수)
+- Real `.env` files are ignored.
+- JWT/SMTP/OAuth/Firebase credentials are supplied through environment variables.
+- Passwords are hashed with bcrypt.
+- The server includes throttling and HTTP security middleware.
+- Repository examples contain placeholders only; production credentials must never be committed.
