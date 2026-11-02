@@ -1,0 +1,74 @@
+package com.loco.health;
+
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@Testcontainers
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class HealthIntegrationTest {
+
+    @Container
+    static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(
+            DockerImageName.parse("postgis/postgis:17-3.6")
+                    .asCompatibleSubstituteFor("postgres"))
+            .withPassword(UUID.randomUUID().toString());
+
+    @DynamicPropertySource
+    static void databaseProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", database::getJdbcUrl);
+        registry.add("spring.datasource.username", database::getUsername);
+        registry.add("spring.datasource.password", database::getPassword);
+    }
+
+    @LocalServerPort
+    int port;
+
+    @Autowired
+    TestRestTemplate client;
+
+    @Test
+    void healthIsPublicAndReturnsExactJson() throws Exception {
+        ResponseEntity<String> response = client.getForEntity(url("/api/health"), String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getContentType())
+                .isNotNull()
+                .matches(type -> type.isCompatibleWith(MediaType.APPLICATION_JSON));
+        JSONAssert.assertEquals("{\"status\":\"ok\"}", response.getBody(), true);
+    }
+
+    @Test
+    void healthWithoutApiPrefixDoesNotExist() {
+        ResponseEntity<String> response = client.getForEntity(url("/health"), String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void actuatorIsNotPublic() {
+        ResponseEntity<String> response = client.getForEntity(url("/api/actuator/health"), String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    private String url(String path) {
+        return "http://localhost:" + port + path;
+    }
+}
