@@ -1,7 +1,9 @@
 package com.loco.health;
 
+import java.util.Map;
 import java.util.UUID;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,13 @@ class HealthIntegrationTest {
     static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(
             DockerImageName.parse("postgis/postgis:17-3.6")
                     .asCompatibleSubstituteFor("postgres"))
-            .withPassword(UUID.randomUUID().toString());
+            .withPassword(UUID.randomUUID().toString())
+            // 공간 확장 도입 전에는 이미지에 포함된 자동 설치 스크립트를 실행하지 않는다.
+            .withTmpFs(Map.of("/docker-entrypoint-initdb.d", "rw"))
+            .withCommand("postgres", "-c", "shared_buffers=1GB")
+            .withCreateContainerCmdModifier(command -> command.getHostConfig()
+                    .withNanoCPUs(2_000_000_000L)
+                    .withMemory(4L * 1024 * 1024 * 1024));
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
@@ -66,6 +74,21 @@ class HealthIntegrationTest {
         ResponseEntity<String> response = client.getForEntity(url("/api/actuator/health"), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void databaseHasNoSpatialExtensionsAndUsesAgreedResources(@Autowired EntityManager entityManager) {
+        assertThat(entityManager.createNativeQuery(
+                "SELECT count(*) FROM pg_extension WHERE extname <> 'plpgsql'", Long.class).getSingleResult())
+                .isEqualTo(0L);
+        assertThat(entityManager.createNativeQuery(
+                "SELECT pg_size_bytes(current_setting('shared_buffers'))", Long.class).getSingleResult())
+                .isEqualTo(1024L * 1024 * 1024);
+
+        var resources = database.getDockerClient()
+                .inspectContainerCmd(database.getContainerId()).exec().getHostConfig();
+        assertThat(resources.getNanoCPUs()).isEqualTo(2_000_000_000L);
+        assertThat(resources.getMemory()).isEqualTo(4L * 1024 * 1024 * 1024);
     }
 
     private String url(String path) {
