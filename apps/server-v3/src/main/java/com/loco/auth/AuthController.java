@@ -5,6 +5,7 @@ import com.loco.security.PublicApi;
 import com.loco.web.ApiController;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -13,7 +14,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class AuthController {
     private final AuthService service;
     private final PasswordRecoveryService recovery;
-    public AuthController(AuthService service, PasswordRecoveryService recovery) { this.service = service; this.recovery = recovery; }
+    private final OAuthLoginService oauth;
+    public AuthController(AuthService service, PasswordRecoveryService recovery, OAuthLoginService oauth) {
+        this.service = service; this.recovery = recovery; this.oauth = oauth;
+    }
+
+    @PostMapping("/auth/oauth/{provider}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public TokenIssuer.Pair oauth(@PathVariable String provider, @RequestBody(required = false) JsonNode body) {
+        return oauth.login(provider, AuthInputs.oauth(AuthInputs.httpBody(body)));
+    }
 
     @PostMapping("/auth/forgot-password")
     @ResponseStatus(HttpStatus.CREATED)

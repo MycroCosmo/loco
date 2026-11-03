@@ -1,6 +1,6 @@
 # 1번 묶음: 인증
 
-현재 구현 범위는 인증 엔티티와 POST /api/auth/register·login·refresh·logout·forgot-password·reset-password이다. 성공 상태는 v2와 같은 201이다.
+현재 구현 범위는 인증 엔티티와 POST /api/auth/register·login·refresh·logout·forgot-password·reset-password·oauth/{provider}이다. 성공 상태는 v2와 같은 201이다.
 엔티티부터 요청 제한까지 단계별로 검증·커밋한다. 스키마와 Flyway V1은 변경하지 않는다.
 
 ## 확정한 설계
@@ -98,3 +98,15 @@ User 변경은 JPA dirty checking과 Auditing으로 updatedAt을 갱신한다. �
 
 PasswordRecoveryTest는 실제 Mailpit SMTP 수신과 550 오류 주입을 사용한다. 동시 재설정은 기존 DatabaseRequestRace로 두 요청의 DB 경쟁을 확인하며 하나만 성공해야 한다.
 후속 refresh 폐기 실패를 DB 트리거로 주입해 비밀번호와 코드 소비까지 롤백되는지 확인한다. 오류 주입은 finally에서 해제한다.
+
+## OAuth 계약과 외부 통신
+
+OAuthProfiles는 카카오 POST form 토큰 교환·네이버 GET query 토큰 교환 후 Bearer 프로필 조회를 수행한다. 환경변수 키는 두 .env.example에만 선언한다.
+OAuthLoginService는 제공자·제공자 ID로 기존 회원을 찾는다. 없으면 이메일 중복을 확인하고, 중복 이메일은 회원 상태·가입 방식에 관계없이 409로 거절한다. 이메일만으로 자동 연결하지 않는다(3fb485f 기준).
+기존 제공자 회원은 email·nickname·제공된 프로필 이미지를 갱신한다. 이미지 생략 시 기존 값을 보존하며 v2처럼 갱신 커밋 후 탈퇴 여부를 검사한다.
+이메일·닉네임이 없는 프로필의 대체 값, 네이버 ID 누락, 외부 오류 메시지와 상태도 v2 코드의 계약을 따른다.
+V2Url은 DTO의 IsUrl({require_tld:false}) 규칙을 담당한다. 실제 v2 validator와 개발 URL·인코딩·포트·IPv6 사례를 대조한다.
+
+OAuthContractTest는 **v3 계약 테스트**다. RestClient.Builder에 MockRestServiceServer를 연결해 외부 네트워크 요청을 차단하고, 요청 URL·method·form/query·Bearer와 HTTP 응답·DB 변경·발급 토큰을 검사한다.
+v2의 고정 OAuth 외부 주소를 바꾸거나 실제 제공자 계정으로 로그인하지 않는다. 따라서 v2 HTTP 비교 통과로 집계하지 않는다.
+메일 템플릿은 코드부터 치환한 뒤 닉네임을 넣어, 닉네임 안의 `${code}` 같은 문자가 다시 치환되지 않게 한다. 실제 양쪽 Mailpit 메일로 이 사례도 확인한다.

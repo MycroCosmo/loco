@@ -59,7 +59,7 @@ class InputCompatibilityTest extends CompatibilityTestBase {
                 "{\"email\":\"a@example.test\",\"password\":\"123456\",\"nickname\":\"😀😀\"}",
                 "{\"email\":\"a@example.test\",\"password\":\"123456\",\"nickname\":\"ok\",\"constructor\":7,\"__proto__\":{}}");
         var input = new ArrayList<Map<String, Object>>();
-        for (String type : List.of("register", "login", "refresh", "logout", "forgot", "reset")) {
+        for (String type : List.of("register", "login", "refresh", "logout", "forgot", "reset", "oauth")) {
             for (String body : bodies) input.add(Map.of("type", type, "body", mapper.readTree(body)));
         }
         var expected = environment().nodeCheck("""
@@ -70,7 +70,8 @@ class InputCompatibilityTest extends CompatibilityTestBase {
                              refresh:require('./dist/auth/dto/refresh-token.dto').RefreshTokenDto,
                              logout:require('./dist/auth/dto/logout.dto').LogoutDto,
                              forgot:require('./dist/auth/dto/forgot-password.dto').ForgotPasswordDto,
-                             reset:require('./dist/auth/dto/reset-password.dto').ResetPasswordDto};
+                             reset:require('./dist/auth/dto/reset-password.dto').ResetPasswordDto,
+                             oauth:require('./dist/auth/dto/oauth-login.dto').OAuthLoginDto};
                 const pipe=new ValidationPipe({whitelist:true,transform:true,forbidNonWhitelisted:true});
                 Promise.all(JSON.parse(process.argv[1]).map(async x=>{
                   try {await pipe.transform(x.body,{type:'body',metatype:types[x.type]});return null;}
@@ -88,9 +89,21 @@ class InputCompatibilityTest extends CompatibilityTestBase {
                     case "logout" -> AuthInputs.logout(body);
                     case "forgot" -> AuthInputs.forgot(body);
                     case "reset" -> AuthInputs.reset(body);
+                    case "oauth" -> AuthInputs.oauth(body);
                 }
             } catch (ApiProblem problem) { actual = mapper.valueToTree(problem.body()); }
             JsonComparison.compare(expected.get(i), actual, Map.of());
         }
+    }
+
+    @Test
+    void redirectValidationMatchesV2LibraryWithoutCallingOAuthProviders() throws Exception {
+        var urls = List.of("http://localhost/callback", "https://example.com/cb?x=1#fragment", "ftp://localhost",
+                "localhost", "localhost:8080/cb", "https://127.0.0.1/cb", "http://[::1]:80/cb", "http://[::ffff:192.0.2.1]/",
+                "//example.com", "javascript:alert(1)", "mailto:a@example.com", "user:pass@example.com", "https://a_b.com",
+                "https://-host", "https://host.", "https://host:0", "https://host:65536", "https://host:", "http://host/<>",
+                "https://도메인.한국/cb", "http://host:000000000000000000000000000000000000080/cb", "https://host/space here");
+        var expected = environment().nodeCheck("process.stdout.write(JSON.stringify(JSON.parse(process.argv[1]).map(x=>require('validator').isURL(x,{require_tld:false}))))", urls);
+        for (int i = 0; i < urls.size(); i++) assertThat(V2Url.valid(urls.get(i))).as("URL index=%s", i).isEqualTo(expected.get(i).asBoolean());
     }
 }

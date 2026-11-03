@@ -62,4 +62,16 @@ public class User {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void changePassword(String password) { this.password = password; }
+    public static User oauth(Provider provider, String providerId, String email, String nickname, String image) {
+        var user = new User();
+        user.provider = provider; user.providerId = providerId; user.email = email;
+        user.nickname = nickname; user.profileImageUrl = image;
+        return user;
+    }
+    public void updateOAuth(String email, String nickname, String image, LocalDateTime now) {
+        this.email = email; this.nickname = nickname;
+        if (image != null) this.profileImageUrl = image;
+        // 같은 프로필로 로그인해도 Prisma update처럼 UPDATE를 발생시킨다.
+        this.updatedAt = now;
+    }
 }

@@ -25,7 +25,7 @@ public class PasswordResetMail {
             helper.setFrom(from, "LOCO");
             helper.setTo(to);
             helper.setSubject("[LOCO] 비밀번호 재설정 인증 코드");
-            helper.setText(template.replace("${nickname}", nickname).replace("${code}", code), true);
+            helper.setText(template.replace("${code}", code).replace("${nickname}", nickname), true);
         } catch (Exception exception) { throw new MailPreparationException(exception); }
         sender.send(message);
     }

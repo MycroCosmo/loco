@@ -14,7 +14,18 @@ public final class AuthInputs {
     public record Logout(String refreshToken) { }
     public record Forgot(String email) { }
     public record Reset(String email, String code, String newPassword) { }
+    public record OAuth(String code, String redirectUri, String state) { }
     private AuthInputs() { }
+
+    public static OAuth oauth(JsonNode body) {
+        var input = new Input(body, Set.of("code", "redirectUri", "state"));
+        input.string("code", null, null);
+        if (!V2Url.valid(input.text("redirectUri"))) input.errors.add("redirectUri must be a URL address");
+        input.string("redirectUri", null, null);
+        if (!input.body.path("state").isMissingNode() && !input.body.path("state").isNull()) input.string("state", null, null);
+        input.finish();
+        return new OAuth(input.text("code"), input.text("redirectUri"), input.text("state"));
+    }
 
     public static Forgot forgot(JsonNode body) {
         var input = new Input(body, Set.of("email"));

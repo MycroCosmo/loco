@@ -29,11 +29,15 @@ class PasswordRecoveryTest extends AuthenticationSupport {
     @Test
     void mailCodeResetsPasswordRevokesRefreshAndCannotBeReused() throws Exception {
         String seedId = seed("valid");
+        for (var side : SharedHarness.Side.values()) try (var db = environment().connect(side)) {
+            db.createStatement().executeUpdate("UPDATE users SET nickname='${code}'");
+        }
         JsonNode firstMail = null;
         for (var side : SharedHarness.Side.values()) {
             environment().clearMail();
             assertResponse(call(side, "forgot-password", Map.of("email", EMAIL)), 201, "이메일로 재설정 코드를 전송했습니다.");
             var mail = environment().awaitMail(EMAIL);
+            assertThat(mail.path("HTML").asText()).contains("<strong>${code}</strong>");
             var matcher = Pattern.compile(">([1-9][0-9]{5})</div>").matcher(mail.path("HTML").asText());
             assertThat(matcher.find()).isTrue();
             String code = matcher.group(1);
