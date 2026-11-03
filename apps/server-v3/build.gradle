@@ -33,6 +33,25 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+def v2Lockfile = file('../server/package-lock.json')
+def prismaVersion = new groovy.json.JsonSlurper().parse(v2Lockfile).packages['node_modules/prisma'].version
+def prismaToolsDirectory = layout.buildDirectory.dir('prisma-cli')
+
+tasks.register('preparePrisma', Exec) {
+    inputs.file(v2Lockfile)
+    outputs.dir(prismaToolsDirectory)
+    environment 'PRISMA_SKIP_POSTINSTALL_GENERATE', 'true'
+    def npm = System.getProperty('os.name').toLowerCase().contains('windows')
+            ? ['cmd.exe', '/d', '/c', 'npm.cmd'] : ['npm']
+    commandLine npm + ['install', '--prefix', prismaToolsDirectory.get().asFile.absolutePath,
+                       '--no-save', '--no-package-lock', '--no-audit', '--no-fund', "prisma@${prismaVersion}"]
+}
+
 tasks.named('test') {
+    dependsOn tasks.named('preparePrisma')
+    inputs.file(v2Lockfile)
+    inputs.file('../server/prisma/schema.prisma')
+    systemProperty 'prisma.cli', prismaToolsDirectory.get().file('node_modules/prisma/build/index.js').asFile.absolutePath
+    systemProperty 'prisma.schema', file('../server/prisma/schema.prisma').absolutePath
     useJUnitPlatform()
 }
