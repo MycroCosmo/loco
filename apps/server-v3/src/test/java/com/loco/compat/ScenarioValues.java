@@ -2,11 +2,13 @@ package com.loco.compat;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /** 한 케이스 안의 한 서버 응답 값만 보관한다. 실패 메시지에 실제 값은 출력하지 않는다. */
 public final class ScenarioValues {
     private final Map<String, JsonNode> values = new HashMap<>();
+    public Set<String> names() { return Set.copyOf(values.keySet()); }
 
     public void capture(JsonNode response, Map<String, String> captures) {
         captures.forEach((alias, pointer) -> {

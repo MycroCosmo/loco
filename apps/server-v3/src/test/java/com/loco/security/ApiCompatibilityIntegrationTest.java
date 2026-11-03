@@ -90,7 +90,7 @@ class ApiCompatibilityIntegrationTest extends CompatibilityTestBase {
         var expected = request(v2Url(), "/api/auth/login", HttpMethod.POST, token(kind), body);
         assertThat(expected.getStatusCode().value()).isEqualTo(400);
         assertThat(expected.getBody().path("message").size()).isEqualTo(2);
-        assertSame(expected, request(v3Url(), "/api/__test/harness/auth/login", HttpMethod.POST, token(kind), body));
+        assertSame(expected, request(v3Url(), "/api/auth/login", HttpMethod.POST, token(kind), body));
     }
 
     @ParameterizedTest

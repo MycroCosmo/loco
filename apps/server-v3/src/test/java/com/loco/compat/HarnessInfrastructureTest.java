@@ -24,7 +24,7 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
     @Test
     @DisplayName("하네스 자체 검증: HTTP 쓰기 → 생성 ID 제외 → DB 상태 비교")
     void writeRequestUsesIndependentDatabasesAndComparesNewIds() throws Exception {
-        for (String path : List.of("/api/auth/login", "/api/feedback")) {
+        for (String path : List.of("/api/feedback")) {
             assertThat(request(v3Url(), path, HttpMethod.POST, null, Map.of()).getStatusCode().value()).isEqualTo(404);
         }
         assertThat(request(v3Url(), "/api/users/me", HttpMethod.GET, null, null).getStatusCode().value()).isEqualTo(404);

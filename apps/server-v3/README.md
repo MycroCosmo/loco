@@ -1,10 +1,10 @@
 # LOCO v3 — Spring 기반과 v2 인증·오류 호환
 
-현재 구현 범위는 `GET /api/health` 하나다. v2와 Flutter 코드는 변경하지 않는다.
+현재 구현 API는 `GET /api/health`, `POST /api/auth/register`, `POST /api/auth/login`이다. 승인된 v2 기준 갱신 외에는 v2와 Flutter 코드를 변경하지 않는다.
 빈 PostgreSQL DB에는 Flyway V1으로 v2와 같은 업무 테이블을 만든다. 인증용 JPA 엔티티는 기존 스키마에 매핑한다. 자세한 설계와 읽는 순서는 [인증 문서](AUTHENTICATION.md)를 참고한다.
 DB 기준은 사용자가 확정한 PostgreSQL 17(`postgis/postgis:17-3.6`)이다. 맞춰야 할 기존 운영 DB 버전은 없다.
 JWT 검증과 v2의 401·404·ValidationPipe 400 응답 기반을 구현했다.
-로그인·회원가입·사용자 조회 등 기능 API는 아직 이관하지 않았다. 보호 경로와 DTO는 통합 테스트 안에만 존재한다.
+회원가입·로그인은 실제 API다. 사용자 조회 등 보호 경로는 아직 테스트 대역이며, refresh·logout은 다음 구현 단위다.
 
 5단계 비교 하네스의 설계·실행·케이스 추가 방법은 [COMPARISON_TESTS.md](COMPARISON_TESTS.md)에 정리했다.
 v2 컨테이너를 공유하고, 같은 Flyway V1으로 만든 두 DB에서 응답과 데이터를 비교한다.
@@ -97,7 +97,7 @@ Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·D
 
 기대 결과:
 
-- `BUILD SUCCESSFUL`, 총 62건 중 성공 61개·실패 0개·알려진 차이 1개. 기존 35개 검증도 포함한다.
+- `BUILD SUCCESSFUL`, 총 77건 중 성공 76개·실패 0개·알려진 차이 1개. 기존 35개 검증도 포함한다.
 - 알려진 차이는 로그인 11번째 요청의 v2 429 / v3 제한 미구현이다. 실제 요청 후 JUnit의 aborted/skipped로 표시하며 성공에 포함하지 않는다.
 - 인증 없는 `/api/health`: 200, JSON 구조와 값이 정확히 `{"status":"ok"}`.
 - `/health`: 404. `/api`를 거치지 않으면 컨트롤러에 접근할 수 없다.
@@ -252,7 +252,7 @@ docker inspect (docker compose ps -q) --format '{{.Name}} CPU={{.HostConfig.Nano
 
 기대 결과는 v3의 `200 {"status":"ok"}`, v2의 401, `shared_buffers`의 `1GB`, Flyway 이력의 `1 / SQL / t`다.
 Docker inspect의 CPU는 모두 `2000000000`(2 CPU), 메모리는 앱 각각 `1610612736`, DB `4294967296` 바이트다.
-v3는 같은 비밀 값으로 JWT를 검증한다. 실행 JAR의 업무 API는 health뿐이므로 보호 경로의 인증 통과는 위 통합 테스트로 확인한다.
+v3는 같은 비밀 값으로 JWT를 검증한다. 실행 JAR에는 회원가입·로그인이 포함된다. 보호 경로의 인증 통과는 위 통합 테스트로 확인한다.
 외부 API 인증 정보는 주입하지 않으며 이 확인 과정에서는 카카오·FCM·이메일 API를 호출하지 않는다.
 
 DB와 v2 업로드 파일은 각각 named volume에 저장한다. 다음 명령으로 종료해도 데이터는 남는다.
@@ -344,7 +344,7 @@ URL 보호 목록을 별도로 관리하는 (a)는 경로가 중복되고, 모�
 
 JWT는 비밀 문자열을 Base64 디코딩하지 않고 UTF-8 바이트로 사용한다. 이는 v2의 문자열 secret과 같다.
 HS256만 허용하고 만료(`exp`)·사용 시작(`nbf`) 허용 오차는 0초다. v2처럼 `sub`가 있어야 하며 `iss`·`aud`를 새로 요구하지 않는다.
-필터는 발급·갱신이나 사용자 DB 조회를 하지 않는다. 서명 검증은 Spring Security JOSE의 NimbusJwtDecoder에 맡긴다.
+필터는 발급·갱신이나 사용자 DB 조회를 하지 않는다. 로그인·회원가입의 발급은 TokenIssuer가 담당한다. 서명 검증은 Spring Security JOSE의 NimbusJwtDecoder에 맡긴다.
 
 실제 v2 응답을 확인하고 비교한 사례:
 
@@ -372,7 +372,7 @@ Nest의 모든 `class-validator` 규칙을 자동 변환하는 기능은 아니�
 | Boot 3.5.16, Gradle Wrapper 8.14.6 | 구현 선택을 위임받아 3.5·8.x의 안정 패치 버전으로 고정했다. |
 | `com.loco` 아래 기능·설정별 패키지 | `health`, `config`, `security`, `web`으로 책임을 구분한다. |
 | 8081, MVC prefix `/api`, YAML | 포트는 v2·앱 개발용과 분리한다. 4단계에서 사용자가 MVC prefix로 변경하기로 선택했다. |
-| 직접 작성한 health, 기능 API 이관 없음 | 인증과 검증용 컨트롤러는 테스트 소스에만 둔다. |
+| 0번 묶음은 health와 기반만 구현 | 1번 묶음부터 실제 인증 API를 추가하고 테스트 대역은 전용 경로에 둔다. |
 | (c) JWT 검증 필터 + 메서드 권한, DTO 검증 전 인증 확인 보완 | 사용자가 선택했다. 없는 경로 404와 보호 경로 401을 함께 유지하며 선언 누락은 시작 시 검출한다. |
 | Spring Security JOSE / NimbusJwtDecoder | 사용자가 JJWT와 비교 후 선택했다. Boot BOM이 버전을 관리하며 HS256 검증에 사용한다. |
 | 앱 API CSRF 비활성화, stateless | 사용자 요구다. 세션·로그인 폼·HTTP Basic 인증은 사용하지 않는다. |
@@ -418,10 +418,10 @@ v2 비교 기준에는 main에 병합된 계정 상태 회귀 수정이 포함�
 v2 Guard처럼 **인증이 필요한 경로에서만** DB의 현재 회원 상태를 조회하고, 공개 경로에서는 조회하지 않는다.
 JWT 필터에 모든 요청의 회원 조회를 추가하지 않는다. 새 v2는 존재하지 않는 회원도 거절하고 인증 정보의 email도 DB의 현재 값을 사용하므로 해당 동작을 함께 맞춘다.
 
-다음 차이는 현재 구현하지 않고 후속 호환 검증 대상으로 남긴다.
+현재 호환 범위와 후속 검증 항목은 다음과 같다.
 
-- v2 `forbidNonWhitelisted`: DTO에 정의되지 않은 필드는 400이며 `message` 배열에 `"property xxx should not exist"`가 포함된다.
-- v2의 기본 500 응답은 `{"statusCode":500,"message":"Internal server error"}`이며 `error` 키가 없다.
+- 이관한 인증 DTO는 v2 `forbidNonWhitelisted`를 적용한다. 정의되지 않은 필드는 400이며 `message` 배열에 `"property xxx should not exist"`가 포함된다.
+- 예상하지 못한 오류의 500 응답은 v2와 같이 `{"statusCode":500,"message":"Internal server error"}`이며 `error` 키가 없다.
 - 깨진 JSON 요청의 400 메시지는 케이스별 명시적 문구 예외로 비교한다. 상태·키·타입은 유지하며 실제 API의 구조 차이를 숨기지 않는다.
 
 0번 묶음과 1번 묶음 설계는 확인 완료했다. 실제 이관 API 케이스를 묶음별로 추가한다.

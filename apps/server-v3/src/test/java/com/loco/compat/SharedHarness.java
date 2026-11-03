@@ -135,6 +135,11 @@ public final class SharedHarness implements BeforeAllCallback {
         public String username() { return postgres.getUsername(); }
         public String databasePassword() { return postgres.getPassword(); }
         public String v2Url() { return "http://" + v2.getHost() + ":" + v2.getMappedPort(3000); }
+        public JsonNode nodeCheck(String script, Object input) throws Exception {
+            var result = v2.execInContainer("node", "-e", script, json.writeValueAsString(input));
+            if (result.getExitCode() != 0) throw new AssertionError("v2 라이브러리 교차 검증 실행 실패");
+            return json.readTree(result.getStdout());
+        }
         public Connection connect(Side side) throws Exception {
             return DriverManager.getConnection(url(side), username(), databasePassword());
         }

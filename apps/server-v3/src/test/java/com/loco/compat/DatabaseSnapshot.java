@@ -19,8 +19,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public final class DatabaseSnapshot {
     private static final ObjectMapper JSON = new ObjectMapper();
-    public record Rules(Map<String, List<String>> orderBy, Map<String, String> rowQueries) {
-        public Rules { orderBy = Map.copyOf(orderBy); rowQueries = Map.copyOf(rowQueries); }
+    public record Rules(Map<String, List<String>> orderBy, Map<String, String> rowQueries, Map<String, String> passwords) {
+        public Rules { orderBy = Map.copyOf(orderBy); rowQueries = Map.copyOf(rowQueries); passwords = Map.copyOf(passwords); }
+        public Rules(Map<String, List<String>> orderBy, Map<String, String> rowQueries) { this(orderBy, rowQueries, Map.of()); }
         public static Rules defaults() { return new Rules(Map.of(), Map.of()); }
     }
     private record Table(List<ObjectNode> rows, Set<String> ids, Set<String> primaryIds,
@@ -156,6 +157,15 @@ public final class DatabaseSnapshot {
                 for (String column : columns) {
                     JsonNode value = row.get(column);
                     if (column.startsWith("__sort_")) { row.remove(column); continue; }
+                    if (name.equals("users") && column.equals("password") && rules.passwords().containsKey(row.path("email").asText())) {
+                        String hash = value.asText("");
+                        if (!hash.matches("\\$2b\\$10\\$[./A-Za-z0-9]{53}")
+                                || !org.springframework.security.crypto.bcrypt.BCrypt.checkpw(rules.passwords().get(row.path("email").asText()), hash)) {
+                            throw new AssertionError("bcrypt 형식·cost·비밀번호 의미 검증 실패");
+                        }
+                        row.put(column, "$bcrypt-2b-10");
+                        continue;
+                    }
                     if (value.isNull()) continue;
                     if (table.ids().contains(column)) row.put(column, alias(value, seedIds, aliases));
                     else if (table.times().contains(column)) {
@@ -174,7 +184,11 @@ public final class DatabaseSnapshot {
     }
 
     public static void compare(DatabaseSnapshot left, DatabaseSnapshot right, Set<String> seedIds, Rules rules) {
-        if (!left.normalized(seedIds, rules).equals(right.normalized(seedIds, rules))) {
+        compare(left, right, seedIds, rules, rules);
+    }
+
+    public static void compare(DatabaseSnapshot left, DatabaseSnapshot right, Set<String> seedIds, Rules leftRules, Rules rightRules) {
+        if (!left.normalized(seedIds, leftRules).equals(right.normalized(seedIds, rightRules))) {
             throw new AssertionError("업무 DB 상태 차이 (값·토큰·해시는 로그에 출력하지 않음)");
         }
     }

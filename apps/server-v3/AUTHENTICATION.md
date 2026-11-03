@@ -1,7 +1,7 @@
 # 1번 묶음: 인증
 
-현재 구현 범위는 User·RefreshToken·PasswordResetToken 엔티티와 JPA 저장소, UUID 생성, 감사 시각이다.
-인증 API는 다음 구현 단위에서 추가한다. 스키마와 Flyway V1은 변경하지 않는다.
+현재 구현 범위는 인증 엔티티와 POST /api/auth/register·login이다. 성공 상태는 v2와 같은 201이다.
+refresh·logout은 다음 구현 단위다. 스키마와 Flyway V1은 변경하지 않는다.
 
 ## 확정한 설계
 
@@ -49,3 +49,19 @@ SMTP 실패 때 앞서 저장한 재설정 토큰 데이터가 남는 동작은 
 엔티티 → 회원가입·로그인 → 재발급·로그아웃까지 각 단위를 검증·커밋하고 멈춘다.
 그 뒤 확인을 받고 비밀번호 찾기·재설정 → OAuth → 보호 경로 회원 상태 확인 → 요청 제한 순서로 진행한다.
 공개 경로에 공통 인증용 회원 조회를 추가하지 않는다.
+
+## 회원가입·로그인 흐름
+
+AuthController → AuthInputs → AuthService → UserRepository / V2PasswordEncoder / TokenIssuer 순서로 읽는다.
+AuthInputs는 원본 JSON의 추가 필드·타입·길이·이메일을 검사하고 typed record를 만든다. 오류 배열의 순서도 v2와 비교한다.
+V2Email은 저장소에 고정된 validator.js 13.15.35의 기본 규칙을 적용한다. 출처의 MIT 허가는 resources/licenses/validatorjs-MIT.txt에 보관한다.
+V2PasswordEncoder는 UTF-8 바이트를 최대 72바이트로 처리해 $2b$ cost 10 해시를 만든다. 실제 v2 bcrypt로 양방향 검증한다.
+회원가입은 이메일 중복을 확인하고 회원을 저장한 뒤 토큰을 발급한다. v2와 같이 회원·토큰 저장 전체를 새 트랜잭션으로 묶지 않는다.
+로그인은 없는 회원·비밀번호 없는 회원·탈퇴 회원·틀린 비밀번호를 v2와 같은 순서와 문구로 처리한다.
+TokenIssuer는 HS256 JWT(sub, email, iat, exp; 7일)와 48바이트 무작위 refreshToken(base64url)을 만든다.
+DB에는 refreshToken의 SHA-256 해시와 30일 만료만 저장한다. 원문 토큰은 응답으로만 반환한다.
+ApiProblem은 업무 오류를, ApiExceptionHandler는 업무·검증·파싱·예상하지 못한 오류를 구분한다. 500에는 error 키를 넣지 않는다.
+
+AuthenticationCases는 실제 API 오류 사례, AuthenticationFlowTest는 연속 발급·DB·교차 인증, InputCompatibilityTest는 v2 라이브러리와의 교차 검증이다.
+비밀번호 해시는 단순 제외하지 않고 형식·cost·평문 일치를 확인한다. 여러 refreshToken은 캡처한 응답 토큰의 해시로 역할을 붙여 정렬한다.
+JDK HTTP 클라이언트로 POST 401 응답 본문까지 비교한다. HttpURLConnection streaming 모드의 인증 오류 본문 유실을 피하기 위한 설정이다.

@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.core.AuthenticationException;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ApiExceptionHandler.class);
     private final ObjectMapper mapper;
 
     public ApiExceptionHandler(ObjectMapper mapper) {
@@ -33,6 +35,22 @@ public class ApiExceptionHandler {
 
     public static Map<String, Object> forbidden() {
         return Map.of("statusCode", 403, "message", "Forbidden resource", "error", "Forbidden");
+    }
+
+    @ExceptionHandler(ApiProblem.class)
+    ResponseEntity<?> businessFailure(ApiProblem problem) {
+        return ResponseEntity.status(problem.status()).body(problem.body());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ResponseEntity<?> malformedJson() {
+        return ResponseEntity.badRequest().body(Map.of("statusCode", 400, "message", "Malformed JSON", "error", "Bad Request"));
+    }
+
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<?> unexpected(Exception exception) {
+        log.error("Unhandled API exception", exception);
+        return ResponseEntity.internalServerError().body(Map.of("statusCode", 500, "message", "Internal server error"));
     }
 
     @ExceptionHandler(AuthenticationException.class)

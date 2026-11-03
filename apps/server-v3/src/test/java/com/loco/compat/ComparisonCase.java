@@ -3,9 +3,10 @@ package com.loco.compat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 public record ComparisonCase(String name, String seedResource, List<ComparisonStep> steps,
-                             DatabaseSnapshot.Rules databaseRules, boolean databaseUnchanged) {
+                             Function<ScenarioValues, DatabaseSnapshot.Rules> databaseRules, boolean databaseUnchanged) {
     public ComparisonCase {
         if (name == null || name.isBlank()) throw new IllegalArgumentException("케이스 이름 필요");
         Objects.requireNonNull(seedResource);
@@ -23,13 +24,14 @@ public record ComparisonCase(String name, String seedResource, List<ComparisonSt
         private final String name;
         private String seedResource = "compat/seed.sql";
         private final List<ComparisonStep> steps = new ArrayList<>();
-        private DatabaseSnapshot.Rules databaseRules = DatabaseSnapshot.Rules.defaults();
+        private Function<ScenarioValues, DatabaseSnapshot.Rules> databaseRules = ignored -> DatabaseSnapshot.Rules.defaults();
         private boolean databaseUnchanged;
 
         private Builder(String name) { this.name = name; }
         public Builder seedResource(String value) { seedResource = value; return this; }
         public Builder step(ComparisonStep value) { steps.add(value); return this; }
-        public Builder databaseRules(DatabaseSnapshot.Rules value) { databaseRules = value; return this; }
+        public Builder databaseRules(DatabaseSnapshot.Rules value) { databaseRules = ignored -> value; return this; }
+        public Builder databaseRules(Function<ScenarioValues, DatabaseSnapshot.Rules> value) { databaseRules = value; return this; }
         public Builder databaseUnchanged() { databaseUnchanged = true; return this; }
         public ComparisonCase build() {
             return new ComparisonCase(name, seedResource, steps, databaseRules, databaseUnchanged);

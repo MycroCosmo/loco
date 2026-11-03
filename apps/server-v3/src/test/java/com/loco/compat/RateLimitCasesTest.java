@@ -18,13 +18,13 @@ class RateLimitCasesTest extends CompatibilityTestBase {
         var body = Map.of("email", "bad", "password", "x");
         for (int i = 0; i < 10; i++) {
             var left = request(v2Url(), path, HttpMethod.POST, null, body, true);
-            var right = request(v3Url(), "/api/__test/harness/auth/login", HttpMethod.POST, null, body, true);
+            var right = request(v3Url(), "/api/auth/login", HttpMethod.POST, null, body, true);
             assertThat(left.getStatusCode().value()).isEqualTo(400);
             assertThat(right.getStatusCode().value()).isEqualTo(400);
             JsonComparison.compare(left.getBody(), right.getBody(), Map.of());
         }
         var left = request(v2Url(), path, HttpMethod.POST, null, body, true);
-        var right = request(v3Url(), "/api/__test/harness/auth/login", HttpMethod.POST, null, body, true);
+        var right = request(v3Url(), "/api/auth/login", HttpMethod.POST, null, body, true);
         environment().budget.blocked(path);
         assertThat(left.getStatusCode().value()).isEqualTo(429);
         assertThat(left.getBody().path("statusCode").asInt()).isEqualTo(429);
@@ -37,7 +37,7 @@ class RateLimitCasesTest extends CompatibilityTestBase {
         assertThat(right.getStatusCode().value()).isEqualTo(400);
         environment().knownDifferences.add(Map.of(
                 "case", "POST /api/auth/login — 11th request",
-                "reason", "알려진 차이: v3 요청 제한 미구현 (테스트 컨트롤러)",
+                "reason", "알려진 차이: v3 요청 제한 미구현",
                 "v2Status", 429, "v3Status", 400,
                 "promotion", "v3 요청 제한 구현 시 필수 통과 케이스로 전환"));
         Assumptions.abort("알려진 차이: 실제 v2 429 / v3 400을 관측함. 성공 집계에서 제외.");

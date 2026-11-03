@@ -3,6 +3,7 @@ package com.loco.compat;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -28,6 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.flyway.target=1")
 @Import(HarnessControllers.class)
 public abstract class CompatibilityTestBase {
+    private static final java.net.http.HttpClient HTTP = java.net.http.HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(10)).version(java.net.http.HttpClient.Version.HTTP_1_1).build();
     @LocalServerPort protected int port;
     @Autowired protected TestRestTemplate client;
     @Autowired protected ObjectMapper mapper;
@@ -59,9 +62,9 @@ public abstract class CompatibilityTestBase {
             var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             if (token != null) headers.setBearerAuth(token);
-            var factory = new SimpleClientHttpRequestFactory();
-            factory.setConnectTimeout(10000);
-            factory.setReadTimeout(10000);
+            // HttpURLConnection의 streaming POST 401 본문 유실을 피한다.
+            var factory = new JdkClientHttpRequestFactory(HTTP);
+            factory.setReadTimeout(java.time.Duration.ofSeconds(10));
             client.getRestTemplate().setRequestFactory(factory);
             var response = client.exchange(URI.create(base + path), method, new HttpEntity<>(body, headers), JsonNode.class);
             if (!rateLimitProbe && response.getStatusCode().value() == 429) {
@@ -74,9 +77,9 @@ public abstract class CompatibilityTestBase {
         }
     }
 
-    protected void runCase(ComparisonCase testCase) throws Exception {
+    protected Map<SharedHarness.Side, ScenarioValues> runCase(ComparisonCase testCase) throws Exception {
         environment().reset(testCase.seedResource());
-        var rules = testCase.databaseRules();
+        var rules = testCase.databaseRules().apply(new ScenarioValues());
         DatabaseSnapshot beforeV2, beforeV3;
         try (var left = environment().connect(SharedHarness.Side.V2);
              var right = environment().connect(SharedHarness.Side.V3)) {
@@ -96,11 +99,13 @@ public abstract class CompatibilityTestBase {
                 JsonComparison.compare(leftResponse.getBody(), rightResponse.getBody(), step.valueExceptions());
                 v2Values.capture(leftResponse.getBody(), step.captures());
                 v3Values.capture(rightResponse.getBody(), step.captures());
+                var leftRules = testCase.databaseRules().apply(v2Values);
+                var rightRules = testCase.databaseRules().apply(v3Values);
                 try (var left = environment().connect(SharedHarness.Side.V2);
                      var right = environment().connect(SharedHarness.Side.V3)) {
-                    var afterV2 = DatabaseSnapshot.capture(left, rules);
-                    var afterV3 = DatabaseSnapshot.capture(right, rules);
-                    DatabaseSnapshot.compare(afterV2, afterV3, seedIds, rules);
+                    var afterV2 = DatabaseSnapshot.capture(left, leftRules);
+                    var afterV3 = DatabaseSnapshot.capture(right, rightRules);
+                    DatabaseSnapshot.compare(afterV2, afterV3, seedIds, leftRules, rightRules);
                     if (testCase.databaseUnchanged()) {
                         beforeV2.assertUnchanged(afterV2);
                         beforeV3.assertUnchanged(afterV3);
@@ -110,6 +115,7 @@ public abstract class CompatibilityTestBase {
                 throw new AssertionError(testCase.name() + " / " + step.name() + ": " + error.getMessage(), error);
             }
         }
+        return Map.of(SharedHarness.Side.V2, v2Values, SharedHarness.Side.V3, v3Values);
     }
 
     private ResponseEntity<JsonNode> requestStep(ComparisonStep step, SharedHarness.Side side,
