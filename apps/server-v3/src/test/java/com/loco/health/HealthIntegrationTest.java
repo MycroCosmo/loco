@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class HealthIntegrationTest {
+    private static final String JWT_SECRET = UUID.randomUUID().toString() + UUID.randomUUID();
 
     @Container
     static final PostgreSQLContainer<?> database = new PostgreSQLContainer<>(
@@ -36,6 +37,7 @@ class HealthIntegrationTest {
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
+        registry.add("loco.jwt.secret", () -> JWT_SECRET);
         registry.add("spring.datasource.url", database::getJdbcUrl);
         registry.add("spring.datasource.username", database::getUsername);
         registry.add("spring.datasource.password", database::getPassword);
@@ -69,7 +71,13 @@ class HealthIntegrationTest {
     void actuatorIsNotPublic() {
         ResponseEntity<String> response = client.getForEntity(url("/api/actuator/health"), String.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void compatibilityTestEndpointsAreNotPartOfTheApplication() {
+        assertThat(client.getForEntity(url("/api/users/me"), String.class).getStatusCode())
+                .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test

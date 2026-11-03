@@ -3,9 +3,11 @@ package com.loco.health;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.loco.security.PublicApi;
+import com.loco.web.ApiController;
 
-@RestController
+@ApiController
+@PublicApi
 public class HealthController {
 
     @GetMapping("/health")
