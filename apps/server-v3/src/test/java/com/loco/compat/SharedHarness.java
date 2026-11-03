@@ -61,6 +61,7 @@ public final class SharedHarness implements BeforeAllCallback {
         public final String secret = UUID.randomUUID().toString() + UUID.randomUUID();
         public final String password = UUID.randomUUID().toString();
         public final AuthRequestBudget budget = new AuthRequestBudget();
+        public final AuthRequestBudget v3Budget = new AuthRequestBudget();
         public final ObjectMapper json = new ObjectMapper();
         private final long started = System.nanoTime();
         private final Network network = Network.newNetwork();
@@ -77,6 +78,8 @@ public final class SharedHarness implements BeforeAllCallback {
         private String passwordHash;
         private int v2Builds;
         private int v2Starts;
+        private int v2Restarts;
+        private int v2Port;
         public final List<Map<String, Object>> knownDifferences = new ArrayList<>();
         private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
@@ -102,6 +105,7 @@ public final class SharedHarness implements BeforeAllCallback {
                         .waitingFor(Wait.forLogMessage(".*LOCO server running.*\\n", 1))
                         .withStartupTimeout(Duration.ofMinutes(2));
                 v2.start();
+                if (!refreshV2Port()) throw new IllegalStateException("v2 HTTP 포트가 게시되지 않음");
                 v2Starts++;
                 var hash = v2.execInContainer("node", "-e",
                         "require('bcrypt').hash(process.argv[1],10).then(h=>process.stdout.write(h))", password);
@@ -135,8 +139,34 @@ public final class SharedHarness implements BeforeAllCallback {
         }
         public String username() { return postgres.getUsername(); }
         public String databasePassword() { return postgres.getPassword(); }
-        public String v2Url() { return "http://" + v2.getHost() + ":" + v2.getMappedPort(3000); }
+        public String v2Url() { return "http://" + v2.getHost() + ":" + v2Port; }
         public String smtpHost() { return mailpit.getHost(); }
+        public void restartV2ForCase() {
+            org.testcontainers.DockerClientFactory.instance().client().restartContainerCmd(v2.getContainerId()).withTimeout(1).exec();
+            long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+            boolean ready = false;
+            while (System.nanoTime() < deadline) {
+                try {
+                    if (refreshV2Port()) {
+                        var probe = HttpRequest.newBuilder(URI.create(v2Url() + "/api/__harness-ready")).timeout(Duration.ofSeconds(2)).GET().build();
+                        if (http.send(probe, HttpResponse.BodyHandlers.discarding()).statusCode() == 404) { ready = true; break; }
+                    }
+                } catch (java.io.IOException ignored) { }
+                catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); throw new IllegalStateException(interrupted); }
+                try { Thread.sleep(100); }
+                catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); throw new IllegalStateException(interrupted); }
+            }
+            if (!ready) throw new IllegalStateException("재시작한 v2 준비 시간 초과");
+            v2Restarts++;
+            budget.clearWindow();
+        }
+        private boolean refreshV2Port() {
+            var info = org.testcontainers.DockerClientFactory.instance().client().inspectContainerCmd(v2.getContainerId()).exec();
+            var bindings = info.getNetworkSettings().getPorts().getBindings().get(com.github.dockerjava.api.model.ExposedPort.tcp(3000));
+            if (bindings == null || bindings.length == 0) return false;
+            v2Port = Integer.parseInt(bindings[0].getHostPortSpec());
+            return true;
+        }
         public int smtpPort() { return mailpit.getMappedPort(1025); }
         public JsonNode nodeCheck(String script, Object input) throws Exception {
             var result = v2.execInContainer("node", "-e", script, json.writeValueAsString(input));
@@ -218,9 +248,11 @@ public final class SharedHarness implements BeforeAllCallback {
                 Files.createDirectories(report.getParent());
                 json.writerWithDefaultPrettyPrinter().writeValue(report.toFile(), Map.of(
                         "environmentMillis", Duration.ofNanos(System.nanoTime() - started).toMillis(),
-                        "authWaitMillis", budget.waitedMillis(), "v2Builds", v2Builds, "v2Starts", v2Starts,
+                        "authWaitMillis", budget.waitedMillis() + v3Budget.waitedMillis(),
+                        "v2AuthWaitMillis", budget.waitedMillis(), "v3AuthWaitMillis", v3Budget.waitedMillis(),
+                        "v2Builds", v2Builds, "v2Starts", v2Starts, "v2Restarts", v2Restarts,
                         "knownDifferences", knownDifferences,
-                        "recommendContainerRestart", budget.waitedMillis() > 180000));
+                        "throttleStrategy", "restart-between-cases", "recommendContainerRestart", false));
             } finally { stopContainers(); }
         }
         private void stopContainers() {

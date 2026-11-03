@@ -60,6 +60,7 @@ public final class AuthRequestBudget {
     }
 
     public long waitedMillis() { return Duration.ofNanos(waitedNanos).toMillis(); }
+    public synchronized void clearWindow() { hits.clear(); blockedUntil.clear(); }
 
     private void purge(ArrayDeque<Long> queue) {
         while (!queue.isEmpty() && queue.peekFirst() + WINDOW <= clock.getAsLong()) queue.removeFirst();

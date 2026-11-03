@@ -69,7 +69,7 @@ tasks.named('test') {
         def report = layout.buildDirectory.file('reports/compatibility/summary.json').get().asFile
         if (report.exists()) {
             def result = new groovy.json.JsonSlurper().parse(report)
-            println "Compatibility: v2 builds=${result.v2Builds}, starts=${result.v2Starts}, auth wait=${result.authWaitMillis} ms"
+            println "Compatibility: v2 builds=${result.v2Builds}, starts=${result.v2Starts}, restarts=${result.v2Restarts ?: 0}, auth wait=${result.authWaitMillis} ms"
             println "Known differences (알려진 차이): ${result.knownDifferences.size()} — ${report}"
             if (result.recommendContainerRestart) println '인증 대기 누적 180초 초과: C(같은 컨테이너 재시작) 전환을 검토하세요.'
         }

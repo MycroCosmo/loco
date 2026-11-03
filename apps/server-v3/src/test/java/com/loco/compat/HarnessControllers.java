@@ -25,6 +25,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @TestConfiguration(proxyBeanMethods = false)
 @Import(HarnessControllers.ProbeController.class)
 public class HarnessControllers {
+    @org.springframework.context.annotation.Bean
+    HarnessRateLimitTime rateLimitTime() { return new HarnessRateLimitTime(); }
+    @org.springframework.context.annotation.Bean
+    @org.springframework.context.annotation.Primary
+    com.loco.security.RequestRateLimiter comparisonRateLimiter(HarnessRateLimitTime time) { return time.limiter(); }
     @TestComponent
     @ApiController
     @AuthenticatedApi

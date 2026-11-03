@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class InputCompatibilityTest extends CompatibilityTestBase {
+    @Override protected boolean usesV2Http() { return false; }
     @Autowired V2PasswordEncoder passwords;
 
     @Test

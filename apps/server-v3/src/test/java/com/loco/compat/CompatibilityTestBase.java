@@ -35,9 +35,15 @@ public abstract class CompatibilityTestBase {
     @LocalServerPort protected int port;
     @Autowired protected TestRestTemplate client;
     @Autowired protected ObjectMapper mapper;
+    @Autowired private HarnessRateLimitTime rateLimitTime;
+
+    protected boolean usesV2Http() { return true; }
 
     @BeforeEach
     void configureHttpClient() {
+        if (usesV2Http()) environment().restartV2ForCase();
+        rateLimitTime.nextWindow();
+        environment().v3Budget.clearWindow();
         var factory = new JdkClientHttpRequestFactory(HTTP);
         factory.setReadTimeout(java.time.Duration.ofSeconds(10));
         client.getRestTemplate().setRequestFactory(factory);
@@ -67,10 +73,9 @@ public abstract class CompatibilityTestBase {
     protected ResponseEntity<JsonNode> request(String base, String path, HttpMethod method,
                                                String token, Object body, boolean rateLimitProbe) {
         try {
-            if (base.equals(v2Url())) {
-                if (rateLimitProbe) environment().budget.recordUnchecked(path);
-                else environment().budget.before(method.name(), path);
-            }
+            var budget = base.equals(v2Url()) ? environment().budget : environment().v3Budget;
+            if (rateLimitProbe) budget.recordUnchecked(path);
+            else budget.before(method.name(), path);
             var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             if (token != null) headers.setBearerAuth(token);

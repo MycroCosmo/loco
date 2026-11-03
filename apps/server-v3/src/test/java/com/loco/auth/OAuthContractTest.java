@@ -31,6 +31,7 @@ import static org.hamcrest.Matchers.*;
 @TestPropertySource(properties = {"KAKAO_REST_API_KEY=test-client", "NAVER_CLIENT_ID=test-client", "NAVER_CLIENT_SECRET=test-secret"})
 @DisplayName("v3 계약 테스트: OAuth 외부 응답 mock (v2 HTTP 비교 아님)")
 class OAuthContractTest extends AuthenticationSupport {
+    @Override protected boolean usesV2Http() { return false; }
     static final class ProviderMock {
         final RestClient.Builder builder = RestClient.builder();
         final MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();

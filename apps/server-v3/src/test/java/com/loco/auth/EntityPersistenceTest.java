@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Import(EntityPersistenceTest.ControlledTime.class)
 class EntityPersistenceTest extends CompatibilityTestBase {
+    @Override protected boolean usesV2Http() { return false; }
     @Autowired UserRepository users;
     @Autowired RefreshTokenRepository refreshTokens;
     @Autowired PasswordResetTokenRepository resetTokens;

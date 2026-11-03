@@ -15,9 +15,9 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 .\gradlew.bat test bootJar --rerun-tasks --console=plain
 ~~~
 
-전체 검증은 135건이다. 기존 하네스·엔티티 62건, 회원가입·로그인 검증 15건, 재발급·로그아웃 검증 20건, 비밀번호 찾기·재설정 15건, OAuth 계약 18건과 URL 검증 1건, 보호 경로 회원 상태 검증 4건이 포함된다.
-기대 결과는 **성공 134 / 실패 0 / 알려진 차이 1**이다.
-알려진 차이도 실제 요청을 실행한다. JUnit의 aborted/skipped 분류를 사용하지만 이름·이유를 명시하며 성공으로 집계하지 않는다.
+전체 검증은 149건이다. 기존 하네스·엔티티 62건, 회원가입·로그인 검증 15건, 재발급·로그아웃 검증 20건, 비밀번호 찾기·재설정 15건, OAuth 계약 18건과 URL 검증 1건, 보호 경로 회원 상태 검증 4건을 포함한다. 기존 429 알려진 차이 1건을 필수 HTTP 검증 10건으로 바꾸고 제한 계산 테스트 5건을 추가했다.
+기대 결과는 **성공 149 / 실패 0 / 알려진 차이 0**이다.
+429도 필수 통과 대상이며 JUnit abort/skip으로 처리하지 않는다. OAuth 18건은 v3 계약 검증이고 v2 HTTP 비교와 구분한다.
 현재 항목은 로그인 11번째 요청의 v2 429 / v3 실제 로그인 400이다.
 
 - JUnit HTML: [build/reports/tests/test/index.html](build/reports/tests/test/index.html)
@@ -33,7 +33,7 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 ~~~
 
 기존 4단계 인증 검증은 `--tests '*ApiCompatibilityIntegrationTest'`,
-알려진 차이 관측은 `--tests '*RateLimitCasesTest'`로 실행한다.
+필수 요청 제한 비교는 `--tests '*RateLimitCasesTest'`로 실행한다.
 필터 실행 시 선택하지 않은 케이스까지 검증했다고 해석하지 않는다.
 
 ## 탑다운으로 읽는 순서
@@ -56,7 +56,7 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 | `HarnessControllers.java` | 인증·DTO·쓰기 비교를 위한 테스트 대역이다. 운영 JAR에 들어가지 않는다. |
 | `HarnessInfrastructureTest.java` | 실제 HTTP 쓰기·DB 초기화·관계 비교·Mailpit 수신을 검증한다. 기능 이관 검증과 구분한다. |
 | `JsonComparisonTest.java`, `AuthRequestBudgetTest.java` | 제외 규칙이 차이를 숨기지 않는지, 제한 횟수·대기 정책이 맞는지 검사한다. 대기 정책의 단위 테스트는 가상 시계를 사용한다. |
-| `RateLimitCasesTest.java` | 실제 v2 제한을 초과시켜 알려진 429 차이를 관측한다. |
+| `RateLimitCasesTest.java` | 모든 인증 API 한도와 429 응답·헤더, JSON 파싱·인증 순서를 비교한다. |
 
 `src/test/resources/compat/seed.sql`은 고정 회원 ID와 기본 데이터다.
 비밀번호는 파일에 저장하지 않고 v2의 bcrypt로 실행 중 생성해 주입한다.
@@ -69,7 +69,7 @@ Health·Flyway·선언 누락 테스트까지 기존 35개 검증을 유지한�
 ## 환경 수명과 초기화
 
 - Gradle test JVM 한 개, JUnit 병렬 실행 비활성화.
-- JUnit root store가 공유 환경을 보관하며 이미지 빌드·v2 기동은 각각 한 번이다.
+- JUnit root store가 공유 환경을 보관하며 이미지 빌드·최초 v2 기동은 각각 한 번이다. C 방식으로 HTTP 비교 케이스 사이 같은 컨테이너를 재시작한다.
 - PostgreSQL 17(`postgis/postgis:17-3.6`) 한 개에 `loco_v2_test`, `loco_v3_test`를 만든다.
 - 두 DB 모두 같은 Flyway migration 경로와 `target("1")`로 준비한다. v3 테스트 앱의 Flyway target도 1이다.
 - 하네스 준비에는 Prisma db push를 사용하지 않는다. 별도 Flyway baseline 테스트의 기존 DB 인수 검증은 그대로 유지한다.
@@ -152,28 +152,25 @@ new DatabaseSnapshot.Rules(
 SQL은 테스트 작성자가 관리하는 SELECT이며 사용자 입력을 받지 않는다.
 모든 그래프의 동형성을 자동 판정하는 도구는 아니다. 식별 기준이 모호하면 데이터나 케이스 기준을 명확히 해야 한다.
 
-## 요청 제한과 알려진 차이
+## 요청 제한과 C 방식
 
-v2 코드를 수정하거나 제한을 비활성화하지 않는다.
-요청량 관리·대기는 인증 API 자체를 검증하는 POST /api/auth/... 케이스에만 적용한다.
-준비 토큰은 직접 서명하므로 이 제한을 소모하지 않는다.
+v2 코드를 수정하거나 제한을 비활성화하지 않는다. 준비 토큰은 직접 서명한다.
+기본 한도는 처리 메서드·접속 IP별 120회/분이다. 인증 API는 register 5, login 10, forgot-password 3, reset-password 5, oauth 10, refresh/logout 120회/분이다.
+OAuth provider 경로는 같은 핸들러라 한도를 공유한다. DTO 오류·로그인 실패도 포함하지만 Express 파싱 단계에서 거절되는 깨진 JSON은 포함하지 않는다.
 
-인증 경로별 제한은 현재 v2 기준이다.
-register 5, login 10, forgot-password 3, reset-password 5, oauth 10, refresh/logout 120회/분이다.
-OAuth provider 경로는 같은 핸들러이므로 예산도 공유한다. 잘못된 입력·로그인 실패 요청도 횟수에 포함한다.
-60초 구간에 1초의 여유를 더해 필요한 경우만 대기한다. 예상하지 않은 429는 재시도하지 않고 실패한다.
+사용자가 선택한 C 방식은 각 JUnit HTTP 비교 케이스 시작 전에 같은 v2 컨테이너를 Docker restart한다. DB·Mailpit·이미지는 재생성하지 않는다.
+하나의 ComparisonCase 안에서 이어지는 요청과 동시 요청 도중에는 재시작하지 않는다. 준비 완료는 없는 경로의 404로 확인해 한도를 소모하지 않는다.
+Docker 재시작 직후 포트 정보가 잠시 비거나 임의 호스트 포트가 달라질 수 있으므로, 같은 컨테이너 ID를 inspect해 현재 포트 게시와 HTTP 준비를 함께 확인한다.
+v2 HTTP를 사용하지 않는 엔티티·라이브러리·OAuth 계약 검증은 재시작을 생략한다.
+v3는 HarnessRateLimitTime을 통해 제한 계산의 시계만 다음 61초 구간으로 이동한다. 구간 안에서는 실제 시간이 흐르며 JWT·JPA 시계에는 영향을 주지 않는다.
+이는 케이스 간 상태 초기화다. 실제 제한 알고리즘과 HTTP interceptor는 그대로 실행하며, 구간 내 제한·만료·재차단은 HTTP/가상 시계 테스트로 검증한다.
 
-429 검증은 별도 `RateLimitCasesTest`에서 수행한다.
-이전 로그인 요청의 제한 구간을 비운 뒤 잘못된 DTO를 11번 보낸다.
-처음 10회는 양쪽 400 응답을 정확히 비교하고, 11번째는 v2의 429와 Retry-After를 확인한다.
-v3 실제 로그인은 아직 제한이 없어 400이다. 관측 결과를 summary.json과 JUnit 보고서에 “알려진 차이”로 남긴다.
-후속 인증 테스트는 이 차단 구간도 기다린다.
+AuthRequestBudget은 양쪽 인증 API 요청을 기록하며 한 시나리오가 실제 한도를 넘으면 필요한 시간만 대기한다. 예상하지 않은 429를 재시도해 숨기지 않는다.
+RateLimitCasesTest는 별도 probe로 실제 한도를 넘겨 status·JSON·Limit/Remaining/Reset·Retry-After를 비교한다. 시간 헤더는 유효 범위로 검증한다.
+7개 인증 API의 한도, 공개 OAuth provider 간 공유, 보호 경로의 429 우선순위, X-Forwarded-For로 IP를 위조해도 한도가 바뀌지 않는지 확인한다.
+깨진 JSON을 11번 보내도 로그인 잔여 횟수가 9로 시작하는지 비교한다. JSON 문구 차이만 해당 케이스에 명시한다.
 
-v3가 429를 반환하기 시작하면 이 테스트는 실패하며 필수 통과 케이스로 전환하라고 알린다.
-그때 양쪽 응답·차단 시점을 비교하는 정상 테스트로 바꾸고 knownDifferences 등록과 abort를 제거한다.
-
-대기 총량이 180초를 넘으면 보고서와 콘솔에서 C(같은 컨테이너 재시작) 전환 검토를 제안한다.
-이는 보고용 기준이며 자동으로 재시작하거나 사용자 선택을 바꾸지 않는다.
+summary.json에는 최초 빌드·기동 수, 재시작 수, 양쪽 인증 대기 시간, 알려진 차이 목록을 기록한다. 429는 알려진 차이 등록과 abort를 제거한 필수 케이스다.
 
 ## Mailpit
 
@@ -262,12 +259,14 @@ ComparisonCase.named("1번 묶음: 회원가입 → 로그인 → 재발급")
 지금 실행되는 시나리오 자체 검증은 피드백 쓰기 → 이전 메시지로 두 번째 쓰기 → 서버별 생성 ID를 사용한 없는 경로 요청이다.
 동일한 DB를 계속 사용하며 각 단계의 응답·DB 상태와 각 서버에서 생성된 ID의 실제 존재를 확인한다.
 
-후속 미구현 차이:
 보호 경로의 탈퇴·없는 회원 차단과 현재 email 사용은 MemberAuthenticationTest에서 검증한다.
+
+후속 묶음의 검증 항목:
+
 - 아직 이관하지 않은 DTO의 전체 검증 규칙
 - 후속 API의 예외·트랜잭션 경계
 - 후속 API의 깨진 JSON 문구 예외 등록
-- 실제 엔드포인트의 요청 제한·메일 기능
+- 이후 묶음의 실제 엔드포인트와 DTO 검증
 
 공식 참고: [Mailpit SMTP](https://mailpit.axllent.org/docs/configuration/smtp/),
 [Mailpit API](https://mailpit.axllent.org/docs/api-v1/),

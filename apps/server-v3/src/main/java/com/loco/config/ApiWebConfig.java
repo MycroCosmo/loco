@@ -28,7 +28,10 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 @Configuration(proxyBeanMethods = false)
 public class ApiWebConfig implements WebMvcConfigurer {
     private final UserRepository users;
-    public ApiWebConfig(UserRepository users) { this.users = users; }
+    private final com.loco.security.RateLimitInterceptor rateLimit;
+    public ApiWebConfig(UserRepository users, com.loco.security.RateLimitInterceptor rateLimit) {
+        this.users = users; this.rateLimit = rateLimit;
+    }
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
         configurer.addPathPrefix("/api", type -> AnnotatedElementUtils.hasAnnotation(type, ApiController.class));
@@ -36,6 +39,7 @@ public class ApiWebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(rateLimit).order(-100);
         registry.addInterceptor(new HandlerInterceptor() {
             @Override
             public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {

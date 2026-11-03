@@ -18,7 +18,7 @@
 - OAuth는 RestClient와 MockRestServiceServer, 메일은 Boot Mail starter와 JavaMailSender를 사용한다.
 - 요청 제한은 v2와 같은 처리 메서드·IP 기준으로 프로세스 메모리에 저장한다.
 
-아직 구현하지 않은 항목도 위 목록은 승인된 설계다. 구현 완료 목록으로 해석하지 않는다.
+위 설계를 1번 묶음의 인증 API와 공통 인증·요청 제한에 적용한다.
 
 ## 읽는 순서
 
@@ -47,7 +47,7 @@ main의 기준에는 재설정 코드 원자적 소비와 OAuth 이메일 자동
 SMTP 실패 때 앞서 저장한 재설정 토큰 데이터가 남는 동작은 유지한다.
 
 엔티티 → 회원가입·로그인 → 재발급·로그아웃은 확인을 마쳤다.
-비밀번호 찾기·재설정 → OAuth → 보호 경로 회원 상태 확인 → 요청 제한 순서로 진행한 뒤 멈춘다.
+비밀번호 찾기·재설정 → OAuth → 보호 경로 회원 상태 확인 → 요청 제한까지 검증하며, 완료 후 다음 묶음은 사용자 확인을 기다린다.
 공개 경로에 공통 인증용 회원 조회를 추가하지 않는다.
 
 ## 회원가입·로그인 흐름
@@ -117,3 +117,18 @@ JWT 필터는 서명·만료만 확인한다. ApiWebConfig의 MVC interceptor가
 탈퇴·없는 회원은 DTO 검증 전에 v2와 같은 `{"statusCode":401,"message":"Unauthorized"}`로 거절한다. 인증 정보의 email은 JWT의 과거 값 대신 DB의 현재 값이다.
 공개 메서드의 클래스 선언 덮어쓰기와 없는 경로는 회원 조회를 하지 않는다. 로그인·재발급처럼 공개 API 자체에 필요한 업무 조회는 이 공통 인증 조회와 별개다.
 MemberAuthenticationTest는 테스트 DB의 users 테이블을 잠시 다른 이름으로 바꿔, 회원 조회가 불가능해도 공개·없는 경로는 통과하고 유효 JWT 보호 요청만 500이 되는지 확인한다. 이름은 finally에서 복원한다.
+
+## 요청 제한과 처리 순서
+
+RequestLimit은 v2 @Throttle의 메서드별 한도다. 지정하지 않으면 120회/분이며 카카오·네이버는 같은 OAuth 메서드 한도를 공유한다.
+RequestRateLimiter는 메서드·접속 IP별 요청 시각을 보관한다. 각 요청은 60초 뒤 제외하고 초과 시점부터 60초 차단한다. 차단 중 재요청은 차단 시간을 연장하지 않는다.
+동기화된 계산으로 동시 요청도 한도를 넘겨 통과하지 않는다. 오래된 항목은 다음 요청의 정리 주기에 제거한다. v2와 같이 프로세스 메모리 기준이므로 여러 인스턴스 사이의 공유 제한은 제공하지 않는다.
+RateLimitInterceptor는 회원 확인보다 먼저 실행한다. 성공 구간에는 X-RateLimit-Limit/Remaining/Reset, 차단에는 Retry-After와 `{"statusCode":429,"message":"ThrottlerException: Too Many Requests"}`를 반환한다.
+접속 IP는 request.remoteAddr다. 신뢰 프록시 설정을 추가하지 않았으므로 임의 X-Forwarded-For 값으로 제한을 우회할 수 없다.
+
+JsonBodyFilter → JWT 필터 → MVC 경로 선택 → 요청 제한 → 보호 경로 회원 확인 → DTO 검증 → 메서드 권한 → API 순서다.
+JsonBodyFilter는 Express처럼 JSON 구문 오류·원시 값·뒤따르는 JSON을 먼저 거절하고, 정상 본문을 MVC에서 다시 읽을 수 있게 보관한다. v2 main.ts의 10MB 한도를 적용해 보관 크기도 제한한다. 따라서 깨진 JSON과 크기 초과는 요청 제한 횟수를 소모하지 않는다.
+RequestRateLimiterTest는 가상 시계로 개별 요청 만료·차단 해제·IP/메서드 분리·동시성을 확인한다. RateLimitCasesTest는 실제 v2/v3의 모든 인증 API 한도와 HTTP 응답을 비교한다.
+HarnessRateLimitTime은 테스트 사이 제한 시계만 이동하는 도구다. 운영 제한기나 JWT 시계를 끄거나 조작하지 않는다. C 방식의 컨테이너 재시작 범위는 COMPARISON_TESTS.md를 참고한다.
+
+학습 순서: 조건부 UPDATE의 행 수 → 트랜잭션 프록시와 롤백 → SMTP의 DB 외부 부작용 → RestClient 계약 테스트 → JWT와 현재 회원 상태의 차이 → MVC interceptor 순서 → 요청별 만료와 차단 구간.
