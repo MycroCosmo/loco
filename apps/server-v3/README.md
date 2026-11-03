@@ -74,7 +74,7 @@ v2 로그인 토큰으로 v3 테스트 컨트롤러를 호출하고 양쪽 오�
 | `compose.yaml` | DB 하나에 v2·v3를 연결한다. CPU·메모리, healthcheck, 기동 순서, 데이터 볼륨을 정의한다. |
 | `.env.example` | Compose용 DB 계정·비밀번호와 공통 JWT 키의 이름만 제공한다. `apps/server-v3/.env.example`은 v3를 호스트에서 단독 실행할 때 사용한다. |
 | `.dockerignore` | 서버 소스와 Docker 파일만 빌드에 전달하고 실제 `.env`·캐시·빌드 결과·모바일 파일을 제외한다. |
-| `infra/docker/server-v2.Dockerfile` | Node 22에서 기존 v2 소스를 빌드한다. `prisma generate`는 클라이언트 코드 생성이며 DB 스키마를 변경하지 않는다. 실행 이미지에는 개발 의존성을 제거한다. |
+| `infra/docker/server-v2.Dockerfile` | v2 CI와 같은 Node 20에서 기존 v2 소스를 빌드·실행한다. `prisma generate`는 클라이언트 코드 생성이며 DB 스키마를 변경하지 않는다. 실행 이미지에는 개발 의존성을 제거한다. |
 | `infra/docker/server-v3.Dockerfile` | Java 21에서 Gradle Wrapper로 JAR를 빌드하고 JRE로 실행한다. 빌드 시에는 테스트용 Prisma를 설치하지 않는다. curl은 컨테이너 healthcheck에 사용한다. |
 | `infra/docker/start-v2.cjs` | DB 계정·비밀번호를 URL 인코딩한 뒤 기존 v2 진입점을 실행한다. 비밀번호의 `@`, `:`, `#` 등이 접속 URL을 깨뜨리지 않도록 한다. |
 

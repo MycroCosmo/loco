@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim AS build
+FROM node:20-bookworm-slim AS build
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates openssl python3 make g++ \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
@@ -10,7 +10,7 @@ COPY apps/server/tsconfig*.json apps/server/nest-cli.json ./
 COPY apps/server/src ./src
 RUN npx --no-install prisma generate && npm run build && npm prune --omit=dev --no-audit --no-fund
 
-FROM node:22-bookworm-slim AS runtime
+FROM node:20-bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates openssl \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
