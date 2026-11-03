@@ -1,8 +1,8 @@
-# 2번 묶음: 사용자 API 설계안 — 승인 전, 미구현
+# 2번 묶음: 사용자 API 설계 — 선택 확정, 변환기 검증 완료
 
 대상은 GET/PUT/DELETE `/api/users/me`, POST `/api/users/me/profile-image`, PUT `/api/users/me/fcm-token`이다.
 v2 기준은 원격 main `3d7ae28`이다. 현재 feature 브랜치의 users·upload 소스가 이 기준과 같음을 확인했다.
-Flutter·v2 코드는 변경하지 않는다. 아래 제안은 의존성·API·테스트에 아직 반영하지 않았다.
+Flutter·v2 코드는 변경하지 않는다. 선택 결과는 아래 7절에 확정했으며 [변환기 검증](CODEC_COMPATIBILITY.md)만 완료했다. 사용자 API는 아직 구현하지 않았다.
 
 ## 1. 이미지 저장과 Flutter 호환
 
@@ -82,7 +82,7 @@ v2 소스에서 확인한 기준:
 - 메타데이터 검증 이후 변환·쓰기 오류는 일반 예외로 전파된다. 손상 파일의 모든 실패를 400으로 통일하면 v2와 달라질 수 있다.
 
 현재 실행 이미지에서 sharp 0.33.5, libvips 8.15.3, libwebp 1.4.0과 HEIF 입력의 .avif 표기를 확인했다. HEIC는 MIME 허용만으로 디코딩 성공을 보장할 수 없다.
-JPEG·PNG·WebP·AVIF·HEIC/HEIF 샘플과 손상·EXIF·투명·애니메이션·극단적 종횡비·작은 이미지로 먼저 v2 기준 결과를 수집한다. 허용 형식 축소는 선택지에 넣지 않는다.
+JPEG·PNG·WebP·AVIF·HEIC/HEIF 샘플과 손상·EXIF·투명·애니메이션·극단적 종횡비·작은 이미지로 v2 기준 결과를 수집한다. JPEG·PNG·WebP는 필수이며 HEIC·AVIF 미지원은 사용자 승인에 따라 알려진 차이/제약으로 보고한다.
 512보다 작을 수 있는 출력 의미는 [sharp resize 문서](https://sharp.pixelplumbing.com/api-resize/)와도 일치한다.
 
 | 선택 | 장점 | 제약과 확인할 내용 |
@@ -90,7 +90,7 @@ JPEG·PNG·WebP·AVIF·HEIC/HEIF 샘플과 손상·EXIF·투명·애니메이션
 | 2A. Java ImageIO + WebP 플러그인, 필요한 입력 디코더 — 우선 검증안 | Java에서 변환·검증 흐름을 구현, 별도 변환 프로세스 없음 | `org.sejda.imageio:webp-imageio`는 WebP 읽기·쓰기 후보일 뿐 HEIF/AVIF 해결책은 아님. 입력 디코더와 Windows Java 21·Linux 컨테이너의 native 로딩을 모두 검증해야 함. 품질 80만 같다고 sharp와 픽셀이 같아지지 않음 |
 | 2B. Java에서 libvips 실행 파일 호출 | sharp와 같은 엔진을 활용할 수 있어 입력 형식·리사이즈 호환을 맞추기 유리 | Java 라이브러리만으로 끝나지 않음. OS별 바이너리·코덱·프로세스 제한·타임아웃·임시 파일 관리 필요. 버전·옵션을 맞춰도 결과 동일성 검증은 필요 |
 
-2A의 정확한 버전과 추가 디코더는 아직 미정이다. 승인 후 작은 호환성 검증부터 하고, 형식 누락이나 Java 21 문제가 있으면 의존성을 임의로 추가하지 않고 2B를 다시 제시한다.
+2A 후보 webp-imageio 0.1.6을 테스트 의존성으로 고정해 Windows·Linux Java 21 검증을 마쳤다. JPEG·PNG·WebP 읽기 및 WebP 쓰기가 통과했다. HEIC·AVIF reader는 없으며 승인된 알려진 제약으로 기록했다. 필수 3종 중 하나라도 실패하면 중단하고 2B를 다시 제시한다. 변환기는 인터페이스 뒤에 둔다.
 [WebP ImageIO 공식 저장소](https://github.com/sejda-pdf/webp-imageio)는 native 라이브러리를 포함하는 reader/writer다. [NightMonkeys 현행 문서](https://github.com/gotson/NightMonkeys)는 Java 22 이상을 요구하므로 Java 21 해결책으로 채택하지 않는다.
 
 Spring의 기본 multipart 제한을 그대로 사용하지 않는다. 파일당 10MiB를 맞추고, 전체 요청 제한으로 multipart 헤더가 붙은 정상 파일을 조기에 거절하지 않게 한다.
@@ -142,15 +142,16 @@ JSON·DB 비교에 multipart 요청, 이미지 GET, 파일 전후 목록 비교�
 DB·파일 초기화/검증은 테스트 전용이며 개발 볼륨을 삭제하거나 초기화하지 않는다.
 기본 `test`에는 입력·응답·이미지 변환 단위/v3 단독 검증, `comparisonTest`에는 실제 v2 HTTP·DB·파일 비교를 둔다. `allTests`로 양쪽을 검증한다.
 
-## 7. 결정 요청
+## 7. 확정된 결정
 
-| 번호 | A | B | 제안 |
+| 번호 | A | B | 선택 |
 | --- | --- | --- | --- |
 | 1 저장소 | 로컬 유지, MinIO는 이관 후. 공존은 단순하지만 다중 호스트 제한 | 지금 MinIO. 공유 저장에 유리하지만 상대 URL 호환·기존 파일·v2 공존 설계 추가 | A |
-| 2 변환기 | Java ImageIO/WebP 플러그인과 입력 디코더의 Java 21 호환성을 먼저 검증. Java 처리에 집중하지만 AVIF/HEIC와 native 지원 확인 필요 | Java에서 libvips 실행 파일 호출. sharp 호환에 유리하지만 프로세스·바이너리 운영 추가 | A를 검증하되 미지원이 확인되면 B 재검토. 라이브러리 채택은 아직 미확정 |
+| 2 변환기 | Java ImageIO/WebP 플러그인 검증 | Java에서 libvips 실행 파일 호출 | A. 필수 3종 실패 때만 중단 후 B 재제안. HEIC·AVIF만 미지원이면 알려진 차이/제약으로 진행 |
 | 3 이미지 비교 | 의미·픽셀 허용 범위 비교. 다른 인코더 허용, 허용 기준 검토 필요 | 바이트 완전 일치. 엄격하지만 엔진·버전을 제약 | A |
 | 4 이미지 DB 트랜잭션 경계 | TransactionTemplate. 커밋 실패와 보상 삭제를 한 흐름에서 확인 가능, 코드에 트랜잭션 제어가 드러남 | 별도 @Transactional 빈. 선언적 처리, 파일/DB 역할이 나뉘어 추적할 파일 증가 | A |
-| 5 로컬 볼륨 권한(1A일 때) | 공통 그룹과 디렉터리 group-write/setgid. 현재 UID 유지, 초기 디렉터리 권한 준비 필요 | 두 앱 UID/GID 통일. 권한은 단순하지만 기존 컨테이너 실행 계정·볼륨 권한 영향 | A |
+| 5 로컬 볼륨 권한(1A일 때) | 공통 그룹과 디렉터리 group-write/setgid | 두 앱 UID/GID 통일 | B. 개발 Compose v3를 node와 같은 1000:1000으로 실행. 기존 볼륨 데이터 보존 |
 
 회원 탈퇴의 단일 트랜잭션, v2 오류 호환, Flutter 무수정은 이미 주어진 요구사항이므로 재선택하지 않는다.
-승인 전 사용자 API·저장소·코덱·추가 테스트 구현을 시작하지 않는다.
+구현 순서는 변환기 검증 → GET/PUT me → PUT fcm-token → DELETE me(롤백) → POST profile-image다.
+현재 변환기 검증 후 확인을 기다린다. 공유 업로드 볼륨·Compose UID/GID 설정은 POST 단계에서 적용한다.

@@ -33,6 +33,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'org.sejda.imageio:webp-imageio:0.1.6'
 }
 
 def v2Lockfile = file('../server/package-lock.json')
@@ -100,3 +101,39 @@ tasks.register('allTests') {
 }
 
 tasks.named('check') { dependsOn tasks.named('comparisonTest') }
+
+tasks.register('codecTest', Test) {
+    description = 'Java 21 이미지 코덱 호환성 검증 (DB·v2 서버 기동 없음)'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform { includeTags 'image-codec' }
+}
+
+['test': 'local', 'codecTest': 'windows'].each { taskName, reportName ->
+    tasks.named(taskName, Test) {
+        def directory = layout.buildDirectory.dir("reports/codec/${reportName}")
+        systemProperty 'codec.report.dir', directory.get().asFile.absolutePath
+        doFirst {
+            delete directory.get().file('summary.json').asFile, directory.get().file('summary.md').asFile
+        }
+        doLast {
+            def report = directory.get().file('summary.json').asFile
+            if (report.exists()) {
+                def result = new groovy.json.JsonSlurper().parse(report)
+                println "Codec: total=${result.total}, passed=${result.passed}, failed=${result.failed}, 알려진 차이/제약=${result.knownLimitations}"
+                result.cases.findAll { it.status != 'PASS' }.each {
+                    println "  ${it.format}: ${it.status}, v2 read=${it.v2Read} — ${it.detail}"
+                }
+            }
+        }
+    }
+}
+
+tasks.register('prepareCodecProbe', Sync) {
+    dependsOn tasks.named('testClasses')
+    from(configurations.testRuntimeClasspath) { into 'lib' }
+    from(sourceSets.test.output) { into 'classes' }
+    from(sourceSets.main.output) { into 'classes' }
+    into layout.buildDirectory.dir('codec-probe')
+}
