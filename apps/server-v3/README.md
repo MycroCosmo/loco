@@ -238,7 +238,7 @@ docker compose ps
 | v2 | `http://localhost:3000/api` | 2 | 1.5GB (`1536m`) |
 | v3 | `http://localhost:8081/api` | 2 | 1.5GB (`1536m`) |
 | DB | 컨테이너 내부 `db:5432`, DB 이름 `loco` | 2 | 4GB |
-| Mailpit | 화면 `http://localhost:8025`, SMTP `localhost:1025` | 2 | 1.5GB (`1536m`) |
+| Mailpit | 화면 `http://localhost:8025`, SMTP `localhost:1025` | 0.5 | 256MB (`256m`) |
 
 개발 메일은 기본적으로 Mailpit(`axllent/mailpit:v1.27.4`, 테스트와 같은 버전)에 모인다. 앱의 SMTP 기본값은 `mailpit:1025`, 발신자는 `noreply@loco.app`이며 `.env.example`의 SMTP 키를 비워 두면 이 값을 사용한다.
 Mailpit은 외부로 전달하지 않고 메모리에 보관하므로 재생성하면 메일이 사라진다. 개발 Compose는 인증 없는 로컬 SMTP를 사용하며 UI·SMTP 포트는 localhost에만 공개한다. v2가 빈 암호로 AUTH를 시도하지 않도록 Mailpit의 AUTH 기능을 켜지 않는다. `/mailpit readyz`가 통과한 후 v3가 시작한다.
@@ -264,7 +264,7 @@ docker inspect (docker compose ps -q) --format '{{.Name}} CPU={{.HostConfig.Nano
 ```
 
 기대 결과는 v3의 `200 {"status":"ok"}`, v2의 401, `shared_buffers`의 `1GB`, Flyway 이력의 `1 / SQL / t`다.
-Docker inspect의 CPU는 모두 `2000000000`(2 CPU), 메모리는 앱 각각 `1610612736`, DB `4294967296` 바이트다.
+Docker inspect의 CPU는 앱·DB `2000000000`(2 CPU), Mailpit `500000000`(0.5 CPU)다. 메모리는 앱 각각 `1610612736`, DB `4294967296`, Mailpit `268435456` 바이트다.
 v3는 같은 비밀 값으로 JWT를 검증한다. 실행 JAR에는 회원가입·로그인이 포함된다. 보호 경로의 인증 통과는 위 통합 테스트로 확인한다.
 외부 API 인증 정보는 주입하지 않으며 이 확인 과정에서는 카카오·FCM·이메일 API를 호출하지 않는다.
 
@@ -440,6 +440,7 @@ JWT 필터에 모든 요청의 회원 조회를 추가하지 않는다. 새 v2�
 - 깨진 JSON 요청의 400 메시지는 케이스별 명시적 문구 예외로 비교한다. 상태·키·타입은 유지하며 실제 API의 구조 차이를 숨기지 않는다.
 
 0번 묶음과 1번 묶음 설계는 확인 완료했다. 실제 이관 API 케이스를 묶음별로 추가한다.
+2번 묶음 사용자 API는 [승인 전 설계안](USER_API_DESIGN.md)에 저장소·변환기 선택지와 비교 케이스를 정리했다. 아직 구현하지 않았다.
 테스트 대역은 `/api/__test/harness/...`에만 둔다. 실제 API 이관 시 별도 `v3Path`를 제거하는 규칙과 이름 기반 빌더·연속 요청 예시는 [하네스 문서](COMPARISON_TESTS.md)를 따른다.
 429는 필수 통과 케이스로 검증한다. 1번 묶음 완료 후 다음 묶음은 사용자 확인을 기다린다.
 작업 기록은 노션에서 관리한다.
