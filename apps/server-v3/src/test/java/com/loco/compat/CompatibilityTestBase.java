@@ -85,24 +85,43 @@ public abstract class CompatibilityTestBase {
         }
         Set<String> seedIds = beforeV2.seedIds();
         DatabaseSnapshot.compare(beforeV2, beforeV3, seedIds, rules);
-        String token = testCase.authenticated() ? environment().token("valid",
-                SharedHarness.Environment.USER_ID, SharedHarness.Environment.EMAIL) : null;
-        String body = testCase.bodyResource() == null ? null
-                : new ClassPathResource(testCase.bodyResource()).getContentAsString(StandardCharsets.UTF_8);
-        var leftResponse = request(v2Url(), testCase.path(), testCase.method(), token, body);
-        var rightResponse = request(v3Url(), testCase.path(), testCase.method(), token, body);
-        assertThat(leftResponse.getStatusCode().value()).isEqualTo(testCase.expectedStatus());
-        assertThat(rightResponse.getStatusCode().value()).isEqualTo(testCase.expectedStatus());
-        JsonComparison.compare(leftResponse.getBody(), rightResponse.getBody(), testCase.valueExceptions());
-        try (var left = environment().connect(SharedHarness.Side.V2);
-             var right = environment().connect(SharedHarness.Side.V3)) {
-            var afterV2 = DatabaseSnapshot.capture(left, rules);
-            var afterV3 = DatabaseSnapshot.capture(right, rules);
-            DatabaseSnapshot.compare(afterV2, afterV3, seedIds, rules);
-            if (testCase.databaseUnchanged()) {
-                beforeV2.assertUnchanged(afterV2);
-                beforeV3.assertUnchanged(afterV3);
+        var v2Values = new ScenarioValues();
+        var v3Values = new ScenarioValues();
+        for (var step : testCase.steps()) {
+            try {
+                var leftResponse = requestStep(step, SharedHarness.Side.V2, v2Values);
+                var rightResponse = requestStep(step, SharedHarness.Side.V3, v3Values);
+                assertThat(leftResponse.getStatusCode().value()).as("v2 상태").isEqualTo(step.expectedStatus());
+                assertThat(rightResponse.getStatusCode().value()).as("v3 상태").isEqualTo(step.expectedStatus());
+                JsonComparison.compare(leftResponse.getBody(), rightResponse.getBody(), step.valueExceptions());
+                v2Values.capture(leftResponse.getBody(), step.captures());
+                v3Values.capture(rightResponse.getBody(), step.captures());
+                try (var left = environment().connect(SharedHarness.Side.V2);
+                     var right = environment().connect(SharedHarness.Side.V3)) {
+                    var afterV2 = DatabaseSnapshot.capture(left, rules);
+                    var afterV3 = DatabaseSnapshot.capture(right, rules);
+                    DatabaseSnapshot.compare(afterV2, afterV3, seedIds, rules);
+                    if (testCase.databaseUnchanged()) {
+                        beforeV2.assertUnchanged(afterV2);
+                        beforeV3.assertUnchanged(afterV3);
+                    }
+                }
+            } catch (AssertionError error) {
+                throw new AssertionError(testCase.name() + " / " + step.name() + ": " + error.getMessage(), error);
             }
         }
+    }
+
+    private ResponseEntity<JsonNode> requestStep(ComparisonStep step, SharedHarness.Side side,
+                                                ScenarioValues values) throws Exception {
+        String token = step.authenticated() ? environment().token("valid",
+                SharedHarness.Environment.USER_ID, SharedHarness.Environment.EMAIL)
+                : step.bearer() == null ? null : step.bearer().apply(values);
+        Object body = step.bodyResource() != null
+                ? new ClassPathResource(step.bodyResource()).getContentAsString(StandardCharsets.UTF_8)
+                : step.body() == null ? null : step.body().apply(values);
+        String path = (side == SharedHarness.Side.V2 ? step.path() : step.v3Path()).apply(values);
+        if (path == null || !path.startsWith("/api/")) throw new AssertionError("/api/ 아래 요청 경로 필요");
+        return request(side == SharedHarness.Side.V2 ? v2Url() : v3Url(), path, step.method(), token, body);
     }
 }

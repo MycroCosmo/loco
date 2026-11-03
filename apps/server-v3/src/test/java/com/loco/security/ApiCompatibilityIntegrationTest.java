@@ -38,16 +38,16 @@ class ApiCompatibilityIntegrationTest extends CompatibilityTestBase {
                 .isEqualTo("HS256");
         var claims = mapper.readTree(Base64.getUrlDecoder().decode(parts[1]));
         assertThat(claims.path("exp").asLong() - claims.path("iat").asLong()).isEqualTo(7 * 24 * 60 * 60);
-        var response = request(v3Url(), "/api/users/me", HttpMethod.GET, validToken, null);
+        var response = request(v3Url(), "/api/__test/harness/users/me", HttpMethod.GET, validToken, null);
         assertThat(response.getStatusCode().value()).isEqualTo(200);
         assertThat(response.getBody().path("userId").asText()).isEqualTo(userId);
         assertThat(response.getBody().path("email").asText()).isEqualTo(email);
         assertThat(response.getBody().path("session").asBoolean()).isFalse();
         assertThat(response.getHeaders().get(HttpHeaders.SET_COOKIE)).isNull();
-        var write = request(v3Url(), "/api/users/me", HttpMethod.PUT, validToken, Map.of("nickname", "ok"));
+        var write = request(v3Url(), "/api/__test/harness/users/me", HttpMethod.PUT, validToken, Map.of("nickname", "ok"));
         assertThat(write.getStatusCode().value()).isEqualTo(200);
         assertThat(write.getHeaders().get(HttpHeaders.SET_COOKIE)).isNull();
-        assertThat(request(v3Url(), "/api/users/me", HttpMethod.GET, null, null)
+        assertThat(request(v3Url(), "/api/__test/harness/users/me", HttpMethod.GET, null, null)
                 .getStatusCode().value()).isEqualTo(401);
     }
 
@@ -58,7 +58,7 @@ class ApiCompatibilityIntegrationTest extends CompatibilityTestBase {
         var expected = request(v2Url(), "/api/users/me", HttpMethod.GET, token, null);
         assertThat(expected.getStatusCode().value()).isEqualTo(401);
         assertThat(expected.getBody()).isEqualTo(mapper.readTree("{\"statusCode\":401,\"message\":\"Unauthorized\"}"));
-        assertSame(expected, request(v3Url(), "/api/users/me", HttpMethod.GET, token, null));
+        assertSame(expected, request(v3Url(), "/api/__test/harness/users/me", HttpMethod.GET, token, null));
     }
 
     @ParameterizedTest
@@ -78,6 +78,9 @@ class ApiCompatibilityIntegrationTest extends CompatibilityTestBase {
         var expected = request(v2Url(), "/api/users/me", HttpMethod.POST, token, Map.of());
         assertThat(expected.getStatusCode().value()).isEqualTo(404);
         assertSame(expected, request(v3Url(), "/api/users/me", HttpMethod.POST, token, Map.of()));
+        var probe = request(v3Url(), "/api/__test/harness/users/me", HttpMethod.POST, token, Map.of());
+        assertThat(probe.getStatusCode().value()).isEqualTo(404);
+        assertThat(probe.getBody().path("message").asText()).isEqualTo("Cannot POST /api/__test/harness/users/me");
     }
 
     @ParameterizedTest
@@ -87,7 +90,7 @@ class ApiCompatibilityIntegrationTest extends CompatibilityTestBase {
         var expected = request(v2Url(), "/api/auth/login", HttpMethod.POST, token(kind), body);
         assertThat(expected.getStatusCode().value()).isEqualTo(400);
         assertThat(expected.getBody().path("message").size()).isEqualTo(2);
-        assertSame(expected, request(v3Url(), "/api/auth/login", HttpMethod.POST, token(kind), body));
+        assertSame(expected, request(v3Url(), "/api/__test/harness/auth/login", HttpMethod.POST, token(kind), body));
     }
 
     @ParameterizedTest
@@ -97,12 +100,12 @@ class ApiCompatibilityIntegrationTest extends CompatibilityTestBase {
         var body = Map.of("nickname", "a".repeat(31));
         var expected = request(v2Url(), "/api/users/me", HttpMethod.PUT, token, body);
         assertThat(expected.getStatusCode().value()).isEqualTo(kind.equals("valid") ? 400 : 401);
-        assertSame(expected, request(v3Url(), "/api/users/me", HttpMethod.PUT, token, body));
+        assertSame(expected, request(v3Url(), "/api/__test/harness/users/me", HttpMethod.PUT, token, body));
     }
 
     @Test
     void validTokenDoesNotBypassMethodAuthorization() {
-        var response = request(v3Url(), "/api/restricted", HttpMethod.GET, validToken, null);
+        var response = request(v3Url(), "/api/__test/harness/restricted", HttpMethod.GET, validToken, null);
         assertThat(response.getStatusCode().value()).isEqualTo(403);
         assertThat(response.getBody().path("error").asText()).isEqualTo("Forbidden");
     }
@@ -110,15 +113,15 @@ class ApiCompatibilityIntegrationTest extends CompatibilityTestBase {
     @ParameterizedTest
     @ValueSource(strings = {"HS384", "HS512"})
     void onlyConfiguredHs256AlgorithmIsAccepted(String algorithm) throws Exception {
-        assertThat(request(v3Url(), "/api/users/me", HttpMethod.GET, token(algorithm), null)
+        assertThat(request(v3Url(), "/api/__test/harness/users/me", HttpMethod.GET, token(algorithm), null)
                 .getStatusCode().value()).isEqualTo(401);
     }
 
     @Test
     void publicMethodOverridesProtectedControllerAndProtectedMethodOverridesPublicController() {
-        assertThat(request(v3Url(), "/api/public-override", HttpMethod.GET, "not-a-jwt", null)
+        assertThat(request(v3Url(), "/api/__test/harness/public-override", HttpMethod.GET, "not-a-jwt", null)
                 .getStatusCode().value()).isEqualTo(200);
-        assertThat(request(v3Url(), "/api/method-protected", HttpMethod.GET, null, null)
+        assertThat(request(v3Url(), "/api/__test/harness/method-protected", HttpMethod.GET, null, null)
                 .getStatusCode().value()).isEqualTo(401);
     }
 

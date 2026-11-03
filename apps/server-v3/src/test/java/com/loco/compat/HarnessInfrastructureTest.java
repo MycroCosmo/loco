@@ -3,6 +3,7 @@ package com.loco.compat;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,9 +24,15 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
     @Test
     @DisplayName("하네스 자체 검증: HTTP 쓰기 → 생성 ID 제외 → DB 상태 비교")
     void writeRequestUsesIndependentDatabasesAndComparesNewIds() throws Exception {
-        runCase(new ComparisonCase("쓰기 비교 대역", HttpMethod.POST, "/api/feedback", "compat/feedback.json",
-                201, true, "compat/seed.sql", Map.of("/id", "각 DB에서 생성한 UUID"),
-                DEFAULT, false));
+        for (String path : List.of("/api/auth/login", "/api/feedback")) {
+            assertThat(request(v3Url(), path, HttpMethod.POST, null, Map.of()).getStatusCode().value()).isEqualTo(404);
+        }
+        assertThat(request(v3Url(), "/api/users/me", HttpMethod.GET, null, null).getStatusCode().value()).isEqualTo(404);
+        runCase(ComparisonCase.named("쓰기 비교 대역")
+                .step(ComparisonStep.named("피드백 작성").method(HttpMethod.POST).path("/api/feedback")
+                        .v3Path("/api/__test/harness/feedback").bodyResource("compat/feedback.json")
+                        .expectedStatus(201).authenticated().valueException("/id", "각 DB에서 생성한 UUID")
+                        .build()).build());
         for (var side : SharedHarness.Side.values()) {
             try (var connection = environment().connect(side);
                  var result = connection.createStatement().executeQuery("SELECT count(*) FROM feedbacks")) {
@@ -43,6 +50,43 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
                 assertThat(result.getInt(1)).isZero();
                 assertThat(result.getInt(2)).isEqualTo(1);
                 assertThat(result.getString(3)).isEqualTo("1");
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("연속 요청: 서버별 이전 응답을 다음 본문·경로에 전달하고 DB 유지")
+    void scenarioReusesEachServersResponseWithoutResettingBetweenSteps() throws Exception {
+        var capturedIds = new ArrayList<String>();
+        runCase(ComparisonCase.named("쓰기 → 이전 메시지로 쓰기 → 생성 ID 경로 요청")
+                .step(ComparisonStep.named("첫 쓰기").method(HttpMethod.POST).path("/api/feedback")
+                        .v3Path("/api/__test/harness/feedback").authenticated().expectedStatus(201)
+                        .bodyResource("compat/feedback.json").valueException("/id", "서버별 생성 ID")
+                        .capture("firstId", "/id").capture("message", "/message").build())
+                .step(ComparisonStep.named("이전 응답으로 두 번째 쓰기").method(HttpMethod.POST)
+                        .path("/api/feedback").v3Path("/api/__test/harness/feedback")
+                        .authenticated().expectedStatus(201)
+                        .body(values -> Map.of("content", values.text("message")))
+                        .valueException("/id", "서버별 생성 ID").build())
+                .step(ComparisonStep.named("서버별 ID로 없는 경로 조회").method(HttpMethod.GET)
+                        .path(values -> {
+                            capturedIds.add(values.text("firstId"));
+                            return "/api/__comparison_missing/" + values.text("firstId");
+                        }).expectedStatus(404).valueException("/message", "경로에 서버별 생성 ID 포함").build())
+                .build());
+        assertThat(capturedIds).hasSize(2).doesNotHaveDuplicates();
+        for (var side : SharedHarness.Side.values()) {
+            try (var connection = environment().connect(side);
+                 var statement = connection.prepareStatement("SELECT content FROM feedbacks WHERE id=?")) {
+                statement.setString(1, capturedIds.get(side.ordinal()));
+                try (var result = statement.executeQuery()) {
+                    assertThat(result.next()).isTrue();
+                    assertThat(result.getString(1)).isEqualTo("comparison harness write probe");
+                }
+                try (var result = connection.createStatement().executeQuery("SELECT count(*) FROM feedbacks")) {
+                    result.next();
+                    assertThat(result.getInt(1)).isEqualTo(2);
+                }
             }
         }
     }

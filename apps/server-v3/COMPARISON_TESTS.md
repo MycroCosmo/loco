@@ -15,7 +15,8 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 .\gradlew.bat test bootJar --rerun-tasks --console=plain
 ~~~
 
-전체 검증은 55건이다. 기대 결과는 **성공 54 / 실패 0 / 알려진 차이 1**이다.
+전체 검증은 59건이다. 기존 55건을 유지하고 시나리오·빌더 검증 4건을 추가했다.
+기대 결과는 **성공 58 / 실패 0 / 알려진 차이 1**이다.
 알려진 차이도 실제 요청을 실행한다. JUnit의 aborted/skipped 분류를 사용하지만 이름·이유를 명시하며 성공으로 집계하지 않는다.
 현재 항목은 로그인 11번째 요청의 v2 429 / v3 테스트 컨트롤러 400이다.
 
@@ -42,7 +43,10 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 | 파일 | 역할 |
 | --- | --- |
 | `FoundationCases.java` | 0번 묶음의 404·401 요청과 기대 상태를 선언한다. |
-| `ComparisonCase.java` | 요청, 시드 파일, 기대 상태, 응답 예외, DB 규칙을 담는 값 객체다. |
+| `ComparisonCase.java` | 이름으로 시작하는 빌더로 시드·순차 요청·DB 규칙을 선언한다. |
+| `ComparisonStep.java` | 한 요청의 v2/v3 경로·본문·인증·기대 상태·응답 예외·저장할 값을 선언한다. |
+| `ScenarioValues.java` | 한 시나리오에서 서버별 응답 값을 보관하고 다음 요청에 전달한다. |
+| `ScenarioCaseTest.java` | 불완전한 선언, 값 누락·중복, 서버 간 토큰 혼용을 검사한다. |
 | `ResponseComparisonTest.java` | 케이스마다 JUnit 테스트를 실행한다. |
 | `CompatibilityTestBase.java` | v3 테스트 앱 연결, HTTP 요청, 초기화 → 요청 → 응답·DB 비교 순서를 연결한다. |
 | `SharedHarness.java` | 전체 JUnit 실행에서 DB·Mailpit·v2를 한 번 준비하고 종료한다. 시드, 직접 JWT 서명, 메일 수집과 보고서도 담당한다. |
@@ -73,7 +77,7 @@ Health·Flyway·선언 누락 테스트까지 기존 35개 검증을 유지한�
 - 각 케이스는 업무 테이블 전체 TRUNCATE → 시드 SQL → 동일 bcrypt 해시 주입 → 메일 비우기 순서로 시작한다.
 - Flyway 이력은 TRUNCATE와 업무 데이터 비교에서 제외한다.
 - 초기 상태 동등성을 확인한 뒤 요청한다. 읽기 전용 케이스는 요청 뒤 각 DB가 이전 상태와 정확히 같은지도 검사한다.
-- 여러 요청이 필요한 시나리오는 초기화 한 번 뒤 요청들을 순서대로 실행하고 마지막에 상태를 비교한다.
+- 여러 요청이 필요한 시나리오는 초기화 한 번 뒤 요청들을 순서대로 실행하고 **각 단계 뒤** 응답과 DB 상태를 비교한다. 중간 실패 시 다음 단계는 실행하지 않는다.
 - 환경 준비 실패를 캐시해 같은 실행에서 반복 빌드·기동하지 않는다.
 
 `build.gradle`은 v2 소스·lockfile·설정·Dockerfile·시작 스크립트를 test 입력으로 등록한다.
@@ -96,12 +100,13 @@ JWT는 테스트의 동일한 JWT_SECRET으로 HS256 서명한다. sub·email과
 기대 상태는 양쪽 각각 확인한다. 그 뒤 JSON 객체 키·타입·null·배열 길이·배열 순서와 값을 비교한다.
 오류 위치만 보고하며 토큰·비밀번호가 들어갈 수 있는 응답 전체를 실패 메시지에 출력하지 않는다.
 
-값 제외는 케이스의 `valueExceptions`에 경로와 이유를 등록한다.
+값 제외는 각 단계의 `valueException(pointer, reason)`에 경로와 이유를 등록한다.
 
 ~~~java
-Map.of("/id", "각 DB에서 생성한 UUID");
-Map.of("/items/*/id", "배열 원소별 생성 UUID");
-Map.of("/message", "깨진 JSON: 런타임 파서 문구 차이");
+// ComparisonStep 빌더에서 해당 단계에 필요한 예외만 선언한다.
+.valueException("/id", "각 DB에서 생성한 UUID")
+.valueException("/items/*/id", "배열 원소별 생성 UUID")
+.valueException("/message", "깨진 JSON: 런타임 파서 문구 차이")
 ~~~
 
 경로 문법은 JSON Pointer의 `~0`·`~1` 이스케이프와 배열 인덱스, 배열 인덱스 자리의 `*`다.
@@ -188,8 +193,74 @@ SQL 초기 데이터와 JSON 요청은 `src/test/resources/compat/` 아래에 �
 필요한 묶음이 생길 때만 파일을 만들며 빈 파일이나 별도 DSL을 미리 추가하지 않는다.
 
 각 이관 API에는 정상·미인증·잘못된 입력·DB 변경 사례를 추가한다.
-단순 요청은 `ComparisonCase`, 여러 요청·메일·암호 검증이 필요한 시나리오는 같은 base를 사용하는 명시적인 JUnit 메서드로 작성한다.
-복잡한 동작을 JSON 설정 언어로 확장하지 않는다.
+단순 요청도 여러 요청도 `ComparisonCase.named(...)`와 `ComparisonStep.named(...)`로 표현한다.
+시드 기본값은 `compat/seed.sql`, DB 규칙 기본값은 `Rules.defaults()`다. `databaseUnchanged()`는 모든 단계 후 초기 상태와 정확히 같은지도 확인한다.
+기대 HTTP 상태에는 기본값이 없으며 반드시 지정한다. `.authenticated()`는 준비용 JWT를 직접 서명한다.
+메일 수집·암호의 의미 검증은 같은 base를 사용하는 JUnit 메서드에서 추가한다. 복잡한 동작을 JSON 설정 언어로 확장하지 않는다.
+
+### 테스트 대역과 실제 API를 구분하는 규칙
+
+`HarnessControllers`의 모든 경로는 **`/api/__test/harness/...`** 아래에 둔다.
+로그인·회원·피드백 대역도 각각 `/api/__test/harness/auth/login`, `/api/__test/harness/users/me`, `/api/__test/harness/feedback`이다.
+대역의 GET/PUT/POST를 실제 `/api/auth/login`, `/api/users/me`, `/api/feedback`에 등록하지 않는다.
+테스트 소스의 `@TestComponent`와 명시적 `@Import`로만 등록하며 운영 JAR에는 포함하지 않는다.
+
+비교 케이스의 `path`는 v2 실제 경로다. 대역 비교일 때만 `v3Path`로 별도 경로를 지정한다.
+`v3Path`를 생략하면 양쪽이 같은 `path`를 사용한다. 대역 경로로 자동 우회하는 로직은 없다.
+
+실제 API를 이관하는 커밋에서 다음을 함께 수행한다.
+
+1. 해당 비교 케이스를 묶음별 파일(예: `AuthenticationCases`)로 옮기고 대역임을 나타내는 이름을 제거한다.
+2. `v3Path`를 제거해 양쪽 실제 경로로 비교한다. 기존 직접 `request(v3Url(), ...)` 호출도 실제 경로로 변경한다.
+3. 실제 정상·오류·DB 변경을 검증한다. 대역에서만 통과하던 케이스를 실제 API 통과로 세지 않는다.
+4. 하네스 자체 검증용 대역은 테스트 namespace에 남길 수 있지만 API 호환 검증과 구분한다.
+5. `HarnessInfrastructureTest`의 아직 미이관인 실제 경로 404 확인에서 이관한 경로를 제거한다. 나머지 경로 검증은 유지한다.
+6. 로그인 이관 시 `RateLimitCasesTest`의 v3 경로도 실제 로그인으로 옮긴다. 요청 제한까지 구현되면 knownDifferences/abort를 제거하고 429를 필수 통과로 바꾼다.
+
+404 메시지에 경로가 포함되는 사례는 양쪽에 같은 없는 경로를 요청한다.
+테스트 대역의 미지원 메서드 404는 별도로 확인하며 경로 차이를 숨기기 위해 기본 비교를 느슨하게 하지 않는다.
+
+### 연속 요청과 이전 응답 재사용
+
+`capture("이름", "/JSON/Pointer")`로 응답을 저장한다. 각 서버의 값은 독립된 `ScenarioValues`에 보관한다.
+다음 단계에서 `values.text("이름")` 또는 타입을 유지하는 `values.value("이름")`을 본문·경로·Bearer에 사용할 수 있다.
+문자열 치환 대신 Java Map/JsonNode를 본문으로 넘겨 JSON escaping을 유지한다. 경로에 일반 문자열 값을 넣을 때는 URI 인코딩한다.
+저장할 값이 누락/null이거나 이름이 중복되면 실패한다. 갱신 토큰은 `loginRefresh`, `rotatedRefresh`처럼 다른 이름을 쓴다.
+단계 이름도 중복을 금지하며 실패 결과에 케이스·단계 이름을 표시한다. 응답 원문과 비밀 값은 오류에 출력하지 않는다.
+
+아래는 **1번 묶음 구현 후 등록할 작성 예시**다. 현재 인증 API가 구현됐다는 뜻이 아니다.
+`email`, `password`, `nickname`은 테스트에서 준비하는 값이다.
+
+~~~java
+ComparisonCase.named("1번 묶음: 회원가입 → 로그인 → 재발급")
+    .step(ComparisonStep.named("회원가입").method(HttpMethod.POST)
+        .path("/api/auth/register").expectedStatus(201)
+        .body(v -> Map.of("email", email, "password", password, "nickname", nickname))
+        .valueException("/accessToken", "서버별 사용자 ID와 발급 시각")
+        .valueException("/refreshToken", "무작위 토큰").build())
+    .step(ComparisonStep.named("로그인").method(HttpMethod.POST)
+        .path("/api/auth/login").expectedStatus(201)
+        .body(v -> Map.of("email", email, "password", password))
+        .valueException("/accessToken", "서버별 사용자 ID와 발급 시각")
+        .valueException("/refreshToken", "무작위 토큰")
+        .capture("loginAccess", "/accessToken").capture("loginRefresh", "/refreshToken").build())
+    .step(ComparisonStep.named("재발급").method(HttpMethod.POST)
+        .path("/api/auth/refresh").expectedStatus(201)
+        .body(v -> Map.of("refreshToken", v.text("loginRefresh")))
+        .valueException("/accessToken", "서버별 사용자 ID와 발급 시각")
+        .valueException("/refreshToken", "무작위 토큰")
+        .capture("rotatedRefresh", "/refreshToken").build())
+    .build();
+~~~
+
+보호 API 단계에서는 `.bearer(v -> v.text("loginAccess"))`로 이전 응답의 토큰을 사용한다.
+공개 refresh API 자체에는 Bearer가 필요 없다. `.authenticated()`와 `.bearer(...)`를 동시에 지정하면 실패한다.
+본문도 `.bodyResource(...)`와 `.body(...)` 중 하나만 지정한다.
+
+위 인증 시나리오를 활성화하기 전에는 bcrypt 의미 검증과 여러 토큰 행의 안정적 대응 규칙을 추가해야 한다.
+현재 비교기는 무작위 비밀번호 해시나 식별 기준이 없는 여러 토큰 행을 자동 제외하지 않는다.
+지금 실행되는 시나리오 자체 검증은 피드백 쓰기 → 이전 메시지로 두 번째 쓰기 → 서버별 생성 ID를 사용한 없는 경로 요청이다.
+동일한 DB를 계속 사용하며 각 단계의 응답·DB 상태와 각 서버에서 생성된 ID의 실제 존재를 확인한다.
 
 후속 미구현 차이:
 - 보호 경로에서만 탈퇴/없는 회원 조회, DB의 현재 email 사용

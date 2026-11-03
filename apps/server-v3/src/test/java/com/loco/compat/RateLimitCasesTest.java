@@ -18,13 +18,13 @@ class RateLimitCasesTest extends CompatibilityTestBase {
         var body = Map.of("email", "bad", "password", "x");
         for (int i = 0; i < 10; i++) {
             var left = request(v2Url(), path, HttpMethod.POST, null, body, true);
-            var right = request(v3Url(), path, HttpMethod.POST, null, body, true);
+            var right = request(v3Url(), "/api/__test/harness/auth/login", HttpMethod.POST, null, body, true);
             assertThat(left.getStatusCode().value()).isEqualTo(400);
             assertThat(right.getStatusCode().value()).isEqualTo(400);
             JsonComparison.compare(left.getBody(), right.getBody(), Map.of());
         }
         var left = request(v2Url(), path, HttpMethod.POST, null, body, true);
-        var right = request(v3Url(), path, HttpMethod.POST, null, body, true);
+        var right = request(v3Url(), "/api/__test/harness/auth/login", HttpMethod.POST, null, body, true);
         environment().budget.blocked(path);
         assertThat(left.getStatusCode().value()).isEqualTo(429);
         assertThat(left.getBody().path("statusCode").asInt()).isEqualTo(429);

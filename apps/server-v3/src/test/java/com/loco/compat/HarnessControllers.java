@@ -34,7 +34,7 @@ public class HarnessControllers {
         public ProbeController(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
         // 하네스의 쓰기/DB 비교 동작을 검증하는 테스트 전용 대역이며 운영 API가 아니다.
-        @PostMapping("/feedback")
+        @PostMapping("/__test/harness/feedback")
         @ResponseStatus(HttpStatus.CREATED)
         public Map<String, String> writeProbe(@AuthenticationPrincipal JwtPrincipal user,
                                               @RequestBody Map<String, String> body) {
@@ -43,19 +43,19 @@ public class HarnessControllers {
                     id, user.userId(), body.get("content"));
             return Map.of("message", "피드백이 제출되었습니다.", "id", id);
         }
-        @GetMapping("/users/me")
+        @GetMapping("/__test/harness/users/me")
         public Map<String, Object> me(@AuthenticationPrincipal JwtPrincipal user, HttpServletRequest request) {
             return Map.of("userId", user.userId(), "email", user.email(), "session", request.getSession(false) != null);
         }
 
-        @PutMapping("/users/me")
+        @PutMapping("/__test/harness/users/me")
         public Map<String, String> update(@Valid @RequestBody UpdateProbe body) { return Map.of("status", "ok"); }
 
-        @GetMapping("/public-override")
+        @GetMapping("/__test/harness/public-override")
         @PublicApi
         public Map<String, String> publicOverride() { return Map.of("status", "ok"); }
 
-        @GetMapping("/restricted")
+        @GetMapping("/__test/harness/restricted")
         @PreAuthorize("hasAuthority('unassigned')")
         public Map<String, String> restricted() { return Map.of("status", "ok"); }
     }
@@ -64,10 +64,10 @@ public class HarnessControllers {
     @ApiController
     @PublicApi
     public static class PublicProbeController {
-        @PostMapping("/auth/login")
+        @PostMapping("/__test/harness/auth/login")
         public Map<String, String> validate(@Valid @RequestBody LoginProbe body) { return Map.of("status", "ok"); }
 
-        @GetMapping("/method-protected")
+        @GetMapping("/__test/harness/method-protected")
         @AuthenticatedApi
         public Map<String, String> protectedMethod() { return Map.of("status", "ok"); }
     }
