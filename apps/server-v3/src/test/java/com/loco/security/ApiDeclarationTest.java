@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ApiDeclarationTest {
     private final WebApplicationContextRunner context = new WebApplicationContextRunner()
+            .withBean(com.loco.users.UserRepository.class, () -> org.mockito.Mockito.mock(com.loco.users.UserRepository.class))
             .withUserConfiguration(Mvc.class, ApiWebConfig.class);
 
     @Test

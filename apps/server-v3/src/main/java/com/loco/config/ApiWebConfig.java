@@ -4,6 +4,8 @@ import java.lang.reflect.AnnotatedElement;
 
 import com.loco.security.AuthenticatedApi;
 import com.loco.security.PublicApi;
+import com.loco.security.JwtPrincipal;
+import com.loco.users.UserRepository;
 import com.loco.web.ApiController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +27,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 @Configuration(proxyBeanMethods = false)
 public class ApiWebConfig implements WebMvcConfigurer {
+    private final UserRepository users;
+    public ApiWebConfig(UserRepository users) { this.users = users; }
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
         configurer.addPathPrefix("/api", type -> AnnotatedElementUtils.hasAnnotation(type, ApiController.class));
@@ -40,6 +44,15 @@ public class ApiWebConfig implements WebMvcConfigurer {
                     if (!new AuthenticationTrustResolverImpl().isAuthenticated(authentication)) {
                         throw new AuthenticationCredentialsNotFoundException("Unauthorized");
                     }
+                    if (!(authentication.getPrincipal() instanceof JwtPrincipal principal)) {
+                        throw new AuthenticationCredentialsNotFoundException("Unauthorized");
+                    }
+                    var member = users.findAuthenticationById(principal.userId())
+                            .filter(user -> user.getDeletedAt() == null)
+                            .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("Unauthorized"));
+                    SecurityContextHolder.getContext().setAuthentication(
+                            org.springframework.security.authentication.UsernamePasswordAuthenticationToken.authenticated(
+                                    new JwtPrincipal(member.getId(), member.getEmail()), null, authentication.getAuthorities()));
                 }
                 return true;
             }

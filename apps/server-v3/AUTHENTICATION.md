@@ -110,3 +110,10 @@ V2Url은 DTO의 IsUrl({require_tld:false}) 규칙을 담당한다. 실제 v2 val
 OAuthContractTest는 **v3 계약 테스트**다. RestClient.Builder에 MockRestServiceServer를 연결해 외부 네트워크 요청을 차단하고, 요청 URL·method·form/query·Bearer와 HTTP 응답·DB 변경·발급 토큰을 검사한다.
 v2의 고정 OAuth 외부 주소를 바꾸거나 실제 제공자 계정으로 로그인하지 않는다. 따라서 v2 HTTP 비교 통과로 집계하지 않는다.
 메일 템플릿은 코드부터 치환한 뒤 닉네임을 넣어, 닉네임 안의 `${code}` 같은 문자가 다시 치환되지 않게 한다. 실제 양쪽 Mailpit 메일로 이 사례도 확인한다.
+
+## 보호 경로의 현재 회원 확인
+
+JWT 필터는 서명·만료만 확인한다. ApiWebConfig의 MVC interceptor가 @AuthenticatedApi를 선택한 경우에만 UserRepository의 인증 projection으로 ID·email·deletedAt을 읽는다.
+탈퇴·없는 회원은 DTO 검증 전에 v2와 같은 `{"statusCode":401,"message":"Unauthorized"}`로 거절한다. 인증 정보의 email은 JWT의 과거 값 대신 DB의 현재 값이다.
+공개 메서드의 클래스 선언 덮어쓰기와 없는 경로는 회원 조회를 하지 않는다. 로그인·재발급처럼 공개 API 자체에 필요한 업무 조회는 이 공통 인증 조회와 별개다.
+MemberAuthenticationTest는 테스트 DB의 users 테이블을 잠시 다른 이름으로 바꿔, 회원 조회가 불가능해도 공개·없는 경로는 통과하고 유효 JWT 보호 요청만 500이 되는지 확인한다. 이름은 finally에서 복원한다.
