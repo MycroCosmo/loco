@@ -91,7 +91,7 @@ API 주소와 Kakao 설정은 [API 안내](docs/api.md), [Kakao 설정](docs/kak
 
 ## 검증 결과
 
-코드 기준 `90be21f`, GitHub Actions 실행 [36164621746](https://github.com/MycroCosmo/loco/actions/runs/36164621746)에서 아래를 확인했습니다. 링크는 비공개 저장소 권한이 필요합니다.
+코드 기준 `90be21f`, GitHub Actions 실행 [36164621746](https://github.com/MycroCosmo/loco/actions/runs/36164621746)에서 아래를 확인했습니다.
 
 | 검사 | 결과 |
 | --- | --- |
@@ -113,4 +113,4 @@ DB 회귀 테스트는 전용 `loco_test` 데이터베이스와 `RUN_DB_REGRESSI
 
 테스트 통과는 실제 배포·외부 OAuth/SMTP/FCM 연동·Flutter 전체 화면·모든 보안 검증을 뜻하지 않습니다. 위 CI의 npm 의존성 검사에서는 취약점 경고가 남아 있어 별도 검토가 필요합니다.
 
-실제 비밀정보는 저장소에 넣지 않습니다. `.gitignore`만으로 과거 이력이 정리되지는 않으며, 이 문서는 전체 이력의 비밀정보 검사 완료를 뜻하지 않습니다. 저장소 공개 범위는 비공개로 유지합니다.
+실제 비밀정보는 저장소에 넣지 않습니다. `.gitignore`만으로 과거 이력이 정리되지는 않으며, 이 문서는 전체 이력의 비밀정보 검사 완료를 뜻하지 않습니다.
