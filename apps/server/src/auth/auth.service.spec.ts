@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Provider } from '@prisma/client';
 import { MailService } from '../mail/mail.service';
@@ -58,5 +58,37 @@ describe('AuthService password reset', () => {
     ).rejects.toBeInstanceOf(UnauthorizedException);
     expect(updateUser).not.toHaveBeenCalled();
     expect(revokeRefreshTokens).not.toHaveBeenCalled();
+  });
+});
+
+describe('AuthService OAuth login', () => {
+  it('does not link an OAuth identity to an existing account by email alone', async () => {
+    const updateUser = jest.fn();
+    const prisma = {
+      user: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        findUnique: jest.fn().mockResolvedValue({
+          id: 'local-user',
+          email: 'user@example.com',
+          provider: Provider.LOCAL,
+        }),
+        update: updateUser,
+      },
+    } as unknown as PrismaService;
+    const service = new AuthService(prisma, {} as JwtService, {} as MailService);
+    jest.spyOn(service as any, 'getKakaoProfile').mockResolvedValue({
+      provider: Provider.KAKAO,
+      providerId: 'kakao-1',
+      email: 'user@example.com',
+      nickname: '사용자',
+    });
+
+    await expect(
+      service.oauthLogin('kakao', {
+        code: 'authorization-code',
+        redirectUri: 'http://localhost/callback',
+      }),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect(updateUser).not.toHaveBeenCalled();
   });
 });
