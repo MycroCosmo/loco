@@ -6,6 +6,9 @@ DB 기준은 사용자가 확정한 PostgreSQL 17(`postgis/postgis:17-3.6`)이�
 JWT 검증과 v2의 401·404·ValidationPipe 400 응답 기반을 구현했다.
 로그인·회원가입·사용자 조회 등 기능 API는 아직 이관하지 않았다. 보호 경로와 DTO는 통합 테스트 안에만 존재한다.
 
+5단계 비교 하네스의 설계·실행·케이스 추가 방법은 [COMPARISON_TESTS.md](COMPARISON_TESTS.md)에 정리했다.
+v2 컨테이너를 공유하고, 같은 Flyway V1으로 만든 두 DB에서 응답과 데이터를 비교한다.
+
 기준은 [업데이트된 작업 프롬프트](https://app.notion.com/p/40c140eabf0e81db996df610eed7c32f)다.
 이 문서의 1~5단계는 **0번 묶음 안의 작업 순서**다. 전체 로드맵의 2단계(공간 조회·캐시)와 구분한다.
 `postgis/postgis` 이미지는 지금 사용하지만 공간 확장은 전체 로드맵 2단계까지 활성화하지 않는다.
@@ -63,8 +66,8 @@ Compose 기동 흐름: DB의 TCP 준비 확인 → v3 시작·Flyway 적용·hea
 | `config/ApiWebConfig.java` | MVC prefix, DTO 검증 전 인증 확인, 시작 시 선언 누락·충돌 검사를 연결한다. |
 | `web/ApiExceptionHandler.java` | 인증 실패·권한 거절·없는 경로·Bean Validation 오류를 상황별 JSON으로 변환한다. |
 
-`src/test/java/com/loco/security/ApiCompatibilityIntegrationTest.java`는 실제 v2 서버와 임시 공유 DB를 띄운다.
-v2 로그인 토큰으로 v3 테스트 컨트롤러를 호출하고 양쪽 오류 응답을 비교한다.
+`src/test/java/com/loco/security/ApiCompatibilityIntegrationTest.java`는 5단계 하네스의 실제 v2 서버와 격리된 두 DB를 공유한다.
+준비 토큰은 직접 발급하고, 실제 v2 로그인 토큰 검증은 해당 테스트에서만 로그인 API를 호출한다.
 `ApiDeclarationTest.java`는 선언을 빠뜨리거나 중복한 컨트롤러 때문에 앱 시작이 실패하는지 확인한다.
 
 저장소 루트의 Compose 관련 파일:
@@ -94,7 +97,8 @@ Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·D
 
 기대 결과:
 
-- `BUILD SUCCESSFUL`, 테스트 35개 성공.
+- `BUILD SUCCESSFUL`, 총 55건 중 성공 54개·실패 0개·알려진 차이 1개. 기존 35개 검증도 포함한다.
+- 알려진 차이는 로그인 11번째 요청의 v2 429 / v3 제한 미구현이다. 실제 요청 후 JUnit의 aborted/skipped로 표시하며 성공에 포함하지 않는다.
 - 인증 없는 `/api/health`: 200, JSON 구조와 값이 정확히 `{"status":"ok"}`.
 - `/health`: 404. `/api`를 거치지 않으면 컨트롤러에 접근할 수 없다.
 - `/api/actuator/health`: 404. Actuator HTTP 엔드포인트는 노출하지 않는다.
@@ -115,7 +119,8 @@ Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·D
 테스트가 띄운 DB는 종료 시 제거된다. 테스트 비밀번호는 실행마다 무작위로 생성한다.
 호환 테스트의 v2·DB도 격리되며 개발 Compose의 계정·데이터를 사용하지 않는다.
 v2 테스트 이미지는 기존 Dockerfile과 필요한 소스만 전달해 빌드한다. `.env`나 업로드 파일은 전달하지 않는다.
-외부 메일·OAuth API는 호출하지 않는다. 고정된 인증·오류 사례를 검증하며 범용 비교 하네스는 5단계에서 별도로 결정한다.
+외부 메일·OAuth API는 호출하지 않는다. 비밀번호 찾기 메일은 테스트 전용 Mailpit으로 수신한다.
+하네스 자체 검증과 실제 이관 API의 호환 검증은 구분한다. 실행 시간·인증 대기 시간·알려진 차이는 `build/reports/compatibility/summary.json`에서 확인한다.
 
 스키마 비교는 테이블·컬럼 타입·nullable·기본값·enum·PK·고유 제약·인덱스·외래 키 등 Prisma가 표현하는 구조를 대상으로 한다.
 Prisma가 지원하지 않는 임의의 트리거나 뷰까지 검증하는 것은 아니다. 비교 기준은 저장소의 v2 Prisma 스키마이며 기존 개발 DB에 직접 연결하지 않는다.
@@ -379,6 +384,11 @@ Nest의 모든 `class-validator` 규칙을 자동 변환하는 기능은 아니�
 | baselineOnMigrate 기본 false, 기존 DB 최초 실행에만 true | 사용자가 선택했다. 스키마 비교 후에만 기존 DB를 V1 상태로 인정한다. 별도 Flyway CLI를 추가하지 않는다. |
 | JUnit에서 고정된 Prisma CLI로 스키마 비교 | 사용자가 선택했다. Node/npm이 필요하며 `gradlew test`로 DB 동등성까지 재검증한다. |
 | Actuator HTTP 노출 없음 | 현재 공개 API는 `/api/health` 하나로 유지한다. |
+| JUnit·Testcontainers 비교 하네스, v2 빌드·기동 1회 | 사용자가 선택했다. 단일 테스트 JVM에서 순차 실행한다. |
+| 하네스 DB 2개, 양쪽 Flyway V1 적용 | 사용자가 선택했다. 케이스마다 같은 시드를 주입하며 개발 Compose DB는 사용하지 않는다. |
+| HTTP 경로별 값 제외, DB UUID 별칭·참조 비교 | 사용자가 선택했다. 키·타입·null·배열 구조는 유지하고 모호한 행 대응은 실패한다. |
+| 인증 API에만 요청량 관리·대기, 준비 JWT 직접 서명 | 사용자가 선택했다. 총 대기가 커지면 컨테이너 재시작 방식을 제안하며 자동 전환하지 않는다. |
+| Mailpit 1개, 429는 보고서의 알려진 차이 | 사용자가 선택했다. 외부 메일 발송 없이 수집하고 미구현 차이를 성공으로 숨기지 않는다. |
 
 ## 공부할 개념
 
@@ -401,9 +411,8 @@ Nest의 모든 `class-validator` 규칙을 자동 변환하는 기능은 아니�
 
 Prisma 기반 비교 테스트는 이관 기간 동안 기본 `test`에 포함한다. 이관이 끝나면 별도 태그로 분리할 예정이다.
 
-4단계 확인은 완료했다. 5단계 전에 v2 비교 기준을 `fix/account-state-regression-20260926`의 계정 상태 수정으로 갱신한다.
-`main` 병합과 `feature/loco-v3-foundation` rebase는 사용자 확인 후 수행하며, 변경된 v2로 기존 35개 테스트를 다시 실행한다.
-기존 테스트의 통과는 활성 회원 JWT와 현재 오류 사례의 호환을 뜻하며 아래 보류 항목의 구현 완료를 뜻하지 않는다.
+v2 비교 기준에는 main에 병합된 계정 상태 회귀 수정이 포함된다.
+현재 테스트의 통과는 활성 회원 JWT와 등록된 오류 사례의 호환을 뜻하며 아래 보류 항목의 구현 완료를 뜻하지 않는다.
 
 1번 묶음(인증)에서 User 엔티티가 생기면 탈퇴 회원의 JWT를 차단한다.
 v2 Guard처럼 **인증이 필요한 경로에서만** DB의 현재 회원 상태를 조회하고, 공개 경로에서는 조회하지 않는다.
@@ -413,11 +422,10 @@ JWT 필터에 모든 요청의 회원 조회를 추가하지 않는다. 새 v2�
 
 - v2 `forbidNonWhitelisted`: DTO에 정의되지 않은 필드는 400이며 `message` 배열에 `"property xxx should not exist"`가 포함된다.
 - v2의 기본 500 응답은 `{"statusCode":500,"message":"Internal server error"}`이며 `error` 키가 없다.
-- 깨진 JSON 요청의 400 메시지는 Node와 Java의 파서·런타임 차이 때문에 동일한 문구로 맞추기 어렵다. 상태·구조만 비교할지, 문구를 정규화할지 등 비교 방식은 5단계에서 결정한다.
+- 깨진 JSON 요청의 400 메시지는 케이스별 명시적 문구 예외로 비교한다. 상태·키·타입은 유지하며 실제 API의 구조 차이를 숨기지 않는다.
 
-위 기준 정리 후 5단계에서 범용 응답 비교 테스트 하네스를 구현한다.
-JUnit 기반·별도 스크립트 등의 선택지를 비교하고 사용자 선택을 기다린다.
-동적 필드 제외, 쓰기 요청 전 DB 초기화와 요청 후 DB 상태 비교는 그 단계의 범위다.
+5단계 결과를 확인받은 뒤 1번 묶음부터 실제 이관 API 케이스를 묶음별로 추가한다.
+v3 요청 제한 구현 시 429의 알려진 차이를 제거하고 필수 통과 케이스로 전환한다.
 작업 기록은 노션에서 관리한다.
 
 공식 참고: [Spring Boot 3.5 실행 환경](https://docs.spring.io/spring-boot/3.5/system-requirements.html),

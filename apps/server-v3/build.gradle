@@ -52,7 +52,25 @@ tasks.named('test') {
     dependsOn tasks.named('preparePrisma')
     inputs.file(v2Lockfile)
     inputs.file('../server/prisma/schema.prisma')
+    inputs.dir('../server/src')
+    inputs.files('../server/package.json', '../server/tsconfig.json', '../server/tsconfig.build.json', '../server/nest-cli.json')
+    inputs.files('../../infra/docker/server-v2.Dockerfile', '../../infra/docker/start-v2.cjs')
+    maxParallelForks = 1
+    forkEvery = 0
+    systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
+    systemProperty 'compat.report', layout.buildDirectory.file('reports/compatibility/summary.json').get().asFile.absolutePath
     systemProperty 'prisma.cli', prismaToolsDirectory.get().file('node_modules/prisma/build/index.js').asFile.absolutePath
     systemProperty 'prisma.schema', file('../server/prisma/schema.prisma').absolutePath
     useJUnitPlatform()
+    testLogging { events 'failed', 'skipped' }
+    doFirst { delete layout.buildDirectory.file('reports/compatibility/summary.json') }
+    doLast {
+        def report = layout.buildDirectory.file('reports/compatibility/summary.json').get().asFile
+        if (report.exists()) {
+            def result = new groovy.json.JsonSlurper().parse(report)
+            println "Compatibility: v2 builds=${result.v2Builds}, starts=${result.v2Starts}, auth wait=${result.authWaitMillis} ms"
+            println "Known differences (알려진 차이): ${result.knownDifferences.size()} — ${report}"
+            if (result.recommendContainerRestart) println '인증 대기 누적 180초 초과: C(같은 컨테이너 재시작) 전환을 검토하세요.'
+        }
+    }
 }

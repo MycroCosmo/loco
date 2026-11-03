@@ -1,0 +1,108 @@
+package com.loco.compat;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@ExtendWith(SharedHarness.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.flyway.target=1")
+@Import(HarnessControllers.class)
+public abstract class CompatibilityTestBase {
+    @LocalServerPort protected int port;
+    @Autowired protected TestRestTemplate client;
+    @Autowired protected ObjectMapper mapper;
+
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        var env = SharedHarness.environment();
+        registry.add("spring.datasource.url", () -> env.url(SharedHarness.Side.V3));
+        registry.add("spring.datasource.username", env::username);
+        registry.add("spring.datasource.password", env::databasePassword);
+        registry.add("loco.jwt.secret", () -> env.secret);
+    }
+
+    protected SharedHarness.Environment environment() { return SharedHarness.environment(); }
+    protected String v2Url() { return environment().v2Url(); }
+    protected String v3Url() { return "http://localhost:" + port; }
+
+    protected ResponseEntity<JsonNode> request(String base, String path, HttpMethod method, String token, Object body) {
+        return request(base, path, method, token, body, false);
+    }
+
+    protected ResponseEntity<JsonNode> request(String base, String path, HttpMethod method,
+                                               String token, Object body, boolean rateLimitProbe) {
+        try {
+            if (base.equals(v2Url())) {
+                if (rateLimitProbe) environment().budget.recordUnchecked(path);
+                else environment().budget.before(method.name(), path);
+            }
+            var headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (token != null) headers.setBearerAuth(token);
+            var factory = new SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(10000);
+            factory.setReadTimeout(10000);
+            client.getRestTemplate().setRequestFactory(factory);
+            var response = client.exchange(URI.create(base + path), method, new HttpEntity<>(body, headers), JsonNode.class);
+            if (!rateLimitProbe && response.getStatusCode().value() == 429) {
+                throw new AssertionError("예상하지 않은 429: " + method + " " + path);
+            }
+            return response;
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("요청 제한 대기 중 중단", exception);
+        }
+    }
+
+    protected void runCase(ComparisonCase testCase) throws Exception {
+        environment().reset(testCase.seedResource());
+        var rules = testCase.databaseRules();
+        DatabaseSnapshot beforeV2, beforeV3;
+        try (var left = environment().connect(SharedHarness.Side.V2);
+             var right = environment().connect(SharedHarness.Side.V3)) {
+            beforeV2 = DatabaseSnapshot.capture(left, rules);
+            beforeV3 = DatabaseSnapshot.capture(right, rules);
+        }
+        Set<String> seedIds = beforeV2.seedIds();
+        DatabaseSnapshot.compare(beforeV2, beforeV3, seedIds, rules);
+        String token = testCase.authenticated() ? environment().token("valid",
+                SharedHarness.Environment.USER_ID, SharedHarness.Environment.EMAIL) : null;
+        String body = testCase.bodyResource() == null ? null
+                : new ClassPathResource(testCase.bodyResource()).getContentAsString(StandardCharsets.UTF_8);
+        var leftResponse = request(v2Url(), testCase.path(), testCase.method(), token, body);
+        var rightResponse = request(v3Url(), testCase.path(), testCase.method(), token, body);
+        assertThat(leftResponse.getStatusCode().value()).isEqualTo(testCase.expectedStatus());
+        assertThat(rightResponse.getStatusCode().value()).isEqualTo(testCase.expectedStatus());
+        JsonComparison.compare(leftResponse.getBody(), rightResponse.getBody(), testCase.valueExceptions());
+        try (var left = environment().connect(SharedHarness.Side.V2);
+             var right = environment().connect(SharedHarness.Side.V3)) {
+            var afterV2 = DatabaseSnapshot.capture(left, rules);
+            var afterV3 = DatabaseSnapshot.capture(right, rules);
+            DatabaseSnapshot.compare(afterV2, afterV3, seedIds, rules);
+            if (testCase.databaseUnchanged()) {
+                beforeV2.assertUnchanged(afterV2);
+                beforeV3.assertUnchanged(afterV3);
+            }
+        }
+    }
+}
