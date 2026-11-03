@@ -26,6 +26,8 @@ JWT 검증과 v2의 401·404·400 응답 호환은 4단계에서 구현한다.
 7. `src/main/resources/db/migration/V1__baseline.sql`: Prisma가 생성한 SQL 원문이다. 테이블 11개, enum 3개, 보조 인덱스 13개(PK 제외), 외래 키 14개를 만든다. 적용한 V1은 고치지 않고 이후 변경은 다음 버전의 마이그레이션으로 추가한다.
 8. `src/test/java/com/loco/migration/FlywayBaselineIntegrationTest.java`: 각 테스트마다 독립된 임시 DB를 만든다. 빈 DB에 V1을 적용하고, 기존 DB는 Prisma `db push`로 별도로 만든 뒤 baseline과 데이터 보존을 확인한다. 실제 DB와 원본 Prisma 스키마를 CLI로 비교한다.
 
+V1 비교 테스트는 `target("1")`로 적용 범위를 고정해, V2 이후 마이그레이션이 추가되어도 V1과 v2 Prisma 스키마의 일치만 검증한다.
+
 요청 흐름: `GET /api/health` → 내장 Tomcat의 `/api` 처리 → 보안 필터 → `HealthController` → JSON 응답.
 
 DB 시작 흐름: DB 연결 → Flyway 이력 확인 및 V1 적용 → JPA 초기화 → HTTP 요청 처리.
@@ -246,6 +248,8 @@ Spring은 실행 디렉터리의 `.env`를 Java properties 형식으로 읽으�
 - Prisma 스키마와 실제 DB의 차이 비교, 클라이언트에서 처리하는 UUID·updatedAt.
 
 ## 다음 단계
+
+Prisma 기반 비교 테스트는 이관 기간 동안 기본 `test`에 포함한다. 이관이 끝나면 별도 태그로 분리할 예정이다.
 
 2단계를 확인받은 뒤 3단계에서 v2·v3가 PostgreSQL 17 DB 하나를 공유하는 Docker Compose를 만든다.
 작업 기록은 노션에서 관리한다.

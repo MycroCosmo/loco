@@ -99,6 +99,7 @@ class FlywayBaselineIntegrationTest {
         return Flyway.configure()
                 .dataSource(database.getJdbcUrl(), database.getUsername(), database.getPassword())
                 .locations("classpath:db/migration")
+                .target("1")
                 .baselineVersion("1")
                 .baselineOnMigrate(baselineOnMigrate)
                 .load();
