@@ -12,7 +12,28 @@ public final class AuthInputs {
     public record Login(String email, String password) { }
     public record Refresh(String refreshToken) { }
     public record Logout(String refreshToken) { }
+    public record Forgot(String email) { }
+    public record Reset(String email, String code, String newPassword) { }
     private AuthInputs() { }
+
+    public static Forgot forgot(JsonNode body) {
+        var input = new Input(body, Set.of("email"));
+        input.recoveryEmail();
+        input.finish();
+        return new Forgot(input.text("email"));
+    }
+    public static Reset reset(JsonNode body) {
+        var input = new Input(body, Set.of("email", "code", "newPassword"));
+        input.recoveryEmail();
+        String code = input.text("code");
+        if (code == null || code.codePointCount(0, code.length()) != 6) input.errors.add("코드는 6자리여야 합니다.");
+        input.string("code", null, null);
+        String password = input.text("newPassword");
+        if (password == null || password.codePointCount(0, password.length()) < 6) input.errors.add("새 비밀번호는 6자 이상이어야 합니다.");
+        input.string("newPassword", null, null);
+        input.finish();
+        return new Reset(input.text("email"), code, password);
+    }
 
     public static JsonNode httpBody(JsonNode body) {
         // Express JSON parser의 strict 모드처럼 JSON 원시 값은 DTO 검증 전에 거절한다.
@@ -65,6 +86,7 @@ public final class AuthInputs {
         }
         String text(String name) { return body.path(name).isTextual() ? body.path(name).asText() : null; }
         void email() { if (!V2Email.valid(text("email"))) errors.add("email must be an email"); }
+        void recoveryEmail() { if (!V2Email.valid(text("email"))) errors.add("올바른 이메일을 입력하세요."); }
         void string(String name, Integer min, Integer max) {
             String value = text(name);
             int size = value == null ? -1 : value.codePointCount(0, value.length());

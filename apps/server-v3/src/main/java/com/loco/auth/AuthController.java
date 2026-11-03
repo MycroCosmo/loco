@@ -12,7 +12,19 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @PublicApi
 public class AuthController {
     private final AuthService service;
-    public AuthController(AuthService service) { this.service = service; }
+    private final PasswordRecoveryService recovery;
+    public AuthController(AuthService service, PasswordRecoveryService recovery) { this.service = service; this.recovery = recovery; }
+
+    @PostMapping("/auth/forgot-password")
+    @ResponseStatus(HttpStatus.CREATED)
+    public java.util.Map<String, String> forgot(@RequestBody(required = false) JsonNode body) {
+        return recovery.forgot(AuthInputs.forgot(AuthInputs.httpBody(body)).email());
+    }
+    @PostMapping("/auth/reset-password")
+    @ResponseStatus(HttpStatus.CREATED)
+    public java.util.Map<String, String> reset(@RequestBody(required = false) JsonNode body) {
+        return recovery.reset(AuthInputs.reset(AuthInputs.httpBody(body)));
+    }
 
     @PostMapping("/auth/register")
     @ResponseStatus(HttpStatus.CREATED)

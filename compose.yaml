@@ -29,6 +29,11 @@ services:
     mem_limit: 1536m
     environment:
       PORT: 8081
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
       DB_URL: jdbc:postgresql://db:5432/loco
       DB_USERNAME: ${DB_USERNAME:?Set DB_USERNAME in the root .env}
       DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the root .env}
@@ -53,6 +58,11 @@ services:
     mem_limit: 1536m
     environment:
       NODE_ENV: production
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
       PORT: 3000
       HOST: 0.0.0.0
       DATABASE_URL: postgresql://db:5432/loco?schema=public

@@ -59,7 +59,7 @@ class InputCompatibilityTest extends CompatibilityTestBase {
                 "{\"email\":\"a@example.test\",\"password\":\"123456\",\"nickname\":\"😀😀\"}",
                 "{\"email\":\"a@example.test\",\"password\":\"123456\",\"nickname\":\"ok\",\"constructor\":7,\"__proto__\":{}}");
         var input = new ArrayList<Map<String, Object>>();
-        for (String type : List.of("register", "login", "refresh", "logout")) {
+        for (String type : List.of("register", "login", "refresh", "logout", "forgot", "reset")) {
             for (String body : bodies) input.add(Map.of("type", type, "body", mapper.readTree(body)));
         }
         var expected = environment().nodeCheck("""
@@ -68,7 +68,9 @@ class InputCompatibilityTest extends CompatibilityTestBase {
                 const types={register:require('./dist/auth/dto/register.dto').RegisterDto,
                              login:require('./dist/auth/dto/login.dto').LoginDto,
                              refresh:require('./dist/auth/dto/refresh-token.dto').RefreshTokenDto,
-                             logout:require('./dist/auth/dto/logout.dto').LogoutDto};
+                             logout:require('./dist/auth/dto/logout.dto').LogoutDto,
+                             forgot:require('./dist/auth/dto/forgot-password.dto').ForgotPasswordDto,
+                             reset:require('./dist/auth/dto/reset-password.dto').ResetPasswordDto};
                 const pipe=new ValidationPipe({whitelist:true,transform:true,forbidNonWhitelisted:true});
                 Promise.all(JSON.parse(process.argv[1]).map(async x=>{
                   try {await pipe.transform(x.body,{type:'body',metatype:types[x.type]});return null;}
@@ -84,6 +86,8 @@ class InputCompatibilityTest extends CompatibilityTestBase {
                     case "login" -> AuthInputs.login(body);
                     case "refresh" -> AuthInputs.refresh(body);
                     case "logout" -> AuthInputs.logout(body);
+                    case "forgot" -> AuthInputs.forgot(body);
+                    case "reset" -> AuthInputs.reset(body);
                 }
             } catch (ApiProblem problem) { actual = mapper.valueToTree(problem.body()); }
             JsonComparison.compare(expected.get(i), actual, Map.of());

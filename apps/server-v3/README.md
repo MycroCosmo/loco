@@ -1,6 +1,6 @@
 # LOCO v3 — Spring 기반과 v2 인증·오류 호환
 
-현재 구현 API는 `GET /api/health`, `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout`이다. 승인된 v2 기준 갱신 외에는 v2와 Flutter 코드를 변경하지 않는다.
+현재 구현 API는 `GET /api/health`, `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`이다. 승인된 v2 기준 갱신 외에는 v2와 Flutter 코드를 변경하지 않는다.
 빈 PostgreSQL DB에는 Flyway V1으로 v2와 같은 업무 테이블을 만든다. 인증용 JPA 엔티티는 기존 스키마에 매핑한다. 자세한 설계와 읽는 순서는 [인증 문서](AUTHENTICATION.md)를 참고한다.
 DB 기준은 사용자가 확정한 PostgreSQL 17(`postgis/postgis:17-3.6`)이다. 맞춰야 할 기존 운영 DB 버전은 없다.
 JWT 검증과 v2의 401·404·ValidationPipe 400 응답 기반을 구현했다.
@@ -17,7 +17,7 @@ v2 컨테이너를 공유하고, 같은 Flyway V1으로 만든 두 DB에서 응�
 후속 작업에서도 v2·Flutter는 읽기만 하며, 이전 직장 코드는 사용하거나 재현하지 않는다.
 외부 API는 테스트에서 mock으로 대체하고, 현재 단계 밖의 기술·보류 항목은 추가하지 않는다.
 확정된 결정 밖의 새 설계 선택은 선택지와 장단점을 설명한 뒤 사용자 답을 기다린다.
-0번 묶음은 단계별 확인을 마쳤다. 1번 묶음은 각 단계의 검증 결과를 보고하고 커밋하며, 사용자 지시에 따라 재발급·로그아웃까지 완료한 뒤 멈춘다.
+0번 묶음은 단계별 확인을 마쳤다. 1번 묶음은 각 단계의 검증 결과를 보고하고 커밋하며, 사용자 지시에 따라 요청 제한까지 완료한 뒤 멈춘다.
 
 ## 탑다운으로 읽는 순서
 
@@ -97,7 +97,7 @@ Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·D
 
 기대 결과:
 
-- `BUILD SUCCESSFUL`, 총 97건 중 성공 96개·실패 0개·알려진 차이 1개. 기존 35개 검증도 포함한다.
+- `BUILD SUCCESSFUL`, 총 112건 중 성공 111개·실패 0개·알려진 차이 1개. 기존 35개 검증도 포함한다.
 - 알려진 차이는 로그인 11번째 요청의 v2 429 / v3 제한 미구현이다. 실제 요청 후 JUnit의 aborted/skipped로 표시하며 성공에 포함하지 않는다.
 - 인증 없는 `/api/health`: 200, JSON 구조와 값이 정확히 `{"status":"ok"}`.
 - `/health`: 404. `/api`를 거치지 않으면 컨트롤러에 접근할 수 없다.

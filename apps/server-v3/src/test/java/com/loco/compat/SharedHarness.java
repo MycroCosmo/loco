@@ -69,7 +69,8 @@ public final class SharedHarness implements BeforeAllCallback {
                 .withPassword(UUID.randomUUID().toString()).withNetwork(network).withNetworkAliases("db")
                 .withTmpFs(Map.of("/docker-entrypoint-initdb.d", "rw"));
         private final GenericContainer<?> mailpit = new GenericContainer<>("axllent/mailpit:v1.27.4")
-                .withNetwork(network).withNetworkAliases("mailpit").withExposedPorts(8025)
+                .withNetwork(network).withNetworkAliases("mailpit").withExposedPorts(8025, 1025)
+                .withEnv("MP_ENABLE_CHAOS", "true")
                 .withEnv("MP_SMTP_AUTH_ACCEPT_ANY", "1").withEnv("MP_SMTP_AUTH_ALLOW_INSECURE", "1")
                 .waitingFor(Wait.forHttp("/api/v1/info").forPort(8025));
         private GenericContainer<?> v2;
@@ -135,6 +136,8 @@ public final class SharedHarness implements BeforeAllCallback {
         public String username() { return postgres.getUsername(); }
         public String databasePassword() { return postgres.getPassword(); }
         public String v2Url() { return "http://" + v2.getHost() + ":" + v2.getMappedPort(3000); }
+        public String smtpHost() { return mailpit.getHost(); }
+        public int smtpPort() { return mailpit.getMappedPort(1025); }
         public JsonNode nodeCheck(String script, Object input) throws Exception {
             var result = v2.execInContainer("node", "-e", script, json.writeValueAsString(input));
             if (result.getExitCode() != 0) throw new AssertionError("v2 라이브러리 교차 검증 실행 실패");
@@ -181,9 +184,14 @@ public final class SharedHarness implements BeforeAllCallback {
 
         public void clearMail() throws Exception { mailRequest("DELETE", "/api/v1/messages"); }
         public JsonNode mailRequest(String method, String path) throws Exception {
+            return mailRequest(method, path, null);
+        }
+        public JsonNode mailRequest(String method, String path, Object body) throws Exception {
             var request = HttpRequest.newBuilder(URI.create("http://" + mailpit.getHost() + ":"
                     + mailpit.getMappedPort(8025) + path)).timeout(Duration.ofSeconds(10))
-                    .method(method, HttpRequest.BodyPublishers.noBody()).build();
+                    .header("Content-Type", "application/json")
+                    .method(method, body == null ? HttpRequest.BodyPublishers.noBody()
+                            : HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body))).build();
             var response = http.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() / 100 != 2) throw new AssertionError("Mailpit HTTP " + response.statusCode());
             return method.equals("DELETE") || response.body().isBlank() ? json.nullNode() : json.readTree(response.body());

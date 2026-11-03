@@ -1,7 +1,7 @@
 # 1번 묶음: 인증
 
-현재 구현 범위는 인증 엔티티와 POST /api/auth/register·login·refresh·logout이다. 성공 상태는 v2와 같은 201이다.
-재발급·로그아웃까지 검증한 뒤 사용자 확인을 기다린다. 스키마와 Flyway V1은 변경하지 않는다.
+현재 구현 범위는 인증 엔티티와 POST /api/auth/register·login·refresh·logout·forgot-password·reset-password이다. 성공 상태는 v2와 같은 201이다.
+엔티티부터 요청 제한까지 단계별로 검증·커밋한다. 스키마와 Flyway V1은 변경하지 않는다.
 
 ## 확정한 설계
 
@@ -46,8 +46,8 @@ main의 기준에는 재설정 코드 원자적 소비와 OAuth 이메일 자동
 원본 커밋은 88975d9, 3fb485f이며 기존 탈퇴 회원 회귀 수정도 유지한다.
 SMTP 실패 때 앞서 저장한 재설정 토큰 데이터가 남는 동작은 유지한다.
 
-엔티티 → 회원가입·로그인 → 재발급·로그아웃까지 각 단위를 검증·커밋하고 멈춘다.
-그 뒤 확인을 받고 비밀번호 찾기·재설정 → OAuth → 보호 경로 회원 상태 확인 → 요청 제한 순서로 진행한다.
+엔티티 → 회원가입·로그인 → 재발급·로그아웃은 확인을 마쳤다.
+비밀번호 찾기·재설정 → OAuth → 보호 경로 회원 상태 확인 → 요청 제한 순서로 진행한 뒤 멈춘다.
 공개 경로에 공통 인증용 회원 조회를 추가하지 않는다.
 
 ## 회원가입·로그인 흐름
@@ -84,3 +84,17 @@ HTTP JSON 본문은 Express의 기본 strict 규칙에 맞춰 객체·배열만 
 - compat/DatabaseRequestRace: PostgreSQL 행을 잠근 뒤 두 HTTP 요청이 실제 DB 잠금 대기에 도달한 것을 관측하고 잠금을 푼다. 특정 UPDATE 문장 형태를 요구하지 않으므로 이후 비관적 락 비교 실험에서도 재사용한다.
 
 테스트 HTTP 클라이언트 설정은 요청 전에 완료하고 경쟁 요청 안에서는 바꾸지 않는다. 새 토큰 INSERT를 실패시키는 테스트용 DB 트리거는 finally에서 제거한다.
+
+## 비밀번호 찾기·재설정
+
+PasswordRecoveryService는 없는 회원·탈퇴 회원·OAuth 회원에게도 같은 찾기 성공 응답을 주고 메일은 보내지 않는다.
+대상 회원의 이전 미사용 코드를 사용 처리하고 새 6자리 코드의 SHA-256과 15분 만료를 저장한다. SMTP 전송 전 각각 커밋하므로 전송 실패에도 두 DB 변경은 남는다.
+PasswordResetMail은 승인한 Boot Mail starter / JavaMailSender를 사용한다. mail/password-reset.html은 v2 본문이며 닉네임·코드만 채운다.
+SMTP_HOST·PORT·USER·PASS·SECURE를 두 서버에 같은 환경변수로 제공한다. 기본 호스트·포트·암시적 TLS 여부는 v2와 같다. STARTTLS는 서버가 제공하면 협상한다. 실제 자격 증명은 .env에만 둔다.
+
+재설정은 유효 코드를 먼저 조회한 뒤 bcrypt 해시를 만들고 PasswordResetTransaction에 진입한다.
+`usedAt IS NULL AND expiresAt > now` 조건부 UPDATE의 성공 건수가 1이어야 비밀번호 변경과 모든 미폐기 refreshToken 폐기가 진행된다. 세 변경은 함께 커밋·롤백된다.
+User 변경은 JPA dirty checking과 Auditing으로 updatedAt을 갱신한다. 코드·토큰 벌크 UPDATE에는 같은 Clock의 시각을 명시한다.
+
+PasswordRecoveryTest는 실제 Mailpit SMTP 수신과 550 오류 주입을 사용한다. 동시 재설정은 기존 DatabaseRequestRace로 두 요청의 DB 경쟁을 확인하며 하나만 성공해야 한다.
+후속 refresh 폐기 실패를 DB 트리거로 주입해 비밀번호와 코드 소비까지 롤백되는지 확인한다. 오류 주입은 finally에서 해제한다.
