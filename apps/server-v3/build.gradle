@@ -49,21 +49,38 @@ tasks.register('preparePrisma', Exec) {
                        '--no-save', '--no-package-lock', '--no-audit', '--no-fund', "prisma@${prismaVersion}"]
 }
 
-tasks.named('test') {
+tasks.withType(Test).configureEach {
+    maxParallelForks = 1
+    forkEvery = 0
+    systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
+    testLogging { events 'failed', 'skipped' }
+}
+
+tasks.named('test', Test) {
+    description = '단위·v3 단독 테스트 (v2 및 Prisma CLI 실행 없음)'
+    useJUnitPlatform { excludeTags 'v2-comparison' }
+    systemProperty 'compat.v2.enabled', 'false'
+    systemProperty 'compat.report', layout.buildDirectory.file('reports/fast/summary.json').get().asFile.absolutePath
+    doFirst { delete layout.buildDirectory.file('reports/fast/summary.json') }
+}
+
+tasks.register('comparisonTest', Test) {
+    description = 'v2 HTTP·라이브러리·Prisma 스키마 비교 테스트'
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform { includeTags 'v2-comparison' }
+    systemProperty 'compat.v2.enabled', 'true'
+    mustRunAfter tasks.named('test')
     dependsOn tasks.named('preparePrisma')
     inputs.file(v2Lockfile)
     inputs.file('../server/prisma/schema.prisma')
     inputs.dir('../server/src')
     inputs.files('../server/package.json', '../server/tsconfig.json', '../server/tsconfig.build.json', '../server/nest-cli.json')
     inputs.files('../../infra/docker/server-v2.Dockerfile', '../../infra/docker/start-v2.cjs')
-    maxParallelForks = 1
-    forkEvery = 0
-    systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
     systemProperty 'compat.report', layout.buildDirectory.file('reports/compatibility/summary.json').get().asFile.absolutePath
     systemProperty 'prisma.cli', prismaToolsDirectory.get().file('node_modules/prisma/build/index.js').asFile.absolutePath
     systemProperty 'prisma.schema', file('../server/prisma/schema.prisma').absolutePath
-    useJUnitPlatform()
-    testLogging { events 'failed', 'skipped' }
     doFirst { delete layout.buildDirectory.file('reports/compatibility/summary.json') }
     doLast {
         def report = layout.buildDirectory.file('reports/compatibility/summary.json').get().asFile
@@ -75,3 +92,11 @@ tasks.named('test') {
         }
     }
 }
+
+tasks.register('allTests') {
+    description = '빠른 테스트와 v2 비교 테스트를 모두 실행'
+    group = 'verification'
+    dependsOn tasks.named('test'), tasks.named('comparisonTest')
+}
+
+tasks.named('check') { dependsOn tasks.named('comparisonTest') }

@@ -83,19 +83,25 @@ Compose 기동 흐름: DB의 TCP 준비 확인 → v3 시작·Flyway 적용·hea
 
 ## 자동 검증
 
-Java 21, 실행 중인 Docker, PATH에 등록된 Node.js/npm이 필요하다. 저장소 루트에서 PowerShell로 실행한다.
+Java 21과 실행 중인 Docker가 필요하다. v2 비교에는 PATH에 등록된 Node.js/npm도 필요하다. 저장소 루트에서 PowerShell로 실행한다.
 
 ```powershell
 cd apps/server-v3
 $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21' # 설치 위치가 다르면 변경
-.\gradlew.bat clean test bootJar --console=plain
+.\gradlew.bat test --console=plain           # 단위·v3 단독
+.\gradlew.bat comparisonTest --console=plain # v2 비교
+.\gradlew.bat allTests bootJar --console=plain # 두 작업 + 실행 JAR
 ```
 
-Linux/macOS에서는 Java 21을 설정하고 `./gradlew clean test bootJar`로 실행한다.
+Linux/macOS에서는 Java 21을 설정하고 `./gradlew`로 같은 작업을 실행한다.
+`test`는 `v2-comparison` 태그를 제외하고, `comparisonTest`는 해당 태그만 실행한다. 새 v2 HTTP·라이브러리·Prisma 비교 클래스에는 `@Tag("v2-comparison")`을 붙인다.
+`allTests`는 두 작업을 순서대로 실행하며 `check`와 `build`도 양쪽 검증을 포함한다. 이미 통과한 작업을 실제로 다시 측정하려면 `test --rerun`, `comparisonTest --rerun`, 전체는 `allTests --rerun-tasks`를 사용한다.
+기본 테스트도 v3 통합 검증용 PostgreSQL 컨테이너는 필요하지만 v2·Mailpit·Prisma CLI는 준비하지 않는다. OAuth는 외부 API를 mock으로 대체한다.
+v3 단독 시드 암호는 Java bcrypt($2b$, cost 10), 비교 시드는 기존처럼 실제 v2 bcrypt로 생성한다. 빠른 테스트에서 v2에 잘못 접근하면 즉시 실패한다.
 Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·DB 이미지·Prisma CLI 다운로드와 v2 테스트 이미지 빌드 시간이 든다.
 `clean`을 생략하면 준비된 Prisma CLI를 재사용한다. Prisma는 테스트 도구이며 Spring 실행 JAR에는 포함되지 않는다.
 
-기대 결과:
+빠른 테스트는 48건, 비교 테스트는 101건이다. 전체 검증(`allTests`)의 기대 결과:
 
 - `BUILD SUCCESSFUL`, 총 149건 중 성공 149개·실패 0개·알려진 차이 0개. 기존 35개 검증도 포함한다.
 - 429는 모든 인증 API의 한도·응답·헤더를 비교하는 필수 통과 대상이다.
@@ -113,7 +119,7 @@ Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·D
 - 빈 DB에는 V1이 한 번만 적용되며 이력의 버전은 `1`, 유형은 `SQL`이다. 다시 migrate해도 V1을 재실행하지 않는다.
 - 기존 스키마에는 기본 설정으로 baseline하지 않는다. 명시적으로 허용하면 유형 `BASELINE`으로 버전 `1`을 기록하고 기존 데이터를 보존한다.
 - SQL 재생성 결과는 V1과 동일하며(줄바꿈 차이 제외), 실제 DB와 Prisma 스키마의 차이는 Flyway 관리 테이블 하나뿐이다.
-- 테스트 보고서: `build/reports/tests/test/index.html`.
+- 테스트 보고서: `build/reports/tests/test/index.html`, `build/reports/tests/comparisonTest/index.html`.
 - 실행 JAR: `build/libs/loco-server-v3-0.0.1-SNAPSHOT.jar`.
 
 테스트가 띄운 DB는 종료 시 제거된다. 테스트 비밀번호는 실행마다 무작위로 생성한다.
@@ -121,6 +127,7 @@ Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·D
 v2 테스트 이미지는 기존 Dockerfile과 필요한 소스만 전달해 빌드한다. `.env`나 업로드 파일은 전달하지 않는다.
 외부 메일·OAuth API는 호출하지 않는다. 비밀번호 찾기 메일은 테스트 전용 Mailpit으로 수신한다.
 하네스 자체 검증과 실제 이관 API의 호환 검증은 구분한다. 실행 시간·인증 대기 시간·알려진 차이는 `build/reports/compatibility/summary.json`에서 확인한다.
+빠른 테스트의 환경 보고서는 `build/reports/fast/summary.json`이며 v2 빌드·기동·재시작 횟수가 모두 0이어야 한다.
 
 스키마 비교는 테이블·컬럼 타입·nullable·기본값·enum·PK·고유 제약·인덱스·외래 키 등 Prisma가 표현하는 구조를 대상으로 한다.
 Prisma가 지원하지 않는 임의의 트리거나 뷰까지 검증하는 것은 아니다. 비교 기준은 저장소의 v2 Prisma 스키마이며 기존 개발 DB에 직접 연결하지 않는다.
@@ -208,7 +215,7 @@ $env:DATABASE_URL = $null
 
 ## Docker Compose로 v2·v3 함께 실행
 
-아래 명령은 **저장소 루트**에서 실행한다. Docker가 켜져 있고 호스트의 3000·8081 포트가 비어 있어야 한다.
+아래 명령은 **저장소 루트**에서 실행한다. Docker가 켜져 있고 호스트의 3000·8081·8025·1025 포트가 비어 있어야 한다.
 첫 실행에는 `.env.example`을 `.env`로 복사하고 `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` 값을 채운다. 기존 `.env`는 덮어쓰지 않는다.
 JWT 비밀 값은 UTF-8 기준 최소 32바이트의 충분히 긴 무작위 값으로 설정하며 v2·v3에 같은 값이 주입된다.
 Nimbus의 HS256 키 길이 요구 사항 때문에 v3는 비어 있거나 32바이트 미만인 값으로 시작하지 않는다. 짧은 기존 개발 키가 있다면 두 앱을 함께 변경하고 토큰을 다시 발급한다.
@@ -223,7 +230,7 @@ docker compose ps
 ```
 
 `docker compose up`으로도 빌드와 기동이 가능하다. 이미지를 만든 뒤 소스를 수정했다면 `--build`로 다시 빌드한다.
-프로젝트 이름은 `loco-v3`이며, 기대 결과는 `db`, `v3`, `v2` 세 서비스 모두 `healthy`다.
+프로젝트 이름은 `loco-v3`이며, 기대 결과는 `db`, `mailpit`, `v3`, `v2` 네 서비스 모두 `healthy`다.
 필수 환경변수가 비어 있으면 기본 비밀 값으로 실행하지 않고 Compose가 오류로 중단한다.
 
 | 서비스 | 호스트 주소 | CPU | 메모리 |
@@ -231,6 +238,12 @@ docker compose ps
 | v2 | `http://localhost:3000/api` | 2 | 1.5GB (`1536m`) |
 | v3 | `http://localhost:8081/api` | 2 | 1.5GB (`1536m`) |
 | DB | 컨테이너 내부 `db:5432`, DB 이름 `loco` | 2 | 4GB |
+| Mailpit | 화면 `http://localhost:8025`, SMTP `localhost:1025` | 2 | 1.5GB (`1536m`) |
+
+개발 메일은 기본적으로 Mailpit(`axllent/mailpit:v1.27.4`, 테스트와 같은 버전)에 모인다. 앱의 SMTP 기본값은 `mailpit:1025`, 발신자는 `noreply@loco.app`이며 `.env.example`의 SMTP 키를 비워 두면 이 값을 사용한다.
+Mailpit은 외부로 전달하지 않고 메모리에 보관하므로 재생성하면 메일이 사라진다. 개발 Compose는 인증 없는 로컬 SMTP를 사용하며 UI·SMTP 포트는 localhost에만 공개한다. v2가 빈 암호로 AUTH를 시도하지 않도록 Mailpit의 AUTH 기능을 켜지 않는다. `/mailpit readyz`가 통과한 후 v3가 시작한다.
+회원가입 후 각 앱의 `/api/auth/forgot-password`로 요청하고 `http://localhost:8025`에서 수신 메일을 확인한다.
+실제 메일 서버를 쓰려면 루트 `.env`에 `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`를 명시하고 앱을 다시 생성한다. 기존 `.env`에 실제 SMTP 설정이 있으면 그 값이 우선하므로 로컬 수신을 원할 때는 SMTP 키를 비운다. Compose 밖에서 v3를 실행할 때는 호스트용 `SMTP_HOST=localhost`, `SMTP_PORT=1025`를 직접 설정한다.
 
 DB는 호스트 포트를 열지 않으며, 두 앱의 포트도 로컬 PC에서만 접속하도록 바인딩한다.
 `shared_buffers=1GB`는 DB 페이지 캐시에 할당하는 값이며 DB 컨테이너 전체 메모리 제한과 다르다.
@@ -382,7 +395,7 @@ Nest의 모든 `class-validator` 규칙을 자동 변환하는 기능은 아니�
 | v3 Flyway만 스키마 관리, DB → v3 → v2 순서 | 사용자가 선택했다. v2와 v3가 같은 DB를 쓰되 스키마 변경 주체는 하나로 유지한다. |
 | Hibernate DDL 비활성화, Flyway V1으로 스키마 생성 | Prisma 생성 SQL을 그대로 사용하며 인증용 JPA 엔티티는 기존 스키마에 매핑한다. 자세한 설계와 읽는 순서는 [인증 문서](AUTHENTICATION.md)를 참고한다. |
 | baselineOnMigrate 기본 false, 기존 DB 최초 실행에만 true | 사용자가 선택했다. 스키마 비교 후에만 기존 DB를 V1 상태로 인정한다. 별도 Flyway CLI를 추가하지 않는다. |
-| JUnit에서 고정된 Prisma CLI로 스키마 비교 | 사용자가 선택했다. Node/npm이 필요하며 `gradlew test`로 DB 동등성까지 재검증한다. |
+| JUnit에서 고정된 Prisma CLI로 스키마 비교 | Node/npm이 필요하며 `gradlew comparisonTest`로 DB 동등성까지 재검증한다. |
 | Actuator HTTP 노출 없음 | 상태 확인은 `/api/health`를 사용한다. 인증 API는 별도 공개 경로다. |
 | JUnit·Testcontainers, v2 빌드·최초 기동 1회 | C 방식으로 HTTP 비교 케이스 사이 같은 컨테이너만 재시작한다. 단일 JVM에서 순차 실행한다. |
 | 하네스 DB 2개, 양쪽 Flyway V1 적용 | 사용자가 선택했다. 케이스마다 같은 시드를 주입하며 개발 Compose DB는 사용하지 않는다. |
@@ -409,7 +422,9 @@ Nest의 모든 `class-validator` 규칙을 자동 변환하는 기능은 아니�
 
 ## 다음 단계
 
-Prisma 기반 비교 테스트는 이관 기간 동안 기본 `test`에 포함한다. 이관이 끝나면 별도 태그로 분리할 예정이다.
+Prisma 기반 비교 테스트는 `v2-comparison` 태그로 분리했으며 `comparisonTest`·`allTests`·`check`에서 계속 필수로 검증한다.
+요청 제한의 IP 기준(`getRemoteAddr`)은 3단계 nginx 도입 시 `X-Forwarded-For`와 신뢰 프록시 처리가 필요하다.
+`RequestRateLimiter`의 단일 `synchronized` 잠금은 2단계 부하 테스트 측정 대상이다. 현재 구현은 유지한다.
 
 v2 비교 기준에는 main에 병합된 계정 상태 회귀 수정이 포함된다.
 현재 테스트는 인증 API·회원 상태·등록된 오류 사례를 검증한다. 이후 묶음의 사용자·지도·장소 API는 별도로 이관한다.

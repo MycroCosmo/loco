@@ -26,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Testcontainers
+@org.junit.jupiter.api.Tag("v2-comparison")
 class FlywayBaselineIntegrationTest {
 
     @Container

@@ -20,6 +20,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@org.junit.jupiter.api.Tag("v2-comparison")
 class PasswordRecoveryTest extends AuthenticationSupport {
     private static final String EMAIL = SharedHarness.Environment.EMAIL;
     private static final String USER = SharedHarness.Environment.USER_ID;

@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@org.junit.jupiter.api.Tag("v2-comparison")
 class ApiCompatibilityIntegrationTest extends CompatibilityTestBase {
     String validToken;
     String userId = SharedHarness.Environment.USER_ID;

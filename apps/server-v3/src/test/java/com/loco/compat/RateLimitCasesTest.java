@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpMethod;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@org.junit.jupiter.api.Tag("v2-comparison")
 class RateLimitCasesTest extends CompatibilityTestBase {
     static Stream<Arguments> limits() {
         return Stream.of(Arguments.of("register", 5, 400), Arguments.of("login", 10, 400),

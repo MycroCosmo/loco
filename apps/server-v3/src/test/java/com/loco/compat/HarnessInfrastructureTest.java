@@ -16,6 +16,7 @@ import org.springframework.http.HttpMethod;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@org.junit.jupiter.api.Tag("v2-comparison")
 class HarnessInfrastructureTest extends CompatibilityTestBase {
     private static final DatabaseSnapshot.Rules DEFAULT = DatabaseSnapshot.Rules.defaults();
 

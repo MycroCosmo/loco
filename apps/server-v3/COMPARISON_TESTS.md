@@ -12,15 +12,15 @@ v2는 계정 상태 회귀 수정이 포함된 저장소 소스를 그대로 빌
 ~~~powershell
 cd apps/server-v3
 $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
-.\gradlew.bat test bootJar --rerun-tasks --console=plain
+.\gradlew.bat comparisonTest --rerun --console=plain
 ~~~
 
 전체 검증은 149건이다. 기존 하네스·엔티티 62건, 회원가입·로그인 검증 15건, 재발급·로그아웃 검증 20건, 비밀번호 찾기·재설정 15건, OAuth 계약 18건과 URL 검증 1건, 보호 경로 회원 상태 검증 4건을 포함한다. 기존 429 알려진 차이 1건을 필수 HTTP 검증 10건으로 바꾸고 제한 계산 테스트 5건을 추가했다.
-기대 결과는 **성공 149 / 실패 0 / 알려진 차이 0**이다.
+`test` 48건과 `comparisonTest` 101건을 합친 기대 결과는 **성공 149 / 실패 0 / 알려진 차이 0**이다.
 429도 필수 통과 대상이며 JUnit abort/skip으로 처리하지 않는다. OAuth 18건은 v3 계약 검증이고 v2 HTTP 비교와 구분한다.
-현재 항목은 로그인 11번째 요청의 v2 429 / v3 실제 로그인 400이다.
+기본 `test`는 단위·v3 단독 검증만 실행한다. `comparisonTest`는 `@Tag("v2-comparison")` 클래스만 실행하고 v2·Mailpit을 한 번 준비한다. Prisma 스키마 검증도 이 작업에 포함한다. 두 그룹 전체는 `allTests`로 실행한다(`check`·`build`도 전체 검증).
 
-- JUnit HTML: [build/reports/tests/test/index.html](build/reports/tests/test/index.html)
+- JUnit HTML: [build/reports/tests/comparisonTest/index.html](build/reports/tests/comparisonTest/index.html), v3 단독·단위 검증은 [test/index.html](build/reports/tests/test/index.html)
 - 환경·대기 시간과 알려진 차이: [build/reports/compatibility/summary.json](build/reports/compatibility/summary.json)
 - Gradle 콘솔: 전체 빌드 실행 시간, v2 빌드·기동 횟수, 인증 요청 대기 밀리초, 알려진 차이 개수
 - `environmentMillis`: 컨테이너 준비 시작부터 공유 환경 종료 처리 전까지의 벽시계 시간이다. 개별 테스트 실행 시간의 합과 다르다.
@@ -29,7 +29,7 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 404·401 케이스만 재실행할 수 있다.
 
 ~~~powershell
-.\gradlew.bat test --tests '*ResponseComparisonTest' --rerun-tasks --console=plain
+.\gradlew.bat comparisonTest --tests '*ResponseComparisonTest' --rerun --console=plain
 ~~~
 
 기존 4단계 인증 검증은 `--tests '*ApiCompatibilityIntegrationTest'`,

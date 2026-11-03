@@ -22,6 +22,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpMethod;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@org.junit.jupiter.api.Tag("v2-comparison")
 class RefreshFlowTest extends AuthenticationSupport {
     private static final DatabaseSnapshot.Rules DEFAULT = DatabaseSnapshot.Rules.defaults();
 

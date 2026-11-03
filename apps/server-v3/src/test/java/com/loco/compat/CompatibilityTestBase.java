@@ -73,7 +73,7 @@ public abstract class CompatibilityTestBase {
     protected ResponseEntity<JsonNode> request(String base, String path, HttpMethod method,
                                                String token, Object body, boolean rateLimitProbe) {
         try {
-            var budget = base.equals(v2Url()) ? environment().budget : environment().v3Budget;
+            var budget = environment().v2Enabled() && base.equals(v2Url()) ? environment().budget : environment().v3Budget;
             if (rateLimitProbe) budget.recordUnchecked(path);
             else budget.before(method.name(), path);
             var headers = new HttpHeaders();

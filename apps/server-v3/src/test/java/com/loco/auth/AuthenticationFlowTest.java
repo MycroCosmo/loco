@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpMethod;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@org.junit.jupiter.api.Tag("v2-comparison")
 class AuthenticationFlowTest extends AuthenticationSupport {
     @Test
     void registerThenLoginPreservesBothIssuedTokensAndUserState() throws Exception {

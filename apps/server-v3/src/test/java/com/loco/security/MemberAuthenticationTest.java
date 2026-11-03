@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpMethod;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@org.junit.jupiter.api.Tag("v2-comparison")
 class MemberAuthenticationTest extends CompatibilityTestBase {
     private String token;
     @BeforeEach void seed() throws Exception {

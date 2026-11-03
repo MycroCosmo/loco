@@ -64,6 +64,8 @@ public final class SharedHarness implements BeforeAllCallback {
         public final AuthRequestBudget v3Budget = new AuthRequestBudget();
         public final ObjectMapper json = new ObjectMapper();
         private final long started = System.nanoTime();
+        private final boolean v2Enabled = Boolean.getBoolean("compat.v2.enabled");
+        private final List<Side> activeSides = v2Enabled ? List.of(Side.values()) : List.of(Side.V3);
         private final Network network = Network.newNetwork();
         private final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
                 DockerImageName.parse("postgis/postgis:17-3.6").asCompatibleSubstituteFor("postgres"))
@@ -87,37 +89,43 @@ public final class SharedHarness implements BeforeAllCallback {
             try {
                 postgres.start();
                 try (var connection = postgres.createConnection("")) {
-                    connection.createStatement().execute("CREATE DATABASE loco_v2_test");
+                    if (v2Enabled) connection.createStatement().execute("CREATE DATABASE loco_v2_test");
                     connection.createStatement().execute("CREATE DATABASE loco_v3_test");
                 }
-                for (Side side : Side.values()) {
+                for (Side side : activeSides) {
                     Flyway.configure().dataSource(url(side), username(), databasePassword())
                             .locations("classpath:db/migration").target("1").load().migrate();
                 }
-                mailpit.start();
-                v2 = new GenericContainer<>(v2Image()).withNetwork(network).withExposedPorts(3000)
-                        .withEnv("DATABASE_URL", "postgresql://db:5432/loco_v2_test?schema=public")
-                        .withEnv("DB_USERNAME", username()).withEnv("DB_PASSWORD", databasePassword())
-                        .withEnv("JWT_SECRET", secret).withEnv("HOST", "0.0.0.0").withEnv("PORT", "3000")
-                        .withEnv("SMTP_HOST", "mailpit").withEnv("SMTP_PORT", "1025")
-                        .withEnv("SMTP_SECURE", "false").withEnv("SMTP_USER", "sender@example.test")
-                        .withEnv("SMTP_PASS", UUID.randomUUID().toString())
-                        .waitingFor(Wait.forLogMessage(".*LOCO server running.*\\n", 1))
-                        .withStartupTimeout(Duration.ofMinutes(2));
-                v2.start();
-                if (!refreshV2Port()) throw new IllegalStateException("v2 HTTP 포트가 게시되지 않음");
-                v2Starts++;
-                var hash = v2.execInContainer("node", "-e",
-                        "require('bcrypt').hash(process.argv[1],10).then(h=>process.stdout.write(h))", password);
-                if (hash.getExitCode() != 0 || !hash.getStdout().matches("\\$2[aby]\\$10\\$.{53}")) {
-                    throw new IllegalStateException("테스트 bcrypt 해시 생성 실패");
-                }
-                passwordHash = hash.getStdout();
+                if (v2Enabled) startComparisonServices();
+                else passwordHash = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(
+                        org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder.BCryptVersion.$2B, 10).encode(password);
                 reset("compat/seed.sql");
             } catch (Exception exception) {
                 stopContainers();
-                throw new IllegalStateException("공유 비교 환경 준비 실패", exception);
+                throw new IllegalStateException("공유 테스트 환경 준비 실패", exception);
             }
+        }
+
+        private void startComparisonServices() throws Exception {
+            mailpit.start();
+            v2 = new GenericContainer<>(v2Image()).withNetwork(network).withExposedPorts(3000)
+                    .withEnv("DATABASE_URL", "postgresql://db:5432/loco_v2_test?schema=public")
+                    .withEnv("DB_USERNAME", username()).withEnv("DB_PASSWORD", databasePassword())
+                    .withEnv("JWT_SECRET", secret).withEnv("HOST", "0.0.0.0").withEnv("PORT", "3000")
+                    .withEnv("SMTP_HOST", "mailpit").withEnv("SMTP_PORT", "1025")
+                    .withEnv("SMTP_SECURE", "false").withEnv("SMTP_USER", "sender@example.test")
+                    .withEnv("SMTP_PASS", UUID.randomUUID().toString())
+                    .waitingFor(Wait.forLogMessage(".*LOCO server running.*\\n", 1))
+                    .withStartupTimeout(Duration.ofMinutes(2));
+            v2.start();
+            if (!refreshV2Port()) throw new IllegalStateException("v2 HTTP 포트가 게시되지 않음");
+            v2Starts++;
+            var hash = v2.execInContainer("node", "-e",
+                    "require('bcrypt').hash(process.argv[1],10).then(h=>process.stdout.write(h))", password);
+            if (hash.getExitCode() != 0 || !hash.getStdout().matches("\\$2[aby]\\$10\\$.{53}")) {
+                throw new IllegalStateException("테스트 bcrypt 해시 생성 실패");
+            }
+            passwordHash = hash.getStdout();
         }
 
         private ImageFromDockerfile v2Image() {
@@ -134,14 +142,20 @@ public final class SharedHarness implements BeforeAllCallback {
         }
 
         public String url(Side side) {
+            if (side == Side.V2) requireV2();
             return "jdbc:postgresql://" + postgres.getHost() + ":" + postgres.getMappedPort(5432)
                     + (side == Side.V2 ? "/loco_v2_test" : "/loco_v3_test");
         }
         public String username() { return postgres.getUsername(); }
         public String databasePassword() { return postgres.getPassword(); }
-        public String v2Url() { return "http://" + v2.getHost() + ":" + v2Port; }
-        public String smtpHost() { return mailpit.getHost(); }
+        public boolean v2Enabled() { return v2Enabled; }
+        private void requireV2() {
+            if (!v2Enabled) throw new IllegalStateException("v2 접근에는 @Tag(\"v2-comparison\")와 comparisonTest 실행이 필요합니다.");
+        }
+        public String v2Url() { requireV2(); return "http://" + v2.getHost() + ":" + v2Port; }
+        public String smtpHost() { return v2Enabled ? mailpit.getHost() : "127.0.0.1"; }
         public void restartV2ForCase() {
+            requireV2();
             org.testcontainers.DockerClientFactory.instance().client().restartContainerCmd(v2.getContainerId()).withTimeout(1).exec();
             long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
             boolean ready = false;
@@ -167,8 +181,9 @@ public final class SharedHarness implements BeforeAllCallback {
             v2Port = Integer.parseInt(bindings[0].getHostPortSpec());
             return true;
         }
-        public int smtpPort() { return mailpit.getMappedPort(1025); }
+        public int smtpPort() { return v2Enabled ? mailpit.getMappedPort(1025) : 0; }
         public JsonNode nodeCheck(String script, Object input) throws Exception {
+            requireV2();
             var result = v2.execInContainer("node", "-e", script, json.writeValueAsString(input));
             if (result.getExitCode() != 0) throw new AssertionError("v2 라이브러리 교차 검증 실행 실패");
             return json.readTree(result.getStdout());
@@ -178,7 +193,7 @@ public final class SharedHarness implements BeforeAllCallback {
         }
 
         public void reset(String seed) throws Exception {
-            for (Side side : Side.values()) {
+            for (Side side : activeSides) {
                 try (var connection = connect(side)) {
                     connection.setAutoCommit(false);
                     var tables = DatabaseSnapshot.tables(connection);
@@ -212,11 +227,12 @@ public final class SharedHarness implements BeforeAllCallback {
             return jwt.serialize();
         }
 
-        public void clearMail() throws Exception { mailRequest("DELETE", "/api/v1/messages"); }
+        public void clearMail() throws Exception { if (v2Enabled) mailRequest("DELETE", "/api/v1/messages"); }
         public JsonNode mailRequest(String method, String path) throws Exception {
             return mailRequest(method, path, null);
         }
         public JsonNode mailRequest(String method, String path, Object body) throws Exception {
+            requireV2();
             var request = HttpRequest.newBuilder(URI.create("http://" + mailpit.getHost() + ":"
                     + mailpit.getMappedPort(8025) + path)).timeout(Duration.ofSeconds(10))
                     .header("Content-Type", "application/json")
@@ -252,7 +268,7 @@ public final class SharedHarness implements BeforeAllCallback {
                         "v2AuthWaitMillis", budget.waitedMillis(), "v3AuthWaitMillis", v3Budget.waitedMillis(),
                         "v2Builds", v2Builds, "v2Starts", v2Starts, "v2Restarts", v2Restarts,
                         "knownDifferences", knownDifferences,
-                        "throttleStrategy", "restart-between-cases", "recommendContainerRestart", false));
+                        "throttleStrategy", v2Enabled ? "restart-between-cases" : "v3-only", "recommendContainerRestart", false));
             } finally { stopContainers(); }
         }
         private void stopContainers() {
