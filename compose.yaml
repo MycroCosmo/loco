@@ -1,0 +1,78 @@
+name: loco-v3
+
+services:
+  db:
+    image: postgis/postgis:17-3.6
+    cpus: 2
+    mem_limit: 4g
+    command: ["postgres", "-c", "shared_buffers=1GB"]
+    environment:
+      POSTGRES_DB: loco
+      POSTGRES_USER: ${DB_USERNAME:?Set DB_USERNAME in the root .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the root .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    tmpfs:
+      - /docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  v3:
+    build:
+      context: .
+      dockerfile: infra/docker/server-v3.Dockerfile
+    cpus: 2
+    mem_limit: 1536m
+    environment:
+      PORT: 8081
+      DB_URL: jdbc:postgresql://db:5432/loco
+      DB_USERNAME: ${DB_USERNAME:?Set DB_USERNAME in the root .env}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the root .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env}
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--output", "/dev/null", "http://127.0.0.1:8081/api/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  v2:
+    build:
+      context: .
+      dockerfile: infra/docker/server-v2.Dockerfile
+    cpus: 2
+    mem_limit: 1536m
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://db:5432/loco?schema=public
+      DB_USERNAME: ${DB_USERNAME:?Set DB_USERNAME in the root .env}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the root .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env}
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - v2-uploads:/app/uploads
+    depends_on:
+      v3:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/users/me').then(r => process.exit(r.status === 401 ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  postgres-data:
+  v2-uploads:

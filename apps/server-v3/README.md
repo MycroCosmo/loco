@@ -1,4 +1,4 @@
-# LOCO v3 — Spring 기반과 Flyway V1
+# LOCO v3 — Spring 기반, Flyway V1, Docker Compose
 
 현재 구현 범위는 `GET /api/health` 하나다. v2와 Flutter 코드는 변경하지 않는다.
 빈 PostgreSQL DB에는 Flyway V1으로 v2와 같은 업무 테이블을 만든다. JPA 엔티티는 아직 만들지 않는다.
@@ -33,6 +33,9 @@ V1 비교 테스트는 `target("1")`로 적용 범위를 고정해, V2 이후 �
 DB 시작 흐름: DB 연결 → Flyway 이력 확인 및 V1 적용 → JPA 초기화 → HTTP 요청 처리.
 `ddl-auto: none`을 유지하므로 업무 스키마 변경은 Flyway가 담당한다.
 
+Compose 기동 흐름: DB의 TCP 준비 확인 → v3 시작·Flyway 적용·health 확인 → v2 시작.
+`depends_on`의 `service_healthy` 조건으로 단순 실행 순서가 아니라 준비 완료까지 기다린다.
+
 ## 나머지 파일의 역할
 
 | 파일 | 필요한 이유 / 핵심 설정 |
@@ -45,6 +48,17 @@ DB 시작 흐름: DB 연결 → Flyway 이력 확인 및 V1 적용 → JPA 초�
 | `.gitignore` | 빌드 결과·Gradle 캐시·실제 `.env`의 커밋을 방지한다. |
 | `.gitattributes` | Wrapper 스크립트의 OS별 줄바꿈과 JAR의 바이너리 처리를 지정한다. |
 | `README.md` | 실행·검증 방법, 결정 이유, 학습 순서를 기록한다. |
+
+저장소 루트의 Compose 관련 파일:
+
+| 파일 | 필요한 이유 / 핵심 설정 |
+| --- | --- |
+| `compose.yaml` | DB 하나에 v2·v3를 연결한다. CPU·메모리, healthcheck, 기동 순서, 데이터 볼륨을 정의한다. |
+| `.env.example` | Compose용 DB 계정·비밀번호와 공통 JWT 키의 이름만 제공한다. `apps/server-v3/.env.example`은 v3를 호스트에서 단독 실행할 때 사용한다. |
+| `.dockerignore` | 서버 소스와 Docker 파일만 빌드에 전달하고 실제 `.env`·캐시·빌드 결과·모바일 파일을 제외한다. |
+| `infra/docker/server-v2.Dockerfile` | Node 22에서 기존 v2 소스를 빌드한다. `prisma generate`는 클라이언트 코드 생성이며 DB 스키마를 변경하지 않는다. 실행 이미지에는 개발 의존성을 제거한다. |
+| `infra/docker/server-v3.Dockerfile` | Java 21에서 Gradle Wrapper로 JAR를 빌드하고 JRE로 실행한다. 빌드 시에는 테스트용 Prisma를 설치하지 않는다. curl은 컨테이너 healthcheck에 사용한다. |
+| `infra/docker/start-v2.cjs` | DB 계정·비밀번호를 URL 인코딩한 뒤 기존 v2 진입점을 실행한다. 비밀번호의 `@`, `:`, `#` 등이 접속 URL을 깨뜨리지 않도록 한다. |
 
 ## 자동 검증
 
@@ -159,9 +173,68 @@ $env:DATABASE_URL = $null
 
 빈 DB로 시작하는 경우에는 이 수동 baseline 절차가 필요 없다.
 
-## 직접 서버를 띄워 확인
+## Docker Compose로 v2·v3 함께 실행
 
-Compose는 3단계에서 추가한다. 지금은 기존 DB에 영향을 주지 않는 임시 PostGIS 컨테이너로 확인한다.
+아래 명령은 **저장소 루트**에서 실행한다. Docker가 켜져 있고 호스트의 3000·8081 포트가 비어 있어야 한다.
+첫 실행에는 `.env.example`을 `.env`로 복사하고 `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` 값을 채운다. 기존 `.env`는 덮어쓰지 않는다.
+JWT 비밀 값은 충분히 긴 무작위 값으로 설정하며 v2·v3에 같은 값이 주입된다.
+`.env`에서 `$` 등 치환될 수 있는 문자를 값에 포함할 때는 작은따옴표로 감싼다.
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+# .env의 빈 값을 채운 뒤 실행
+docker compose config --quiet
+docker compose up --build --detach --wait --wait-timeout 180
+docker compose ps
+```
+
+`docker compose up`으로도 빌드와 기동이 가능하다. 이미지를 만든 뒤 소스를 수정했다면 `--build`로 다시 빌드한다.
+프로젝트 이름은 `loco-v3`이며, 기대 결과는 `db`, `v3`, `v2` 세 서비스 모두 `healthy`다.
+필수 환경변수가 비어 있으면 기본 비밀 값으로 실행하지 않고 Compose가 오류로 중단한다.
+
+| 서비스 | 호스트 주소 | CPU | 메모리 |
+| --- | --- | --- | --- |
+| v2 | `http://localhost:3000/api` | 2 | 1.5GB (`1536m`) |
+| v3 | `http://localhost:8081/api` | 2 | 1.5GB (`1536m`) |
+| DB | 컨테이너 내부 `db:5432`, DB 이름 `loco` | 2 | 4GB |
+
+DB는 호스트 포트를 열지 않으며, 두 앱의 포트도 로컬 PC에서만 접속하도록 바인딩한다.
+`shared_buffers=1GB`는 DB 페이지 캐시에 할당하는 값이며 DB 컨테이너 전체 메모리 제한과 다르다.
+JVM 힙과 Node 메모리는 우선 런타임 기본값을 사용하며 성능 실험 전에는 추가 튜닝하지 않는다.
+
+스키마는 **v3의 Flyway만** 관리한다. v2 기동에는 `prisma db push`나 migration 명령을 넣지 않는다.
+DB healthcheck는 초기화용 임시 소켓 서버를 준비 완료로 오인하지 않도록 TCP로 확인한다.
+v3가 마이그레이션을 마치고 `/api/health`에 200을 반환해야 v2가 시작한다.
+v2에는 health API를 추가하지 않고 기존 보호 경로 `/api/users/me`의 401 응답으로 기동을 확인한다.
+이 순서 보장은 시작 시점에 적용된다. v3가 나중에 중단돼도 이미 실행 중인 v2를 자동으로 중단하지는 않는다.
+
+```powershell
+curl.exe -i http://localhost:8081/api/health
+curl.exe -i http://localhost:3000/api/users/me
+docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SHOW shared_buffers"'
+docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT version, type, success FROM flyway_schema_history"'
+docker inspect (docker compose ps -q) --format '{{.Name}} CPU={{.HostConfig.NanoCpus}} Memory={{.HostConfig.Memory}}'
+```
+
+기대 결과는 v3의 `200 {"status":"ok"}`, v2의 401, `shared_buffers`의 `1GB`, Flyway 이력의 `1 / SQL / t`다.
+Docker inspect의 CPU는 모두 `2000000000`(2 CPU), 메모리는 앱 각각 `1610612736`, DB `4294967296` 바이트다.
+v3의 JWT 검증은 아직 4단계 작업이며, 현재는 두 앱에 같은 비밀 값을 주입하는 구성까지만 완료한다.
+외부 API 인증 정보는 주입하지 않으며 이 확인 과정에서는 카카오·FCM·이메일 API를 호출하지 않는다.
+
+DB와 v2 업로드 파일은 각각 named volume에 저장한다. 다음 명령으로 종료해도 데이터는 남는다.
+
+```powershell
+docker compose down
+docker compose up --detach --wait --wait-timeout 180
+```
+
+전체 로컬 데이터를 버리고 새 DB로 시작할 때만 `docker compose down --volumes`를 사용한다.
+기존 볼륨에서는 `.env`의 DB 비밀번호를 바꾸는 것만으로 DB 계정 비밀번호가 변경되지는 않는다.
+Flyway 이력이 없는 기존 DB를 가져오는 경우에는 앞의 스키마 비교·최초 baseline 절차를 먼저 수행한다.
+
+## v3만 호스트에서 따로 실행 (선택)
+
+아래는 Compose를 내린 뒤 v3를 호스트에서 따로 실행할 때 사용하는 선택 절차다. 기존 DB에 영향을 주지 않는 임시 PostGIS 컨테이너로 확인한다.
 아래 명령은 `apps/server-v3`에서 실행한다. 55432 포트가 비어 있어야 한다.
 
 ```powershell
@@ -183,7 +256,7 @@ docker exec loco-v3-step1-db pg_isready -h 127.0.0.1 -U loco -d loco
 
 `/docker-entrypoint-initdb.d`를 빈 임시 디렉터리로 덮어 이미지의 공간 확장 설치 스크립트를 실행하지 않는다.
 PostgreSQL 자체의 DB·사용자 초기화는 그대로 수행한다. 이후 스키마 변경은 Flyway가 담당한다.
-CPU·메모리 제한과 `shared_buffers` 설정은 3단계 Docker Compose에서 적용한다.
+CPU·메모리 제한과 `shared_buffers` 설정은 Docker Compose에서 적용하며 이 임시 컨테이너에는 적용하지 않는다.
 
 `accepting connections`가 나오면 같은 터미널에서 서버를 시작한다. 초기화 중이면 `pg_isready`를 다시 실행한다.
 
@@ -229,7 +302,9 @@ Spring은 실행 디렉터리의 `.env`를 Java properties 형식으로 읽으�
 | 8081, context path `/api`, YAML | v2의 3000 및 앱 개발용 8080과 분리한다. API prefix는 설정 한 곳에서 적용한다. |
 | 직접 작성한 health, GET health만 공개 | HTTP 요청 흐름을 이해하기 쉽고 기능 API 이관 없이 동작을 확인할 수 있다. |
 | PostgreSQL 17, PostGIS 17-3.6 이미지 + 공간 확장 미활성화 | 사용자가 확정했다. 맞춰야 할 기존 운영 DB 버전은 없다. 공간 확장 도입은 전체 로드맵 2단계로 미룬다. |
-| DB CPU 2 / 메모리 4GB / shared_buffers 1GB | 3단계 Docker Compose에서 적용한다. 테스트에는 자원 제한 설정·검증을 넣지 않는다. |
+| v2·v3 각각 CPU 2 / 메모리 1.5GB | 사용자가 v2도 v3와 같은 제한으로 선택했다. Compose에 적용한다. |
+| DB CPU 2 / 메모리 4GB / shared_buffers 1GB | Compose에 적용한다. JUnit 테스트에는 자원 제한 설정·검증을 넣지 않는다. |
+| v3 Flyway만 스키마 관리, DB → v3 → v2 순서 | 사용자가 선택했다. v2와 v3가 같은 DB를 쓰되 스키마 변경 주체는 하나로 유지한다. |
 | Hibernate DDL 비활성화, Flyway V1으로 스키마 생성 | Prisma 생성 SQL을 그대로 사용하며 JPA 엔티티는 아직 만들지 않는다. |
 | baselineOnMigrate 기본 false, 기존 DB 최초 실행에만 true | 사용자가 선택했다. 스키마 비교 후에만 기존 DB를 V1 상태로 인정한다. 별도 Flyway CLI를 추가하지 않는다. |
 | JUnit에서 고정된 Prisma CLI로 스키마 비교 | 사용자가 선택했다. Node/npm이 필요하며 `gradlew test`로 DB 동등성까지 재검증한다. |
@@ -244,6 +319,7 @@ Spring은 실행 디렉터리의 `.env`를 Java properties 형식으로 읽으�
 - JPA의 `ddl-auto`, `open-in-view`: 스키마 변경과 DB 세션 수명을 제어하는 설정.
 - JUnit 5, Testcontainers, 실제 HTTP 통합 테스트: 격리된 DB로 외부 동작을 검증하는 방법.
 - 이미지 초기화 스크립트와 PostgreSQL 확장.
+- Docker 다단계 빌드, Compose healthcheck·depends_on, named volume, CPU·메모리 제한과 shared_buffers.
 - Flyway 버전 SQL과 baseline의 차이, 이력 테이블·체크섬·재실행 방지.
 - Prisma 스키마와 실제 DB의 차이 비교, 클라이언트에서 처리하는 UUID·updatedAt.
 
@@ -251,12 +327,13 @@ Spring은 실행 디렉터리의 `.env`를 Java properties 형식으로 읽으�
 
 Prisma 기반 비교 테스트는 이관 기간 동안 기본 `test`에 포함한다. 이관이 끝나면 별도 태그로 분리할 예정이다.
 
-2단계를 확인받은 뒤 3단계에서 v2·v3가 PostgreSQL 17 DB 하나를 공유하는 Docker Compose를 만든다.
+3단계를 확인받은 뒤 4단계에서 v2 JWT 검증과 에러 응답 호환을 구현한다.
 작업 기록은 노션에서 관리한다.
 
 ### 4단계 설계 메모
 
 - 현재 `anyRequest().denyAll()` 때문에 `/api` 아래 존재하지 않는 경로는 403(v2는 404), 토큰 없는 보호 경로도 403(v2는 401)이 된다. `/api` 밖의 `/health`가 반환하는 404와는 구분한다.
+- v2의 인증 없는 `GET /api/users/me` 응답은 `{"message":"Unauthorized","statusCode":401}`이며 `error` 키가 없다. 4단계 에러 응답은 키를 일괄 추가하지 않고 경로·상황별 실제 v2 응답과 맞춘다.
 - 4단계에서 (a) 보호 경로 목록 지정, (b) 전체 인증, (c) 필터는 토큰 확인만 하고 권한은 `@PreAuthorize`로 처리하는 방식 중 선택한다. 그때 각 선택지의 장단점을 다시 제시하고 사용자 답을 기다린다.
 - 앱 API용 필터 체인은 CSRF를 비활성화해야 한다. 관리자 세션용 체인의 CSRF 정책은 별도로 다룬다.
 - `/api` prefix를 현재처럼 `context-path`로 둘지 Spring MVC path prefix로 둘지도 그때 함께 비교한다.
@@ -266,3 +343,6 @@ Prisma 기반 비교 테스트는 이관 기간 동안 기본 `test`에 포함�
 [Testcontainers 연동](https://docs.spring.io/spring-boot/3.5/reference/testing/testcontainers.html),
 [Flyway baselineOnMigrate](https://documentation.red-gate.com/flyway/reference/configuration/flyway-namespace/flyway-baseline-on-migrate-setting),
 [Prisma migrate diff](https://docs.prisma.io/docs/cli/migrate/diff).
+
+Compose 참고: [기동 순서와 healthcheck](https://docs.docker.com/compose/how-tos/startup-order/),
+[서비스 자원 제한](https://docs.docker.com/reference/compose-file/services/).
