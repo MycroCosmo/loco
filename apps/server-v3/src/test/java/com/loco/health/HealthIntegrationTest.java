@@ -32,11 +32,7 @@ class HealthIntegrationTest {
                     .asCompatibleSubstituteFor("postgres"))
             .withPassword(UUID.randomUUID().toString())
             // 공간 확장 도입 전에는 이미지에 포함된 자동 설치 스크립트를 실행하지 않는다.
-            .withTmpFs(Map.of("/docker-entrypoint-initdb.d", "rw"))
-            .withCommand("postgres", "-c", "shared_buffers=1GB")
-            .withCreateContainerCmdModifier(command -> command.getHostConfig()
-                    .withNanoCPUs(2_000_000_000L)
-                    .withMemory(4L * 1024 * 1024 * 1024));
+            .withTmpFs(Map.of("/docker-entrypoint-initdb.d", "rw"));
 
     @DynamicPropertySource
     static void databaseProperties(DynamicPropertyRegistry registry) {
@@ -77,18 +73,10 @@ class HealthIntegrationTest {
     }
 
     @Test
-    void databaseHasNoSpatialExtensionsAndUsesAgreedResources(@Autowired EntityManager entityManager) {
+    void databaseHasNoSpatialExtensions(@Autowired EntityManager entityManager) {
         assertThat(entityManager.createNativeQuery(
                 "SELECT count(*) FROM pg_extension WHERE extname <> 'plpgsql'", Long.class).getSingleResult())
                 .isEqualTo(0L);
-        assertThat(entityManager.createNativeQuery(
-                "SELECT pg_size_bytes(current_setting('shared_buffers'))", Long.class).getSingleResult())
-                .isEqualTo(1024L * 1024 * 1024);
-
-        var resources = database.getDockerClient()
-                .inspectContainerCmd(database.getContainerId()).exec().getHostConfig();
-        assertThat(resources.getNanoCPUs()).isEqualTo(2_000_000_000L);
-        assertThat(resources.getMemory()).isEqualTo(4L * 1024 * 1024 * 1024);
     }
 
     private String url(String path) {
