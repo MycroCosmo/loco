@@ -1,7 +1,7 @@
 # 1번 묶음: 인증
 
-현재 구현 범위는 인증 엔티티와 POST /api/auth/register·login이다. 성공 상태는 v2와 같은 201이다.
-refresh·logout은 다음 구현 단위다. 스키마와 Flyway V1은 변경하지 않는다.
+현재 구현 범위는 인증 엔티티와 POST /api/auth/register·login·refresh·logout이다. 성공 상태는 v2와 같은 201이다.
+재발급·로그아웃까지 검증한 뒤 사용자 확인을 기다린다. 스키마와 Flyway V1은 변경하지 않는다.
 
 ## 확정한 설계
 
@@ -65,3 +65,22 @@ ApiProblem은 업무 오류를, ApiExceptionHandler는 업무·검증·파싱·�
 AuthenticationCases는 실제 API 오류 사례, AuthenticationFlowTest는 연속 발급·DB·교차 인증, InputCompatibilityTest는 v2 라이브러리와의 교차 검증이다.
 비밀번호 해시는 단순 제외하지 않고 형식·cost·평문 일치를 확인한다. 여러 refreshToken은 캡처한 응답 토큰의 해시로 역할을 붙여 정렬한다.
 JDK HTTP 클라이언트로 POST 401 응답 본문까지 비교한다. HttpURLConnection streaming 모드의 인증 오류 본문 유실을 피하기 위한 설정이다.
+
+## 재발급·로그아웃 흐름
+
+AuthService.refresh는 해시로 토큰을 찾고 폐기·만료·회원 상태를 검사한다. 공개 API의 업무 검증이며 공통 JWT 인증용 회원 조회와 구분한다.
+RefreshTokenRotation은 별도 Spring 빈이다. 프록시의 @Transactional 안에서 `id = :id AND revokedAt IS NULL` 조건부 UPDATE와 새 토큰 INSERT를 묶는다.
+UPDATE 건수가 1인 요청만 새 토큰을 저장한다. 같은 토큰의 동시 요청은 하나만 201, 나머지는 401이다.
+새 토큰 저장 실패 시 이전 토큰 폐기도 롤백된다. v2처럼 사전 조회는 트랜잭션 밖, JWT 서명은 커밋 뒤에 수행한다.
+로그아웃은 전달된 해시의 미폐기 토큰만 수정한다. 토큰 생략·null·빈 값·없는 토큰·반복 요청도 201이며 다른 토큰은 유지한다.
+두 API는 공개 경로여서 Bearer가 없어도 된다. 추가 필드·잘못된 타입은 AuthInputs가 v2의 DTO 오류 배열로 반환한다.
+HTTP JSON 본문은 Express의 기본 strict 규칙에 맞춰 객체·배열만 받는다. 깨진 JSON·null·boolean 본문의 400 문구는 케이스별 예외로 비교한다.
+
+테스트 파일은 다음 순서로 읽는다.
+
+- AuthenticationSupport: 발급 응답의 JWT 서명·claim·만료와 DB 해시를 검증하고, 토큰별 역할로 DB 행을 정렬한다. 회원가입·로그인·재발급 테스트가 공유한다.
+- RefreshCases / RefreshComparisonTest: refresh·logout의 입력 오류와 데이터 불변 사례 11건이다.
+- RefreshFlowTest: 로그인 → 회전 → 이전 토큰 거절 → 로그아웃, 만료·폐기·탈퇴 상태, 멱등성, 동시 요청과 롤백 등 9건이다.
+- compat/DatabaseRequestRace: PostgreSQL 행을 잠근 뒤 두 HTTP 요청이 실제 DB 잠금 대기에 도달한 것을 관측하고 잠금을 푼다. 특정 UPDATE 문장 형태를 요구하지 않으므로 이후 비관적 락 비교 실험에서도 재사용한다.
+
+테스트 HTTP 클라이언트 설정은 요청 전에 완료하고 경쟁 요청 안에서는 바꾸지 않는다. 새 토큰 INSERT를 실패시키는 테스트용 DB 트리거는 finally에서 제거한다.

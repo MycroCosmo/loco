@@ -17,11 +17,23 @@ public class AuthController {
     @PostMapping("/auth/register")
     @ResponseStatus(HttpStatus.CREATED)
     public TokenIssuer.Pair register(@RequestBody(required = false) JsonNode body) {
-        return service.register(AuthInputs.register(body));
+        return service.register(AuthInputs.register(AuthInputs.httpBody(body)));
     }
     @PostMapping("/auth/login")
     @ResponseStatus(HttpStatus.CREATED)
     public TokenIssuer.Pair login(@RequestBody(required = false) JsonNode body) {
-        return service.login(AuthInputs.login(body));
+        return service.login(AuthInputs.login(AuthInputs.httpBody(body)));
+    }
+
+    @PostMapping("/auth/refresh")
+    @ResponseStatus(HttpStatus.CREATED)
+    public TokenIssuer.Pair refresh(@RequestBody(required = false) JsonNode body) {
+        return service.refresh(AuthInputs.refresh(AuthInputs.httpBody(body)).refreshToken());
+    }
+
+    @PostMapping("/auth/logout")
+    @ResponseStatus(HttpStatus.CREATED)
+    public java.util.Map<String, String> logout(@RequestBody(required = false) JsonNode body) {
+        return service.logout(AuthInputs.logout(AuthInputs.httpBody(body)).refreshToken());
     }
 }

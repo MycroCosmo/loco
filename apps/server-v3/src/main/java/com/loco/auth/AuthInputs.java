@@ -10,7 +10,30 @@ import com.loco.web.ApiProblem;
 public final class AuthInputs {
     public record Register(String email, String password, String nickname) { }
     public record Login(String email, String password) { }
+    public record Refresh(String refreshToken) { }
+    public record Logout(String refreshToken) { }
     private AuthInputs() { }
+
+    public static JsonNode httpBody(JsonNode body) {
+        // Express JSON parser의 strict 모드처럼 JSON 원시 값은 DTO 검증 전에 거절한다.
+        if (body != null && !body.isObject() && !body.isArray()) throw ApiProblem.badRequest("Malformed JSON");
+        return body;
+    }
+
+    public static Refresh refresh(JsonNode body) {
+        var input = new Input(body, Set.of("refreshToken"));
+        input.string("refreshToken", null, null);
+        input.finish();
+        return new Refresh(input.text("refreshToken"));
+    }
+    public static Logout logout(JsonNode body) {
+        var input = new Input(body, Set.of("refreshToken"));
+        if (!input.body.path("refreshToken").isMissingNode() && !input.body.path("refreshToken").isNull()) {
+            input.string("refreshToken", null, null);
+        }
+        input.finish();
+        return new Logout(input.text("refreshToken"));
+    }
 
     public static Register register(JsonNode body) {
         var input = new Input(body, Set.of("email", "password", "nickname"));

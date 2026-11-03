@@ -1,10 +1,10 @@
 # LOCO v3 — Spring 기반과 v2 인증·오류 호환
 
-현재 구현 API는 `GET /api/health`, `POST /api/auth/register`, `POST /api/auth/login`이다. 승인된 v2 기준 갱신 외에는 v2와 Flutter 코드를 변경하지 않는다.
+현재 구현 API는 `GET /api/health`, `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout`이다. 승인된 v2 기준 갱신 외에는 v2와 Flutter 코드를 변경하지 않는다.
 빈 PostgreSQL DB에는 Flyway V1으로 v2와 같은 업무 테이블을 만든다. 인증용 JPA 엔티티는 기존 스키마에 매핑한다. 자세한 설계와 읽는 순서는 [인증 문서](AUTHENTICATION.md)를 참고한다.
 DB 기준은 사용자가 확정한 PostgreSQL 17(`postgis/postgis:17-3.6`)이다. 맞춰야 할 기존 운영 DB 버전은 없다.
 JWT 검증과 v2의 401·404·ValidationPipe 400 응답 기반을 구현했다.
-회원가입·로그인은 실제 API다. 사용자 조회 등 보호 경로는 아직 테스트 대역이며, refresh·logout은 다음 구현 단위다.
+회원가입·로그인·재발급·로그아웃은 실제 API다. 사용자 조회 등 보호 경로는 아직 테스트 대역이다.
 
 5단계 비교 하네스의 설계·실행·케이스 추가 방법은 [COMPARISON_TESTS.md](COMPARISON_TESTS.md)에 정리했다.
 v2 컨테이너를 공유하고, 같은 Flyway V1으로 만든 두 DB에서 응답과 데이터를 비교한다.
@@ -97,7 +97,7 @@ Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·D
 
 기대 결과:
 
-- `BUILD SUCCESSFUL`, 총 77건 중 성공 76개·실패 0개·알려진 차이 1개. 기존 35개 검증도 포함한다.
+- `BUILD SUCCESSFUL`, 총 97건 중 성공 96개·실패 0개·알려진 차이 1개. 기존 35개 검증도 포함한다.
 - 알려진 차이는 로그인 11번째 요청의 v2 429 / v3 제한 미구현이다. 실제 요청 후 JUnit의 aborted/skipped로 표시하며 성공에 포함하지 않는다.
 - 인증 없는 `/api/health`: 200, JSON 구조와 값이 정확히 `{"status":"ok"}`.
 - `/health`: 404. `/api`를 거치지 않으면 컨트롤러에 접근할 수 없다.

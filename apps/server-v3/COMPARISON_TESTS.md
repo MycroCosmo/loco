@@ -15,8 +15,8 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 .\gradlew.bat test bootJar --rerun-tasks --console=plain
 ~~~
 
-전체 검증은 77건이다. 기존 하네스·엔티티 62건과 회원가입·로그인 검증 15건이 포함된다.
-기대 결과는 **성공 76 / 실패 0 / 알려진 차이 1**이다.
+전체 검증은 97건이다. 기존 하네스·엔티티 62건, 회원가입·로그인 검증 15건, 재발급·로그아웃 검증 20건이 포함된다.
+기대 결과는 **성공 96 / 실패 0 / 알려진 차이 1**이다.
 알려진 차이도 실제 요청을 실행한다. JUnit의 aborted/skipped 분류를 사용하지만 이름·이유를 명시하며 성공으로 집계하지 않는다.
 현재 항목은 로그인 11번째 요청의 v2 429 / v3 실제 로그인 400이다.
 
@@ -228,7 +228,7 @@ SQL 초기 데이터와 JSON 요청은 `src/test/resources/compat/` 아래에 �
 저장할 값이 누락/null이거나 이름이 중복되면 실패한다. 갱신 토큰은 `loginRefresh`, `rotatedRefresh`처럼 다른 이름을 쓴다.
 단계 이름도 중복을 금지하며 실패 결과에 케이스·단계 이름을 표시한다. 응답 원문과 비밀 값은 오류에 출력하지 않는다.
 
-아래는 **1번 묶음 구현 후 등록할 작성 예시**다. 현재 인증 API가 구현됐다는 뜻이 아니다.
+아래는 구현된 인증 API를 연결하는 작성 예시다. 실제 실행 케이스는 `auth/AuthenticationFlowTest`, `auth/RefreshFlowTest`에 있으며 DB 역할 규칙과 토큰 의미 검증도 함께 지정한다.
 `email`, `password`, `nickname`은 테스트에서 준비하는 값이다.
 
 ~~~java
@@ -257,7 +257,7 @@ ComparisonCase.named("1번 묶음: 회원가입 → 로그인 → 재발급")
 공개 refresh API 자체에는 Bearer가 필요 없다. `.authenticated()`와 `.bearer(...)`를 동시에 지정하면 실패한다.
 본문도 `.bodyResource(...)`와 `.body(...)` 중 하나만 지정한다.
 
-회원가입·로그인 시나리오는 bcrypt 의미 검증과 응답 토큰 해시 기반 역할 정렬을 사용한다. refresh 단계는 해당 API 이관 후 활성화한다.
+회원가입·로그인·재발급 시나리오는 bcrypt 의미 검증과 응답 토큰 해시 기반 역할 정렬을 사용한다. `auth/AuthenticationSupport`가 공통 규칙을 제공한다.
 비밀번호 의미 검증을 명시하지 않았거나 여러 토큰 행의 대응 기준이 없으면 자동 제외하지 않는다. databaseRules(values -> ...)로 각 서버의 캡처 값에서 규칙을 만들 수 있다. runCase는 서버별 ScenarioValues를 반환해 JWT 서명·claim·DB 해시 같은 추가 검증에 사용한다.
 지금 실행되는 시나리오 자체 검증은 피드백 쓰기 → 이전 메시지로 두 번째 쓰기 → 서버별 생성 ID를 사용한 없는 경로 요청이다.
 동일한 DB를 계속 사용하며 각 단계의 응답·DB 상태와 각 서버에서 생성된 ID의 실제 존재를 확인한다.

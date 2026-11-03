@@ -8,6 +8,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -34,6 +35,13 @@ public abstract class CompatibilityTestBase {
     @LocalServerPort protected int port;
     @Autowired protected TestRestTemplate client;
     @Autowired protected ObjectMapper mapper;
+
+    @BeforeEach
+    void configureHttpClient() {
+        var factory = new JdkClientHttpRequestFactory(HTTP);
+        factory.setReadTimeout(java.time.Duration.ofSeconds(10));
+        client.getRestTemplate().setRequestFactory(factory);
+    }
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
@@ -62,10 +70,6 @@ public abstract class CompatibilityTestBase {
             var headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             if (token != null) headers.setBearerAuth(token);
-            // HttpURLConnection의 streaming POST 401 본문 유실을 피한다.
-            var factory = new JdkClientHttpRequestFactory(HTTP);
-            factory.setReadTimeout(java.time.Duration.ofSeconds(10));
-            client.getRestTemplate().setRequestFactory(factory);
             var response = client.exchange(URI.create(base + path), method, new HttpEntity<>(body, headers), JsonNode.class);
             if (!rateLimitProbe && response.getStatusCode().value() == 429) {
                 throw new AssertionError("예상하지 않은 429: " + method + " " + path);
