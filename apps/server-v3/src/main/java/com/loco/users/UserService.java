@@ -10,7 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository users;
     private final Clock clock;
-    public UserService(UserRepository users, Clock clock) { this.users = users; this.clock = clock; }
+    private final com.loco.auth.RefreshTokenRepository refreshTokens;
+    private final com.loco.auth.PasswordResetTokenRepository resetTokens;
+    public UserService(UserRepository users, Clock clock, com.loco.auth.RefreshTokenRepository refreshTokens,
+                       com.loco.auth.PasswordResetTokenRepository resetTokens) {
+        this.users = users; this.clock = clock; this.refreshTokens = refreshTokens; this.resetTokens = resetTokens;
+    }
     @Transactional(readOnly = true)
     public UserResponses.Me me(String id) { return UserResponses.me(active(id)); }
     @Transactional
@@ -28,5 +33,13 @@ public class UserService {
     public void updateFcmToken(String id, String token) {
         active(id).updateFcmToken(token, LocalDateTime.now(clock));
         users.flush();
+    }
+    @Transactional
+    public void withdraw(String id) {
+        var now = LocalDateTime.now(clock);
+        active(id).withdraw(now);
+        users.flush();
+        refreshTokens.revokeForUser(id, now);
+        resetTokens.invalidate(id, now);
     }
 }
