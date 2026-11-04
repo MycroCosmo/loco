@@ -63,6 +63,7 @@ public class User {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void changePassword(String password) { this.password = password; }
+    public void updateFcmToken(String token, LocalDateTime now) { fcmToken = token; updatedAt = now; }
     public void updateProfile(UserInputs.Update input, LocalDateTime now) {
         if (input.hasNickname()) nickname = input.nickname();
         if (input.hasImage()) profileImageUrl = input.image();

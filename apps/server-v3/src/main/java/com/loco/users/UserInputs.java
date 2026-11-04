@@ -10,6 +10,13 @@ import com.loco.web.ApiProblem;
 public final class UserInputs {
     private UserInputs() { }
     public record Update(boolean hasNickname, String nickname, boolean hasImage, String image) { }
+    public static String fcmToken(JsonNode body) {
+        JsonNode token = body == null ? MissingNode.getInstance() : body.path("fcmToken");
+        if (token.isObject() && token.size() == 1 && token.has("set")) token = token.get("set");
+        if (token.isMissingNode() || token.isNull()) return null;
+        if (token.isTextual()) return token.textValue();
+        throw new IllegalArgumentException("Invalid Prisma-compatible FCM value");
+    }
     public static Update update(JsonNode value) {
         JsonNode body = value == null ? MissingNode.getInstance() : value;
         var errors = new ArrayList<String>();

@@ -20,4 +20,9 @@ public class UserController {
     public UserResponses.Updated update(@AuthenticationPrincipal JwtPrincipal user, @RequestBody(required = false) JsonNode body) {
         return users.update(user.userId(), UserInputs.update(body));
     }
+    @PutMapping("/users/me/fcm-token")
+    public java.util.Map<String, String> fcm(@AuthenticationPrincipal JwtPrincipal user, @RequestBody(required = false) JsonNode body) {
+        users.updateFcmToken(user.userId(), UserInputs.fcmToken(body));
+        return java.util.Map.of("message", "FCM 토큰이 업데이트되었습니다.");
+    }
 }

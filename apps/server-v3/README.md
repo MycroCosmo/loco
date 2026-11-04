@@ -460,3 +460,4 @@ Compose 참고: [기동 순서와 healthcheck](https://docs.docker.com/compose/h
 [MVC HandlerInterceptor](https://docs.spring.io/spring-framework/docs/6.2.x/javadoc-api/org/springframework/web/servlet/HandlerInterceptor.html).
 
 GET/PUT me는 실제 경로로 비교하며 사용자용 가짜 컨트롤러를 제거했다. src/test/resources/users/profile-v2.json은 19가지 입력의 실제 v2 응답·DB 갱신 관측이다. 빈 객체는 갱신하지 않고 동일 값 명시는 updatedAt을 갱신한다. nickname:null·빈 배열은 v2처럼 500이다. DB 오류 시 전체 상태 롤백도 검증한다.
+`nFCM은 실제 v2 관측 17종을 `src/test/resources/users/fcm-v2.json`에 고정했다. 누락/null은 해제, 같은 값도 갱신한다. 숫자·불리언·배열·빈 객체 값은 500이고 `{set: 문자열 또는 null}`은 Prisma와 같은 결과를 낸다. 미정의 필드는 무시한다.

@@ -24,4 +24,9 @@ public class UserService {
         return users.findById(id).filter(user -> user.getDeletedAt() == null)
                 .orElseThrow(() -> ApiProblem.notFound("사용자를 찾을 수 없습니다."));
     }
+    @Transactional
+    public void updateFcmToken(String id, String token) {
+        active(id).updateFcmToken(token, LocalDateTime.now(clock));
+        users.flush();
+    }
 }
