@@ -35,7 +35,7 @@ class AuthenticationFlowTest extends AuthenticationSupport {
         for (var side : SharedHarness.Side.values()) assertPair(side, values.get(side), "login", SharedHarness.Environment.EMAIL);
         assertThat(request(v2Url(), "/api/users/me", HttpMethod.GET, values.get(SharedHarness.Side.V3).text("loginAccess"), null)
                 .getStatusCode().value()).isEqualTo(200);
-        assertThat(request(v3Url(), "/api/__test/harness/users/me", HttpMethod.GET, values.get(SharedHarness.Side.V2).text("loginAccess"), null)
+        assertThat(request(v3Url(), "/api/users/me", HttpMethod.GET, values.get(SharedHarness.Side.V2).text("loginAccess"), null)
                 .getStatusCode().value()).isEqualTo(200);
     }
 

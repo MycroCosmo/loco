@@ -101,9 +101,9 @@ v3 단독 시드 암호는 Java bcrypt($2b$, cost 10), 비교 시드는 기존�
 Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·DB 이미지·Prisma CLI 다운로드와 v2 테스트 이미지 빌드 시간이 든다.
 `clean`을 생략하면 준비된 Prisma CLI를 재사용한다. Prisma는 테스트 도구이며 Spring 실행 JAR에는 포함되지 않는다.
 
-빠른 테스트는 53건(코덱 5건 포함), 비교 테스트는 101건이다. 전체 검증(`allTests`)의 기대 결과:
+빠른 테스트는 53건(코덱 5건 포함), 비교 테스트는 124건이다. 전체 검증(`allTests`)의 기대 결과:
 
-- `BUILD SUCCESSFUL`, 총 154건 중 성공 152개·실패 0개·코덱 알려진 차이 1개·공통 지원 제약 1개. 코덱 2건은 사유가 표시되는 SKIPPED이며 기존 API 비교의 알려진 차이는 0개다.
+- `BUILD SUCCESSFUL`, 총 177건 중 성공 175개·실패 0개·코덱 알려진 차이 1개·공통 지원 제약 1개. 코덱 2건은 사유가 표시되는 SKIPPED이며 기존 API 비교의 알려진 차이는 0개다.
 - 429는 모든 인증 API의 한도·응답·헤더를 비교하는 필수 통과 대상이다.
 - 인증 없는 `/api/health`: 200, JSON 구조와 값이 정확히 `{"status":"ok"}`.
 - `/health`: 404. `/api`를 거치지 않으면 컨트롤러에 접근할 수 없다.
@@ -441,7 +441,7 @@ JWT 필터에 모든 요청의 회원 조회를 추가하지 않는다. 새 v2�
 - 깨진 JSON 요청의 400 메시지는 케이스별 명시적 문구 예외로 비교한다. 상태·키·타입은 유지하며 실제 API의 구조 차이를 숨기지 않는다.
 
 0번 묶음과 1번 묶음 설계는 확인 완료했다. 실제 이관 API 케이스를 묶음별로 추가한다.
-2번 묶음 사용자 API는 [확정된 설계](USER_API_DESIGN.md)를 따른다. 변환기 호환성 검증을 완료하고 사용자 확인을 기다리며, 사용자 API는 아직 구현하지 않았다.
+2번 묶음 사용자 API는 [확정된 설계](USER_API_DESIGN.md)를 따른다. 변환기 검증과 GET/PUT me 이관을 완료했다. FCM → 탈퇴 → 이미지 업로드 순서로 진행한다.
 테스트 대역은 `/api/__test/harness/...`에만 둔다. 실제 API 이관 시 별도 `v3Path`를 제거하는 규칙과 이름 기반 빌더·연속 요청 예시는 [하네스 문서](COMPARISON_TESTS.md)를 따른다.
 429는 필수 통과 케이스로 검증한다. 1번 묶음 완료 후 다음 묶음은 사용자 확인을 기다린다.
 작업 기록은 노션에서 관리한다.
@@ -458,3 +458,5 @@ Compose 참고: [기동 순서와 healthcheck](https://docs.docker.com/compose/h
 인증 참고: [Spring Method Security](https://docs.spring.io/spring-security/reference/6.5/servlet/authorization/method-security.html),
 [JWT 검증](https://docs.spring.io/spring-security/reference/6.5/servlet/oauth2/resource-server/jwt.html),
 [MVC HandlerInterceptor](https://docs.spring.io/spring-framework/docs/6.2.x/javadoc-api/org/springframework/web/servlet/HandlerInterceptor.html).
+
+GET/PUT me는 실제 경로로 비교하며 사용자용 가짜 컨트롤러를 제거했다. src/test/resources/users/profile-v2.json은 19가지 입력의 실제 v2 응답·DB 갱신 관측이다. 빈 객체는 갱신하지 않고 동일 값 명시는 updatedAt을 갱신한다. nickname:null·빈 배열은 v2처럼 500이다. DB 오류 시 전체 상태 롤백도 검증한다.

@@ -1,0 +1,23 @@
+package com.loco.users;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.loco.security.AuthenticatedApi;
+import com.loco.security.JwtPrincipal;
+import com.loco.web.ApiController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@ApiController
+@AuthenticatedApi
+public class UserController {
+    private final UserService users;
+    public UserController(UserService users) { this.users = users; }
+    @GetMapping("/users/me")
+    public UserResponses.Me me(@AuthenticationPrincipal JwtPrincipal user) { return users.me(user.userId()); }
+    @PutMapping("/users/me")
+    public UserResponses.Updated update(@AuthenticationPrincipal JwtPrincipal user, @RequestBody(required = false) JsonNode body) {
+        return users.update(user.userId(), UserInputs.update(body));
+    }
+}

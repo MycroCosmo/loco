@@ -56,12 +56,18 @@ public class User {
     public String getId() { return id; }
     public String getEmail() { return email; }
     public String getNickname() { return nickname; }
+    public String getProfileImageUrl() { return profileImageUrl; }
     public String getPassword() { return password; }
     public Provider getProvider() { return provider; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void changePassword(String password) { this.password = password; }
+    public void updateProfile(UserInputs.Update input, LocalDateTime now) {
+        if (input.hasNickname()) nickname = input.nickname();
+        if (input.hasImage()) profileImageUrl = input.image();
+        if (input.hasNickname() || input.hasImage()) updatedAt = now;
+    }
     public static User oauth(Provider provider, String providerId, String email, String nickname, String image) {
         var user = new User();
         user.provider = provider; user.providerId = providerId; user.email = email;

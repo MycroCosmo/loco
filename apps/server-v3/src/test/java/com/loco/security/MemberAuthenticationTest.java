@@ -25,7 +25,7 @@ class MemberAuthenticationTest extends CompatibilityTestBase {
         }
         for (var method : java.util.List.of(HttpMethod.GET, HttpMethod.PUT)) {
             var left = request(v2Url(), "/api/users/me", method, token, Map.of("nickname", "x".repeat(31)));
-            var right = request(v3Url(), "/api/__test/harness/users/me", method, token, Map.of("nickname", "x".repeat(31)));
+            var right = request(v3Url(), "/api/users/me", method, token, Map.of("nickname", "x".repeat(31)));
             assertThat(left.getStatusCode().value()).isEqualTo(401);
             assertThat(right.getStatusCode().value()).isEqualTo(401);
             JsonComparison.compare(left.getBody(), right.getBody(), Map.of());
@@ -41,16 +41,16 @@ class MemberAuthenticationTest extends CompatibilityTestBase {
             db.createStatement().executeUpdate("UPDATE users SET email='current@example.test'");
         }
         var left = request(v2Url(), "/api/users/me", HttpMethod.GET, token, null);
-        var right = request(v3Url(), "/api/__test/harness/users/me", HttpMethod.GET, token, null);
+        var right = request(v3Url(), "/api/users/me", HttpMethod.GET, token, null);
         assertThat(left.getStatusCode().value()).isEqualTo(200); assertThat(right.getStatusCode().value()).isEqualTo(200);
         assertThat(left.getBody().path("email").asText()).isEqualTo("current@example.test");
         assertThat(right.getBody().path("email")).isEqualTo(left.getBody().path("email"));
-        assertThat(right.getBody().path("userId").asText()).isEqualTo(SharedHarness.Environment.USER_ID);
+        assertThat(right.getBody().path("id").asText()).isEqualTo(SharedHarness.Environment.USER_ID);
     }
     @Test void publicAndUnknownRoutesDoNotReadMembersEvenWithValidJwt() throws Exception {
         for (var side : SharedHarness.Side.values()) try (var db = environment().connect(side)) {
             String base = side == SharedHarness.Side.V2 ? v2Url() : v3Url();
-            String protectedPath = side == SharedHarness.Side.V2 ? "/api/users/me" : "/api/__test/harness/users/me";
+            String protectedPath = "/api/users/me";
             db.createStatement().execute("ALTER TABLE users RENAME TO unavailable_users");
             try {
                 assertThat(request(base, "/api/auth/logout", HttpMethod.POST, token, Map.of()).getStatusCode().value()).isEqualTo(201);

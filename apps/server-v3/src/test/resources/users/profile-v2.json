@@ -1,0 +1,230 @@
+[ {
+  "input" : "GET",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "compat",
+    "profileImageUrl" : null,
+    "provider" : "LOCAL",
+    "createdAt" : "<timestamp>",
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "{}",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "compat",
+    "profileImageUrl" : null,
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"nickname\":\"compat\"}",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "compat",
+    "profileImageUrl" : null,
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"nickname\":\"new\"}",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "new",
+    "profileImageUrl" : null,
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "new",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"nickname\":\"\"}",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "",
+    "profileImageUrl" : null,
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"nickname\":null}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"nickname\":12}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "nickname must be shorter than or equal to 30 characters", "nickname must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"nickname\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "nickname must be shorter than or equal to 30 characters" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"nickname\":\"\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\"}",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00",
+    "profileImageUrl" : null,
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00\uD83D\uDE00",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"profileImageUrl\":null}",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "compat",
+    "profileImageUrl" : null,
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"profileImageUrl\":\"https://example.com/a.png\"}",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "compat",
+    "profileImageUrl" : "https://example.com/a.png",
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : "https://example.com/a.png",
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"profileImageUrl\":\"http://localhost/a\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "profileImageUrl must be a URL address" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"profileImageUrl\":\"http://127.0.0.1/a\"}",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "compat",
+    "profileImageUrl" : "http://127.0.0.1/a",
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : "http://127.0.0.1/a",
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"profileImageUrl\":\"/uploads/profiles/a.webp\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "profileImageUrl must be a URL address" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"profileImageUrl\":\"\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "profileImageUrl must be a URL address" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"extra\":true,\"nickname\":12,\"profileImageUrl\":3}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "property extra should not exist", "nickname must be shorter than or equal to 30 characters", "nickname must be a string", "profileImageUrl must be a URL address" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "[]",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "[1]",
+  "status" : 400,
+  "body" : {
+    "message" : [ "property 0 should not exist" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+}, {
+  "input" : "null-body",
+  "status" : 200,
+  "body" : {
+    "id" : "11111111-1111-4111-8111-111111111111",
+    "email" : "compat@example.test",
+    "nickname" : "compat",
+    "profileImageUrl" : null,
+    "updatedAt" : "<timestamp>"
+  },
+  "nickname" : "compat",
+  "profileImageUrl" : null,
+  "updatedAtChanged" : false
+} ]

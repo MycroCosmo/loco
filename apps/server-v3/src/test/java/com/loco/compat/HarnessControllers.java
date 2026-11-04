@@ -5,7 +5,6 @@ import com.loco.security.AuthenticatedApi;
 import com.loco.security.PublicApi;
 import com.loco.security.JwtPrincipal;
 import com.loco.web.ApiController;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -16,7 +15,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.http.HttpStatus;
@@ -48,14 +46,6 @@ public class HarnessControllers {
                     id, user.userId(), body.get("content"));
             return Map.of("message", "피드백이 제출되었습니다.", "id", id);
         }
-        @GetMapping("/__test/harness/users/me")
-        public Map<String, Object> me(@AuthenticationPrincipal JwtPrincipal user, HttpServletRequest request) {
-            return Map.of("userId", user.userId(), "email", user.email(), "session", request.getSession(false) != null);
-        }
-
-        @PutMapping("/__test/harness/users/me")
-        public Map<String, String> update(@Valid @RequestBody UpdateProbe body) { return Map.of("status", "ok"); }
-
         @GetMapping("/__test/harness/public-override")
         @PublicApi
         public Map<String, String> publicOverride() { return Map.of("status", "ok"); }
@@ -79,6 +69,4 @@ public class HarnessControllers {
 
     public record LoginProbe(@Email(message = "email must be an email") String email,
             @Size(min = 6, message = "password must be longer than or equal to 6 characters") String password) { }
-    public record UpdateProbe(@Size(max = 30,
-            message = "nickname must be shorter than or equal to 30 characters") String nickname) { }
 }

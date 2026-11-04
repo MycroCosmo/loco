@@ -64,7 +64,7 @@ class RateLimitCasesTest extends CompatibilityTestBase {
 
     @Test void globalLimitRunsBeforeMemberAuthenticationAndIgnoresForwardedIp() {
         for (String base : java.util.List.of(v2Url(), v3Url())) {
-            String path = base.equals(v2Url()) ? "/api/users/me" : "/api/__test/harness/users/me";
+            String path = "/api/users/me";
             for (int i = 0; i < 120; i++) {
                 var response = request(base, path, HttpMethod.GET, null, null, true);
                 assertThat(response.getStatusCode().value()).isEqualTo(401);

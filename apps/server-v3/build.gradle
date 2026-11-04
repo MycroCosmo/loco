@@ -72,6 +72,7 @@ tasks.register('comparisonTest', Test) {
     classpath = sourceSets.test.runtimeClasspath
     useJUnitPlatform { includeTags 'v2-comparison' }
     systemProperty 'compat.v2.enabled', 'true'
+    systemProperty 'users.observe', providers.gradleProperty('usersObserve').getOrElse('false')
     mustRunAfter tasks.named('test')
     dependsOn tasks.named('preparePrisma')
     inputs.file(v2Lockfile)

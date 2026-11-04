@@ -76,7 +76,7 @@ class HealthIntegrationTest {
 
     @Test
     void compatibilityTestEndpointsAreNotPartOfTheApplication() {
-        assertThat(client.getForEntity(url("/api/users/me"), String.class).getStatusCode())
+        assertThat(client.getForEntity(url("/api/__test/harness/restricted"), String.class).getStatusCode())
                 .isEqualTo(HttpStatus.NOT_FOUND);
     }
 

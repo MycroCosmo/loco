@@ -28,7 +28,7 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
         for (String path : List.of("/api/feedback")) {
             assertThat(request(v3Url(), path, HttpMethod.POST, null, Map.of()).getStatusCode().value()).isEqualTo(404);
         }
-        assertThat(request(v3Url(), "/api/users/me", HttpMethod.GET, null, null).getStatusCode().value()).isEqualTo(404);
+        assertThat(request(v3Url(), "/api/users/me", HttpMethod.GET, null, null).getStatusCode().value()).isEqualTo(401);
         runCase(ComparisonCase.named("쓰기 비교 대역")
                 .step(ComparisonStep.named("피드백 작성").method(HttpMethod.POST).path("/api/feedback")
                         .v3Path("/api/__test/harness/feedback").bodyResource("compat/feedback.json")

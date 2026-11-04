@@ -2,7 +2,7 @@
 
 대상은 GET/PUT/DELETE `/api/users/me`, POST `/api/users/me/profile-image`, PUT `/api/users/me/fcm-token`이다.
 v2 기준은 원격 main `3d7ae28`이다. 현재 feature 브랜치의 users·upload 소스가 이 기준과 같음을 확인했다.
-Flutter·v2 코드는 변경하지 않는다. 선택 결과는 아래 7절에 확정했으며 [변환기 검증](CODEC_COMPATIBILITY.md)만 완료했다. 사용자 API는 아직 구현하지 않았다.
+Flutter·v2 코드는 변경하지 않는다. 선택 결과는 아래 7절에 확정했으며 [변환기 검증](CODEC_COMPATIBILITY.md)을 완료했다. GET/PUT me는 실제 API로 이관했으며 나머지는 확정한 순서대로 진행한다.
 
 ## 1. 이미지 저장과 Flutter 호환
 

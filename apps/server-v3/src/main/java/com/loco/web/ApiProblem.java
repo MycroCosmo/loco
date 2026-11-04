@@ -16,6 +16,7 @@ public final class ApiProblem extends RuntimeException {
     }
     public static ApiProblem unauthorized(String message) { return new ApiProblem(401, message, "Unauthorized"); }
     public static ApiProblem conflict(String message) { return new ApiProblem(409, message, "Conflict"); }
+    public static ApiProblem notFound(String message) { return new ApiProblem(404, message, "Not Found"); }
     public static ApiProblem badRequest(String message) { return new ApiProblem(400, message, "Bad Request"); }
     public static ApiProblem invalid(List<String> messages) { return new ApiProblem(400, List.copyOf(messages), "Bad Request"); }
     public int status() { return status; }

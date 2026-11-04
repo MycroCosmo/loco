@@ -4,10 +4,14 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 // validator.js 13.15.35 isURL({require_tld:false})에 해당한다. MIT 허가는 resources/licenses에 있다.
-final class V2Url {
+public final class V2Url {
     private static final Pattern SCHEME = Pattern.compile("^([a-z][a-z0-9+.-]*):", Pattern.CASE_INSENSITIVE);
     private V2Url() { }
     static boolean valid(String value) {
+        return valid(value, false);
+    }
+    public static boolean validProfileUrl(String value) { return valid(value, true); }
+    private static boolean valid(String value, boolean requireTld) {
         if (value == null || value.isEmpty() || value.length() > 2084 || Pattern.compile("[\\s<>\\ufeff]", Pattern.UNICODE_CHARACTER_CLASS).matcher(value).find()) return false;
         if (value.startsWith("mailto:")) return false;
         String url = value.split("[?#]", -1)[0];
@@ -49,6 +53,13 @@ final class V2Url {
         int colon = host.indexOf(':');
         if (colon >= 0) { port = host.substring(colon + 1); host = host.substring(0, colon); }
         if (!validPort(port)) return false;
+        if (requireTld) {
+            boolean ipv4 = host.matches("(?:0|[1-9][0-9]{0,2})(?:\\.(?:0|[1-9][0-9]{0,2})){3}")
+                    && java.util.Arrays.stream(host.split("\\.")).allMatch(part -> Integer.parseInt(part) <= 255);
+            String[] labels = host.split("\\.", -1);
+            if (!ipv4 && (labels.length < 2 || !Pattern.compile("([a-z\\u00A1-\\u00A8\\u00AA-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFEF]{2,}|xn[a-z0-9-]{2,})", Pattern.CASE_INSENSITIVE)
+                    .matcher(labels[labels.length - 1]).matches())) return false;
+        }
         for (String label : host.split("\\.", -1)) {
             if (label.isEmpty() || label.length() > 63 || label.startsWith("-") || label.endsWith("-")
                     || label.chars().anyMatch(c -> c >= 0xff01 && c <= 0xff5e)
