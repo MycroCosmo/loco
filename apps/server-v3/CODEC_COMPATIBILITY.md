@@ -1,78 +1,48 @@
-# 2번 묶음 1단계: 변환기 호환성 검증
+# 이미지 변환기: libvips CLI 8.15.3
 
-필수 JPEG·PNG·WebP 읽기와 WebP 쓰기는 Windows·Linux Java 21에서 통과했다.
-승인된 기준에 따라 A안을 유지하며 B(libvips 프로세스)로 전환하지 않는다. 사용자 확인 전 다음 GET/PUT me 단계로 넘어가지 않는다.
+사용자 선택 B를 적용했다. ImageIO 후보가 애니메이션 WebP에서 `VP8_STATUS_UNSUPPORTED_FEATURE`로 실패해 전환했다.
+운영 구현은 `ImageConverter` 뒤의 `VipsImageConverter`다. `webp-imageio:0.1.6`은 독립 검증용 테스트 의존성으로만 남겼다.
 
-## 검증 범위와 결과
-
-검증 후보는 `org.sejda.imageio:webp-imageio:0.1.6`이다. 현재는 **testRuntimeOnly**이며 운영 JAR에 포함되지 않는다.
-검증용 `ImageConverter` 인터페이스 뒤에 `ImageIoConverter`를 두었다. HTTP·회원·업로드 저장·512px 크롭은 아직 연결하지 않았다.
-실제 프로필 변환기는 POST 단계에서 이 경계를 이용해 연결하고 크롭·작은 이미지·메타데이터 등 추가 동작을 검증한다.
-
-| 입력 | v2 sharp 0.33.5 | Windows Java 21.0.5 | Linux Java 21.0.13 | 판정 |
+| 입력 | v2 읽기 | Windows Java 21 | Linux Java 21 | 업로드 API |
 | --- | --- | --- | --- | --- |
-| JPEG | 읽기 성공 | 읽기·WebP 쓰기 성공 | 읽기·WebP 쓰기 성공 | 필수 통과 |
-| PNG | 읽기 성공 | 읽기·WebP 쓰기 성공 | 읽기·WebP 쓰기 성공 | 필수 통과 |
-| WebP | 읽기 성공 | 읽기·WebP 쓰기 성공 | 읽기·WebP 쓰기 성공 | 필수 통과 |
-| HEIC(HEVC) | 메타데이터 성공, 디코더 부족으로 전체 읽기 실패 | reader 없음 | reader 없음 | SHARED_LIMITATION: 공통 지원 제약 |
-| AVIF(AV1) | 읽기 성공 | reader 없음 | reader 없음 | KNOWN_DIFFERENCE: 알려진 차이 |
+| JPEG·PNG·일반 WebP | 성공 | 성공 | 성공 | 201 |
+| 애니메이션 WebP | 첫 프레임 성공 | 첫 프레임 성공 | 첫 프레임 성공 | 201, 정적 WebP |
+| AVIF | 성공 | 성공 | 성공 | 201, 알려진 차이 해제 |
+| HEIC | 디코더 부족으로 실패 | 디코딩 실패 | 디코딩 성공 | 양 플랫폼 모두 v2와 같은 500 |
 
-HEIC를 v2는 지원하는데 v3만 실패하는 것으로 기록하지 않는다. v2 실제 오류와 fixture 해시는
-`src/test/resources/codec/v2-observation.json`에 고정했다. 이는 코덱 관측이며 HTTP 상태·오류 문구 관측은 아니다.
-독립 libheif 도구가 HEIC fixture를 디코딩했으므로 손상 파일을 미지원으로 오인한 결과가 아니다.
+Windows 코덱 6건은 성공 5건·HEIC 제약 SKIPPED 1건, Linux는 6건 모두 성공이다.
+HEIC 업로드는 디코더 가용성과 별도로 v2의 500 응답·DB와 기존 파일 보존·새 0바이트 WebP 잔여를 유지한다.
+AVIF는 API 비교에서도 필수 통과 대상으로 전환했다.
 
-각 필수 형식은 원본·출력의 64×48 크기와 네 사분면 색상, 출력 RIFF/WEBP 시그니처를 확인했다.
-출력 6개(3형식 × 2플랫폼)는 v2 sharp로도 형식·크기·픽셀 교차 검증을 통과했다.
-두 선택 형식의 reader 부재만 알려진 제약으로 처리한다. JNI 로딩 오류·잘못된 출력·필수 형식 실패는 예외 처리하지 않고 검증을 실패시킨다.
+고정 fixture의 SHA-256, 64×48 크기, WebP 시그니처, RGB 오차 24 이내를 확인한다.
+애니메이션은 빨강 첫 프레임을 검증하며 파랑 두 번째 프레임과 구분한다. 양 플랫폼 출력 11개는 v2 sharp로도 독립 디코딩·픽셀 검증을 통과했다.
+HTTP 비교는 투명 PNG, EXIF 비자동 회전, 512px 중앙 크롭, 작은 이미지 비확대, 크기 경계·multipart 오류·파일/DB 실패도 포함한다.
 
-## 실행과 보고서
+## 실행 파일과 설정
 
-Java 21, PowerShell 7, Docker를 준비한 뒤 저장소 루트에서 실행한다.
+- Windows: `scripts/prepare-vips.ps1`이 공식 8.15.3 web 배포본을 `build/vips`에 준비한다. 다운로드 SHA-256을 고정했다.
+- Linux: Dockerfile에서 공식 8.15.3 소스와 게시된 SHA-256을 검증해 빌드한다. OS별 하위 코덱 차이는 위 실제 테스트로 확인한다.
+- `prepareVips`는 Windows의 테스트·`bootRun`에 연결된다. 수동 JAR 실행 또는 Linux 호스트는 CLI를 설치하고 PATH나 `.env`의 `VIPS_EXECUTABLE`을 지정한다.
+- 메타데이터는 `vipsheader`, 읽기는 libvips → 임시 PNG → Java 이미지, 쓰기는 Java PNG → libvips WebP 품질 80이다. 중앙 크롭은 Java에서 수행한다.
+- `ProcessBuilder`로 쉘 없이 내부 임시 파일명만 전달한다. 실행당 30초 제한, 네이티브 동시 작업 수 2, 종료 코드·경고 검사, 임시 파일 정리를 적용한다.
+- CLI는 경고가 있어도 0으로 종료할 수 있으므로 디코딩 경고도 실패로 처리한다.
+
+## 재검증
+
+저장소 루트에서 Java 21·PowerShell 7·Docker를 준비한 뒤 실행한다.
 
 ```powershell
 $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 ./apps/server-v3/scripts/verify-codec.ps1
+./apps/server-v3/scripts/verify-user-images.ps1
 ```
 
-스크립트는 Windows의 `codecTest prepareCodecProbe` 실행 후 같은 클래스·fixture·의존성으로 Linux를 검증한다.
-Linux 이미지는 Temurin 21 JRE Jammy digest로 고정하고 UID/GID 1000:1000, CPU 2, 메모리 1536MB, 네트워크 차단 상태에서 실행한다.
-이 검증으로 개발 Compose나 기존 업로드 볼륨을 변경하지 않는다. Compose 계정 통일은 이미지 업로드 단계에서 적용한다.
+코덱 스크립트는 같은 6건을 Windows와 Linux에서 실행한다. Linux는 UID/GID 1000:1000, CPU 2, 메모리 1536MB, 네트워크 차단 상태다.
+Compose 스크립트는 임시 프로젝트에서 5종 변환, HEIC 오류, 공유 파일 읽기·교체·보존을 확인하고 자신이 만든 프로젝트만 정리한다. 기존 개발 볼륨은 건드리지 않는다.
 
-- Windows JUnit HTML: `build/reports/tests/codecTest/index.html`.
-- Windows 결과: `build/reports/codec/windows/summary.json`, `summary.md`.
-- Linux 결과: `build/reports/codec/linux/summary.json`, `summary.md`.
-- 명령 실행 시간: `build/reports/codec/timing.json`. Windows는 Gradle·준비 작업 포함, Linux는 컨테이너 실행·종료 포함. 이미지 pull은 제외한다.
-- 기본 `gradlew test`에도 5건을 포함하며 결과는 `build/reports/codec/local/`에 남긴다. 기본 테스트에서 v2 서버를 띄우지 않는다.
-- JUnit에서는 HEIC·AVIF가 사유를 가진 SKIPPED로 표시된다. 콘솔과 별도 보고서에도 공통 제약 1건·실제 차이 1건이 보인다. 성공 5건으로 집계하지 않는다.
+- 코덱 보고서: `build/reports/codec/{windows,linux,local}/summary.json`, `summary.md`.
+- 플랫폼 시간: `build/reports/codec/timing.json`. 이미지 준비 시간 제외, Windows Gradle 실행과 Linux 컨테이너 실행·종료는 포함한다.
+- Compose 결과: `build/user-images-compose-result.json`.
+- 기본 `gradlew test`에도 코덱 6건 포함. API 비교는 `comparisonTest`, 전체는 `allTests`.
 
-v2 기준을 다시 관측하려면 저장소 루트에서 다음과 같이 실행한다. 보고서의 baseline을 교체하기 전 차이를 검토한다.
-
-```powershell
-docker build -t loco-v2-codec -f infra/docker/server-v2.Dockerfile .
-$fixtures = (Resolve-Path apps/server-v3/src/test/resources/codec).Path
-$scripts = (Resolve-Path apps/server-v3/scripts).Path
-docker run --rm --network none --user 1000:1000 `
-  --mount "type=bind,source=$fixtures,target=/fixtures,readonly" `
-  --mount "type=bind,source=$scripts,target=/probe,readonly" `
-  --entrypoint node loco-v2-codec /probe/codec-fixtures.cjs observe /fixtures
-```
-
-Java 출력의 독립 디코딩 확인은 같은 이미지에서 `verify-outputs /results`를 실행한다.
-
-```powershell
-$reports = (Resolve-Path apps/server-v3/build/reports/codec).Path
-docker run --rm --network none --user 1000:1000 `
-  --mount "type=bind,source=$reports,target=/results,readonly" `
-  --mount "type=bind,source=$scripts,target=/probe,readonly" `
-  --entrypoint node loco-v2-codec /probe/codec-fixtures.cjs verify-outputs /results
-```
-
-## 다음 단계에 적용할 결정
-
-로컬 디스크 유지, 이미지 의미 비교, 이미지 DB 반영은 TransactionTemplate을 사용한다.
-공유 볼륨을 붙일 때 개발 Compose의 v3를 v2 node와 같은 UID/GID 1000:1000으로 실행하고 기존 볼륨 데이터는 지우지 않는다.
-HEIC·AVIF는 현재 승인된 지원 제약으로 유지하되, POST API 구현 시 실제 v2 HTTP 응답과의 차이도 별도 비교 보고서에 남긴다.
-형식 이름만으로 손상 파일이나 서버 오류까지 알려진 차이로 처리하지 않는다.
-
-현재 검증은 작은 코덱 시험이다. 프로필 크롭·EXIF·투명도·대용량/손상 이미지·multipart 오류·파일/DB 실패 순서는 후속 단계에서 검증한다.
-라이브러리 공식 사용법: [WebP ImageIO](https://github.com/sejda-pdf/webp-imageio).
+공식 자료: [설치와 Windows 배포본](https://www.libvips.org/install.html), [애니메이션 WebP](https://www.libvips.org/API/8.17/ctor.Image.webpload.html).

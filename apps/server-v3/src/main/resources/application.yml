@@ -1,7 +1,14 @@
 server:
   port: ${PORT:8081}
+  tomcat:
+    max-swallow-size: -1
 
 spring:
+  servlet:
+    multipart:
+      resolve-lazily: true
+      max-file-size: 10MB
+      max-request-size: -1
   application:
     name: loco-server-v3
   mail:
@@ -40,5 +47,9 @@ management:
         exclude: '*'
 
 loco:
+  vips:
+    executable: ${VIPS_EXECUTABLE:vips}
+  uploads:
+    directory: ${UPLOAD_DIRECTORY:uploads}
   jwt:
     secret: ${JWT_SECRET}

@@ -23,7 +23,7 @@ import org.testcontainers.utility.DockerImageName;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "loco.uploads.directory=")
 class HealthIntegrationTest {
     private static final String JWT_SECRET = UUID.randomUUID().toString() + UUID.randomUUID();
 
@@ -72,6 +72,13 @@ class HealthIntegrationTest {
         ResponseEntity<String> response = client.getForEntity(url("/api/actuator/health"), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void emptyUploadDirectoryDoesNotExposeWorkingDirectory() {
+        assertThat(java.nio.file.Files.exists(java.nio.file.Path.of("README.md"))).isTrue();
+        assertThat(client.getForEntity(url("/uploads/README.md"), String.class).getStatusCode())
+                .isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test

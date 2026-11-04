@@ -1,4 +1,4 @@
-param([string]$LinuxImage = 'eclipse-temurin:21-jre-jammy@sha256:1eac8b8fee11ca7d6725a48bc5d41992ed1561504ebae25490d2d062847e8269')
+param([string]$LinuxImage = 'loco-vips-codec:8.15.3')
 $ErrorActionPreference = 'Stop'
 if (-not $IsWindows) { throw 'Windows PowerShell 7에서 실행하세요. Linux 검증은 이 스크립트가 Docker로 실행합니다.' }
 Push-Location (Resolve-Path "$PSScriptRoot/..")
@@ -12,15 +12,12 @@ try {
     $windowsExit = $LASTEXITCODE
     $timer.Stop()
     $windowsSeconds = $timer.Elapsed.TotalSeconds
-    if ($windowsExit -ne 0) { throw 'Windows 필수 형식 검증 실패: API 이관을 중단하고 B안을 검토하세요.' }
+    if ($windowsExit -ne 0) { throw 'Windows 필수 형식 검증 실패: 변환기와 네이티브 구성을 확인하세요.' }
     $probe = (Resolve-Path build/codec-probe).Path
     $reports = (Resolve-Path build/reports/codec).Path
     New-Item -ItemType Directory -Force "$reports/linux" | Out-Null
-    docker image inspect $LinuxImage *> $null
-    if ($LASTEXITCODE -ne 0) {
-        docker pull $LinuxImage
-        if ($LASTEXITCODE -ne 0) { throw 'Linux 검증 이미지 준비 실패' }
-    }
+    docker build --target codec-runtime -f ../../infra/docker/server-v3.Dockerfile -t $LinuxImage ../..
+    if ($LASTEXITCODE -ne 0) { throw 'Linux libvips 검증 이미지 준비 실패' }
     $timer.Restart()
     docker run --rm --network none --user 1000:1000 --cpus 2 --memory 1536m `
         --mount "type=bind,source=$probe,target=/probe,readonly" `
@@ -34,9 +31,9 @@ try {
         linuxSeconds = $timer.Elapsed.TotalSeconds
         linuxImage = $LinuxImage
         linuxExitCode = $linuxExit
-        imagePullIncluded = $false
+        imagePreparationIncluded = $false
     } | ConvertTo-Json | Set-Content "$reports/timing.json"
-    if ($linuxExit -ne 0) { throw 'Linux 필수 형식 검증 실패: API 이관을 중단하고 B안을 검토하세요.' }
+    if ($linuxExit -ne 0) { throw 'Linux 필수 형식 검증 실패: 변환기와 네이티브 구성을 확인하세요.' }
     Get-Content "$reports/windows/summary.md"
     Get-Content "$reports/linux/summary.md"
     Get-Content "$reports/timing.json"

@@ -52,6 +52,17 @@ public class ApiExceptionHandler {
         log.error("Unhandled API exception", exception);
         return ResponseEntity.internalServerError().body(Map.of("statusCode", 500, "message", "Internal server error"));
     }
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    ResponseEntity<?> fileTooLarge() { return ResponseEntity.status(413).body(ApiProblem.payloadTooLarge("File too large").body()); }
+
+    @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
+    ResponseEntity<?> malformedMultipart(org.springframework.web.multipart.MultipartException exception) {
+        Throwable cause = exception;
+        while (cause.getCause() != null) cause = cause.getCause();
+        String message = String.valueOf(cause.getMessage()).toLowerCase(java.util.Locale.ROOT);
+        return ResponseEntity.badRequest().body(ApiProblem.badRequest(message.contains("boundary")
+                ? "Multipart: Boundary not found" : "Multipart: Unexpected end of form").body());
+    }
 
     @ExceptionHandler(AuthenticationException.class)
     ResponseEntity<?> authenticationFailed() {

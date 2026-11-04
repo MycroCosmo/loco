@@ -50,7 +50,26 @@ tasks.register('preparePrisma', Exec) {
                        '--no-save', '--no-package-lock', '--no-audit', '--no-fund', "prisma@${prismaVersion}"]
 }
 
+def windowsHost = System.getProperty('os.name').toLowerCase().contains('windows')
+def vipsExecutable = providers.environmentVariable('VIPS_EXECUTABLE').getOrElse(windowsHost
+        ? layout.buildDirectory.file('vips/vips-dev-8.15/bin/vips.exe').get().asFile.absolutePath : 'vips')
+tasks.register('prepareVips', Exec) {
+    description = 'Windows용 고정 libvips 8.15.3 준비 (Linux는 설치된 CLI 사용)'
+    onlyIf { windowsHost && !providers.environmentVariable('VIPS_EXECUTABLE').isPresent() }
+    inputs.file('scripts/prepare-vips.ps1')
+    if (windowsHost && !providers.environmentVariable('VIPS_EXECUTABLE').isPresent()) {
+        outputs.dir(layout.buildDirectory.dir('vips/vips-dev-8.15'))
+    }
+    commandLine 'pwsh.exe', '-NoProfile', '-File', file('scripts/prepare-vips.ps1').absolutePath
+}
+tasks.named('bootRun') {
+    dependsOn tasks.named('prepareVips')
+    systemProperty 'loco.vips.executable', vipsExecutable
+}
+
 tasks.withType(Test).configureEach {
+    dependsOn tasks.named('prepareVips')
+    systemProperty 'loco.vips.executable', vipsExecutable
     maxParallelForks = 1
     forkEvery = 0
     systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'

@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 @AuthenticatedApi
 public class UserController {
     private final UserService users;
-    public UserController(UserService users) { this.users = users; }
+    private final com.loco.images.ProfileImageService images;
+    public UserController(UserService users, com.loco.images.ProfileImageService images) { this.users = users; this.images = images; }
     @GetMapping("/users/me")
     public UserResponses.Me me(@AuthenticationPrincipal JwtPrincipal user) { return users.me(user.userId()); }
     @PutMapping("/users/me")
@@ -30,5 +31,18 @@ public class UserController {
     public java.util.Map<String, String> withdraw(@AuthenticationPrincipal JwtPrincipal user) {
         users.withdraw(user.userId());
         return java.util.Map.of("message", "회원 탈퇴가 완료되었습니다.");
+    }
+    @org.springframework.web.bind.annotation.PostMapping("/users/me/profile-image")
+    @org.springframework.web.bind.annotation.ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+    public UserResponses.Image image(@AuthenticationPrincipal JwtPrincipal user, jakarta.servlet.http.HttpServletRequest request) {
+        org.springframework.web.multipart.MultipartFile file = null;
+        if (request instanceof org.springframework.web.multipart.MultipartHttpServletRequest multipart) {
+            for (var entry : multipart.getMultiFileMap().entrySet()) for (var part : entry.getValue()) {
+                if (part.getOriginalFilename() == null || part.getOriginalFilename().isEmpty()) continue;
+                if (!entry.getKey().equals("file") || file != null) throw com.loco.web.ApiProblem.badRequest("Unexpected field");
+                file = part;
+            }
+        }
+        return images.update(user.userId(), file);
     }
 }

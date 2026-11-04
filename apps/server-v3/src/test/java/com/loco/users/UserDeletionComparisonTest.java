@@ -33,6 +33,8 @@ class UserDeletionComparisonTest extends CompatibilityTestBase {
         environment().reset("compat/seed.sql");
         for (var side : SharedHarness.Side.values()) try (var db = environment().connect(side)) {
             db.createStatement().execute("UPDATE users SET \"fcmToken\"='phone',\"profileImageUrl\"='/uploads/profiles/keep.webp'");
+            db.createStatement().execute("INSERT INTO maps(id,\"ownerId\",title,\"updatedAt\") VALUES ('55555555-5555-4555-8555-555555555555','" + USER + "','retained map','2026-01-01')");
+            db.createStatement().execute("INSERT INTO places(id,\"mapId\",\"createdById\",name,address,latitude,longitude,\"updatedAt\") VALUES ('66666666-6666-4666-8666-666666666666','55555555-5555-4555-8555-555555555555','" + USER + "','retained place','address',37.5,127.0,'2026-01-01')");
             db.createStatement().execute("INSERT INTO users(id,email,nickname,provider,\"updatedAt\") VALUES ('" + OTHER + "','other@example.test','other','LOCAL','2026-01-01')");
             for (String table : List.of("refresh_tokens", "password_reset_tokens")) {
                 String consumed = table.equals("refresh_tokens") ? "revokedAt" : "usedAt";
@@ -76,6 +78,9 @@ class UserDeletionComparisonTest extends CompatibilityTestBase {
                 }
             }
             assertThat(request(base, "/api/users/me", HttpMethod.GET, token, null).getStatusCode().value()).isEqualTo(401);
+            try (var count = db.createStatement().executeQuery("SELECT (SELECT count(*) FROM maps), (SELECT count(*) FROM places)")) {
+                count.next(); assertThat(count.getInt(1)).isEqualTo(1); assertThat(count.getInt(2)).isEqualTo(1);
+            }
             assertThat(request(base, "/api/users/me", HttpMethod.DELETE, token, null).getStatusCode().value()).isEqualTo(401);
         }
         try (var left = environment().connect(SharedHarness.Side.V2); var right = environment().connect(SharedHarness.Side.V3)) {

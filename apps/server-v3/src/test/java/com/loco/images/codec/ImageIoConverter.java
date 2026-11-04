@@ -11,6 +11,17 @@ import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
 public final class ImageIoConverter implements ImageConverter {
+    @Override public Metadata metadata(byte[] bytes) throws IOException {
+        try (var input = new MemoryCacheImageInputStream(new ByteArrayInputStream(bytes))) {
+            var readers = ImageIO.getImageReaders(input);
+            if (!readers.hasNext()) throw new UnsupportedImage();
+            var reader = readers.next();
+            try {
+                reader.setInput(input);
+                return new Metadata(reader.getFormatName().toLowerCase(java.util.Locale.ROOT), reader.getWidth(0), reader.getHeight(0));
+            } finally { reader.dispose(); }
+        }
+    }
     @Override public BufferedImage read(byte[] bytes) throws IOException {
         try (var input = new MemoryCacheImageInputStream(new ByteArrayInputStream(bytes))) {
             var readers = ImageIO.getImageReaders(input);

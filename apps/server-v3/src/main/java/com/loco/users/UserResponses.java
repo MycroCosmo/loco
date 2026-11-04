@@ -9,6 +9,8 @@ public final class UserResponses {
     public record Me(String id, String email, String nickname, String profileImageUrl, Provider provider,
                      String createdAt, String updatedAt) { }
     public record Updated(String id, String email, String nickname, String profileImageUrl, String updatedAt) { }
+    public record Image(String id, String email, String nickname, String profileImageUrl, Provider provider, String updatedAt) { }
+    public static Image image(User user) { return new Image(user.getId(), user.getEmail(), user.getNickname(), user.getProfileImageUrl(), user.getProvider(), timestamp(user.getUpdatedAt())); }
     public static Me me(User user) {
         return new Me(user.getId(), user.getEmail(), user.getNickname(), user.getProfileImageUrl(), user.getProvider(),
                 timestamp(user.getCreatedAt()), timestamp(user.getUpdatedAt()));

@@ -16,8 +16,10 @@
 생성·관측 코드는 `apps/server-v3/scripts/codec-fixtures.cjs`에 있다.
 이 스크립트는 v2 이미지의 `/app/node_modules/sharp`를 사용한다.
 `generate <디렉터리>`는 HEIC를 제외한 4종을 생성하고,
-`observe <디렉터리>`는 5종의 버전·해시·디코딩 결과를 출력한다.
+`observe <디렉터리>`는 6종의 버전·해시·디코딩 결과를 출력한다.
 일반 테스트는 이미 커밋된 fixture를 사용하므로 Node나 HEIC 생성 도구를 설치할 필요가 없다.
 
 현재 RGB 허용 오차 24는 압축 손실이 있는 합성 이미지의 네 지점을 확인하기 위한 값이다.
 실제 사진의 크롭·화질 동등성이나 모든 HEIC/AVIF 변형의 지원을 증명하는 기준은 아니다.
+
+애니메이션 animated.webp는 Java ImageIO로 만든 빨강·파랑 두 프레임 GIF를 v2 sharp로 WebP 변환한 것이다. 첫 프레임 빨강의 손실 압축 오차를 24 이내로 확인하며 실제 v2 관측과 SHA-256도 baseline에 포함했다. observe는 이제 6종을 검증한다.

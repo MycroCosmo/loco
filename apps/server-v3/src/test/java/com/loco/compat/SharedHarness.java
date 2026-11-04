@@ -83,6 +83,7 @@ public final class SharedHarness implements BeforeAllCallback {
         private int v2Restarts;
         private int v2Port;
         public final List<Map<String, Object>> knownDifferences = new ArrayList<>();
+        public final Path uploads = Path.of("build/harness-uploads", UUID.randomUUID().toString()).toAbsolutePath().normalize();
         private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
 
         private Environment() {

@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class CodecProbe {
-    public static final List<String> FORMATS = List.of("jpeg", "png", "webp", "heic", "avif");
+    public static final List<String> FORMATS = List.of("jpeg", "png", "webp", "heic", "avif", "animated-webp");
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final int[][] COLORS = {{240,32,32}, {32,224,32}, {32,32,240}, {240,224,32}};
     private static final int[][] POINTS = {{8,8}, {48,8}, {8,36}, {48,36}};
@@ -24,7 +24,7 @@ public final class CodecProbe {
 
     public Result run(String format) throws Exception {
         if (Runtime.version().feature() != 21) throw new IllegalStateException("Java 21 required");
-        byte[] input = resource("quadrants." + format);
+        byte[] input = resource(format.equals("animated-webp") ? "animated.webp" : "quadrants." + format);
         String hash = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(input));
         JsonNode baseline = JSON.readTree(resource("v2-observation.json")).path("cases");
         JsonNode expected = null;
@@ -33,16 +33,16 @@ public final class CodecProbe {
         boolean v2Read = expected.path("read").asBoolean();
         try {
             var decoded = converter.read(input);
-            verifyPixels(decoded);
+            verifyPixels(decoded, format);
             byte[] output = converter.writeWebP(decoded);
             if (output.length < 12 || !new String(output, 0, 4, StandardCharsets.US_ASCII).equals("RIFF")
                     || !new String(output, 8, 4, StandardCharsets.US_ASCII).equals("WEBP")) throw new AssertionError("Output is not WebP");
-            verifyPixels(converter.read(output));
+            verifyPixels(converter.read(output), format);
             Files.createDirectories(directory.resolve("outputs"));
             Files.write(directory.resolve("outputs/" + format + ".webp"), output);
             return new Result(format, "PASS", v2Read, hash, "64x48 input and WebP output; quadrant RGB error <= 24");
         } catch (ImageConverter.UnsupportedImage error) {
-            boolean optional = format.equals("heic") || format.equals("avif");
+            boolean optional = format.equals("heic");
             return new Result(format, optional ? (v2Read ? "KNOWN_DIFFERENCE" : "SHARED_LIMITATION") : "FAIL", v2Read, hash, error.getMessage());
         } catch (Exception | LinkageError | AssertionError error) {
             return new Result(format, "FAIL", v2Read, hash, error.getClass().getSimpleName() + ": " + error.getMessage());
@@ -55,12 +55,13 @@ public final class CodecProbe {
             return input.readAllBytes();
         }
     }
-    private static void verifyPixels(BufferedImage image) {
+    private static void verifyPixels(BufferedImage image, String format) {
         if (image == null || image.getWidth() != 64 || image.getHeight() != 48) throw new AssertionError("Expected 64x48 image");
         for (int i = 0; i < POINTS.length; i++) {
             int rgb = image.getRGB(POINTS[i][0], POINTS[i][1]);
             for (int channel = 0; channel < 3; channel++) {
-                if (Math.abs(((rgb >> (16 - channel * 8)) & 255) - COLORS[i][channel]) > 24) throw new AssertionError("Incorrect quadrant pixel");
+                int expected = format.equals("animated-webp") ? (channel == 0 ? 255 : 0) : COLORS[i][channel];
+                if (Math.abs(((rgb >> (16 - channel * 8)) & 255) - expected) > 24) throw new AssertionError("Incorrect fixture pixel / animation frame");
             }
         }
     }
@@ -70,7 +71,7 @@ public final class CodecProbe {
         long passed = results.stream().filter(r -> r.status().equals("PASS")).count();
         long failed = results.stream().filter(r -> r.status().equals("FAIL")).count();
         var report = Map.of("java", System.getProperty("java.version"), "os", System.getProperty("os.name"),
-                "arch", System.getProperty("os.arch"), "library", "org.sejda.imageio:webp-imageio:0.1.6",
+                "arch", System.getProperty("os.arch"), "library", "libvips CLI 8.15.3",
                 "total", results.size(), "passed", passed, "failed", failed,
                 "knownLimitations", results.size() - passed - failed, "elapsedMillis", elapsedMillis, "cases", results);
         JSON.writerWithDefaultPrettyPrinter().writeValue(directory.resolve("summary.json").toFile(), report);
@@ -84,7 +85,7 @@ public final class CodecProbe {
 
     public static void main(String[] args) throws Exception {
         long start = System.nanoTime();
-        var probe = new CodecProbe(new ImageIoConverter(), Path.of(args[0]));
+        var probe = new CodecProbe(new VipsImageConverter(System.getProperty("loco.vips.executable", "vips")), Path.of(args[0]));
         var results = new ArrayList<Result>();
         for (String format : FORMATS) results.add(probe.run(format));
         probe.report(results, (System.nanoTime() - start) / 1_000_000);

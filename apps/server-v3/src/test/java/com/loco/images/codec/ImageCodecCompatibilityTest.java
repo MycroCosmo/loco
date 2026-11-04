@@ -13,12 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("image-codec")
 class ImageCodecCompatibilityTest {
     private static final long START = System.nanoTime();
-    private static final CodecProbe PROBE = new CodecProbe(new ImageIoConverter(), Path.of(
+    private static final CodecProbe PROBE = new CodecProbe(new VipsImageConverter(System.getProperty("loco.vips.executable", "vips")), Path.of(
             System.getProperty("codec.report.dir", "build/reports/codec/local")));
     private static final List<CodecProbe.Result> RESULTS = new ArrayList<>();
 
     @ParameterizedTest(name = "{0}: 입력 읽기와 WebP 쓰기")
-    @ValueSource(strings = {"jpeg", "png", "webp", "heic", "avif"})
+    @ValueSource(strings = {"jpeg", "png", "webp", "heic", "avif", "animated-webp"})
     void readsFixtureAndWritesDecodableWebP(String format) throws Exception {
         var result = PROBE.run(format);
         RESULTS.add(result);

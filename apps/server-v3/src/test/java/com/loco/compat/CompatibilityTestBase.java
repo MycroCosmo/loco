@@ -56,6 +56,7 @@ public abstract class CompatibilityTestBase {
         registry.add("spring.datasource.username", env::username);
         registry.add("spring.datasource.password", env::databasePassword);
         registry.add("loco.jwt.secret", () -> env.secret);
+        registry.add("loco.uploads.directory", () -> env.uploads.toString());
         registry.add("spring.mail.host", env::smtpHost);
         registry.add("spring.mail.port", env::smtpPort);
         registry.add("spring.mail.username", () -> "sender@example.test");

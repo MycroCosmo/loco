@@ -35,6 +35,9 @@ services:
       retries: 12
 
   v3:
+    user: "1000:1000"
+    volumes:
+      - v2-uploads:/app/uploads
     build:
       context: .
       dockerfile: infra/docker/server-v3.Dockerfile

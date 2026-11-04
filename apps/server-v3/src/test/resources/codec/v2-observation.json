@@ -84,6 +84,22 @@
         "compression": "av1"
       },
       "read": true
+    },
+    {
+      "format": "animated-webp",
+      "sha256": "1e6ab56f3c4b49b7236f303af3b1c43fd3a34113179a8db4fd68868686fa276c",
+      "metadata": {
+        "format": "webp",
+        "width": 64,
+        "height": 48,
+        "pages": 2
+      },
+      "read": true,
+      "pixel": [
+        255,
+        0,
+        2
+      ]
     }
   ]
 }

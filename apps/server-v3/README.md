@@ -17,7 +17,7 @@ v2 컨테이너를 공유하고, 같은 Flyway V1으로 만든 두 DB에서 응�
 후속 작업에서도 v2·Flutter는 읽기만 하며, 이전 직장 코드는 사용하거나 재현하지 않는다.
 외부 API는 테스트에서 mock으로 대체하고, 현재 단계 밖의 기술·보류 항목은 추가하지 않는다.
 확정된 결정 밖의 새 설계 선택은 선택지와 장단점을 설명한 뒤 사용자 답을 기다린다.
-0번 묶음은 단계별 확인을 마쳤다. 1번 묶음은 각 단계의 검증 결과를 보고하고 커밋하며, 사용자 지시에 따라 요청 제한까지 완료한 뒤 멈춘다.
+0번·1번 묶음은 확인을 마쳤다. 2번 묶음은 사용자 API를 단계별로 검증·커밋하며, 완료 후 다음 묶음의 사용자 확인을 기다린다.
 
 ## 탑다운으로 읽는 순서
 
@@ -101,9 +101,9 @@ v3 단독 시드 암호는 Java bcrypt($2b$, cost 10), 비교 시드는 기존�
 Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·DB 이미지·Prisma CLI 다운로드와 v2 테스트 이미지 빌드 시간이 든다.
 `clean`을 생략하면 준비된 Prisma CLI를 재사용한다. Prisma는 테스트 도구이며 Spring 실행 JAR에는 포함되지 않는다.
 
-빠른 테스트는 53건(코덱 5건 포함), 비교 테스트는 124건이다. 전체 검증(`allTests`)의 기대 결과:
+빠른 테스트는 55건(코덱 6건 포함), 비교 테스트는 172건이다. 전체 검증(`allTests`)의 기대 결과:
 
-- `BUILD SUCCESSFUL`, 총 177건 중 성공 175개·실패 0개·코덱 알려진 차이 1개·공통 지원 제약 1개. 코덱 2건은 사유가 표시되는 SKIPPED이며 기존 API 비교의 알려진 차이는 0개다.
+- `BUILD SUCCESSFUL`, 총 227건 중 성공 226개·실패 0개·Windows HEIC 원시 코덱 제약 1개(SKIPPED). API 비교의 알려진 차이는 0개다. AVIF와 애니메이션 WebP는 필수 통과 대상이다.
 - 429는 모든 인증 API의 한도·응답·헤더를 비교하는 필수 통과 대상이다.
 - 인증 없는 `/api/health`: 200, JSON 구조와 값이 정확히 `{"status":"ok"}`.
 - `/health`: 404. `/api`를 거치지 않으면 컨트롤러에 접근할 수 없다.
@@ -428,7 +428,7 @@ Prisma 기반 비교 테스트는 `v2-comparison` 태그로 분리했으며 `com
 `RequestRateLimiter`의 단일 `synchronized` 잠금은 2단계 부하 테스트 측정 대상이다. 현재 구현은 유지한다.
 
 v2 비교 기준에는 main에 병합된 계정 상태 회귀 수정이 포함된다.
-현재 테스트는 인증 API·회원 상태·등록된 오류 사례를 검증한다. 이후 묶음의 사용자·지도·장소 API는 별도로 이관한다.
+현재 테스트는 인증·사용자 API·회원 상태·등록된 오류 사례를 검증한다. 이후 묶음의 지도·장소 API는 별도로 이관한다.
 
 보호 경로에서 탈퇴·없는 회원의 JWT를 차단한다.
 v2 Guard처럼 **인증이 필요한 경로에서만** DB의 현재 회원 상태를 조회하고, 공개 경로에서는 조회하지 않는다.
@@ -441,9 +441,9 @@ JWT 필터에 모든 요청의 회원 조회를 추가하지 않는다. 새 v2�
 - 깨진 JSON 요청의 400 메시지는 케이스별 명시적 문구 예외로 비교한다. 상태·키·타입은 유지하며 실제 API의 구조 차이를 숨기지 않는다.
 
 0번 묶음과 1번 묶음 설계는 확인 완료했다. 실제 이관 API 케이스를 묶음별로 추가한다.
-2번 묶음 사용자 API는 [확정된 설계](USER_API_DESIGN.md)를 따른다. 변환기 검증과 GET/PUT me 이관을 완료했다. FCM → 탈퇴 → 이미지 업로드 순서로 진행한다.
+2번 묶음 사용자 API는 [확정된 설계](USER_API_DESIGN.md)를 따른다. GET/PUT me, FCM, 탈퇴(롤백), 이미지 업로드를 구현했다. 변환기는 사용자 재선택에 따라 B(libvips CLI 8.15.3)를 사용한다.
 테스트 대역은 `/api/__test/harness/...`에만 둔다. 실제 API 이관 시 별도 `v3Path`를 제거하는 규칙과 이름 기반 빌더·연속 요청 예시는 [하네스 문서](COMPARISON_TESTS.md)를 따른다.
-429는 필수 통과 케이스로 검증한다. 1번 묶음 완료 후 다음 묶음은 사용자 확인을 기다린다.
+429는 필수 통과 케이스로 검증한다. 2번 묶음 완료 후 다음 묶음은 사용자 확인을 기다린다.
 작업 기록은 노션에서 관리한다.
 
 공식 참고: [Spring Boot 3.5 실행 환경](https://docs.spring.io/spring-boot/3.5/system-requirements.html),
@@ -464,3 +464,26 @@ GET/PUT me는 실제 경로로 비교하며 사용자용 가짜 컨트롤러를 
 FCM은 실제 v2 관측 17종을 `src/test/resources/users/fcm-v2.json`에 고정했다. 누락/null은 해제, 같은 값도 갱신한다. 숫자·불리언·배열·빈 객체 값은 500이고 `{set: 문자열 또는 null}`은 Prisma와 같은 결과를 낸다. 미정의 필드는 무시한다.
 
 DELETE me는 회원 탈퇴 표시·FCM 해제·리프레시 토큰 폐기·재설정 토큰 사용 처리를 한 트랜잭션으로 수행한다. 만료된 미처리 토큰도 처리하며, 이미 처리된 토큰과 다른 회원은 보존한다. 두 토큰 테이블에 각각 오류를 주입해 전체 DB 롤백을 비교 검증한다.
+
+## 사용자 API와 이미지 저장
+
+`UserController`는 보호된 5개 사용자 경로를 연결하고, `UserInputs`는 v2의 입력 차이를 처리하며, `UserResponses`는 API별 공개 필드만 반환한다.
+`UserService`는 JPA 갱신과 탈퇴 트랜잭션을 담당한다. 시간은 기존 Clock·Auditing을 사용한다.
+
+이미지 흐름은 `ProfileImageStorage`(검증·중앙 크롭·파일 저장), `VipsImageConverter`(네이티브 읽기·WebP 쓰기),
+`ProfileImageService`(TransactionTemplate 커밋과 실패 보상 삭제), `UploadWebConfig`(공개 정적 제공) 순서로 읽으면 된다.
+`/uploads/...` 상대 URL을 유지하며 API의 `/api` prefix와 별개다. 정적 다운로드는 회원 DB를 조회하지 않는다.
+
+- 파일 필드 `file`, **10MiB 미만** 허용. 정확히 10MiB부터 v2처럼 413이다.
+- `resolve-lazily`는 인증을 multipart 파싱보다 먼저 처리한다. `max-file-size`는 10MB, 전체 요청 크기는 별도로 제한하지 않는다.
+- `max-swallow-size=-1`은 큰 파일 오류 응답을 전달하기 전에 연결이 끊기는 것을 방지한다.
+- `UPLOAD_DIRECTORY`는 기본 `uploads`이며 빈 값도 같은 기본값으로 처리한다. `VIPS_EXECUTABLE`은 libvips 경로다.
+- Windows 테스트와 `bootRun`은 `prepareVips`로 고정 바이너리를 준비한다. 수동 JAR 실행은 PATH 또는 `VIPS_EXECUTABLE`을 설정한다.
+- 개발 Compose는 기존 `v2-uploads`를 두 앱에 연결하고 UID/GID를 1000:1000으로 통일한다. 기존 볼륨은 삭제하지 않는다.
+- HEIC는 v2와 같은 500·기존 DB/파일 보존·새 0바이트 파일 잔여를 검증한다. AVIF와 애니메이션 WebP는 201로 일치한다.
+
+관측 fixture는 `src/test/resources/users/`에 있다. `-PusersObserve=true`는 v2 관측 파일을 `build/reports/users/`에 출력하는 명시적 재관측 모드다.
+일반 비교는 커밋된 fixture를 검증하며 자동으로 기대값을 교체하지 않는다.
+양 플랫폼 재검증과 공유 볼륨 검증 명령은 [코덱 문서](CODEC_COMPATIBILITY.md)에 있다.
+이번 묶음에서 공부할 핵심은 JPA 변경 감지·Auditing, nullable 입력과 필드 누락, 트랜잭션 롤백, 파일 보상 삭제,
+TransactionTemplate의 커밋 경계, multipart 지연 파싱, 네이티브 프로세스 실행, Docker 볼륨의 UID/GID다.
