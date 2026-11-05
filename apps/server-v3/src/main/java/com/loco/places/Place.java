@@ -91,6 +91,23 @@ public class Place {
     return id;
   }
 
+  public void update(PlaceInputs input, LocalDateTime now) {
+    if (input.body().isArray()) throw new IllegalArgumentException("Invalid Prisma update data");
+    for (String key : new String[] {"name", "address", "latitude", "longitude", "tags"})
+      if (input.has(key) && input.body().get(key).isNull())
+        throw new IllegalArgumentException("Null Prisma update field");
+    if (input.has("name")) name = input.text("name");
+    if (input.has("address")) address = input.text("address");
+    if (input.has("roadAddress")) roadAddress = input.text("roadAddress");
+    if (input.has("latitude")) latitude = PrismaFloats.input(input.number("latitude"));
+    if (input.has("longitude")) longitude = PrismaFloats.input(input.number("longitude"));
+    if (input.has("phone")) phone = input.text("phone");
+    if (input.has("category")) category = input.text("category");
+    if (input.has("memo")) memo = input.text("memo");
+    if (input.has("tags")) tags = input.tags();
+    if (input.hasChanges()) updatedAt = now;
+  }
+
   public MapRoom getMap() {
     return map;
   }

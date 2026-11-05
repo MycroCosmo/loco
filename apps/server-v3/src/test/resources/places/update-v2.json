@@ -1,0 +1,645 @@
+[ {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{}",
+  "status" : 200,
+  "updated" : false,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "[]",
+  "status" : 500,
+  "updated" : false,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "[1]",
+  "status" : 400,
+  "updated" : false,
+  "body" : {
+    "message" : [ "property 0 should not exist" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"unknown\":1}",
+  "status" : 400,
+  "updated" : false,
+  "body" : {
+    "message" : [ "property unknown should not exist" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"name\":\"Alpha\"}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"name\":\"renamed\"}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "renamed",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"name\":\"\",\"address\":\"\"}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "",
+    "address" : "",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"name\":1,\"address\":false,\"latitude\":\"1\",\"longitude\":181,\"tags\":[1]}",
+  "status" : 400,
+  "updated" : false,
+  "body" : {
+    "message" : [ "name must be shorter than or equal to 100 characters", "name must be a string", "address must be a string", "latitude must not be greater than 90", "latitude must not be less than -90", "latitude must be a number conforming to the specified constraints", "longitude must not be greater than 180", "each value in tags must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"latitude\":38,\"longitude\":128}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 38,
+    "longitude" : 128,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"latitude\":37.44441}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.44441,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"latitude\":37.4499}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4499,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"latitude\":37.05}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.05,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"latitude\":-0.00001}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : -1.0E-5,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"latitude\":0,\"longitude\":-0.0}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 0,
+    "longitude" : 0,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"tags\":[\"new\",\"new\"]}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "new", "new" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"tags\":[]}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"phone\":\"phone\",\"category\":\"cafe\",\"memo\":\"memo\",\"roadAddress\":\"road\"}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : "phone",
+    "category" : "cafe",
+    "memo" : "memo",
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"name\":null}",
+  "status" : 500,
+  "updated" : false,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"address\":null}",
+  "status" : 500,
+  "updated" : false,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"roadAddress\":null}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"latitude\":null}",
+  "status" : 500,
+  "updated" : false,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"longitude\":null}",
+  "status" : 500,
+  "updated" : false,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"phone\":null}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"category\":null}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"memo\":null}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "input" : "{\"tags\":null}",
+  "status" : 500,
+  "updated" : false,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000004",
+  "input" : "{\"name\":\"renamed\"}",
+  "status" : 403,
+  "updated" : false,
+  "body" : {
+    "message" : "수정 권한이 없습니다.",
+    "error" : "Forbidden",
+    "statusCode" : 403
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000006",
+  "input" : "{\"name\":\"renamed\"}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000006",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "renamed",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000007",
+  "input" : "{\"name\":\"renamed\"}",
+  "status" : 200,
+  "updated" : true,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000007",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "renamed",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/places/missing",
+  "input" : "{\"name\":\"renamed\"}",
+  "status" : 404,
+  "updated" : false,
+  "body" : {
+    "message" : "장소를 찾을 수 없습니다.",
+    "error" : "Not Found",
+    "statusCode" : 404
+  }
+} ]

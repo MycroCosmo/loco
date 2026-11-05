@@ -174,3 +174,7 @@ LocalImageFiles 재사용, Firebase 실제 전송 보류, 기존 스키마와 AP
 `CoordinateKeys`는 정확한 이진 BigDecimal + HALF_UP을 사용한다. 실제 Node로 경계의 인접 double, ±0, 음수 반올림 0과 임의 좌표를 교차 검증한다. PostgreSQL ROUND와 다른 셀 누락은 그대로 유지한다.
 
 추가로 실제 v2 Prisma 5의 float 입력 왕복에서 `127.88879999999999 → 127.8888`이 관측됐다. PostgreSQL AVG 결과를 JS/Prisma로 다시 넘기는 경계 때문에 발생하며, 허용 오차로 비교를 완화하지 않는다. `PrismaFloats`가 정확한 double을 유효숫자 16자리 HALF_EVEN으로 변환하고 고정 Prisma의 실제 DB 왕복과 대조한다. 원인은 Prisma 5가 사용하는 bigdecimal 0.3의 f64 변환(소수 15자리 지수 표기 = 유효숫자 16자리)이다. 근거: [bigdecimal 0.3의 TryFrom<f64> 구현](https://github.com/akubera/bigdecimal-rs/blob/v0.3.0/src/lib.rs#L1652)과 하네스 `CoordinateKeysComparisonTest`. 운영에서 Node를 호출하지 않는다.
+
+수정 단계의 `update-v2.json`은 31종 실제 v2 결과를 고정한다(200 20종, 400 3종, 403/404 각 1종, 500 6종). 빈 객체는 updatedAt을 유지하면서 셀을 갱신한다. 같은 값/null 가능한 필드의 명시는 updatedAt을 변경하며, 필수 DB 컬럼의 null·tags:null·빈 배열 본문은 500이다. 비공개방을 나간 작성자도 수정 가능하다.
+
+`PlaceUpdateFailureComparisonTest`는 장소 UPDATE와 이전/새 좌표의 정밀도 1·2·3, 총 7개 오류 지점을 검증한다. 단독 장소 이동 시 이전 셀 DELETE와 새 셀 INSERT 각각의 부분 커밋 상태를 양 DB에서 비교한다. 인증 포함 SQL 수는 빈 수정 9회, 값 명시 10회, 좌표 변경 16회다. 이전/새 셀이 겹쳐도 호출을 합치지 않는다.

@@ -44,4 +44,12 @@ public class PlaceController {
       @PathVariable String id, @AuthenticationPrincipal JwtPrincipal user) {
     return queries.detail(id, user.userId());
   }
+
+  @PutMapping("/places/{id}")
+  public PlaceResponses.Core update(
+      @PathVariable String id,
+      @AuthenticationPrincipal JwtPrincipal user,
+      @RequestBody(required = false) com.fasterxml.jackson.databind.JsonNode body) {
+    return mutations.update(id, user.userId(), PlaceInputs.parse(body, false));
+  }
 }

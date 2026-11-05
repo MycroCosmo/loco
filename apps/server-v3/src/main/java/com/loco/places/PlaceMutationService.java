@@ -22,6 +22,7 @@ public class PlaceMutationService {
   private final MarkerCells cells;
   private final NotificationSender sender;
   private final Executor executor;
+  private final java.time.Clock clock;
 
   public PlaceMutationService(
       PlaceRepository places,
@@ -32,7 +33,8 @@ public class PlaceMutationService {
       PlaceQueryRepository queries,
       MarkerCells cells,
       NotificationSender sender,
-      @Qualifier("applicationTaskExecutor") Executor executor) {
+      @Qualifier("applicationTaskExecutor") Executor executor,
+      java.time.Clock clock) {
     this.places = places;
     this.maps = maps;
     this.members = members;
@@ -42,6 +44,33 @@ public class PlaceMutationService {
     this.cells = cells;
     this.sender = sender;
     this.executor = executor;
+    this.clock = clock;
+  }
+
+  private record Changed(PlaceResponses.Core result, double oldLatitude, double oldLongitude) {}
+
+  public PlaceResponses.Core update(String id, String userId, PlaceInputs input) {
+    var changed =
+        transaction.execute(
+            status -> {
+              var place =
+                  places.findById(id).orElseThrow(() -> ApiProblem.notFound("장소를 찾을 수 없습니다."));
+              if (!place.getCreatedBy().getId().equals(userId))
+                throw ApiProblem.forbidden("수정 권한이 없습니다.");
+              // v2는 지도방을 나간 작성자도 수정 가능하다. 멤버십 재검사는 후속 개선 후보다.
+              double oldLat = PrismaFloats.input(place.getLatitude()),
+                  oldLng = PrismaFloats.input(place.getLongitude());
+              place.update(input, java.time.LocalDateTime.now(clock));
+              places.flush();
+              return new Changed(queries.core(id), oldLat, oldLng);
+            });
+    var result = changed.result();
+    cells.refresh(result.mapId(), changed.oldLatitude(), changed.oldLongitude());
+    if (changed.oldLatitude() != result.latitude().doubleValue()
+        || changed.oldLongitude() != result.longitude().doubleValue())
+      cells.refresh(
+          result.mapId(), result.latitude().doubleValue(), result.longitude().doubleValue());
+    return result;
   }
 
   public PlaceResponses.Core create(String mapId, String userId, PlaceInputs input) {

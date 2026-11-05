@@ -78,6 +78,10 @@ public record PlaceInputs(JsonNode body) {
     return body.has(key);
   }
 
+  public boolean hasChanges() {
+    return FIELDS.stream().anyMatch(body::has);
+  }
+
   public String text(String key) {
     return body.path(key).textValue();
   }
