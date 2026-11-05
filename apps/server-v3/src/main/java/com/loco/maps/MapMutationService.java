@@ -22,6 +22,7 @@ public class MapMutationService {
   private final Clock clock;
   private final TransactionTemplate transaction;
   private final LocalImageFiles files;
+  private final MapQueryRepository queries;
 
   public MapMutationService(
       MapRepository maps,
@@ -30,7 +31,8 @@ public class MapMutationService {
       EntityManager em,
       Clock clock,
       TransactionTemplate transaction,
-      LocalImageFiles files) {
+      LocalImageFiles files,
+      MapQueryRepository queries) {
     this.maps = maps;
     this.members = members;
     this.codes = codes;
@@ -38,6 +40,7 @@ public class MapMutationService {
     this.clock = clock;
     this.transaction = transaction;
     this.files = files;
+    this.queries = queries;
   }
 
   @Transactional
@@ -60,6 +63,16 @@ public class MapMutationService {
     room.update(input, code, LocalDateTime.now(clock));
     maps.flush();
     return MapResponses.core(room);
+  }
+
+  @Transactional
+  public MapResponses.Detail regenerateInviteCode(String id, String userId) {
+    var room = owned(id, userId, "초대 코드 재생성 권한이 없습니다.");
+    if (room.getVisibility() != Visibility.PRIVATE)
+      throw ApiProblem.badRequest("비공개 지도방만 초대 코드를 재생성할 수 있습니다.");
+    room.regenerateInviteCode(codes.generate(room.getInviteCode()), LocalDateTime.now(clock));
+    maps.flush();
+    return queries.detail(id).orElseThrow();
   }
 
   public void delete(String id, String userId, boolean force) {

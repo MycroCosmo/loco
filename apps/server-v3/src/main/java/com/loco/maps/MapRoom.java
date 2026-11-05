@@ -79,6 +79,11 @@ public class MapRoom {
     return id;
   }
 
+  public void regenerateInviteCode(String code, LocalDateTime now) {
+    inviteCode = code;
+    updatedAt = now;
+  }
+
   public User getOwner() {
     return owner;
   }

@@ -223,3 +223,5 @@ Firebase 실제 전송과 무효 FCM 토큰 정리는 보류했다. `Notificatio
 - [Spring Data JPA native query](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html): JPA repository에서 native SQL을 사용할 수 있다.
 - [Hibernate 6.6 문서](https://hibernate.org/orm/documentation/6.6/): ARRAY와 named enum 매핑을 기존 스키마에 맞춰 검증한다.
 - [Firebase Admin 설치](https://firebase.google.com/docs/admin/setup): Java 전송 어댑터 선택 시 참고한다. 이번 설계 단계에서 SDK 추가는 하지 않았다.
+
+초대 코드 재생성(API-11)은 PRIVATE 소유자만 사용할 수 있다. 기존 코드 제외·10회 후보 한도와 상세 응답을 유지하며 정상 SQL은 인증 포함 5회다. `MapInviteCodeComparisonTest`는 이전 코드 무효화→새 코드 가입, 두 DB 실패 시점의 롤백, 실제 행 잠금으로 겹친 재생성을 비교한다. 동시 재생성은 v2와 같이 둘 다 성공하고 마지막 커밋 코드가 남는다.

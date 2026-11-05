@@ -66,4 +66,11 @@ public class MapController {
     mutations.delete(id, user.userId(), "true".equals(force));
     return java.util.Map.of("message", "지도방이 삭제되었습니다.");
   }
+
+  @PostMapping("/maps/{id}/invite-code/regenerate")
+  @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+  public MapResponses.Detail regenerateInviteCode(
+      @AuthenticationPrincipal JwtPrincipal user, @PathVariable String id) {
+    return mutations.regenerateInviteCode(id, user.userId());
+  }
 }
