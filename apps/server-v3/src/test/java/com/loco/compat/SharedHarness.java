@@ -100,6 +100,17 @@ public final class SharedHarness implements BeforeAllCallback {
     private int v2Builds;
     private int v2Starts;
     private int v2Restarts;
+    final V2RequestQuota quota = new V2RequestQuota(this::restartV2);
+    private final Map<String, Integer> restartReasons = new java.util.LinkedHashMap<>();
+
+    public boolean quotaMode() {
+      return !System.getProperty("compat.restart.strategy", "quota").equals("each-case");
+    }
+
+    public void reserveV2Requests(String method, String path, int slots) {
+      if (quotaMode()) quota.reserveBeforeScenario(method, path, slots);
+    }
+
     private int v2Port;
     public final List<Map<String, Object>> knownDifferences = new ArrayList<>();
     public final Path uploads =
@@ -147,6 +158,11 @@ public final class SharedHarness implements BeforeAllCallback {
               .withEnv("DB_USERNAME", username())
               .withEnv("DB_PASSWORD", databasePassword())
               .withEnv("JWT_SECRET", secret)
+              .withEnv("NODE_OPTIONS", "--require /app/harness-timing.cjs")
+              .withCopyFileToContainer(
+                  org.testcontainers.utility.MountableFile.forClasspathResource(
+                      "compat/timing-v2.cjs"),
+                  "/app/harness-timing.cjs")
               .withEnv("HOST", "0.0.0.0")
               .withEnv("PORT", "3000")
               .withEnv("SMTP_HOST", "mailpit")
@@ -235,42 +251,49 @@ public final class SharedHarness implements BeforeAllCallback {
     }
 
     public void restartV2ForCase() {
-      requireV2();
-      org.testcontainers.DockerClientFactory.instance()
-          .client()
-          .restartContainerCmd(v2.getContainerId())
-          .withTimeout(1)
-          .exec();
-      long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
-      boolean ready = false;
-      while (System.nanoTime() < deadline) {
-        try {
-          if (refreshV2Port()) {
-            var probe =
-                HttpRequest.newBuilder(URI.create(v2Url() + "/api/__harness-ready"))
-                    .timeout(Duration.ofSeconds(2))
-                    .GET()
-                    .build();
-            if (http.send(probe, HttpResponse.BodyHandlers.discarding()).statusCode() == 404) {
-              ready = true;
-              break;
+      restartV2("each-case");
+    }
+
+    private void restartV2(String reason) {
+      try (var timing = HarnessTimings.measure("restart")) {
+        requireV2();
+        org.testcontainers.DockerClientFactory.instance()
+            .client()
+            .restartContainerCmd(v2.getContainerId())
+            .withTimeout(1)
+            .exec();
+        long deadline = System.nanoTime() + Duration.ofSeconds(30).toNanos();
+        boolean ready = false;
+        while (System.nanoTime() < deadline) {
+          try {
+            if (refreshV2Port()) {
+              var probe =
+                  HttpRequest.newBuilder(URI.create(v2Url() + "/api/__harness-ready"))
+                      .timeout(Duration.ofSeconds(2))
+                      .GET()
+                      .build();
+              if (http.send(probe, HttpResponse.BodyHandlers.discarding()).statusCode() == 404) {
+                ready = true;
+                break;
+              }
             }
+          } catch (java.io.IOException ignored) {
+          } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(interrupted);
           }
-        } catch (java.io.IOException ignored) {
-        } catch (InterruptedException interrupted) {
-          Thread.currentThread().interrupt();
-          throw new IllegalStateException(interrupted);
+          try {
+            Thread.sleep(100);
+          } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(interrupted);
+          }
         }
-        try {
-          Thread.sleep(100);
-        } catch (InterruptedException interrupted) {
-          Thread.currentThread().interrupt();
-          throw new IllegalStateException(interrupted);
-        }
+        if (!ready) throw new IllegalStateException("재시작한 v2 준비 시간 초과");
+        v2Restarts++;
+        restartReasons.merge(reason, 1, Integer::sum);
+        budget.clearWindow();
       }
-      if (!ready) throw new IllegalStateException("재시작한 v2 준비 시간 초과");
-      v2Restarts++;
-      budget.clearWindow();
     }
 
     private boolean refreshV2Port() {
@@ -305,27 +328,29 @@ public final class SharedHarness implements BeforeAllCallback {
     }
 
     public void reset(String seed) throws Exception {
-      for (Side side : activeSides) {
-        try (var connection = connect(side)) {
-          connection.setAutoCommit(false);
-          var tables = DatabaseSnapshot.tables(connection);
-          connection
-              .createStatement()
-              .execute(
-                  "TRUNCATE TABLE "
-                      + String.join(",", tables.stream().map(DatabaseSnapshot::quote).toList())
-                      + " RESTART IDENTITY");
-          ScriptUtils.executeSqlScript(connection, new ClassPathResource(seed));
-          try (var statement =
-              connection.prepareStatement("UPDATE users SET password=? WHERE id=?")) {
-            statement.setString(1, passwordHash);
-            statement.setString(2, USER_ID);
-            statement.executeUpdate();
+      try (var ignored = HarnessTimings.measure("preparation")) {
+        for (Side side : activeSides) {
+          try (var connection = connect(side)) {
+            connection.setAutoCommit(false);
+            var tables = DatabaseSnapshot.tables(connection);
+            connection
+                .createStatement()
+                .execute(
+                    "TRUNCATE TABLE "
+                        + String.join(",", tables.stream().map(DatabaseSnapshot::quote).toList())
+                        + " RESTART IDENTITY");
+            ScriptUtils.executeSqlScript(connection, new ClassPathResource(seed));
+            try (var statement =
+                connection.prepareStatement("UPDATE users SET password=? WHERE id=?")) {
+              statement.setString(1, passwordHash);
+              statement.setString(2, USER_ID);
+              statement.executeUpdate();
+            }
+            connection.commit();
           }
-          connection.commit();
         }
+        clearMail();
       }
-      clearMail();
     }
 
     public String token(String kind, String userId, String email) throws Exception {
@@ -404,6 +429,16 @@ public final class SharedHarness implements BeforeAllCallback {
         Files.createDirectories(report.getParent());
         json.writerWithDefaultPrettyPrinter()
             .writeValue(
+                report.resolveSibling("quota.json").toFile(),
+                Map.of(
+                    "restartReasons",
+                    restartReasons,
+                    "withinCaseWaitMillis",
+                    quota.waitedMillis()));
+        json.writerWithDefaultPrettyPrinter()
+            .writeValue(report.resolveSibling("timing.json").toFile(), HarnessTimings.report());
+        json.writerWithDefaultPrettyPrinter()
+            .writeValue(
                 report.toFile(),
                 Map.of(
                     "environmentMillis",
@@ -423,7 +458,7 @@ public final class SharedHarness implements BeforeAllCallback {
                     "knownDifferences",
                     knownDifferences,
                     "throttleStrategy",
-                    v2Enabled ? "restart-between-cases" : "v3-only",
+                    v2Enabled ? (quotaMode() ? "quota-aware" : "each-case") : "v3-only",
                     "recommendContainerRestart",
                     false));
       } finally {

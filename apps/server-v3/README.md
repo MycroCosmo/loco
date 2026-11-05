@@ -402,7 +402,7 @@ Nest의 모든 `class-validator` 규칙을 자동 변환하는 기능은 아니�
 | baselineOnMigrate 기본 false, 기존 DB 최초 실행에만 true | 사용자가 선택했다. 스키마 비교 후에만 기존 DB를 V1 상태로 인정한다. 별도 Flyway CLI를 추가하지 않는다. |
 | JUnit에서 고정된 Prisma CLI로 스키마 비교 | Node/npm이 필요하며 `gradlew comparisonTest`로 DB 동등성까지 재검증한다. |
 | Actuator HTTP 노출 없음 | 상태 확인은 `/api/health`를 사용한다. 인증 API는 별도 공개 경로다. |
-| JUnit·Testcontainers, v2 빌드·최초 기동 1회 | C 방식으로 HTTP 비교 케이스 사이 같은 컨테이너만 재시작한다. 단일 JVM에서 순차 실행한다. |
+| JUnit·Testcontainers, v2 빌드·최초 기동 1회 | 핸들러별 잔여량이 부족할 때만 케이스 시작에 같은 컨테이너를 재시작한다. 단일 JVM에서 순차 실행한다. |
 | 하네스 DB 2개, 양쪽 Flyway V1 적용 | 사용자가 선택했다. 케이스마다 같은 시드를 주입하며 개발 Compose DB는 사용하지 않는다. |
 | HTTP 경로별 값 제외, DB UUID 별칭·참조 비교 | 사용자가 선택했다. 키·타입·null·배열 구조는 유지하고 모호한 행 대응은 실패한다. |
 | C 방식 + 시나리오 내부 요청량 관리, 준비 JWT 직접 서명 | 사용자가 C 전환을 승인했다. 연속 요청 중간에는 재시작하지 않는다. |
@@ -494,3 +494,6 @@ DELETE me는 회원 탈퇴 표시·FCM 해제·리프레시 토큰 폐기·재�
 양 플랫폼 재검증과 공유 볼륨 검증 명령은 [코덱 문서](CODEC_COMPATIBILITY.md)에 있다.
 이번 묶음에서 공부할 핵심은 JPA 변경 감지·Auditing, nullable 입력과 필드 누락, 트랜잭션 롤백, 파일 보상 삭제,
 TransactionTemplate의 커밋 경계, multipart 지연 파싱, 네이티브 프로세스 실행, Docker 볼륨의 UID/GID다.
+
+테스트 시간 계측과 재시작 조건은 [하네스 문서의 실행 시간 계측](COMPARISON_TESTS.md#실행-시간-계측)을 따른다. 전체 비교 범위·필수 429·동시 요청 검증은 유지한다.
+전체 회귀 시간은 [실측 전후 결과와 추가 단축 선택지](TEST_PERFORMANCE.md)를 참고한다. 케이스를 유지한 채 재시작 321→6회, 동일 계측 전체 1261.87→467.69초로 줄였다.

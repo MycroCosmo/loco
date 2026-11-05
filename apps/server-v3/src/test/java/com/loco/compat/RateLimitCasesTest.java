@@ -13,6 +13,42 @@ import org.springframework.http.HttpMethod;
 
 @org.junit.jupiter.api.Tag("v2-comparison")
 class RateLimitCasesTest extends CompatibilityTestBase {
+  @Override
+  protected boolean verifiesRateLimit() {
+    return true;
+  }
+
+  @Test
+  void quotaBelongsToHandlerNotApplicationOrConcretePath() {
+    environment().reserveV2Requests("POST", "/api/auth/login", 10);
+    environment().reserveV2Requests("POST", "/api/auth/forgot-password", 3);
+    environment().reserveV2Requests("POST", "/api/auth/oauth/kakao", 10);
+    environment().reserveV2Requests("GET", "/api/users/me", 120);
+    environment().reserveV2Requests("PUT", "/api/users/me", 120);
+    environment().reserveV2Requests("GET", "/api/maps/first", 120);
+    for (String base : java.util.List.of(v2Url(), v3Url())) {
+      for (int i = 0; i < 10; i++)
+        assertThat(
+                request(base, "/api/auth/login", HttpMethod.POST, null, Map.of(), true)
+                    .getStatusCode()
+                    .value())
+            .isEqualTo(400);
+      for (var input :
+          java.util.List.of(
+              new String[] {"POST", "/api/auth/forgot-password", "2", "400"},
+              new String[] {"POST", "/api/auth/oauth/kakao", "9", "400"},
+              new String[] {"POST", "/api/auth/oauth/naver", "8", "400"},
+              new String[] {"GET", "/api/users/me", "119", "401"},
+              new String[] {"PUT", "/api/users/me", "119", "401"},
+              new String[] {"GET", "/api/maps/first", "119", "401"},
+              new String[] {"GET", "/api/maps/second", "118", "401"})) {
+        var response = request(base, input[1], HttpMethod.valueOf(input[0]), null, Map.of(), true);
+        assertThat(response.getStatusCode().value()).isEqualTo(Integer.parseInt(input[3]));
+        assertThat(response.getHeaders().getFirst("X-RateLimit-Remaining")).isEqualTo(input[2]);
+      }
+    }
+  }
+
   static Stream<Arguments> limits() {
     return Stream.of(
         Arguments.of("register", 5, 400),

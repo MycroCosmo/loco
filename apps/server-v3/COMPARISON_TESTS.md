@@ -70,7 +70,7 @@ Health·Flyway·선언 누락 테스트까지 기존 35개 검증을 유지한�
 ## 환경 수명과 초기화
 
 - Gradle test JVM 한 개, JUnit 병렬 실행 비활성화.
-- JUnit root store가 공유 환경을 보관하며 이미지 빌드·최초 v2 기동은 각각 한 번이다. C 방식으로 HTTP 비교 케이스 사이 같은 컨테이너를 재시작한다.
+- JUnit root store가 공유 환경을 보관하며 이미지 빌드·최초 v2 기동은 각각 한 번이다. 핸들러의 요청 잔여량이 부족할 때만 같은 컨테이너를 케이스 시작에서 재시작한다.
 - PostgreSQL 17(`postgis/postgis:17-3.6`) 한 개에 `loco_v2_test`, `loco_v3_test`를 만든다.
 - 두 DB 모두 같은 Flyway migration 경로와 `target("1")`로 준비한다. v3 테스트 앱의 Flyway target도 1이다.
 - 하네스 준비에는 Prisma db push를 사용하지 않는다. 별도 Flyway baseline 테스트의 기존 DB 인수 검증은 그대로 유지한다.
@@ -159,10 +159,10 @@ v2 코드를 수정하거나 제한을 비활성화하지 않는다. 준비 토�
 기본 한도는 처리 메서드·접속 IP별 120회/분이다. 인증 API는 register 5, login 10, forgot-password 3, reset-password 5, oauth 10, refresh/logout 120회/분이다.
 OAuth provider 경로는 같은 핸들러라 한도를 공유한다. DTO 오류·로그인 실패도 포함하지만 Express 파싱 단계에서 거절되는 깨진 JSON은 포함하지 않는다.
 
-사용자가 선택한 C 방식은 각 JUnit HTTP 비교 케이스 시작 전에 같은 v2 컨테이너를 Docker restart한다. DB·Mailpit·이미지는 재생성하지 않는다.
+C 방식의 무조건 재시작을 제거했다. V2RequestQuota는 실제 Throttler 핸들러 키·경로 패턴·HTTP 메서드와 X-RateLimit-Remaining을 관측한다. 다음 케이스의 첫 요청에 잔여량이 없을 때만 같은 컨테이너를 재시작한다. 다른 API가 소진됐다는 이유만으로 재시작하지 않는다. DB·Mailpit·이미지는 재생성하지 않는다.
 하나의 ComparisonCase 안에서 이어지는 요청과 동시 요청 도중에는 재시작하지 않는다. 준비 완료는 없는 경로의 404로 확인해 한도를 소모하지 않는다.
 Docker 재시작 직후 포트 정보가 잠시 비거나 임의 호스트 포트가 달라질 수 있으므로, 같은 컨테이너 ID를 inspect해 현재 포트 게시와 HTTP 준비를 함께 확인한다.
-v2 HTTP를 사용하지 않는 엔티티·라이브러리·OAuth 계약 검증은 재시작을 생략한다.
+v2 HTTP를 사용하지 않는 엔티티·라이브러리·OAuth 계약 검증은 재시작하지 않는다. 429 경계 검증은 해당 핸들러의 초기 한도가 필요하므로 사용한 잔여량이 있을 때 초기화한다. 동시 요청은 reserveV2Requests로 시나리오 시작 전에 필요한 슬롯을 확보한다. 시나리오 중간에 소진되면 재시작 없이 만료를 기다린다. 예상 밖 429는 재시도하지 않고 실패한다.
 v3는 HarnessRateLimitTime을 통해 제한 계산의 시계만 다음 61초 구간으로 이동한다. 구간 안에서는 실제 시간이 흐르며 JWT·JPA 시계에는 영향을 주지 않는다.
 이는 케이스 간 상태 초기화다. 실제 제한 알고리즘과 HTTP interceptor는 그대로 실행하며, 구간 내 제한·만료·재차단은 HTTP/가상 시계 테스트로 검증한다.
 
@@ -171,7 +171,7 @@ RateLimitCasesTest는 별도 probe로 실제 한도를 넘겨 status·JSON·Limi
 7개 인증 API의 한도, 공개 OAuth provider 간 공유, 보호 경로의 429 우선순위, X-Forwarded-For로 IP를 위조해도 한도가 바뀌지 않는지 확인한다.
 깨진 JSON을 11번 보내도 로그인 잔여 횟수가 9로 시작하는지 비교한다. JSON 문구 차이만 해당 케이스에 명시한다.
 
-summary.json에는 최초 빌드·기동 수, 재시작 수, 양쪽 인증 대기 시간, 알려진 차이 목록을 기록한다. 429는 알려진 차이 등록과 abort를 제거한 필수 케이스다.
+summary.json에는 최초 빌드·기동 수, 재시작 수, 기존 인증 예산의 대기 시간, 알려진 차이 목록을 기록한다. quota.json에는 실제 재시작 사유와 시나리오 내부 잔여량 대기를 별도로 기록한다. 429는 알려진 차이 등록과 abort를 제거한 필수 케이스다.
 
 ## Mailpit
 
@@ -272,3 +272,15 @@ ComparisonCase.named("1번 묶음: 회원가입 → 로그인 → 재발급")
 공식 참고: [Mailpit SMTP](https://mailpit.axllent.org/docs/configuration/smtp/),
 [Mailpit API](https://mailpit.axllent.org/docs/api-v1/),
 [Nest Throttler 6.5.0](https://github.com/nestjs/throttler/tree/v6.5.0).
+
+## 실행 시간 계측
+
+Windows에서 `pwsh -File scripts/measure-tests.ps1 -Label after -RestartMode quota`로 전체 빌드를 측정한다. 개선 전 재현은 `-Label before -RestartMode each-case`다. 결과는 `build/performance/<Label>/result.json`, 두 작업의 원본 보고서, 테스트 식별자 목록에 남는다. 스크립트는 test와 comparisonTest에 각각 --rerun을 지정해 테스트를 실제로 다시 실행한다. 이미지·도구 캐시는 유지한다.
+
+- 재시작: Docker restart 명령부터 현재 포트의 HTTP 준비 확인까지. 최초 기동은 기타다.
+- 케이스 준비: 양쪽 DB TRUNCATE·SQL 시드·bcrypt 해시 주입·메일 비우기. 추가 사례별 SQL/파일 fixture 준비는 기타다.
+- HTTP: 하네스의 TestRestTemplate가 서버 응답 헤더를 받을 때까지의 실제 구간 합집합. 동시 요청을 이중 합산하지 않는다. 응답 본문 역직렬화·검증은 기타다.
+- 이미지: API의 메타데이터·디코딩·크롭·WebP 인코딩·파일 저장 구간. v2의 UploadService.saveAsWebP는 테스트 컨테이너 preload로, v3의 LocalImageStorage.save는 테스트 BeanPostProcessor로 감싼다. 원래 함수를 그대로 호출하며 예외도 그대로 전파한다. 현재 이미지 API 비교는 순차이므로 이미지 시간을 HTTP 합집합에서 빼 나머지 요청 시간을 구한다. 이미지 업로드 동시 테스트를 추가할 때는 원격 이미지 구간도 합집합 계측으로 바꿔야 한다.
+- 기타: 전체 Gradle wall time에서 위 구간을 뺀 나머지. 컴파일·환경 기동/종료·DB 상태 비교·Node 라이브러리 교차 검증·파일 fixture 준비·독립 코덱 probe·제한 대기 등을 포함한다. 요청별 처리 시간의 일반적인 성능 보장은 아니다.
+
+테스트용 `http://v2.harness.invalid`는 HTTP interceptor에서 현재 컨테이너 주소로 바뀐다. 재시작으로 호스트 포트가 달라져도 시나리오가 오래된 URL을 사용하지 않는다. 해당 별칭은 외부 DNS로 전송하지 않는다. v2 운영 소스·Dockerfile·요청 제한값을 수정하거나 IP를 바꾸지 않는다.

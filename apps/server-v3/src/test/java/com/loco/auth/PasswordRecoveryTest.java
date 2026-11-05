@@ -172,7 +172,9 @@ class PasswordRecoveryTest extends AuthenticationSupport {
   @Test
   void simultaneousResetConsumesCodeOnlyOnce() throws Exception {
     String id = seed("valid");
-    environment().budget.freshWindow("/api/auth/reset-password");
+    if (environment().quotaMode())
+      environment().reserveV2Requests("POST", "/api/auth/reset-password", 2);
+    else environment().budget.freshWindow("/api/auth/reset-password");
     JsonNode failure = null;
     for (var side : SharedHarness.Side.values()) {
       var responses =

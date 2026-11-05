@@ -29,7 +29,7 @@ import org.springframework.test.context.DynamicPropertySource;
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = "spring.flyway.target=1")
-@Import(HarnessControllers.class)
+@Import({HarnessControllers.class, HarnessImageTiming.class})
 public abstract class CompatibilityTestBase {
   private static final java.net.http.HttpClient HTTP =
       java.net.http.HttpClient.newBuilder()
@@ -41,18 +41,32 @@ public abstract class CompatibilityTestBase {
   @Autowired protected ObjectMapper mapper;
   @Autowired private HarnessRateLimitTime rateLimitTime;
 
+  protected boolean verifiesRateLimit() {
+    return false;
+  }
+
   protected boolean usesV2Http() {
     return true;
   }
 
   @BeforeEach
-  void configureHttpClient() {
-    if (usesV2Http()) environment().restartV2ForCase();
+  void configureHttpClient(org.junit.jupiter.api.TestInfo info) {
+    HarnessTimings.beginCase(
+        info.getTestClass().orElseThrow().getSimpleName()
+            + "."
+            + info.getTestMethod().orElseThrow().getName());
+    if (usesV2Http()) {
+      if (!environment().quotaMode()) environment().restartV2ForCase();
+      environment().quota.beginCase();
+    }
     rateLimitTime.nextWindow();
     environment().v3Budget.clearWindow();
     var factory = new JdkClientHttpRequestFactory(HTTP);
     factory.setReadTimeout(java.time.Duration.ofSeconds(10));
     client.getRestTemplate().setRequestFactory(factory);
+    client
+        .getRestTemplate()
+        .setInterceptors(java.util.List.of(new HarnessHttp(environment(), verifiesRateLimit())));
   }
 
   @DynamicPropertySource
@@ -74,7 +88,7 @@ public abstract class CompatibilityTestBase {
   }
 
   protected String v2Url() {
-    return environment().v2Url();
+    return HarnessHttp.V2;
   }
 
   protected String v3Url() {
@@ -98,8 +112,10 @@ public abstract class CompatibilityTestBase {
           environment().v2Enabled() && base.equals(v2Url())
               ? environment().budget
               : environment().v3Budget;
-      if (rateLimitProbe) budget.recordUnchecked(path);
-      else budget.before(method.name(), path);
+      if (!(base.equals(v2Url()) && environment().quotaMode())) {
+        if (rateLimitProbe) budget.recordUnchecked(path);
+        else budget.before(method.name(), path);
+      }
       var headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_JSON);
       if (token != null) headers.setBearerAuth(token);
