@@ -98,6 +98,7 @@ public class MapMembershipService {
     if (!room.getOwner().getId().equals(requesterId))
       throw ApiProblem.forbidden("방장만 멤버를 내보낼 수 있습니다.");
     if (targetId.equals(requesterId)) throw ApiProblem.badRequest("자기 자신을 내보낼 수 없습니다.");
+    // v2에도 남은 분기다. 위에서 requesterId == ownerId와 자기 추방을 검사하므로 현재는 도달하지 않는다.
     if (targetId.equals(room.getOwner().getId())) throw ApiProblem.badRequest("방장은 내보낼 수 없습니다.");
     members.leave(id, targetId);
   }
