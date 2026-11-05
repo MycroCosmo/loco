@@ -1,5 +1,8 @@
 # LOCO v3 — Spring 기반과 v2 인증·오류 호환
 
+Java 포맷은 Spotless 8.1.0 + google-java-format 1.28.0으로 고정한다. Java 21·Gradle 8.14.6에서 실행하며, `./gradlew spotlessApply`로 `src`의 운영·테스트 Java 전체를 정리한다. `./gradlew spotlessCheck`가 검사하고 `check`·`build`에서도 포맷 위반은 실패한다. 빌드가 소스를 자동 수정하지는 않는다.
+포매터 실행에는 Gradle 자체도 JDK 21로 실행해야 한다. 최소 실행 조건과 단일 스타일을 기준으로 선택했다: [Spotless 8.1.0 요구사항](https://raw.githubusercontent.com/diffplug/spotless/gradle/8.1.0/plugin-gradle/README.md), [google-java-format 1.28.0 실행 조건](https://raw.githubusercontent.com/google/google-java-format/v1.28.0/README.md).
+
 현재 구현 API는 `GET /api/health`, `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`, `POST /api/auth/oauth/{provider}`이다. 승인된 v2 기준 갱신 외에는 v2와 Flutter 코드를 변경하지 않는다.
 빈 PostgreSQL DB에는 Flyway V1으로 v2와 같은 업무 테이블을 만든다. 인증용 JPA 엔티티는 기존 스키마에 매핑한다. 자세한 설계와 읽는 순서는 [인증 문서](AUTHENTICATION.md)를 참고한다.
 DB 기준은 사용자가 확정한 PostgreSQL 17(`postgis/postgis:17-3.6`)이다. 맞춰야 할 기존 운영 DB 버전은 없다.

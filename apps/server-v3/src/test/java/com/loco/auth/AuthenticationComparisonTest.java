@@ -7,7 +7,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 @org.junit.jupiter.api.Tag("v2-comparison")
 class AuthenticationComparisonTest extends CompatibilityTestBase {
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("com.loco.auth.AuthenticationCases#errors")
-    void compare(ComparisonCase testCase) throws Exception { runCase(testCase); }
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("com.loco.auth.AuthenticationCases#errors")
+  void compare(ComparisonCase testCase) throws Exception {
+    runCase(testCase);
+  }
 }

@@ -10,19 +10,33 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration(proxyBeanMethods = false)
 public class UploadWebConfig implements WebMvcConfigurer {
-    private final ProfileImageStorage storage;
-    public UploadWebConfig(ProfileImageStorage storage) { this.storage = storage; }
-    @Override public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String uri = storage.root().toUri().toString();
-        registry.addResourceHandler("/uploads/**").addResourceLocations(uri.endsWith("/") ? uri : uri + "/");
-    }
-    @Override public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new HandlerInterceptor() {
-            @Override public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+  private final ProfileImageStorage storage;
+
+  public UploadWebConfig(ProfileImageStorage storage) {
+    this.storage = storage;
+  }
+
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    String uri = storage.root().toUri().toString();
+    registry
+        .addResourceHandler("/uploads/**")
+        .addResourceLocations(uri.endsWith("/") ? uri : uri + "/");
+  }
+
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry
+        .addInterceptor(
+            new HandlerInterceptor() {
+              @Override
+              public boolean preHandle(
+                  HttpServletRequest request, HttpServletResponse response, Object handler) {
                 response.setHeader("Access-Control-Allow-Origin", "*");
                 response.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
                 return true;
-            }
-        }).addPathPatterns("/uploads/**");
-    }
+              }
+            })
+        .addPathPatterns("/uploads/**");
+  }
 }
