@@ -23,6 +23,7 @@ public class PlaceMutationService {
   private final NotificationSender sender;
   private final Executor executor;
   private final java.time.Clock clock;
+  private final com.loco.images.LocalImageFiles files;
 
   public PlaceMutationService(
       PlaceRepository places,
@@ -34,7 +35,8 @@ public class PlaceMutationService {
       MarkerCells cells,
       NotificationSender sender,
       @Qualifier("applicationTaskExecutor") Executor executor,
-      java.time.Clock clock) {
+      java.time.Clock clock,
+      com.loco.images.LocalImageFiles files) {
     this.places = places;
     this.maps = maps;
     this.members = members;
@@ -45,6 +47,33 @@ public class PlaceMutationService {
     this.sender = sender;
     this.executor = executor;
     this.clock = clock;
+    this.files = files;
+  }
+
+  private record Deleted(String mapId, double latitude, double longitude, String[] imageUrls) {}
+
+  public void delete(String id, String userId) {
+    var deleted =
+        transaction.execute(
+            status -> {
+              var place =
+                  places.findById(id).orElseThrow(() -> ApiProblem.notFound("장소를 찾을 수 없습니다."));
+              boolean owner = place.getMap().getOwner().getId().equals(userId);
+              if (!owner && !place.getCreatedBy().getId().equals(userId))
+                throw ApiProblem.forbidden("삭제 권한이 없습니다.");
+              // v2처럼 작성자/방장만 검사한다. 지도방을 나간 작성자 차단은 후속 개선 후보다.
+              var result =
+                  new Deleted(
+                      place.getMap().getId(),
+                      PrismaFloats.input(place.getLatitude()),
+                      PrismaFloats.input(place.getLongitude()),
+                      place.getImageUrls() == null ? new String[0] : place.getImageUrls().clone());
+              places.delete(place);
+              places.flush();
+              return result;
+            });
+    cells.refresh(deleted.mapId(), deleted.latitude(), deleted.longitude());
+    for (String image : deleted.imageUrls()) files.delete(image);
   }
 
   private record Changed(PlaceResponses.Core result, double oldLatitude, double oldLongitude) {}

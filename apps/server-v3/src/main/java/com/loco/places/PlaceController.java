@@ -52,4 +52,11 @@ public class PlaceController {
       @RequestBody(required = false) com.fasterxml.jackson.databind.JsonNode body) {
     return mutations.update(id, user.userId(), PlaceInputs.parse(body, false));
   }
+
+  @DeleteMapping("/places/{id}")
+  public java.util.Map<String, String> delete(
+      @PathVariable String id, @AuthenticationPrincipal JwtPrincipal user) {
+    mutations.delete(id, user.userId());
+    return java.util.Map.of("message", "장소가 삭제되었습니다.");
+  }
 }
