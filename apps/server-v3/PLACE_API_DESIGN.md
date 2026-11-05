@@ -1,6 +1,6 @@
 # 4번 묶음: 장소 기본 API 설계안
 
-상태: 설계 검토 중. 아래 권장안은 미확정이며 장소 API 구현은 시작하지 않았다.
+상태: 사용자 승인 후 구현 중. 4-1~4-6은 모두 A로 확정했다. 아래 대안 표는 선택 당시 비교 기록이다.
 v2 기준은 작업 브랜치 `0d5ed03`의 places·map-permissions·notifications·upload와 Prisma 스키마다. v2 소스, Flutter, Flyway V1은 변경하지 않는다.
 
 설계 근거는 [컨트롤러](../server/src/places/places.controller.ts), [서비스](../server/src/places/places.service.ts), [입력 DTO](../server/src/places/dto), [스키마](../server/prisma/schema.prisma)다. 임시 PostgreSQL 17 DB에 V1 SQL을 적용하고 캐시된 v2 이미지로 **32건의 HTTP 요청**과 관련 DB·파일 결과를 관측했다. 이는 아래 경계 사례의 설계용 관측이며, v3 비교 테스트 32건을 구현하거나 통과했다는 뜻은 아니다. 임시 DB·컨테이너는 정리했고 개발 DB는 사용하지 않았다.
@@ -128,7 +128,7 @@ SQL 수는 인증 조회를 포함해 각 대표 API/분기에서 실제 측정 
 
 ## 8. 결정할 항목
 
-모든 선택지는 같은 API·DB·부분 커밋 결과를 목표로 한다. A는 권장안이며 아직 승인되지 않았다.
+모든 항목은 사용자 선택 A로 확정했다. 좌표 키는 new BigDecimal(double)의 정확한 이진 값에 HALF_UP을 적용하고, 음수의 반올림 결과 0에는 부호를 유지하되 입력 -0.0은 Node toFixed처럼 양의 0으로 처리한다. 실제 Node 결과로 검증한다.
 
 | 번호·항목 이름 | A | B |
 | --- | --- | --- |
@@ -149,4 +149,22 @@ LocalImageFiles 재사용, Firebase 실제 전송 보류, 기존 스키마와 AP
 4. 삭제 구현. DB cascade·셀 갱신·파일 정리 순서와 실패 잔여 상태 비교.
 5. 포맷·빠른 테스트·전체 비교 회귀. 단계별 한국어 커밋 본문에 성공/실패/알려진 차이·실행 시간 기록.
 
-지금은 설계에서 멈추고 4-1~4-6의 선택을 기다린다.
+단계별 검증·커밋·push 후 다음 단계로 진행하며 4번 묶음 완료 시 멈춘다.
+
+## 10. 이관 후 개선 후보
+
+다음 세 문제는 사용자 지시에 따라 이번 이관에서는 v2와 동일하게 유지한다. 개선 완료나 v3만의 알려진 차이로 표시하지 않는다.
+
+| 문제 | 근거 | 이관 후 검토할 개선 |
+| --- | --- | --- |
+| toFixed와 PostgreSQL ROUND 차이로 마커 셀 누락 | v2 refreshMarkerCellsForCoordinate의 JS 키와 refreshMarkerCell의 numeric ROUND 조건이 다름. 실제 37.05는 정밀도 1 셀 누락, -0.00001은 세 셀 누락 | 키 생성·셀 소속 판정의 반올림 규칙을 통일하고 기존 집계 재생성. 좌표 경계 회귀 검증 필요 |
+| 동시 저장 시 오래된 집계 잔존 가능 | 장소 쓰기·집계 SELECT·셀 UPSERT가 별도 커밋. 두 SELECT/쓰기의 교차 실행에서 이전 집계가 덮어쓸 수 있음. 정밀도 2 오류 주입으로 앞선 커밋 잔존은 관측했으나 이 설계 시점에 경쟁 발생 빈도는 측정하지 않음 | 저장/집계 원자성 또는 셀 단위 직렬화·재시도 방식을 실제 경쟁 테스트로 비교 |
+| 비공개방을 나간 작성자의 수정·삭제 허용 | v2 update는 작성자만, remove는 작성자/방장만 검사하고 map 읽기 권한을 재검사하지 않음. 실제 상세 403·수정/삭제 200 관측 | 읽기/쓰기 접근 정책을 명시하고 회원 상태·멤버십 재검사 도입. 이전 동작 변경으로 별도 승인 필요 |
+
+## 11. 구현 검증
+
+조회 단계는 `PlaceObservationTest`로 실제 v2의 67개 입력/커서/권한 응답을 `src/test/resources/places/read-v2.json`에 고정했다. `PlaceReadIntegrationTest`가 같은 요청의 v3 상태·JSON·DB 불변과 SQL 수를 검증한다. 반복 search/tag는 쉼표 문자열, 중첩 객체는 `[object Object]`로 변환하며 없는 커서는 빈 페이지다. JSON 정수/실수 표현도 Node 직렬화와 맞춘다.
+
+조회 SQL 수(회원 인증 조회 포함): 내 장소/공개 상세 2회, 비공개 상세 3회, 지도방 목록은 공개 3회/비공개 멤버 4회. 잘못된 sort는 인증 1회 후 400이다. 목록 크기와 무관하게 고정한다.
+
+재검증: `./gradlew test --tests '*PlaceReadIntegrationTest' comparisonTest --tests '*PlaceObservationTest'`. 명시적 v2 재관측은 `./gradlew comparisonTest --tests '*PlaceObservationTest' -PplacesObserve=true`; 결과는 build/reports/places에만 생성하고 커밋된 기대값을 자동 교체하지 않는다.

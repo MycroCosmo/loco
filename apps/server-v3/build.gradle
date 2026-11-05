@@ -103,6 +103,7 @@ tasks.register('comparisonTest', Test) {
     systemProperty 'compat.restart.strategy', providers.gradleProperty('harnessRestart').getOrElse('quota')
     systemProperty 'users.observe', providers.gradleProperty('usersObserve').getOrElse('false')
     systemProperty 'maps.observe', providers.gradleProperty('mapsObserve').getOrElse('false')
+    systemProperty 'places.observe', providers.gradleProperty('placesObserve').getOrElse('false')
     mustRunAfter tasks.named('test')
     dependsOn tasks.named('preparePrisma')
     inputs.file(v2Lockfile)

@@ -17,11 +17,11 @@ public final class SqlQueryCounter implements StatementInspector {
     return sql;
   }
 
-  static void reset() {
+  public static void reset() {
     SQL.clear();
   }
 
-  static List<String> statements() {
+  public static List<String> statements() {
     return List.copyOf(SQL);
   }
 

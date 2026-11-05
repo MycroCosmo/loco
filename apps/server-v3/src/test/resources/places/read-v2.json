@@ -1,0 +1,2514 @@
+[ {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?limit=1",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "hasMore" : true
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?limit=2",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "hasMore" : true
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?limit=0",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?limit=-1",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "hasMore" : true
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?limit=100",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?limit=2x",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "hasMore" : true
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?limit=NaN",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?limit=1.5",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "hasMore" : true
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?limit=1&limit=2",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "hasMore" : true
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=bad",
+  "status" : 400,
+  "body" : {
+    "message" : "sort는 latest, name, reviews만 가능합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=name",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=reviews",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=latest&sort=name",
+  "status" : 400,
+  "body" : {
+    "message" : "sort는 latest, name, reviews만 가능합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search=SeOuL",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search=road",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search=foo%20bar",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search=%25",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search=%5C",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search=%20%20",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search=missing",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?tag=foo",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?tag=FOO",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?tag=%20foo%20",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?tag=foo&search=Alpha",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search=a&search=b",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?tag=foo&tag=bar",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?cursor=missing",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?cursor=a&cursor=b",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search%5Bx%5D=a",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=latest&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000001",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=latest&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000002",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=latest&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000003",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=latest&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000004",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    } ],
+    "nextCursor" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+    "hasMore" : true
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=latest&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000005",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=latest&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000006",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=latest&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000007",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=name&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000001",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=name&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000002",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=name&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000003",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=name&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000004",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    } ],
+    "nextCursor" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+    "hasMore" : true
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=name&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000005",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=name&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000006",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=name&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000007",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=reviews&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000001",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=reviews&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000002",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Gamma",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 4,
+      "reviewCount" : 1
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "hasMore" : true
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=reviews&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000003",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "22222222-2222-4222-8222-222222222222",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "22222222-2222-4222-8222-222222222222",
+        "nickname" : "owner",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=reviews&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000004",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=reviews&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000005",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=reviews&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000006",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?sort=reviews&limit=2&cursor=cccccccc-cccc-4ccc-8ccc-000000000007",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places?search=foo&cursor=cccccccc-cccc-4ccc-8ccc-000000000002",
+  "status" : 200,
+  "body" : {
+    "items" : [ ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/places/me",
+  "status" : 200,
+  "body" : [ {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-03T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "title" : "room-1"
+    },
+    "averageRating" : 0,
+    "reviewCount" : 0
+  }, {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000005",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000004",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "place-5",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-02T12:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000004",
+      "title" : "room-4"
+    },
+    "averageRating" : 0,
+    "reviewCount" : 0
+  }, {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Beta",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "Foo" ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-02T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "title" : "room-1"
+    },
+    "averageRating" : 3.5,
+    "reviewCount" : 2
+  }, {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000007",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "place-7",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-01T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+      "title" : "room-3"
+    },
+    "averageRating" : 0,
+    "reviewCount" : 0
+  }, {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000006",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "place-6",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-01T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+      "title" : "room-2"
+    },
+    "averageRating" : 0,
+    "reviewCount" : 0
+  }, {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Gamma",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-01T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "title" : "room-1"
+    },
+    "averageRating" : 4,
+    "reviewCount" : 1
+  } ]
+}, {
+  "path" : "/api/places/missing",
+  "status" : 404,
+  "body" : {
+    "message" : "장소를 찾을 수 없습니다.",
+    "error" : "Not Found",
+    "statusCode" : 404
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000001",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-03T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "ownerId" : "11111111-1111-4111-8111-111111111111",
+      "title" : "room-1",
+      "description" : null,
+      "tags" : [ "Seoul" ],
+      "coverImageUrl" : null,
+      "visibility" : "PUBLIC",
+      "inviteCode" : null,
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z"
+    },
+    "averageRating" : 0,
+    "reviewCount" : 0
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000002",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Beta",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "Foo" ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-02T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "ownerId" : "11111111-1111-4111-8111-111111111111",
+      "title" : "room-1",
+      "description" : null,
+      "tags" : [ "Seoul" ],
+      "coverImageUrl" : null,
+      "visibility" : "PUBLIC",
+      "inviteCode" : null,
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z"
+    },
+    "averageRating" : 3.5,
+    "reviewCount" : 2
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000003",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Gamma",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-01T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "ownerId" : "11111111-1111-4111-8111-111111111111",
+      "title" : "room-1",
+      "description" : null,
+      "tags" : [ "Seoul" ],
+      "coverImageUrl" : null,
+      "visibility" : "PUBLIC",
+      "inviteCode" : null,
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z"
+    },
+    "averageRating" : 4,
+    "reviewCount" : 1
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000004",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "22222222-2222-4222-8222-222222222222",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-03T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "22222222-2222-4222-8222-222222222222",
+      "nickname" : "owner",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "ownerId" : "11111111-1111-4111-8111-111111111111",
+      "title" : "room-1",
+      "description" : null,
+      "tags" : [ "Seoul" ],
+      "coverImageUrl" : null,
+      "visibility" : "PUBLIC",
+      "inviteCode" : null,
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z"
+    },
+    "averageRating" : 0,
+    "reviewCount" : 0
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000005",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000005",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000004",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "place-5",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-02T12:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000004",
+      "ownerId" : "22222222-2222-4222-8222-222222222222",
+      "title" : "room-4",
+      "description" : null,
+      "tags" : [ "Seoul" ],
+      "coverImageUrl" : null,
+      "visibility" : "PUBLIC",
+      "inviteCode" : null,
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z"
+    },
+    "averageRating" : 0,
+    "reviewCount" : 0
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000006",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000006",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "place-6",
+    "address" : "Seoul address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "2026-01-01T00:00:00.000Z",
+    "updatedAt" : "2026-01-01T00:00:00.000Z",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    },
+    "map" : {
+      "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+      "ownerId" : "22222222-2222-4222-8222-222222222222",
+      "title" : "room-2",
+      "description" : null,
+      "tags" : [ "Seoul" ],
+      "coverImageUrl" : null,
+      "visibility" : "PRIVATE",
+      "inviteCode" : "INVITE02",
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z"
+    },
+    "averageRating" : 0,
+    "reviewCount" : 0
+  }
+}, {
+  "path" : "/api/places/cccccccc-cccc-4ccc-8ccc-000000000007",
+  "status" : 403,
+  "body" : {
+    "message" : "접근 권한이 없습니다.",
+    "error" : "Forbidden",
+    "statusCode" : 403
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000002/places",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000006",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "place-6",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-01T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000003/places",
+  "status" : 403,
+  "body" : {
+    "message" : "접근 권한이 없습니다.",
+    "error" : "Forbidden",
+    "statusCode" : 403
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000004/places",
+  "status" : 200,
+  "body" : {
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000005",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000004",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "place-5",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T12:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    } ],
+    "nextCursor" : null,
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/missing/places",
+  "status" : 404,
+  "body" : {
+    "message" : "지도방을 찾을 수 없습니다.",
+    "error" : "Not Found",
+    "statusCode" : 404
+  }
+}, {
+  "path" : "/api/maps/missing/places?sort=bad",
+  "status" : 400,
+  "body" : {
+    "message" : "sort는 latest, name, reviews만 가능합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+} ]
