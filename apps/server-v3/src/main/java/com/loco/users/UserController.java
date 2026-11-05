@@ -50,17 +50,6 @@ public class UserController {
       org.springframework.http.HttpStatus.CREATED)
   public UserResponses.Image image(
       @AuthenticationPrincipal JwtPrincipal user, jakarta.servlet.http.HttpServletRequest request) {
-    org.springframework.web.multipart.MultipartFile file = null;
-    if (request
-        instanceof org.springframework.web.multipart.MultipartHttpServletRequest multipart) {
-      for (var entry : multipart.getMultiFileMap().entrySet())
-        for (var part : entry.getValue()) {
-          if (part.getOriginalFilename() == null || part.getOriginalFilename().isEmpty()) continue;
-          if (!entry.getKey().equals("file") || file != null)
-            throw com.loco.web.ApiProblem.badRequest("Unexpected field");
-          file = part;
-        }
-    }
-    return images.update(user.userId(), file);
+    return images.update(user.userId(), com.loco.images.ImageUploadRequest.file(request));
   }
 }

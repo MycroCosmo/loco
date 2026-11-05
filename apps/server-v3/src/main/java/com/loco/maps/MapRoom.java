@@ -104,6 +104,11 @@ public class MapRoom {
     return coverImageUrl;
   }
 
+  public void updateCover(String url, LocalDateTime now) {
+    coverImageUrl = url;
+    updatedAt = now;
+  }
+
   public Visibility getVisibility() {
     return visibility;
   }

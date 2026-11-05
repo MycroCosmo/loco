@@ -12,11 +12,17 @@ public class MapController {
   private final MapService maps;
   private final MapQueryRepository queries;
   private final MapMutationService mutations;
+  private final MapCoverService covers;
 
-  public MapController(MapService maps, MapQueryRepository queries, MapMutationService mutations) {
+  public MapController(
+      MapService maps,
+      MapQueryRepository queries,
+      MapMutationService mutations,
+      MapCoverService covers) {
     this.maps = maps;
     this.queries = queries;
     this.mutations = mutations;
+    this.covers = covers;
   }
 
   @GetMapping("/maps")
@@ -72,5 +78,14 @@ public class MapController {
   public MapResponses.Detail regenerateInviteCode(
       @AuthenticationPrincipal JwtPrincipal user, @PathVariable String id) {
     return mutations.regenerateInviteCode(id, user.userId());
+  }
+
+  @PostMapping("/maps/{id}/cover")
+  @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+  public MapResponses.Core cover(
+      @AuthenticationPrincipal JwtPrincipal user,
+      @PathVariable String id,
+      jakarta.servlet.http.HttpServletRequest request) {
+    return covers.update(id, user.userId(), com.loco.images.ImageUploadRequest.file(request));
   }
 }

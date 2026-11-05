@@ -11,7 +11,12 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("v2-comparison")
-class ProfileImageObservationTest extends ProfileImageRequests {
+class ProfileImageObservationTest extends com.loco.compat.ImageUploadRequests {
+  @Override
+  protected String uploadPath() {
+    return "/api/users/me/profile-image";
+  }
+
   @Test
   void observeUploadResponses() throws Exception {
     if (Boolean.getBoolean("users.observe")) {

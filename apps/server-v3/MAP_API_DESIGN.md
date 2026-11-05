@@ -171,14 +171,14 @@ tags는 Hibernate 기본 ARRAY 매핑을 우선 검증하며 별도 라이브러
 
 각 단위는 한국어 커밋으로 나누고 본문에 전체/성공/실패/알려진 차이 수, 실행 범위와 시간을 기록한다. 파일을 추가할 때 역할과 핵심 설정을 설명한다.
 빠른 테스트 `./gradlew test`, 실제 v2 비교 `./gradlew comparisonTest`, 통합 `./gradlew allTests`를 유지한다. 시간은 v2 이미지 캐시 여부와 네이티브 이미지 준비 포함 여부를 구분한다.
-구현은 승인됐으며 API-12 N+1 전후 측정 완료 시 사용자 확인을 기다린다.
+API-12 N+1 전후 측정은 사용자 확인을 마쳤다. API-11/14까지 완료한 뒤 3번 묶음 확인을 기다린다.
 
 현재 조회 관측: `src/test/resources/maps/read-v2.json`의 49개 요청과 DB 불변을 검증한다. 커서가 필터 밖일 때도 Prisma skip:1이 첫 유효 행을 제외한다.
 현재 SQL 기준: 목록·내 목록·공개/내 소유 상세 2회, 타인 비공개 상세 3회, 조회 파라미터 오류 1회(인증 조회). `MapReadIntegrationTest`가 고정하며 증가하면 실패한다.
 생성은 공개 3회·비공개 4회, 수정은 일반 3회·공개→비공개 4회·빈 객체 2회, 삭제 성공 4회(인증 포함)다. 실패 경로의 SQL 수도 비교 테스트에서 별도로 고정한다.
 쓰기 관측은 `src/test/resources/maps/write-v2.json`이다. 생성의 tags:null은 빈 배열, 수정의 tags:null·빈 배열 본문은 500이다. scalar 문자열 tags는 배열 오류 한 개만 반환한다. DB의 기존 NULL tags는 응답에서 빈 배열로 읽는다.
 즐겨찾기 RESTRICT에 따른 삭제 500과 force 대소문자 구분, 생성·삭제의 지연 커밋 실패 롤백, 신고 행 보존, 커밋 이후에만 파일 삭제를 실제 v2와 비교했다.
-`LocalImageFiles`는 공유 업로드 루트와 경로 안전성·정리 실패 무시를 공통으로 담당한다. 프로필 변환·크롭은 아직 기존 코드이며 커버 단계에서 크기 설정을 공통화한다.
+`LocalImageFiles`는 공유 업로드 루트와 경로 안전성·정리 실패 무시를 공통으로 담당한다. LocalImageStorage가 기존 프로필 변환·크롭을 공통화하고 PROFILE(512×512)/MAP_COVER(800×400) 목적을 받는다.
 
 ## 9. 멤버 단계의 측정과 남은 차이
 
@@ -204,16 +204,33 @@ API-12는 실제로 LAZY 순회 구현을 실행한 뒤 `join fetch m.user`로 �
 | API-08 공개 가입 | 4(반복 가입 포함) |
 | API-09 코드 가입 | 5(반복 가입 포함) |
 | API-10 나가기 | 3 |
+| API-11 초대 코드 재생성 | 5(첫 후보 사용 가능 시) |
 | API-12 멤버 목록 | 방장 3, 일반 멤버 4; 멤버 수와 무관 |
 | API-13 추방 | 3 |
+| API-14 커버 업로드 | 4 |
 
-`MapReadIntegrationTest`, `MapWriteComparisonTest`, `MapDeletionComparisonTest`, `MapMembershipComparisonTest`가 정상·오류 경로별 수를 고정한다. 코드 충돌 재시도는 후보마다 조회가 늘어나는 별도 경로이며 10회 한도를 단위 테스트로 검증한다. API-11/14의 SQL 기준은 구현 시 추가한다.
+`MapReadIntegrationTest`, `MapWriteComparisonTest`, `MapDeletionComparisonTest`, `MapMembershipComparisonTest`, `MapInviteCodeComparisonTest`, `MapCoverComparisonTest`가 정상·오류 경로별 수를 고정한다. 코드 충돌 재시도는 후보마다 조회가 늘어나는 별도 경로이며 10회 한도를 단위 테스트로 검증한다.
 
 동시 가입은 DatabaseRequestRace가 지도방 부모 행을 잠그고 두 map_members INSERT의 실제 잠금 대기를 확인한 뒤 해제한다. 공개 가입·코드 가입 모두 v2 [201,500], v3 [201,201]과 동일 회원 행 1개를 관측했다. v3는 JPA native ON CONFLICT DO NOTHING을 사용한다. v2 실패를 재현하지 않으며 차이는 보고서에 `improved`로 표시한다.
 Firebase 실제 전송과 무효 FCM 토큰 정리는 보류했다. `NotificationSender`는 전송 경계, `DeferredNotificationSender`는 명시적 보류 구현, `MemberJoinedNotification.Delivery`는 커밋 후 호출 지점이다. 반복 가입도 호출하며 롤백이면 호출하지 않는다. 전송 실패가 가입 성공을 취소하지 않는 mock 계약을 검증한다. 이후 실제 송신 구현에서 비동기 전송·전송 실패·무효 토큰 정리를 함께 다룬다.
 전체 지도방 비교 범위에서는 의도된 코드 생성 1건, Firebase 보류 1건, 관측된 동시 가입 개선 2건을 보고한다. 알려진 차이는 테스트 실패나 SKIPPED와 별도 집계한다.
 
 재검증(앱 디렉터리): `./gradlew test --tests '*MapMemberSqlTest'`로 SQL 3회 고정을 확인하고, `./gradlew comparisonTest --tests '*Map*Test'`로 v2 응답·DB·알려진 차이를 확인한다. 전체 회귀는 기존 `./gradlew allTests`다.
+
+초대 코드 재생성(API-11)은 PRIVATE 소유자만 사용할 수 있다. 기존 코드 제외·10회 후보 한도와 상세 응답을 유지하며 정상 SQL은 인증 포함 5회다. `MapInviteCodeComparisonTest`는 이전 코드 무효화→새 코드 가입, 두 DB 실패 시점의 롤백, 실제 행 잠금으로 겹친 재생성을 비교한다. 동시 재생성은 v2와 같이 둘 다 성공하고 마지막 커밋 코드가 남는다.
+
+## 10. 커버 업로드의 호환 기준
+
+- `src/test/resources/maps/cover-v2.json`은 구현 전 실제 v2에서 관측한 27가지 HTTP 응답·출력 크기다. 10MiB 이상은 413, 바로 아래는 201이다. 잘못된 multipart의 문구도 프로필과 같은 실제 응답으로 고정했다.
+- JPEG·PNG·WebP·AVIF·애니메이션 WebP는 201이다. 애니메이션은 첫 프레임, EXIF 방향 자동 회전은 하지 않는다. HEIC는 v2와 같은 500·DB 불변·빈 새 출력 파일을 유지한다. HEIC HTTP 동작은 건너뛰지 않고 필수 비교한다.
+- 1024×768 → 800×400, 100×800 → 100×400, 800×100 → 800×100, 64×48 → 64×48로 중앙 크롭하고 확대하지 않는다. WebP 바이트 일치 대신 크기·형식·사분면 내부 픽셀(채널 오차 최대 24)을 비교한다.
+- `ImageUploadRequest`는 인증 이후 단일 file 필드·MIME·크기를 검증한다. 파일 누락 400은 방 존재 검사보다 먼저다. MIME·multipart 오류도 방 조회 전 400/413, 정상 파일의 없는 방은 404·타인 방은 403이다. 손상·빈 내용 검증은 소유자 확인 뒤 수행한다.
+- `MapCoverService`는 변환 후 별도 DB 트랜잭션에서 URL을 저장한다. UPDATE 실패와 지연 커밋 실패 모두 새 파일을 삭제하고 이전 파일·전체 DB를 보존한다. 커밋 후 이전 파일을 삭제하고, 외부 URL·없는 파일·디렉터리 정리 실패는 API 성공을 취소하지 않는다.
+- `ImageUploadRequests`는 프로필·커버에서 공유하는 테스트 요청 생성기다. 커버 비교는 응답·다른 방을 포함한 DB·파일 변경·오류 우선순위·공개 정적 GET을 검증하며, 기존 프로필 비교도 함께 실행한다.
+- 정상 커버 요청 SQL 4회 = 인증 회원 조회 + 소유 지도방 조회 + 트랜잭션 내 조회 + UPDATE. 없는 방·타인 방·내용 검증 실패는 2회, multipart/누락 오류는 1회, 정적 파일 GET은 0회다.
+- `scripts/verify-user-images.ps1`은 Windows에서 임시 Linux Compose 프로젝트를 띄워 프로필과 커버의 변환·양방향 파일 공유·교체·UID/GID 1000·다른 파일 보존을 검증한다. 생성한 임시 프로젝트 볼륨만 정리하며 개발 볼륨은 지우지 않는다. 실행 결과는 `build/user-images-compose-result.json`이다.
+
+재검증: `./gradlew comparisonTest --tests '*MapCover*Test' --tests '*ProfileImage*Test'`. 전체 포맷·빌드·회귀: `./gradlew build`. Linux 공유 파일 검증: `pwsh -File scripts/verify-user-images.ps1`.
 
 ## 근거 파일·공식 참고
 
@@ -223,5 +240,3 @@ Firebase 실제 전송과 무효 FCM 토큰 정리는 보류했다. `Notificatio
 - [Spring Data JPA native query](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html): JPA repository에서 native SQL을 사용할 수 있다.
 - [Hibernate 6.6 문서](https://hibernate.org/orm/documentation/6.6/): ARRAY와 named enum 매핑을 기존 스키마에 맞춰 검증한다.
 - [Firebase Admin 설치](https://firebase.google.com/docs/admin/setup): Java 전송 어댑터 선택 시 참고한다. 이번 설계 단계에서 SDK 추가는 하지 않았다.
-
-초대 코드 재생성(API-11)은 PRIVATE 소유자만 사용할 수 있다. 기존 코드 제외·10회 후보 한도와 상세 응답을 유지하며 정상 SQL은 인증 포함 5회다. `MapInviteCodeComparisonTest`는 이전 코드 무효화→새 코드 가입, 두 DB 실패 시점의 롤백, 실제 행 잠금으로 겹친 재생성을 비교한다. 동시 재생성은 v2와 같이 둘 다 성공하고 마지막 커밋 코드가 남는다.

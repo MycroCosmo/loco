@@ -27,9 +27,9 @@ function DockerCommand([string[]] $Arguments) {
     if ($LASTEXITCODE -ne 0) { throw "Docker command failed: $($Arguments[0])" }
     return $output
 }
-function UploadImage([string] $Base, [string] $File, [string] $Mime, [string] $Token) {
-    $response = & curl.exe --silent --show-error --fail-with-body -H "Authorization: Bearer $Token" -F "file=@$File;type=$Mime" "$Base/api/users/me/profile-image"
-    if ($LASTEXITCODE -ne 0) { throw 'Profile upload failed' }
+function UploadImage([string] $Base, [string] $File, [string] $Mime, [string] $Token, [string] $ApiPath='/api/users/me/profile-image') {
+    $response = & curl.exe --silent --show-error --fail-with-body -H "Authorization: Bearer $Token" -F "file=@$File;type=$Mime" ($Base + $ApiPath)
+    if ($LASTEXITCODE -ne 0) { throw 'Image upload failed' }
     return $response | ConvertFrom-Json
 }
 function VerifySharedFile([string] $Url) {
@@ -87,6 +87,44 @@ try {
     if ((Invoke-WebRequest -Uri ($v3 + $previous) -SkipHttpErrorCheck).StatusCode -ne 404) { throw 'v2 did not remove v3 image' }
     if ((Invoke-WebRequest -Uri "$v3/uploads/profiles/preserved.txt").Content -ne 'preserved') { throw 'Unrelated volume data changed' }
     $result.checks += 'v2 replacement + v3 GET + unrelated file preserved'
+
+    $room = Invoke-RestMethod -Method Post -Uri "$v3/api/maps" -Headers @{Authorization="Bearer $($account.accessToken)"} -ContentType 'application/json' -Body '{"title":"cover smoke","visibility":"PUBLIC"}'
+    $coverPath = "/api/maps/$($room.id)/cover"
+    DockerCommand ($compose + @('exec','-T','v2','node','-e',"const fs=require('fs');fs.mkdirSync('/app/uploads/maps',{recursive:true});fs.writeFileSync('/app/uploads/maps/preserved.txt','preserved')")) | Out-Null
+    $previous = $null
+    foreach ($extension in @('jpeg','png','webp','avif','animated-webp')) {
+        $name = if ($extension -eq 'animated-webp') { 'animated.webp' } else { "quadrants.$extension" }
+        $mime = if ($extension -eq 'animated-webp') { 'image/webp' } else { "image/$extension" }
+        $uploaded = UploadImage $v3 (Join-Path $repository "apps/server-v3/src/test/resources/codec/$name") $mime $account.accessToken $coverPath
+        VerifySharedFile $uploaded.coverImageUrl
+        if ($previous -and (Invoke-WebRequest -Uri ($v2 + $previous) -SkipHttpErrorCheck).StatusCode -ne 404) { throw 'Previous cover was not removed' }
+        $previous = $uploaded.coverImageUrl
+        $result.checks += "Linux v3 cover $extension conversion + v2/v3 shared GET"
+    }
+    $large = (DockerCommand ($compose + @('exec','-T','v2','node','-e',"require('sharp')({create:{width:1024,height:768,channels:3,background:'#336699'}}).png().toBuffer().then(b=>console.log(b.toString('base64')))"))).Trim()
+    $largePath = Join-Path $directory 'cover-large.png'
+    [IO.File]::WriteAllBytes($largePath, [Convert]::FromBase64String($large))
+    $uploaded = UploadImage $v3 $largePath 'image/png' $account.accessToken $coverPath
+    VerifySharedFile $uploaded.coverImageUrl
+    $metadata = (DockerCommand ($compose + @('exec','-T','v2','node','-e',"require('sharp')('/app'+process.argv[1]).metadata().then(m=>console.log(JSON.stringify({width:m.width,height:m.height,format:m.format})))",$uploaded.coverImageUrl))) | ConvertFrom-Json
+    if ($metadata.width -ne 800 -or $metadata.height -ne 400 -or $metadata.format -ne 'webp') { throw 'Linux cover dimensions differ' }
+    $previous = $uploaded.coverImageUrl
+    $result.checks += 'Linux cover 1024x768 -> 800x400 WebP'
+    $status = & curl.exe --silent --show-error -o $errorFile -w '%{http_code}' -H "Authorization: Bearer $($account.accessToken)" -F "file=@$heic;type=image/heic" ($v3 + $coverPath)
+    $errorBody = Get-Content $errorFile -Raw | ConvertFrom-Json
+    if ($status -ne '500' -or $errorBody.message -ne 'Internal server error') { throw 'Cover HEIC error differs' }
+    $after = Invoke-RestMethod -Uri "$v3/api/maps/$($room.id)" -Headers @{Authorization="Bearer $($account.accessToken)"}
+    if ($after.coverImageUrl -ne $previous) { throw 'HEIC changed the stored cover' }
+    $emptyFiles = (DockerCommand ($compose + @('exec','-T','v2','node','-e',"const fs=require('fs'),p='/app/uploads/maps/';console.log(fs.readdirSync(p).filter(n=>n.endsWith('.webp')&&fs.statSync(p+n).size===0).length)"))).Trim()
+    if ($emptyFiles -ne '1') { throw 'HEIC cover residual file differs' }
+    $result.checks += 'Linux cover HEIC 500 + DB unchanged + empty output file'
+    $uploaded = UploadImage $v2 $largePath 'image/png' $account.accessToken $coverPath
+    VerifySharedFile $uploaded.coverImageUrl
+    if ((Invoke-WebRequest -Uri ($v3 + $previous) -SkipHttpErrorCheck).StatusCode -ne 404) { throw 'v2 did not remove v3 cover' }
+    foreach ($folder in @('maps','profiles')) {
+        if ((Invoke-WebRequest -Uri "$v3/uploads/$folder/preserved.txt").Content -ne 'preserved') { throw 'Unrelated volume data changed' }
+    }
+    $result.checks += 'v2 cover replacement + v3 GET + both folders preserved'
     $result.passed = $true
 } finally {
     $timer.Stop(); $result.seconds = $timer.Elapsed.TotalSeconds

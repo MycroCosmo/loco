@@ -21,7 +21,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.HttpMethod;
 
 @Tag("v2-comparison")
-class ProfileImageComparisonTest extends ProfileImageRequests {
+class ProfileImageComparisonTest extends com.loco.compat.ImageUploadRequests {
+  @Override
+  protected String uploadPath() {
+    return "/api/users/me/profile-image";
+  }
+
   private static final String OLD = "/uploads/profiles/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp";
   private static final DatabaseSnapshot.Rules OTHER_FIELDS =
       new DatabaseSnapshot.Rules(

@@ -1,7 +1,6 @@
-package com.loco.users;
+package com.loco.compat;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.loco.compat.CompatibilityTestBase;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -10,8 +9,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
-abstract class ProfileImageRequests extends CompatibilityTestBase {
-  static final List<String> INPUTS =
+public abstract class ImageUploadRequests extends CompatibilityTestBase {
+  protected static final List<String> INPUTS =
       List.of(
           "jpeg",
           "png",
@@ -41,22 +40,21 @@ abstract class ProfileImageRequests extends CompatibilityTestBase {
           "exif-jpeg",
           "animated-webp");
 
-  record Part(String field, String filename, String mime, byte[] bytes) {}
+  protected abstract String uploadPath();
 
-  byte[] fixture(String extension) throws Exception {
+  protected record Part(String field, String filename, String mime, byte[] bytes) {}
+
+  protected byte[] fixture(String extension) throws Exception {
     try (var stream = getClass().getResourceAsStream("/codec/quadrants." + extension)) {
       return stream.readAllBytes();
     }
   }
 
-  ResponseEntity<JsonNode> uploadCase(String base, String input, String token) throws Exception {
+  protected ResponseEntity<JsonNode> uploadCase(String base, String input, String token)
+      throws Exception {
     if (input.equals("json-body"))
       return request(
-          base,
-          "/api/users/me/profile-image",
-          HttpMethod.POST,
-          token,
-          java.util.Map.of("file", "image.png"));
+          base, uploadPath(), HttpMethod.POST, token, java.util.Map.of("file", "image.png"));
     byte[] data =
         switch (input) {
           case "jpeg", "png", "webp", "heic", "avif" -> fixture(input);
@@ -152,7 +150,7 @@ abstract class ProfileImageRequests extends CompatibilityTestBase {
                 .asText());
   }
 
-  byte[] png(int width, int height) throws Exception {
+  protected byte[] png(int width, int height) throws Exception {
     var image =
         new java.awt.image.BufferedImage(width, height, java.awt.image.BufferedImage.TYPE_INT_RGB);
     int[] colors = {0xff0000, 0x00ff00, 0x0000ff, 0xffff00};
@@ -164,8 +162,8 @@ abstract class ProfileImageRequests extends CompatibilityTestBase {
     return out.toByteArray();
   }
 
-  ResponseEntity<JsonNode> upload(String base, List<Part> parts, String token, String mode)
-      throws Exception {
+  protected ResponseEntity<JsonNode> upload(
+      String base, List<Part> parts, String token, String mode) throws Exception {
     String boundary = "loco-test-boundary";
     var bytes = new ByteArrayOutputStream();
     for (var part : parts) {
@@ -191,7 +189,7 @@ abstract class ProfileImageRequests extends CompatibilityTestBase {
         "multipart/form-data" + (mode.equals("boundary-missing") ? "" : "; boundary=" + boundary));
     if (token != null) headers.setBearerAuth(token);
     return client.exchange(
-        base + "/api/users/me/profile-image",
+        base + uploadPath(),
         HttpMethod.POST,
         new HttpEntity<>(bytes.toByteArray(), headers),
         JsonNode.class);
