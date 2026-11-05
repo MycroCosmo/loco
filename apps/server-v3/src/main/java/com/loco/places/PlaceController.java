@@ -10,9 +10,20 @@ import org.springframework.web.bind.annotation.*;
 @AuthenticatedApi
 public class PlaceController {
   private final PlaceQueryRepository queries;
+  private final PlaceMutationService mutations;
 
-  public PlaceController(PlaceQueryRepository queries) {
+  public PlaceController(PlaceQueryRepository queries, PlaceMutationService mutations) {
     this.queries = queries;
+    this.mutations = mutations;
+  }
+
+  @PostMapping("/maps/{mapId}/places")
+  @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+  public PlaceResponses.Core create(
+      @PathVariable String mapId,
+      @AuthenticationPrincipal JwtPrincipal user,
+      @RequestBody(required = false) com.fasterxml.jackson.databind.JsonNode body) {
+    return mutations.create(mapId, user.userId(), PlaceInputs.parse(body, true));
   }
 
   @GetMapping("/maps/{mapId}/places")

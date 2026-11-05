@@ -498,3 +498,12 @@ TransactionTemplate의 커밋 경계, multipart 지연 파싱, 네이티브 프�
 
 테스트 시간 계측과 재시작 조건은 [하네스 문서의 실행 시간 계측](COMPARISON_TESTS.md#실행-시간-계측)을 따른다. 전체 비교 범위·필수 429·동시 요청 검증은 유지한다.
 전체 회귀 시간은 [실측 전후 결과와 추가 단축 선택지](TEST_PERFORMANCE.md)를 참고한다. 케이스를 유지한 채 재시작 321→6회, 동일 계측 전체 1261.87→467.69초로 줄였다.
+
+## 장소 기본 API (4번 묶음)
+
+설계·결정·v2 관측 근거와 후속 개선 후보는 [장소 API 문서](PLACE_API_DESIGN.md)에 모은다.
+`PlaceController` → `PlaceInputs`/`PlaceListing` → `PlaceQueryRepository` 또는 `PlaceMutationService` 순서로 읽는다.
+`Place`는 지도방·작성자를 LAZY로 참조하며 cascade를 사용하지 않는다. 목록/리뷰 집계는 native projection이고, UUID 문자열·배열·timestamp(3) 매핑은 V1을 유지한다.
+
+`MarkerCells`는 장소 쓰기와 별개로 SELECT 후 각 셀을 커밋한다. 키 생성(`CoordinateKeys`)과 PostgreSQL ROUND가 다른 기존 제약도 보존한다. `PrismaFloats`는 Prisma 5의 Float 입출력 변환을 맞추며 Node는 테스트 oracle에서만 사용한다.
+입력/응답 fixture와 DB·부분 실패·알림 계약은 `src/test/java/com/loco/places`에 있다. `PlaceWriteSupport`는 UUID/시각 형식 검사와 비-ID 기준의 DB 행 대응을 공유한다.

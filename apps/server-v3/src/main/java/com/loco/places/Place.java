@@ -70,6 +70,23 @@ public class Place {
 
   protected Place() {}
 
+  public static Place create(MapRoom map, User author, PlaceInputs input) {
+    var place = new Place();
+    place.map = map;
+    place.createdBy = author;
+    place.name = input.text("name");
+    place.address = input.text("address");
+    place.roadAddress = input.text("roadAddress");
+    place.latitude = PrismaFloats.input(input.number("latitude"));
+    place.longitude = PrismaFloats.input(input.number("longitude"));
+    place.phone = input.text("phone");
+    place.category = input.text("category");
+    place.memo = input.text("memo");
+    place.tags = input.tags() == null ? new String[0] : input.tags();
+    place.imageUrls = new String[0];
+    return place;
+  }
+
   public String getId() {
     return id;
   }

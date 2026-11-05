@@ -168,3 +168,9 @@ LocalImageFiles 재사용, Firebase 실제 전송 보류, 기존 스키마와 AP
 조회 SQL 수(회원 인증 조회 포함): 내 장소/공개 상세 2회, 비공개 상세 3회, 지도방 목록은 공개 3회/비공개 멤버 4회. 잘못된 sort는 인증 1회 후 400이다. 목록 크기와 무관하게 고정한다.
 
 재검증: `./gradlew test --tests '*PlaceReadIntegrationTest' comparisonTest --tests '*PlaceObservationTest'`. 명시적 v2 재관측은 `./gradlew comparisonTest --tests '*PlaceObservationTest' -PplacesObserve=true`; 결과는 build/reports/places에만 생성하고 커밋된 기대값을 자동 교체하지 않는다.
+
+생성 단계는 `PlaceInputs`의 누락/null 구분과 v2 ValidationPipe 오류 순서를 44개 실제 관측으로 검증한다. `PlaceMutationService`는 장소 커밋 → `MarkerCells`의 정밀도별 SELECT/쓰기 커밋 → 비동기 알림 호출 순서다. 알림은 `NotificationSender.sendToMap` 계약까지만 연결하며 실제 Firebase 전송 보류는 기존 알려진 차이다.
+
+`CoordinateKeys`는 정확한 이진 BigDecimal + HALF_UP을 사용한다. 실제 Node로 경계의 인접 double, ±0, 음수 반올림 0과 임의 좌표를 교차 검증한다. PostgreSQL ROUND와 다른 셀 누락은 그대로 유지한다.
+
+추가로 실제 v2 Prisma 5의 float 입력 왕복에서 `127.88879999999999 → 127.8888`이 관측됐다. PostgreSQL AVG 결과를 JS/Prisma로 다시 넘기는 경계 때문에 발생하며, 허용 오차로 비교를 완화하지 않는다. `PrismaFloats`가 정확한 double을 유효숫자 16자리 HALF_EVEN으로 변환하고 고정 Prisma의 실제 DB 왕복과 대조한다. 원인은 Prisma 5가 사용하는 bigdecimal 0.3의 f64 변환(소수 15자리 지수 표기 = 유효숫자 16자리)이다. 근거: [bigdecimal 0.3의 TryFrom<f64> 구현](https://github.com/akubera/bigdecimal-rs/blob/v0.3.0/src/lib.rs#L1652)과 하네스 `CoordinateKeysComparisonTest`. 운영에서 Node를 호출하지 않는다.

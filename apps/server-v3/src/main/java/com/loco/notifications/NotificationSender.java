@@ -7,4 +7,6 @@ public interface NotificationSender {
   record Message(String title, String body, Map<String, String> data) {}
 
   void sendToUser(String userId, Message message);
+
+  void sendToMap(String mapId, String excludeUserId, Message message);
 }
