@@ -24,6 +24,19 @@ public class MapRoom {
     @CreatedDate @Column(name="\"createdAt\"",updatable=false,columnDefinition="timestamp(3)") private LocalDateTime createdAt;
     @LastModifiedDate @Column(name="\"updatedAt\"",columnDefinition="timestamp(3)") private LocalDateTime updatedAt;
     protected MapRoom() { }
+    public static MapRoom create(User owner,MapMutationInputs input,String code) {
+        var room=new MapRoom();room.owner=owner;room.title=input.title();room.description=input.description();
+        room.tags=input.tags()==null?new String[0]:input.tags();room.visibility=input.visibility();room.inviteCode=code;
+        return room;
+    }
+    public void update(MapMutationInputs input,String code,LocalDateTime now) {
+        if(input.hasTitle()) title=input.title();
+        if(input.hasDescription()) description=input.description();
+        if(input.hasTags()) tags=input.tags();
+        if(input.hasVisibility()) visibility=input.visibility();
+        inviteCode=code;
+        if(input.hasTitle()||input.hasDescription()||input.hasTags()||input.hasVisibility()) updatedAt=now;
+    }
     public String getId() { return id; }
     public User getOwner() { return owner; }
     public String getTitle() { return title; }

@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.UUID;
 import com.loco.images.codec.ImageConverter;
 import com.loco.web.ApiProblem;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,8 +18,9 @@ public class ProfileImageStorage {
     private static final Set<String> MIMES = Set.of("image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "image/avif");
     private final Path root;
     private final ImageConverter converter;
-    public ProfileImageStorage(@Value("${loco.uploads.directory:uploads}") String directory, ImageConverter converter) {
-        root = Path.of(directory.isBlank() ? "uploads" : directory).toAbsolutePath().normalize(); this.converter = converter;
+    private final LocalImageFiles files;
+    public ProfileImageStorage(LocalImageFiles files, ImageConverter converter) {
+        root = files.root(); this.files=files; this.converter = converter;
     }
     public Path root() { return root; }
     public String save(MultipartFile file) {
@@ -64,8 +64,6 @@ public class ProfileImageStorage {
     }
     public void delete(String url) {
         if (url == null || !url.startsWith("/uploads/profiles/")) return;
-        Path target = root.resolve(url.substring("/uploads/".length())).normalize();
-        if (!target.startsWith(root) || target.equals(root) || Files.isDirectory(target, java.nio.file.LinkOption.NOFOLLOW_LINKS)) return;
-        try { Files.deleteIfExists(target); } catch (IOException ignored) { /* v2: 파일 정리 실패는 API 성공을 취소하지 않는다. */ }
+        files.delete(url);
     }
 }

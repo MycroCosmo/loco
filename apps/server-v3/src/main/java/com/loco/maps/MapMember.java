@@ -14,6 +14,7 @@ public class MapMember {
     @ManyToOne(fetch=FetchType.LAZY, optional=false) @JoinColumn(name="\"userId\"") private User user;
     @CreatedDate @Column(name="\"createdAt\"",updatable=false,columnDefinition="timestamp(3)") private LocalDateTime createdAt;
     protected MapMember() { }
+    public static MapMember create(MapRoom map,User user) {var member=new MapMember();member.map=map;member.user=user;return member;}
     public String getId() { return id; }
     public MapRoom getMap() { return map; }
     public User getUser() { return user; }

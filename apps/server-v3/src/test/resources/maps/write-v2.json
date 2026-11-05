@@ -1,0 +1,456 @@
+[ {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "title must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "[]",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "title must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "[1]",
+  "status" : 400,
+  "body" : {
+    "message" : [ "property 0 should not exist", "title must be shorter than or equal to 100 characters", "title must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"unknown\":1}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "property unknown should not exist", "title must be shorter than or equal to 100 characters", "title must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"title\":\"new-room\",\"visibility\":\"PUBLIC\"}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "new-room",
+    "description" : null,
+    "tags" : [ ],
+    "coverImageUrl" : null,
+    "visibility" : "PUBLIC",
+    "inviteCode" : null,
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"title\":\"\",\"visibility\":\"PRIVATE\"}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "",
+    "description" : null,
+    "tags" : [ ],
+    "coverImageUrl" : null,
+    "visibility" : "PRIVATE",
+    "inviteCode" : "$code",
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"title\":null,\"visibility\":null}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "title must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"title\":1,\"description\":1,\"tags\":[1],\"visibility\":\"bad\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "title must be a string", "description must be shorter than or equal to 500 characters", "description must be a string", "each value in tags must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"title\":\"new-room\",\"visibility\":\"PUBLIC\",\"description\":null,\"tags\":null}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "new-room",
+    "description" : null,
+    "tags" : [ ],
+    "coverImageUrl" : null,
+    "visibility" : "PUBLIC",
+    "inviteCode" : null,
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"title\":\"new-room\",\"visibility\":\"PUBLIC\",\"tags\":[]}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "new-room",
+    "description" : null,
+    "tags" : [ ],
+    "coverImageUrl" : null,
+    "visibility" : "PUBLIC",
+    "inviteCode" : null,
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"title\":\"room-1\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"description\":null}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "title must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"tags\":null}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "title must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"visibility\":null}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "title must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"tags\":\"wrong\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "title must be a string", "tags must be an array", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"title\":\"new-room\",\"visibility\":\"PRIVATE\",\"tags\":[\"a\",\"a\"]}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "new-room",
+    "description" : null,
+    "tags" : [ "a", "a" ],
+    "coverImageUrl" : null,
+    "visibility" : "PRIVATE",
+    "inviteCode" : "$code",
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "POST",
+  "path" : "/api/maps",
+  "input" : "{\"title\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"description\":\"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\",\"visibility\":\"PUBLIC\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "description must be shorter than or equal to 500 characters" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{}",
+  "status" : 200,
+  "body" : {
+    "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "room-1",
+    "description" : null,
+    "tags" : [ "Seoul", "coffee shop" ],
+    "coverImageUrl" : null,
+    "visibility" : "PUBLIC",
+    "inviteCode" : null,
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "[]",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "[1]",
+  "status" : 400,
+  "body" : {
+    "message" : [ "property 0 should not exist" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"unknown\":1}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "property unknown should not exist" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"title\":\"new-room\",\"visibility\":\"PUBLIC\"}",
+  "status" : 200,
+  "body" : {
+    "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "new-room",
+    "description" : null,
+    "tags" : [ "Seoul", "coffee shop" ],
+    "coverImageUrl" : null,
+    "visibility" : "PUBLIC",
+    "inviteCode" : null,
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"title\":\"\",\"visibility\":\"PRIVATE\"}",
+  "status" : 200,
+  "body" : {
+    "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "",
+    "description" : null,
+    "tags" : [ "Seoul", "coffee shop" ],
+    "coverImageUrl" : null,
+    "visibility" : "PRIVATE",
+    "inviteCode" : "$code",
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"title\":null,\"visibility\":null}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"title\":1,\"description\":1,\"tags\":[1],\"visibility\":\"bad\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "title must be a string", "description must be shorter than or equal to 500 characters", "description must be a string", "each value in tags must be a string", "visibility must be one of the following values: PUBLIC, PRIVATE" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"title\":\"new-room\",\"visibility\":\"PUBLIC\",\"description\":null,\"tags\":null}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"title\":\"new-room\",\"visibility\":\"PUBLIC\",\"tags\":[]}",
+  "status" : 200,
+  "body" : {
+    "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "new-room",
+    "description" : null,
+    "tags" : [ ],
+    "coverImageUrl" : null,
+    "visibility" : "PUBLIC",
+    "inviteCode" : null,
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"title\":\"room-1\"}",
+  "status" : 200,
+  "body" : {
+    "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "room-1",
+    "description" : null,
+    "tags" : [ "Seoul", "coffee shop" ],
+    "coverImageUrl" : null,
+    "visibility" : "PUBLIC",
+    "inviteCode" : null,
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"description\":null}",
+  "status" : 200,
+  "body" : {
+    "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "room-1",
+    "description" : null,
+    "tags" : [ "Seoul", "coffee shop" ],
+    "coverImageUrl" : null,
+    "visibility" : "PUBLIC",
+    "inviteCode" : null,
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"tags\":null}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"visibility\":null}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"tags\":\"wrong\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "tags must be an array" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"title\":\"new-room\",\"visibility\":\"PRIVATE\",\"tags\":[\"a\",\"a\"]}",
+  "status" : 200,
+  "body" : {
+    "id" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "ownerId" : "11111111-1111-4111-8111-111111111111",
+    "title" : "new-room",
+    "description" : null,
+    "tags" : [ "a", "a" ],
+    "coverImageUrl" : null,
+    "visibility" : "PRIVATE",
+    "inviteCode" : "$code",
+    "createdAt" : "$time",
+    "updatedAt" : "$time"
+  }
+}, {
+  "method" : "PUT",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "{\"title\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"description\":\"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\",\"visibility\":\"PUBLIC\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "title must be shorter than or equal to 100 characters", "description must be shorter than or equal to 500 characters" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "method" : "DELETE",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+  "input" : "null",
+  "status" : 200,
+  "body" : {
+    "message" : "지도방이 삭제되었습니다."
+  }
+}, {
+  "method" : "DELETE",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+  "input" : "null",
+  "status" : 200,
+  "body" : {
+    "message" : "지도방이 삭제되었습니다."
+  }
+}, {
+  "method" : "DELETE",
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000003",
+  "input" : "null",
+  "status" : 403,
+  "body" : {
+    "message" : "삭제 권한이 없습니다.",
+    "error" : "Forbidden",
+    "statusCode" : 403
+  }
+}, {
+  "method" : "DELETE",
+  "path" : "/api/maps/missing",
+  "input" : "null",
+  "status" : 404,
+  "body" : {
+    "message" : "지도방을 찾을 수 없습니다.",
+    "error" : "Not Found",
+    "statusCode" : 404
+  }
+} ]
