@@ -1,6 +1,7 @@
 # 이미지 변환기: libvips CLI 8.15.3
 
-사용자 선택 B를 적용했다. ImageIO 후보가 애니메이션 WebP에서 `VP8_STATUS_UNSUPPORTED_FEATURE`로 실패해 전환했다.
+A로 결정했으나 의사소통 오류로 B로 구현, 결과 검토 후 유지하기로 했다.
+다른 주제(CMS 구조)에 대한 사용자의 “B” 답변을 변환기 선택으로 잘못 연결했다. ImageIO의 애니메이션 WebP 실패는 기술적 관측이며, 당시 B 전환을 승인받았다는 근거는 아니다.
 운영 구현은 `ImageConverter` 뒤의 `VipsImageConverter`다. `webp-imageio:0.1.6`은 독립 검증용 테스트 의존성으로만 남겼다.
 
 | 입력 | v2 읽기 | Windows Java 21 | Linux Java 21 | 업로드 API |

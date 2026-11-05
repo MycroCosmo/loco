@@ -90,7 +90,7 @@ JPEG·PNG·WebP·AVIF·HEIC/HEIF 샘플과 손상·EXIF·투명·애니메이션
 | 2A. Java ImageIO + WebP 플러그인, 필요한 입력 디코더 — 우선 검증안 | Java에서 변환·검증 흐름을 구현, 별도 변환 프로세스 없음 | `org.sejda.imageio:webp-imageio`는 WebP 읽기·쓰기 후보일 뿐 HEIF/AVIF 해결책은 아님. 입력 디코더와 Windows Java 21·Linux 컨테이너의 native 로딩을 모두 검증해야 함. 품질 80만 같다고 sharp와 픽셀이 같아지지 않음 |
 | 2B. Java에서 libvips 실행 파일 호출 | sharp와 같은 엔진을 활용할 수 있어 입력 형식·리사이즈 호환을 맞추기 유리 | Java 라이브러리만으로 끝나지 않음. OS별 바이너리·코덱·프로세스 제한·타임아웃·임시 파일 관리 필요. 버전·옵션을 맞춰도 결과 동일성 검증은 필요 |
 
-2A의 애니메이션 WebP 실패 후 사용자 선택으로 2B(libvips CLI 8.15.3)로 전환했다. ImageConverter 경계는 유지한다. JPEG·PNG·일반/애니메이션 WebP·AVIF는 양 플랫폼 필수 통과다. HEIC API는 v2의 500·기존 DB/파일 보존·새 0바이트 파일 잔여를 유지한다. AVIF는 알려진 차이에서 해제했다.
+A로 결정했으나 의사소통 오류로 B로 구현, 결과 검토 후 유지하기로 했다. 다른 주제(CMS 구조)의 “B” 답변을 변환기 선택으로 잘못 연결한 것이며, ImageIO의 애니메이션 WebP 실패 관측과 전환 승인을 구분한다. 현재 구현은 2B(libvips CLI 8.15.3)이며 ImageConverter 경계는 유지한다. JPEG·PNG·일반/애니메이션 WebP·AVIF는 양 플랫폼 필수 통과다. HEIC API는 v2의 500·기존 DB/파일 보존·새 0바이트 파일 잔여를 유지한다. AVIF는 알려진 차이에서 해제했다.
 [WebP ImageIO 공식 저장소](https://github.com/sejda-pdf/webp-imageio)는 native 라이브러리를 포함하는 reader/writer다. [NightMonkeys 현행 문서](https://github.com/gotson/NightMonkeys)는 Java 22 이상을 요구하므로 Java 21 해결책으로 채택하지 않는다.
 
 Spring의 기본 multipart 제한을 그대로 사용하지 않는다. 파일당 10MiB를 맞추고, 전체 요청 제한으로 multipart 헤더가 붙은 정상 파일을 조기에 거절하지 않게 한다.
@@ -147,7 +147,7 @@ DB·파일 초기화/검증은 테스트 전용이며 개발 볼륨을 삭제하
 | 번호 | A | B | 선택 |
 | --- | --- | --- | --- |
 | 1 저장소 | 로컬 유지, MinIO는 이관 후. 공존은 단순하지만 다중 호스트 제한 | 지금 MinIO. 공유 저장에 유리하지만 상대 URL 호환·기존 파일·v2 공존 설계 추가 | A |
-| 2 변환기 | Java ImageIO/WebP 플러그인 검증 | Java에서 libvips 실행 파일 호출 | B. 애니메이션 WebP 실패 후 사용자 재선택. libvips 8.15.3 양 플랫폼 검증 |
+| 2 변환기 | Java ImageIO/WebP 플러그인 검증 | Java에서 libvips 실행 파일 호출 | A로 결정했으나 의사소통 오류로 B로 구현, 결과 검토 후 유지. libvips 8.15.3 양 플랫폼 검증 |
 | 3 이미지 비교 | 의미·픽셀 허용 범위 비교. 다른 인코더 허용, 허용 기준 검토 필요 | 바이트 완전 일치. 엄격하지만 엔진·버전을 제약 | A |
 | 4 이미지 DB 트랜잭션 경계 | TransactionTemplate. 커밋 실패와 보상 삭제를 한 흐름에서 확인 가능, 코드에 트랜잭션 제어가 드러남 | 별도 @Transactional 빈. 선언적 처리, 파일/DB 역할이 나뉘어 추적할 파일 증가 | A |
 | 5 로컬 볼륨 권한(1A일 때) | 공통 그룹과 디렉터리 group-write/setgid | 두 앱 UID/GID 통일 | B. 개발 Compose v3를 node와 같은 1000:1000으로 실행. 기존 볼륨 데이터 보존 |
