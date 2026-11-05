@@ -1,6 +1,6 @@
 # 3번 묶음: 지도방 API 14개 설계안
 
-상태: 사용자 선택 확정 후 단계별 구현 중. 현재 엔티티, 목록·내 목록·상세, 생성·수정·삭제를 이관했다. 스키마는 변경하지 않는다.
+상태: 14개 중 12개 이관. 목록·내 목록·상세, 생성·수정·삭제, 멤버십·가입·코드 가입·나가기·멤버 목록·추방을 구현했다. API-12 N+1 전후 측정 후 중간 확인을 기다린다. 초대 코드 재생성(API-11)과 커버 업로드(API-14)는 미구현이다. 스키마는 변경하지 않았다.
 v2 기준은 main `3d7ae28`의 maps·upload·notifications와 Prisma 스키마다. 현재 feature 브랜치의 maps 소스와 Prisma 스키마가 이 기준과 같은 것을 확인했다.
 기존 동작은 소스·V1 SQL·Flutter 호출 코드로 확인했으며, 조회 49개와 쓰기 입력 38개는 실제 v2 HTTP로 관측해 fixture로 고정했다. 나머지 런타임 의존 항목도 구현 시 먼저 v2로 관측한다.
 
@@ -104,14 +104,14 @@ JPEG/PNG/WebP/애니메이션 WebP/AVIF, HEIC 500, 10MiB 경계, 위장 MIME, �
 
 가입 알림은 v2 NotificationsService를 그대로 무시할 수 없는 연관 동작이다. FIREBASE_SERVICE_ACCOUNT 미설정 시 꺼지고, 설정 시 방장의 FCM 토큰으로 제목·본문·data를 전송한다. 호출은 HTTP에서 await하지 않으며 실패가 가입을 취소하지 않는다.
 등록 해제된 토큰 오류에는 fcmToken을 null로 갱신하는 부수 효과가 있다. 현재 FCM 토큰 저장 API만으로는 전송 구현이 충족되지 않는다.
-결정 6에서 이번 범위를 선택한다. 실제 외부 푸시는 비교 테스트에서 보내지 않는다. v2 HTTP/DB 비교는 Firebase 비활성 환경, v3 전송 payload·오류·토큰 해제는 mock 계약 테스트로 구분한다. 비동기 결과는 고정 sleep 대신 제한 시간 내 상태 조건으로 기다린다.
+결정 3-6 B에 따라 이번에는 인터페이스·호출 위치·mock 계약만 구현한다. 실제 외부 푸시는 비교 테스트에서 보내지 않는다. v2 HTTP/DB 비교는 Firebase 비활성 환경이며, v3의 payload·전송 실패 격리·커밋 이후 호출은 mock 계약으로 구분한다. 무효 토큰 해제는 실제 Firebase 전송 구현과 함께 검증한다. 비동기 결과가 필요한 후속 검증은 고정 sleep 대신 제한 시간 내 상태 조건으로 기다린다.
 
 ## 6. 비교 테스트 계획
 
 기존 Testcontainers 환경·양쪽 Flyway V1·케이스 전 독립 DB 초기화·컨테이너 재시작·직접 JWT 발급을 재사용한다. 시간·UUID·초대 코드·파일명은 값만 무시하지 말고 형식, null, DB와 응답의 일치·참조 관계를 검증한다.
 새 inviteCode는 케이스별 제외 항목으로 등록하되, 응답에서 추출해 다음 요청에 사용하고 이전 코드와 다름을 별도 검증한다. PRIVATE/PUBLIC의 null 전환은 제외하지 않는다.
 HTTP 배열 순서는 기본적으로 비교한다. DB 행 대응은 제목·회원 email 등 의미가 있는 시드 키를 사용하고 UUID/시간 정렬로 결과를 맞추지 않는다. 새 map_members는 map 제목+user email로 연결을 비교한다.
-기존 227건은 구현 시작 시 다시 기준을 확인한다. 아래 신규 테스트 건수·시간은 실행 전이므로 예상 숫자로 보고하지 않는다.
+기존 인증·사용자 테스트와 신규 지도방 테스트를 단계별로 검증한다. 실행 범위·성공/실패/알려진 차이·시간은 각 단계 커밋 본문에 남긴다. 아래 표 중 API-11/14는 후속 구현 때 검증한다.
 
 | API | 정상·경계·오류 비교 케이스 | DB·파일·부수 효과 |
 | --- | --- | --- |
@@ -159,7 +159,7 @@ Firebase 실제 전송은 장소 추가 등 알림을 보내는 모든 API 이�
 
 tags는 Hibernate 기본 ARRAY 매핑을 우선 검증하며 별도 라이브러리는 제안하지 않는다. enum은 현재 Provider 매핑을 재사용한다. 실패하면 다른 매핑·라이브러리를 임의 채택하지 않고 근거와 대안을 제시한다.
 3-2 A와 3-4 A는 **JPA 안에서 사용하는 native SQL 허용 범위**에 대한 명시적 선택이다. 서로 같은 결정으로 묶지 않는다.
-3-6 A 선택 시 SDK 버전은 프로젝트 의존성 호환 확인 후 후보·근거를 제시한다. 현재 문서 작성만으로 의존성을 선택하거나 외부 계정을 연결하지 않는다.
+3-6 B로 확정했으므로 Firebase SDK와 외부 계정 연결은 이번 범위에 추가하지 않는다.
 
 ## 8. 승인 후 구현 순서와 확인 방법
 
@@ -179,6 +179,41 @@ tags는 Hibernate 기본 ARRAY 매핑을 우선 검증하며 별도 라이브러
 쓰기 관측은 `src/test/resources/maps/write-v2.json`이다. 생성의 tags:null은 빈 배열, 수정의 tags:null·빈 배열 본문은 500이다. scalar 문자열 tags는 배열 오류 한 개만 반환한다. DB의 기존 NULL tags는 응답에서 빈 배열로 읽는다.
 즐겨찾기 RESTRICT에 따른 삭제 500과 force 대소문자 구분, 생성·삭제의 지연 커밋 실패 롤백, 신고 행 보존, 커밋 이후에만 파일 삭제를 실제 v2와 비교했다.
 `LocalImageFiles`는 공유 업로드 루트와 경로 안전성·정리 실패 무시를 공통으로 담당한다. 프로필 변환·크롭은 아직 기존 코드이며 커버 단계에서 크기 설정을 공통화한다.
+
+## 9. 멤버 단계의 측정과 남은 차이
+
+API-12는 실제로 LAZY 순회 구현을 실행한 뒤 `join fetch m.user`로 변경했다. MapRoom.owner와 MapMember.map/user의 기본 매핑은 모두 LAZY이며 cascade는 없다. 목록 조회 메서드에서만 user를 함께 읽는다.
+
+| 조건 | LAZY 순회 실제 SQL | fetch join 실제 SQL |
+| --- | --- | --- |
+| 방장이 멤버 3명 조회 | 6 | 3 |
+| 방장이 멤버 10명 조회 | 13 | 3 |
+
+인증 회원 확인 1회·방 조회 1회·멤버 조회 1회를 포함한다. 기존 구현은 멤버별 User 조회가 추가됐다. HTTP 응답의 행 수·방장 표시·탈퇴 멤버 노출을 함께 검증하며, 시드 준비 JDBC와 트랜잭션 제어문은 제외한다.
+`MapMemberSqlTest`는 기본적으로 두 크기 모두 3회를 요구한다. `SqlQueryCounter`는 테스트 전용 Hibernate StatementInspector이고 테스트 병렬 실행은 꺼져 있다. 단순 wall time이 아니라 실제 SQL 수로 N+1을 검증한다.
+전후 측정 파일은 `build/reports/maps/n-plus-one-{naive,fetch}.json`이다. naive는 변경 전 실행 결과이며 현재 코드에서 재생성하면 6/13 기준에 실패하는 것이 정상이다.
+
+| API | 정상 요청 SQL 수(인증 포함) |
+| --- | --- |
+| API-01 목록 / 02 내 목록 | 각각 2 |
+| API-03 생성 | 공개 3, 비공개 4(첫 후보 사용 가능 시) |
+| API-04 상세 | 공개·소유 2, 타인 비공개 3 |
+| API-05 수정 | 일반 3, 빈 객체 2, 코드 신규 생성 4(첫 후보 사용 가능 시) |
+| API-06 삭제 | 4 |
+| API-07 멤버십 | 소유자 2, 타인 3 |
+| API-08 공개 가입 | 4(반복 가입 포함) |
+| API-09 코드 가입 | 5(반복 가입 포함) |
+| API-10 나가기 | 3 |
+| API-12 멤버 목록 | 방장 3, 일반 멤버 4; 멤버 수와 무관 |
+| API-13 추방 | 3 |
+
+`MapReadIntegrationTest`, `MapWriteComparisonTest`, `MapDeletionComparisonTest`, `MapMembershipComparisonTest`가 정상·오류 경로별 수를 고정한다. 코드 충돌 재시도는 후보마다 조회가 늘어나는 별도 경로이며 10회 한도를 단위 테스트로 검증한다. API-11/14의 SQL 기준은 구현 시 추가한다.
+
+동시 가입은 DatabaseRequestRace가 지도방 부모 행을 잠그고 두 map_members INSERT의 실제 잠금 대기를 확인한 뒤 해제한다. 공개 가입·코드 가입 모두 v2 [201,500], v3 [201,201]과 동일 회원 행 1개를 관측했다. v3는 JPA native ON CONFLICT DO NOTHING을 사용한다. v2 실패를 재현하지 않으며 차이는 보고서에 `improved`로 표시한다.
+Firebase 실제 전송과 무효 FCM 토큰 정리는 보류했다. `NotificationSender`는 전송 경계, `DeferredNotificationSender`는 명시적 보류 구현, `MemberJoinedNotification.Delivery`는 커밋 후 호출 지점이다. 반복 가입도 호출하며 롤백이면 호출하지 않는다. 전송 실패가 가입 성공을 취소하지 않는 mock 계약을 검증한다. 이후 실제 송신 구현에서 비동기 전송·전송 실패·무효 토큰 정리를 함께 다룬다.
+전체 지도방 비교 범위에서는 의도된 코드 생성 1건, Firebase 보류 1건, 관측된 동시 가입 개선 2건을 보고한다. 알려진 차이는 테스트 실패나 SKIPPED와 별도 집계한다.
+
+재검증(앱 디렉터리): `./gradlew test --tests '*MapMemberSqlTest'`로 SQL 3회 고정을 확인하고, `./gradlew comparisonTest --tests '*Map*Test'`로 v2 응답·DB·알려진 차이를 확인한다. 전체 회귀는 기존 `./gradlew allTests`다.
 
 ## 근거 파일·공식 참고
 

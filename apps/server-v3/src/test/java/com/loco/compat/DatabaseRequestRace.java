@@ -14,7 +14,13 @@ public final class DatabaseRequestRace {
 
     public static List<ResponseEntity<JsonNode>> run(SharedHarness.Environment environment, SharedHarness.Side side,
             String table, String id, Callable<ResponseEntity<JsonNode>> request) throws Exception {
+        return run(environment,side,table,id,table,request);
+    }
+    /** FK INSERT 경쟁은 부모 행을 잠그되 자식 테이블 SQL의 잠금 대기를 확인한다. */
+    public static List<ResponseEntity<JsonNode>> run(SharedHarness.Environment environment, SharedHarness.Side side,
+            String table, String id, String waitingTable, Callable<ResponseEntity<JsonNode>> request) throws Exception {
         if (!table.matches("[a-z_]+")) throw new IllegalArgumentException("테스트 테이블 이름 오류");
+        if (!waitingTable.matches("[a-z_]+")) throw new IllegalArgumentException("대기 테이블 이름 오류");
         var futures = new ArrayList<Future<ResponseEntity<JsonNode>>>();
         try (var gate = environment.connect(side); var observer = environment.connect(side);
              var pool = Executors.newFixedThreadPool(2)) {
@@ -34,7 +40,7 @@ public final class DatabaseRequestRace {
                         WHERE datname=current_database() AND wait_event_type='Lock'
                         AND query LIKE '%' || ? || '%'
                         """)) {
-                    waiting.setString(1, table);
+                    waiting.setString(1, waitingTable);
                     while (true) {
                         try (var result = waiting.executeQuery()) {
                             result.next();

@@ -71,6 +71,7 @@ tasks.withType(Test).configureEach {
     dependsOn tasks.named('prepareVips')
     systemProperty 'loco.vips.executable', vipsExecutable
     maxParallelForks = 1
+    systemProperty 'maps.query.phase', providers.gradleProperty('mapsQueryPhase').getOrElse('fetch')
     forkEvery = 0
     systemProperty 'junit.jupiter.execution.parallel.enabled', 'false'
     testLogging { events 'failed', 'skipped' }
