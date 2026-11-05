@@ -13,7 +13,7 @@ public record PlaceListing(String cursor, int limit, String sort, String search,
             && !java.util.Set.of("latest", "name", "reviews").contains(sort))
       throw ApiProblem.badRequest("sort는 latest, name, reviews만 가능합니다.");
     int size = 20;
-    String raw = request.getParameter("limit");
+    String raw = strip(parameter(request, "limit"));
     if (raw != null) {
       var m = java.util.regex.Pattern.compile("^[\\s]*([+-]?\\d+)").matcher(raw);
       if (m.find()) {
@@ -41,6 +41,10 @@ public record PlaceListing(String cursor, int limit, String sort, String search,
   }
 
   private static String strip(String s) {
-    return s == null ? null : s.strip();
+    // ECMAScript trim에는 Java strip이 남기는 NBSP와 BOM도 포함된다.
+    return s == null
+        ? null
+        : s.replaceAll(
+            "^[\\s\\p{Zs}\\u2028\\u2029\\uFEFF]+|[\\s\\p{Zs}\\u2028\\u2029\\uFEFF]+$", "");
   }
 }

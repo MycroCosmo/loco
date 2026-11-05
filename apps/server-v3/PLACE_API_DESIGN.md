@@ -1,6 +1,6 @@
 # 4번 묶음: 장소 기본 API 설계안
 
-상태: 사용자 승인 후 구현 중. 4-1~4-6은 모두 A로 확정했다. 아래 대안 표는 선택 당시 비교 기록이다.
+상태: 4번 묶음 구현·전체 회귀 검증 완료. 4-1~4-6은 모두 A로 확정했다. 아래 대안 표는 선택 당시 비교 기록이다.
 v2 기준은 작업 브랜치 `0d5ed03`의 places·map-permissions·notifications·upload와 Prisma 스키마다. v2 소스, Flutter, Flyway V1은 변경하지 않는다.
 
 설계 근거는 [컨트롤러](../server/src/places/places.controller.ts), [서비스](../server/src/places/places.service.ts), [입력 DTO](../server/src/places/dto), [스키마](../server/prisma/schema.prisma)다. 임시 PostgreSQL 17 DB에 V1 SQL을 적용하고 캐시된 v2 이미지로 **32건의 HTTP 요청**과 관련 DB·파일 결과를 관측했다. 이는 아래 경계 사례의 설계용 관측이며, v3 비교 테스트 32건을 구현하거나 통과했다는 뜻은 아니다. 임시 DB·컨테이너는 정리했고 개발 DB는 사용하지 않았다.
@@ -59,9 +59,9 @@ search·tag는 trim한다. tag는 배열의 정확한 원소 일치이며 search
 
 Place는 기존 TEXT UUID 문자열·`@UuidGenerator`·Clock 기반 Auditing을 재사용한다. 좌표는 기존 double precision, tags/imageUrls는 기존 PostgreSQL TEXT[]에 매핑한다. 스키마·인덱스·외래 키·V1은 변경하지 않는다. 같은 값을 명시한 수정과 빈 수정은 Prisma 관측 결과에 맞게 갱신 시각을 처리한다.
 
-Place의 map/createdBy 관계는 4-1에서 선택한다. 리뷰 컬렉션을 응답 직렬화하거나 행별로 순회하지 않는다. 목록의 작성자·리뷰 집계는 일괄 조회하며, 4-2에서 native projection 또는 JPA 조회 조합을 선택한다. 리뷰 읽기를 위해 리뷰 쓰기 기능 전체를 앞당기지 않는다.
+Place의 map/createdBy 관계는 4-1 A인 LAZY ManyToOne으로 구현했다. 리뷰 컬렉션을 응답 직렬화하거나 행별로 순회하지 않는다. 목록의 작성자·리뷰 집계는 일괄 조회하며, 4-2 A인 native projection을 사용한다. 리뷰 읽기를 위해 리뷰 쓰기 기능 전체를 앞당기지 않는다.
 
-place_marker_cells의 키는 `(mapId, precision, cellLatKey, cellLngKey)`다. placeId는 nullable 집계 값이며 Place 외래 키가 아니다. 4-3에서 JPA native 명령 중심 또는 복합 키 엔티티 중심으로 선택한다. native DML의 updatedAt에는 기존 Clock을 명시적으로 전달한다(JPA Auditing이 native SQL을 자동 처리하지 않음).
+place_marker_cells의 키는 `(mapId, precision, cellLatKey, cellLngKey)`다. placeId는 nullable 집계 값이며 Place 외래 키가 아니다. 4-3 A인 JPA native 명령을 사용한다. native DML의 updatedAt에는 기존 Clock을 명시적으로 전달한다(JPA Auditing이 native SQL을 자동 처리하지 않음).
 
 ## 5. 마커 셀 재집계와 커밋 경계
 
@@ -91,11 +91,11 @@ place_marker_cells의 키는 `(mapId, precision, cellLatKey, cellLngKey)`다. pl
 | 이름 수정 | 500 | 새 이름이 장소와 정밀도 1에 남음. 2·3은 이전 이름 |
 | 삭제 | 500 | 장소·리뷰는 삭제됨. 정밀도 1 셀 삭제, 2·3 셀 잔존. 이미지 파일은 남음. targetId만 가진 신고 행도 남음 |
 
-**반올림 호환성도 필요하다.** 실제 좌표 37.05는 정밀도 1 셀이 생기지 않고 2·3만 생겼다. -0.00001은 해당 좌표의 1·2·3 셀이 모두 생기지 않았다. JS 이진 부동소수점 toFixed와 PostgreSQL numeric ROUND의 경계/음수 0 표현 차이 때문이다. PostgreSQL 쿼리를 고치거나 Java의 일반 반올림으로 통일하면 v2와 DB가 달라진다. 4-5에서 호환 키 생성 방법을 선택하고 경계 값·음수·±0·좌표 범위 끝을 Node 결과와 대조한다. 이는 기존 제약을 보존하는 것이며 새 PostGIS 로직은 넣지 않는다.
+**반올림 호환성도 필요하다.** 실제 좌표 37.05는 정밀도 1 셀이 생기지 않고 2·3만 생겼다. -0.00001은 해당 좌표의 1·2·3 셀이 모두 생기지 않았다. JS 이진 부동소수점 toFixed와 PostgreSQL numeric ROUND의 경계/음수 0 표현 차이 때문이다. PostgreSQL 쿼리를 고치거나 Java의 일반 반올림으로 통일하면 v2와 DB가 달라진다. 4-5 A인 Java 키 생성 함수의 경계 값·음수·±0·좌표 범위 끝을 Node 결과와 대조한다. 이는 기존 제약을 보존하는 것이며 새 PostGIS 로직은 넣지 않는다.
 
 ## 6. 알림과 파일
 
-3-6 결정대로 실제 Firebase 전송은 미구현 상태를 유지한다. 기존 NotificationSender에 지도방 전송을 확장하거나 별도 인터페이스를 두는 4-6 선택만 남는다.
+3-6 결정대로 실제 Firebase 전송은 미구현 상태를 유지한다. 4-6 A대로 기존 NotificationSender에 sendToMap을 추가했다.
 
 장소 생성과 모든 셀 갱신이 성공한 뒤에만 아래 계약을 호출한다. 장소 INSERT 직후 AFTER_COMMIT 이벤트에 연결하면 집계 실패에도 알림이 나가므로 순서가 틀린다. HTTP 응답은 외부 전송 완료를 기다리지 않는 v2 경계를 따른다.
 
@@ -124,7 +124,7 @@ place_marker_cells의 키는 `(mapId, precision, cellLatKey, cellLngKey)`다. pl
 
 모든 API에 토큰 없음·만료/서명 오류·탈퇴/없는 회원 401, 해당 핸들러의 429 경계와 핸들러 독립성을 적용한다. 429를 피하려고 케이스를 줄이거나 응답을 재시도하지 않는다. DB 오류 주입은 테스트 전용 트리거로 두 DB에 동일하게 적용하고 제거한다. 실패 후 남은 셀도 비교 대상이다.
 
-SQL 수는 인증 조회를 포함해 각 대표 API/분기에서 실제 측정 후 상한을 고정한다. 특히 목록 크기에 따라 쿼리가 증가하는지 확인하고, 이동은 이전·새 좌표의 집계 비용을 따로 기록한다. 아직 구현하지 않았으므로 예상 숫자를 실측처럼 적지 않는다. 테스트는 빠른 단위/v3 단독과 v2 비교로 기존 Gradle 작업에 나눠 넣는다.
+SQL 수는 인증 조회를 포함해 각 대표 API/분기에서 실제 측정 후 상한을 고정한다. 특히 목록 크기에 따라 쿼리가 증가하는지 확인하고, 이동은 이전·새 좌표의 집계 비용을 따로 기록한다. 구현 후 실측한 SQL 수는 11장에 기록하고 테스트로 고정했다. 테스트는 빠른 단위/v3 단독과 v2 비교로 기존 Gradle 작업에 나눠 넣는다.
 
 ## 8. 결정할 항목
 
@@ -180,3 +180,15 @@ LocalImageFiles 재사용, Firebase 실제 전송 보류, 기존 스키마와 AP
 `PlaceUpdateFailureComparisonTest`는 장소 UPDATE와 이전/새 좌표의 정밀도 1·2·3, 총 7개 오류 지점을 검증한다. 단독 장소 이동 시 이전 셀 DELETE와 새 셀 INSERT 각각의 부분 커밋 상태를 양 DB에서 비교한다. 인증 포함 SQL 수는 빈 수정 9회, 값 명시 10회, 좌표 변경 16회다. 이전/새 셀이 겹쳐도 호출을 합치지 않는다.
 
 삭제 단계는 장소·리뷰 cascade 커밋 → 세 정밀도 셀 갱신 → LocalImageFiles 정리 순서를 유지한다. `PlaceDeletionComparisonTest` 12개 모드가 마지막/공유 셀, 작성자/방장/외부인/나간 작성자, 없는/반복 삭제, 장소 DELETE/지연 커밋/정밀도별 오류, 신고 잔존과 파일 상태를 실제 v2와 비교한다. 외부 URL·없는 파일·디렉터리·경로 탈출은 정상 완료를 취소하지 않는다. 집계 실패 시 파일이 남는다. SQL은 정상 삭제 10회, 권한 거부 3회, 없는 장소 2회다. 이미지 업로드·개별 삭제·libvips 변환은 6번 묶음 범위다.
+
+최종 경계 검증은 `PlaceProtectionComparisonTest`(6개 경로의 토큰 없음/만료/오서명/형식 오류/탈퇴/없는 회원과 DB 불변), `PlaceRateLimitComparisonTest`(각 핸들러 120회 후 429, 서로 독립), `PlaceBoundaryComparisonTest`(순환 소수 평점·큰 페이지·방장 멤버 행 없음·고정밀 좌표·JS 공백/배열 쿼리)로 나눴다. 알려진 차이를 피하려고 비교 케이스를 생략하지 않는다.
+
+장소 묶음만 반복할 때는 앱 디렉터리에서 `./gradlew test --tests 'com.loco.places.*' comparisonTest --tests 'com.loco.places.*'`를 실행한다. 전체 회귀·빌드 실측은 `pwsh -File scripts/measure-tests.ps1 -Label places-final -RestartMode quota`다. v2·Flutter·V1·개발 Compose는 이 묶음에서 수정하지 않는다.
+
+### 최종 회귀 (2026-11-06)
+
+`test --rerun comparisonTest --rerun build`를 실제 실행했다. v2 이미지 빌드 캐시를 사용했으며 전체 350.515초다. 빠른 191건은 성공 190/실패 0/HEIC 공통 제약 skip 1, 비교 442건은 전부 성공했다. 합계 633건, 성공 632/실패 0/skip 1. 기존 성능 개선 시점의 447개 테스트 식별자 누락 0, 신규 186개다.
+
+알려진 차이는 기존 지도방 4건(동시 가입 개선 2, 초대 코드 생성 1, Firebase 보류 1)과 장소 Firebase 보류 1, 총 5건이다. HEIC skip과 별도로 센다. 사용자 지시로 보존한 v2의 세 문제는 v2/v3 차이가 아니라 공통 제약이다.
+
+v2 기동 1회, 재시작 8회, 시나리오 내 대기 0ms. 인증 관련 6회와 장소의 필수 429 검증 예약 1회·PUT 한도 소진 1회다. 시간 분해와 원본 보고서 경로는 TEST_PERFORMANCE.md를 참고한다. 이 묶음에서 실제 Firebase 전송과 동시 집계 경쟁 발생 빈도는 검증하지 않았다. 4번 묶음 종료 후 사용자 확인을 기다린다.
