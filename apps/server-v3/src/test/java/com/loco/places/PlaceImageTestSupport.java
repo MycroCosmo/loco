@@ -8,6 +8,57 @@ import java.nio.file.*;
 import java.util.*;
 
 abstract class PlaceImageTestSupport extends PlaceImageObservationSupport {
+  protected java.util.concurrent.Callable<org.springframework.http.ResponseEntity<JsonNode>>
+      uploadAction(SharedHarness.Side side) throws Exception {
+    byte[] png = fixture("png");
+    String auth = token(1);
+    return () ->
+        upload(base(side), List.of(new Part("file", "race.png", "image/png", png)), auth, "normal");
+  }
+
+  protected java.util.concurrent.Callable<org.springframework.http.ResponseEntity<JsonNode>>
+      deleteAction(SharedHarness.Side side, String url) throws Exception {
+    String auth = token(1);
+    return () ->
+        request(
+            base(side),
+            uploadPath(),
+            org.springframework.http.HttpMethod.DELETE,
+            auth,
+            Map.of("imageUrl", url));
+  }
+
+  protected Map<String, Object> summary(
+      SharedHarness.Side side, List<org.springframework.http.ResponseEntity<JsonNode>> responses)
+      throws Exception {
+    var urls = urls(side);
+    var files = files(side);
+    var uploaded = new HashSet<String>();
+    for (var response : responses)
+      if (response.getStatusCode().value() == 201)
+        response
+            .getBody()
+            .path("imageUrls")
+            .forEach(
+                url -> {
+                  if (!url.asText().contains("/old-")) uploaded.add(url.asText());
+                });
+    uploaded.removeAll(urls);
+    return Map.of(
+        "statuses",
+        responses.stream().map(r -> r.getStatusCode().value()).sorted().toList(),
+        "images",
+        urls.size(),
+        "files",
+        files.size(),
+        "brokenUrls",
+        urls.stream().filter(u -> !files.containsKey(u)).count(),
+        "orphanFiles",
+        files.keySet().stream().filter(u -> !urls.contains(u)).count(),
+        "lostUploadedUrls",
+        uploaded.size());
+  }
+
   protected List<SharedHarness.Side> sides() {
     return environment().v2Enabled()
         ? List.of(SharedHarness.Side.values())
