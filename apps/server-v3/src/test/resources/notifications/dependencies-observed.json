@@ -1,0 +1,727 @@
+{
+    "baseline": {
+        "count": 90,
+        "bytes": 65245468,
+        "added": [
+
+        ],
+        "replaced": [
+
+        ],
+        "deltaBytes": 0
+    },
+    "firebaseAdmin": {
+        "count": 195,
+        "bytes": 129408239,
+        "added": [
+            {
+                "id": "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.21.4",
+                "name": "com.fasterxml.jackson.dataformat:jackson-dataformat-xml",
+                "bytes": 135714
+            },
+            {
+                "id": "com.fasterxml.woodstox:woodstox-core:7.0.0",
+                "name": "com.fasterxml.woodstox:woodstox-core",
+                "bytes": 1608603
+            },
+            {
+                "id": "com.google.android:annotations:4.1.1.4",
+                "name": "com.google.android:annotations",
+                "bytes": 3120
+            },
+            {
+                "id": "com.google.api-client:google-api-client-gson:2.7.2",
+                "name": "com.google.api-client:google-api-client-gson",
+                "bytes": 4852
+            },
+            {
+                "id": "com.google.api-client:google-api-client:2.7.2",
+                "name": "com.google.api-client:google-api-client",
+                "bytes": 301930
+            },
+            {
+                "id": "com.google.api.grpc:gapic-google-cloud-storage-v2:2.73.0",
+                "name": "com.google.api.grpc:gapic-google-cloud-storage-v2",
+                "bytes": 58344
+            },
+            {
+                "id": "com.google.api.grpc:grpc-google-cloud-storage-v2:2.73.0",
+                "name": "com.google.api.grpc:grpc-google-cloud-storage-v2",
+                "bytes": 31525
+            },
+            {
+                "id": "com.google.api.grpc:proto-google-cloud-firestore-v1:3.47.0",
+                "name": "com.google.api.grpc:proto-google-cloud-firestore-v1",
+                "bytes": 1158162
+            },
+            {
+                "id": "com.google.api.grpc:proto-google-cloud-monitoring-v3:3.52.0",
+                "name": "com.google.api.grpc:proto-google-cloud-monitoring-v3",
+                "bytes": 2023127
+            },
+            {
+                "id": "com.google.api.grpc:proto-google-cloud-storage-v2:2.73.0",
+                "name": "com.google.api.grpc:proto-google-cloud-storage-v2",
+                "bytes": 1095697
+            },
+            {
+                "id": "com.google.api.grpc:proto-google-common-protos:2.76.0",
+                "name": "com.google.api.grpc:proto-google-common-protos",
+                "bytes": 2830165
+            },
+            {
+                "id": "com.google.api.grpc:proto-google-iam-v1:1.71.0",
+                "name": "com.google.api.grpc:proto-google-iam-v1",
+                "bytes": 178148
+            },
+            {
+                "id": "com.google.api:api-common:2.68.0",
+                "name": "com.google.api:api-common",
+                "bytes": 51404
+            },
+            {
+                "id": "com.google.api:gax-grpc:2.85.0",
+                "name": "com.google.api:gax-grpc",
+                "bytes": 164350
+            },
+            {
+                "id": "com.google.api:gax-httpjson:2.85.0",
+                "name": "com.google.api:gax-httpjson",
+                "bytes": 201876
+            },
+            {
+                "id": "com.google.api:gax:2.85.0",
+                "name": "com.google.api:gax",
+                "bytes": 522540
+            },
+            {
+                "id": "com.google.apis:google-api-services-storage:v1-rev20260524-2.0.0",
+                "name": "com.google.apis:google-api-services-storage",
+                "bytes": 267181
+            },
+            {
+                "id": "com.google.auth:google-auth-library-credentials:1.52.0",
+                "name": "com.google.auth:google-auth-library-credentials",
+                "bytes": 8979
+            },
+            {
+                "id": "com.google.auth:google-auth-library-oauth2-http:1.52.0",
+                "name": "com.google.auth:google-auth-library-oauth2-http",
+                "bytes": 344655
+            },
+            {
+                "id": "com.google.auto.value:auto-value-annotations:1.11.0",
+                "name": "com.google.auto.value:auto-value-annotations",
+                "bytes": 7491
+            },
+            {
+                "id": "com.google.cloud.opentelemetry:detector-resources-support:0.33.0",
+                "name": "com.google.cloud.opentelemetry:detector-resources-support",
+                "bytes": 18021
+            },
+            {
+                "id": "com.google.cloud.opentelemetry:exporter-metrics:0.33.0",
+                "name": "com.google.cloud.opentelemetry:exporter-metrics",
+                "bytes": 39863
+            },
+            {
+                "id": "com.google.cloud.opentelemetry:shared-resourcemapping:0.33.0",
+                "name": "com.google.cloud.opentelemetry:shared-resourcemapping",
+                "bytes": 92851
+            },
+            {
+                "id": "com.google.cloud:google-cloud-core-grpc:2.75.0",
+                "name": "com.google.cloud:google-cloud-core-grpc",
+                "bytes": 16946
+            },
+            {
+                "id": "com.google.cloud:google-cloud-core-http:2.75.0",
+                "name": "com.google.cloud:google-cloud-core-http",
+                "bytes": 16175
+            },
+            {
+                "id": "com.google.cloud:google-cloud-core:2.75.0",
+                "name": "com.google.cloud:google-cloud-core",
+                "bytes": 141171
+            },
+            {
+                "id": "com.google.cloud:google-cloud-firestore:3.47.0",
+                "name": "com.google.cloud:google-cloud-firestore",
+                "bytes": 605137
+            },
+            {
+                "id": "com.google.cloud:google-cloud-monitoring:3.52.0",
+                "name": "com.google.cloud:google-cloud-monitoring",
+                "bytes": 255303
+            },
+            {
+                "id": "com.google.cloud:google-cloud-storage:2.73.0",
+                "name": "com.google.cloud:google-cloud-storage",
+                "bytes": 1536313
+            },
+            {
+                "id": "com.google.cloud:proto-google-cloud-firestore-bundle-v1:3.47.0",
+                "name": "com.google.cloud:proto-google-cloud-firestore-bundle-v1",
+                "bytes": 74378
+            },
+            {
+                "id": "com.google.code.findbugs:jsr305:3.0.2",
+                "name": "com.google.code.findbugs:jsr305",
+                "bytes": 19936
+            },
+            {
+                "id": "com.google.code.gson:gson:2.14.0",
+                "name": "com.google.code.gson:gson",
+                "bytes": 313604
+            },
+            {
+                "id": "com.google.errorprone:error_prone_annotations:2.50.0",
+                "name": "com.google.errorprone:error_prone_annotations",
+                "bytes": 20252
+            },
+            {
+                "id": "com.google.firebase:firebase-admin:9.11.0",
+                "name": "com.google.firebase:firebase-admin",
+                "bytes": 1098778
+            },
+            {
+                "id": "com.google.guava:failureaccess:1.0.3",
+                "name": "com.google.guava:failureaccess",
+                "bytes": 10763
+            },
+            {
+                "id": "com.google.guava:guava:33.6.0-jre",
+                "name": "com.google.guava:guava",
+                "bytes": 3064793
+            },
+            {
+                "id": "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava",
+                "name": "com.google.guava:listenablefuture",
+                "bytes": 2199
+            },
+            {
+                "id": "com.google.http-client:google-http-client-apache-v2:2.2.0",
+                "name": "com.google.http-client:google-http-client-apache-v2",
+                "bytes": 11670
+            },
+            {
+                "id": "com.google.http-client:google-http-client-appengine:2.2.0",
+                "name": "com.google.http-client:google-http-client-appengine",
+                "bytes": 19643
+            },
+            {
+                "id": "com.google.http-client:google-http-client-gson:2.2.0",
+                "name": "com.google.http-client:google-http-client-gson",
+                "bytes": 12827
+            },
+            {
+                "id": "com.google.http-client:google-http-client-jackson2:2.2.0",
+                "name": "com.google.http-client:google-http-client-jackson2",
+                "bytes": 9658
+            },
+            {
+                "id": "com.google.http-client:google-http-client:2.2.0",
+                "name": "com.google.http-client:google-http-client",
+                "bytes": 299773
+            },
+            {
+                "id": "com.google.j2objc:j2objc-annotations:3.1",
+                "name": "com.google.j2objc:j2objc-annotations",
+                "bytes": 16762
+            },
+            {
+                "id": "com.google.oauth-client:google-oauth-client:1.39.0",
+                "name": "com.google.oauth-client:google-oauth-client",
+                "bytes": 81752
+            },
+            {
+                "id": "com.google.protobuf:protobuf-java-util:4.33.6",
+                "name": "com.google.protobuf:protobuf-java-util",
+                "bytes": 77259
+            },
+            {
+                "id": "com.google.protobuf:protobuf-java:4.33.6",
+                "name": "com.google.protobuf:protobuf-java",
+                "bytes": 1886534
+            },
+            {
+                "id": "com.google.re2j:re2j:1.8",
+                "name": "com.google.re2j:re2j",
+                "bytes": 114335
+            },
+            {
+                "id": "com.nimbusds:nimbus-jose-jwt:10.9.1",
+                "name": "com.nimbusds:nimbus-jose-jwt",
+                "bytes": 813607
+            },
+            {
+                "id": "commons-codec:commons-codec:1.18.0",
+                "name": "commons-codec:commons-codec",
+                "bytes": 373045
+            },
+            {
+                "id": "commons-logging:commons-logging:1.2",
+                "name": "commons-logging:commons-logging",
+                "bytes": 61829
+            },
+            {
+                "id": "dev.cel:common:0.13.0",
+                "name": "dev.cel:common",
+                "bytes": 278889
+            },
+            {
+                "id": "dev.cel:protobuf:0.13.0",
+                "name": "dev.cel:protobuf",
+                "bytes": 409263
+            },
+            {
+                "id": "dev.cel:runtime:0.13.0",
+                "name": "dev.cel:runtime",
+                "bytes": 513361
+            },
+            {
+                "id": "io.grpc:grpc-alts:1.83.0",
+                "name": "io.grpc:grpc-alts",
+                "bytes": 324010
+            },
+            {
+                "id": "io.grpc:grpc-api:1.83.0",
+                "name": "io.grpc:grpc-api",
+                "bytes": 345005
+            },
+            {
+                "id": "io.grpc:grpc-auth:1.83.0",
+                "name": "io.grpc:grpc-auth",
+                "bytes": 14758
+            },
+            {
+                "id": "io.grpc:grpc-context:1.83.0",
+                "name": "io.grpc:grpc-context",
+                "bytes": 293
+            },
+            {
+                "id": "io.grpc:grpc-core:1.83.0",
+                "name": "io.grpc:grpc-core",
+                "bytes": 657191
+            },
+            {
+                "id": "io.grpc:grpc-googleapis:1.83.0",
+                "name": "io.grpc:grpc-googleapis",
+                "bytes": 15113
+            },
+            {
+                "id": "io.grpc:grpc-grpclb:1.83.0",
+                "name": "io.grpc:grpc-grpclb",
+                "bytes": 181439
+            },
+            {
+                "id": "io.grpc:grpc-inprocess:1.83.0",
+                "name": "io.grpc:grpc-inprocess",
+                "bytes": 39597
+            },
+            {
+                "id": "io.grpc:grpc-netty-shaded:1.83.0",
+                "name": "io.grpc:grpc-netty-shaded",
+                "bytes": 10837690
+            },
+            {
+                "id": "io.grpc:grpc-opentelemetry:1.83.0",
+                "name": "io.grpc:grpc-opentelemetry",
+                "bytes": 74948
+            },
+            {
+                "id": "io.grpc:grpc-protobuf-lite:1.83.0",
+                "name": "io.grpc:grpc-protobuf-lite",
+                "bytes": 7815
+            },
+            {
+                "id": "io.grpc:grpc-protobuf:1.83.0",
+                "name": "io.grpc:grpc-protobuf",
+                "bytes": 5204
+            },
+            {
+                "id": "io.grpc:grpc-rls:1.83.0",
+                "name": "io.grpc:grpc-rls",
+                "bytes": 255742
+            },
+            {
+                "id": "io.grpc:grpc-services:1.83.0",
+                "name": "io.grpc:grpc-services",
+                "bytes": 951302
+            },
+            {
+                "id": "io.grpc:grpc-stub:1.83.0",
+                "name": "io.grpc:grpc-stub",
+                "bytes": 61670
+            },
+            {
+                "id": "io.grpc:grpc-util:1.83.0",
+                "name": "io.grpc:grpc-util",
+                "bytes": 108748
+            },
+            {
+                "id": "io.grpc:grpc-xds:1.83.0",
+                "name": "io.grpc:grpc-xds",
+                "bytes": 12310552
+            },
+            {
+                "id": "io.netty:netty-buffer:4.2.18.Final",
+                "name": "io.netty:netty-buffer",
+                "bytes": 378263
+            },
+            {
+                "id": "io.netty:netty-codec-base:4.2.18.Final",
+                "name": "io.netty:netty-codec-base",
+                "bytes": 155356
+            },
+            {
+                "id": "io.netty:netty-codec-compression:4.2.18.Final",
+                "name": "io.netty:netty-codec-compression",
+                "bytes": 237340
+            },
+            {
+                "id": "io.netty:netty-codec-http:4.2.18.Final",
+                "name": "io.netty:netty-codec-http",
+                "bytes": 681156
+            },
+            {
+                "id": "io.netty:netty-common:4.2.18.Final",
+                "name": "io.netty:netty-common",
+                "bytes": 903757
+            },
+            {
+                "id": "io.netty:netty-handler:4.2.18.Final",
+                "name": "io.netty:netty-handler",
+                "bytes": 588760
+            },
+            {
+                "id": "io.netty:netty-resolver:4.2.18.Final",
+                "name": "io.netty:netty-resolver",
+                "bytes": 32975
+            },
+            {
+                "id": "io.netty:netty-transport-native-unix-common:4.2.18.Final",
+                "name": "io.netty:netty-transport-native-unix-common",
+                "bytes": 46877
+            },
+            {
+                "id": "io.netty:netty-transport:4.2.18.Final",
+                "name": "io.netty:netty-transport",
+                "bytes": 549970
+            },
+            {
+                "id": "io.opencensus:opencensus-api:0.31.1",
+                "name": "io.opencensus:opencensus-api",
+                "bytes": 355405
+            },
+            {
+                "id": "io.opencensus:opencensus-contrib-http-util:0.31.1",
+                "name": "io.opencensus:opencensus-contrib-http-util",
+                "bytes": 23415
+            },
+            {
+                "id": "io.opentelemetry.contrib:opentelemetry-gcp-resources:1.37.0-alpha",
+                "name": "io.opentelemetry.contrib:opentelemetry-gcp-resources",
+                "bytes": 8276
+            },
+            {
+                "id": "io.opentelemetry.instrumentation:opentelemetry-grpc-1.6:2.1.0-alpha",
+                "name": "io.opentelemetry.instrumentation:opentelemetry-grpc-1.6",
+                "bytes": 36667
+            },
+            {
+                "id": "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator:2.1.0-alpha",
+                "name": "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator",
+                "bytes": 103287
+            },
+            {
+                "id": "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.1.0",
+                "name": "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api",
+                "bytes": 216952
+            },
+            {
+                "id": "io.opentelemetry.semconv:opentelemetry-semconv:1.29.0-alpha",
+                "name": "io.opentelemetry.semconv:opentelemetry-semconv",
+                "bytes": 74817
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-api:1.62.0",
+                "name": "io.opentelemetry:opentelemetry-api",
+                "bytes": 175114
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-common:1.62.0",
+                "name": "io.opentelemetry:opentelemetry-common",
+                "bytes": 4458
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-context:1.62.0",
+                "name": "io.opentelemetry:opentelemetry-context",
+                "bytes": 50758
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-extension-incubator:1.35.0-alpha",
+                "name": "io.opentelemetry:opentelemetry-extension-incubator",
+                "bytes": 33059
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-sdk-common:1.62.0",
+                "name": "io.opentelemetry:opentelemetry-sdk-common",
+                "bytes": 85065
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi:1.62.0",
+                "name": "io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi",
+                "bytes": 20581
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-sdk-logs:1.62.0",
+                "name": "io.opentelemetry:opentelemetry-sdk-logs",
+                "bytes": 79362
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-sdk-metrics:1.62.0",
+                "name": "io.opentelemetry:opentelemetry-sdk-metrics",
+                "bytes": 365132
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-sdk-trace:1.62.0",
+                "name": "io.opentelemetry:opentelemetry-sdk-trace",
+                "bytes": 145227
+            },
+            {
+                "id": "io.opentelemetry:opentelemetry-sdk:1.62.0",
+                "name": "io.opentelemetry:opentelemetry-sdk",
+                "bytes": 13010
+            },
+            {
+                "id": "io.perfmark:perfmark-api:0.27.0",
+                "name": "io.perfmark:perfmark-api",
+                "bytes": 6954
+            },
+            {
+                "id": "javax.annotation:javax.annotation-api:1.3.2",
+                "name": "javax.annotation:javax.annotation-api",
+                "bytes": 26586
+            },
+            {
+                "id": "org.apache.httpcomponents.client5:httpclient5:5.6.4",
+                "name": "org.apache.httpcomponents.client5:httpclient5",
+                "bytes": 1057058
+            },
+            {
+                "id": "org.apache.httpcomponents.core5:httpcore5-h2:5.4.3",
+                "name": "org.apache.httpcomponents.core5:httpcore5-h2",
+                "bytes": 263675
+            },
+            {
+                "id": "org.apache.httpcomponents.core5:httpcore5:5.4.3",
+                "name": "org.apache.httpcomponents.core5:httpcore5",
+                "bytes": 955121
+            },
+            {
+                "id": "org.apache.httpcomponents:httpclient:4.5.14",
+                "name": "org.apache.httpcomponents:httpclient",
+                "bytes": 785639
+            },
+            {
+                "id": "org.apache.httpcomponents:httpcore:4.4.16",
+                "name": "org.apache.httpcomponents:httpcore",
+                "bytes": 327891
+            },
+            {
+                "id": "org.checkerframework:checker-qual:3.49.0",
+                "name": "org.checkerframework:checker-qual",
+                "bytes": 238014
+            },
+            {
+                "id": "org.codehaus.mojo:animal-sniffer-annotations:1.27",
+                "name": "org.codehaus.mojo:animal-sniffer-annotations",
+                "bytes": 3194
+            },
+            {
+                "id": "org.codehaus.woodstox:stax2-api:4.2.2",
+                "name": "org.codehaus.woodstox:stax2-api",
+                "bytes": 195922
+            },
+            {
+                "id": "org.conscrypt:conscrypt-openjdk-uber:2.6.2",
+                "name": "org.conscrypt:conscrypt-openjdk-uber",
+                "bytes": 7548583
+            },
+            {
+                "id": "org.jspecify:jspecify:1.0.0",
+                "name": "org.jspecify:jspecify",
+                "bytes": 3819
+            },
+            {
+                "id": "org.slf4j:slf4j-api:2.0.19",
+                "name": "org.slf4j:slf4j-api",
+                "bytes": 70246
+            },
+            {
+                "id": "org.threeten:threeten-extra:1.8.0",
+                "name": "org.threeten:threeten-extra",
+                "bytes": 280525
+            },
+            {
+                "id": "org.threeten:threetenbp:1.7.0",
+                "name": "org.threeten:threetenbp",
+                "bytes": 514668
+            }
+        ],
+        "replaced": [
+            {
+                "id": "com.github.stephenc.jcip:jcip-annotations:1.0-1",
+                "name": "com.github.stephenc.jcip:jcip-annotations",
+                "bytes": 4722
+            },
+            {
+                "id": "com.nimbusds:nimbus-jose-jwt:9.37.4",
+                "name": "com.nimbusds:nimbus-jose-jwt",
+                "bytes": 788181
+            },
+            {
+                "id": "org.apache.httpcomponents.client5:httpclient5:5.5.2",
+                "name": "org.apache.httpcomponents.client5:httpclient5",
+                "bytes": 960897
+            },
+            {
+                "id": "org.apache.httpcomponents.core5:httpcore5-h2:5.3.6",
+                "name": "org.apache.httpcomponents.core5:httpcore5-h2",
+                "bytes": 242521
+            },
+            {
+                "id": "org.apache.httpcomponents.core5:httpcore5:5.3.6",
+                "name": "org.apache.httpcomponents.core5:httpcore5",
+                "bytes": 909490
+            },
+            {
+                "id": "org.slf4j:slf4j-api:2.0.18",
+                "name": "org.slf4j:slf4j-api",
+                "bytes": 69982
+            }
+        ],
+        "deltaBytes": 64162771
+    },
+    "directHttpWithAuth": {
+        "count": 112,
+        "bytes": 71638077,
+        "added": [
+            {
+                "id": "com.google.api:api-common:2.68.0",
+                "name": "com.google.api:api-common",
+                "bytes": 51404
+            },
+            {
+                "id": "com.google.auth:google-auth-library-credentials:1.52.0",
+                "name": "com.google.auth:google-auth-library-credentials",
+                "bytes": 8979
+            },
+            {
+                "id": "com.google.auth:google-auth-library-oauth2-http:1.52.0",
+                "name": "com.google.auth:google-auth-library-oauth2-http",
+                "bytes": 344655
+            },
+            {
+                "id": "com.google.auto.value:auto-value-annotations:1.11.0",
+                "name": "com.google.auto.value:auto-value-annotations",
+                "bytes": 7491
+            },
+            {
+                "id": "com.google.code.findbugs:jsr305:3.0.2",
+                "name": "com.google.code.findbugs:jsr305",
+                "bytes": 19936
+            },
+            {
+                "id": "com.google.code.gson:gson:2.14.0",
+                "name": "com.google.code.gson:gson",
+                "bytes": 313604
+            },
+            {
+                "id": "com.google.errorprone:error_prone_annotations:2.50.0",
+                "name": "com.google.errorprone:error_prone_annotations",
+                "bytes": 20252
+            },
+            {
+                "id": "com.google.guava:failureaccess:1.0.3",
+                "name": "com.google.guava:failureaccess",
+                "bytes": 10763
+            },
+            {
+                "id": "com.google.guava:guava:33.6.0-jre",
+                "name": "com.google.guava:guava",
+                "bytes": 3064793
+            },
+            {
+                "id": "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava",
+                "name": "com.google.guava:listenablefuture",
+                "bytes": 2199
+            },
+            {
+                "id": "com.google.http-client:google-http-client-gson:2.2.0",
+                "name": "com.google.http-client:google-http-client-gson",
+                "bytes": 12827
+            },
+            {
+                "id": "com.google.http-client:google-http-client:2.2.0",
+                "name": "com.google.http-client:google-http-client",
+                "bytes": 299773
+            },
+            {
+                "id": "com.google.j2objc:j2objc-annotations:3.1",
+                "name": "com.google.j2objc:j2objc-annotations",
+                "bytes": 16762
+            },
+            {
+                "id": "commons-codec:commons-codec:1.18.0",
+                "name": "commons-codec:commons-codec",
+                "bytes": 373045
+            },
+            {
+                "id": "io.grpc:grpc-api:1.70.0",
+                "name": "io.grpc:grpc-api",
+                "bytes": 323078
+            },
+            {
+                "id": "io.grpc:grpc-context:1.70.0",
+                "name": "io.grpc:grpc-context",
+                "bytes": 293
+            },
+            {
+                "id": "io.opencensus:opencensus-api:0.31.1",
+                "name": "io.opencensus:opencensus-api",
+                "bytes": 355405
+            },
+            {
+                "id": "io.opencensus:opencensus-contrib-http-util:0.31.1",
+                "name": "io.opencensus:opencensus-contrib-http-util",
+                "bytes": 23415
+            },
+            {
+                "id": "javax.annotation:javax.annotation-api:1.3.2",
+                "name": "javax.annotation:javax.annotation-api",
+                "bytes": 26586
+            },
+            {
+                "id": "org.apache.httpcomponents:httpclient:4.5.14",
+                "name": "org.apache.httpcomponents:httpclient",
+                "bytes": 785639
+            },
+            {
+                "id": "org.apache.httpcomponents:httpcore:4.4.16",
+                "name": "org.apache.httpcomponents:httpcore",
+                "bytes": 327891
+            },
+            {
+                "id": "org.jspecify:jspecify:1.0.0",
+                "name": "org.jspecify:jspecify",
+                "bytes": 3819
+            }
+        ],
+        "replaced": [
+
+        ],
+        "deltaBytes": 6392609
+    }
+}

@@ -22,6 +22,8 @@ v2 컨테이너를 공유하고, 같은 Flyway V1으로 만든 두 DB에서 응�
 확정된 결정 밖의 새 설계 선택은 선택지와 장단점을 설명한 뒤 사용자 답을 기다린다.
 0~7번 묶음 확인을 마쳤다. 8-A 즐겨찾기·피드백·신고 5개 API와 8-B 카카오 검색을 이관했다. 카카오 검증은 실제 API·키 없이 가짜 서버만 사용한다.
 
+8번 묶음 확인 후 [9번 Firebase 발송·예약 작업 설계](NOTIFICATIONS_DESIGN.md)를 작성했다. 원본 v2의 알림·커밋·실패·삭제 경계를 외부 호출 없이 관측했으며 9-1~9-9 선택 대기다. v3 발송·예약 작업 구현과 기존 알림 보류 차이 두 건의 해제는 아직 하지 않았다.
+
 ## 탑다운으로 읽는 순서
 
 1. `src/main/java/com/loco/LocoApplication.java`: `main()` → `SpringApplication.run()`이 내장 HTTP 서버와 Spring을 시작한다. `@SpringBootApplication`은 이 클래스가 있는 `com.loco` 아래의 컨트롤러·설정을 검색한다.

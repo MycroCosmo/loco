@@ -1,0 +1,40 @@
+{
+  "transport" : {
+    "blockedProbes" : 3,
+    "unexpectedAttempts" : 0,
+    "credentialMode" : "no service-account values; empty object only in SDK stub",
+    "firebaseNetwork" : false
+  },
+  "rows" : [ {
+    "name" : "cleanup-boundaries",
+    "now" : "2026-11-06T12:00:00.000Z",
+    "refreshBefore" : 6,
+    "refreshAfter" : [ "probe-expired-recent", "probe-future", "probe-old-equal", "probe-old-plus" ],
+    "resetBefore" : 4,
+    "resetAfter" : [ "probe-expired-equal", "probe-future" ]
+  }, {
+    "name" : "repeated-cleanup",
+    "refresh" : 4,
+    "reset" : 2
+  }, {
+    "name" : "delete-failure:refresh_tokens",
+    "rejected" : true,
+    "refresh" : 6,
+    "reset" : 2
+  }, {
+    "name" : "delete-failure:password_reset_tokens",
+    "rejected" : true,
+    "refresh" : 4,
+    "reset" : 4
+  }, {
+    "name" : "schedule:UTC",
+    "cron" : "0 3 * * *",
+    "explicitTimeZone" : false,
+    "nextUtc" : "2026-11-06T03:00:00.000Z"
+  }, {
+    "name" : "schedule:Asia/Seoul",
+    "cron" : "0 3 * * *",
+    "explicitTimeZone" : false,
+    "nextUtc" : "2026-11-06T18:00:00.000Z"
+  } ]
+}
