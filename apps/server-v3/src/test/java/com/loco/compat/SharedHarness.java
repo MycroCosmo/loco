@@ -153,12 +153,18 @@ public final class SharedHarness implements BeforeAllCallback {
       v2 =
           new GenericContainer<>(v2Image())
               .withNetwork(network)
-              .withExposedPorts(3000)
+              .withExposedPorts(3000, 39091)
               .withEnv("DATABASE_URL", "postgresql://db:5432/loco_v2_test?schema=public")
               .withEnv("DB_USERNAME", username())
               .withEnv("DB_PASSWORD", databasePassword())
               .withEnv("JWT_SECRET", secret)
-              .withEnv("NODE_OPTIONS", "--require /app/harness-timing.cjs")
+              .withEnv(
+                  "NODE_OPTIONS",
+                  "--require /app/harness-timing.cjs --require /app/harness-kakao.cjs")
+              .withCopyFileToContainer(
+                  org.testcontainers.utility.MountableFile.forClasspathResource(
+                      "kakao/preload-v2.cjs"),
+                  "/app/harness-kakao.cjs")
               .withCopyFileToContainer(
                   org.testcontainers.utility.MountableFile.forClasspathResource(
                       "compat/timing-v2.cjs"),
@@ -248,6 +254,31 @@ public final class SharedHarness implements BeforeAllCallback {
 
     public String smtpHost() {
       return v2Enabled ? mailpit.getHost() : "127.0.0.1";
+    }
+
+    public String kakaoUrl() {
+      requireV2();
+      // Docker restart may publish a different host port.
+      var info =
+          org.testcontainers.DockerClientFactory.instance()
+              .client()
+              .inspectContainerCmd(v2.getContainerId())
+              .exec();
+      var binding =
+          info.getNetworkSettings()
+              .getPorts()
+              .getBindings()
+              .get(com.github.dockerjava.api.model.ExposedPort.tcp(39091));
+      return "http://" + v2.getHost() + ":" + binding[0].getHostPortSpec();
+    }
+
+    public JsonNode kakaoControl(Map<String, Object> settings) throws Exception {
+      var builder =
+          HttpRequest.newBuilder(URI.create(kakaoUrl() + "/__control"))
+              .timeout(Duration.ofSeconds(3));
+      if (settings == null) builder.GET();
+      else builder.POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(settings)));
+      return json.readTree(http.send(builder.build(), HttpResponse.BodyHandlers.ofString()).body());
     }
 
     public void restartV2ForCase() {
