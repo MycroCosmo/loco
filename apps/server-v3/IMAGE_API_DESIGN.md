@@ -237,3 +237,8 @@ B에서도 v2의 오류 우선순서를 위해 파일 유무·장소·작성자�
 
 사용자는 **6-1 B / 6-2 B / 6-3 B / 6-4 B(범위 조정)**를 선택했다. v2 재현을 유지하고 v3 정합성은 별도 필수 검사한다. 7절 성능 계획 전체는 2단계 실험 백로그로 보존하며 이번에 비관적 락 대안·성능 계측·벤치마크를 구현하지 않는다. 성능 우위도 주장하지 않는다.
 
+## 10. 구현 검증
+
+POST 단계: 입력/권한/극단 비율 42건과 저장·UPDATE·커밋 실패 3건, 기존 프로필/커버 회귀 89건을 함께 실행했다. 전체 134건 모두 성공, 실패/skip/알려진 차이 0, 127.531초(v2 이미지 캐시), 재시작/대기 0이다. 인증 포함 정상 POST SQL 4회, 서비스의 장소/권한/정원/디코딩 거절 2회, multipart/파일 누락 거절 1회다. 변환은 TransactionTemplate 밖이고 cardinality 조건과 array_append는 한 UPDATE다. 영속 엔티티를 읽지 않는 native 경로라 오래된 엔티티 flush로 배열을 덮어쓰지 않는다.
+
+PlaceImageController는 HTTP/인증 경로, PlaceImageService는 사전/최종 검사와 새 파일 보상, PlaceImageRepository는 원자적 배열 DML을 맡는다. PlaceImageTestSupport는 두 DB/파일 시드와 변동 URL 대응을 공유한다. 장소 inside 축소에는 최소 1픽셀을 유지해 1×3000/3000×1 입력도 v2와 맞춘다. 선행 문서 커밋의 EOF 빈 줄 경고를 정리했고 현재 git diff --check는 통과했다.

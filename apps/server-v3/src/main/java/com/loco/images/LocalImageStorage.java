@@ -22,7 +22,8 @@ public class LocalImageStorage {
 
   public enum Purpose {
     PROFILE("profiles", 512, 512),
-    MAP_COVER("maps", 800, 400);
+    MAP_COVER("maps", 800, 400),
+    PLACE("places", 1200, 1200);
     final String folder;
     final int width;
     final int height;
@@ -83,14 +84,17 @@ public class LocalImageStorage {
   }
 
   private BufferedImage crop(BufferedImage source, Purpose purpose) {
+    double widthScale = (double) purpose.width / source.getWidth();
+    double heightScale = (double) purpose.height / source.getHeight();
     double scale =
         Math.min(
             1,
-            Math.max(
-                (double) purpose.width / source.getWidth(),
-                (double) purpose.height / source.getHeight()));
-    int width = Math.min(purpose.width, (int) Math.round(source.getWidth() * scale));
-    int height = Math.min(purpose.height, (int) Math.round(source.getHeight() * scale));
+            purpose == Purpose.PLACE
+                ? Math.min(widthScale, heightScale)
+                : Math.max(widthScale, heightScale));
+    int width = Math.max(1, Math.min(purpose.width, (int) Math.round(source.getWidth() * scale)));
+    int height =
+        Math.max(1, Math.min(purpose.height, (int) Math.round(source.getHeight() * scale)));
     var image =
         new BufferedImage(
             width,
