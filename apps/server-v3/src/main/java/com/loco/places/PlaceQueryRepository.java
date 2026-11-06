@@ -20,7 +20,7 @@ public class PlaceQueryRepository {
     this.permissions = permissions;
   }
 
-  private static final String PROJECTION =
+  static final String PROJECTION =
       """
  SELECT p.*, u.nickname AS "authorNickname",u."profileImageUrl" AS "authorImage",
  m."ownerId" AS "mapOwner", m.title AS "mapTitle",m.description AS "mapDescription",m.tags AS "mapTags",

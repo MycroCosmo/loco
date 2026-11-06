@@ -18,9 +18,9 @@
 | --- | --- | --- |
 | markers | level | 생략/빈 문자열 5. Number 변환 후 정수 1~14만 허용. 0x6/6e0/BOM+6 허용, 5.5/5x/NaN/Infinity/공백/중복은 400 `level은 숫자여야 합니다.`. 방 조회보다 먼저 검사 |
 | markers | swLat/swLng/neLat/neLng | parseFloat이므로 37x→37, 0x10→0, 중복 `37,38`→37. 누락/NaN/Infinity는 지도방 권한 확인 후 400 `지도 영역 좌표가 올바르지 않습니다.`. 위도 ±90/경도 ±180 제한 없음. 각각 min/max로 정렬하므로 뒤집힌 범위 허용, 날짜변경선 처리는 없음. 경계 포함 |
-| marker-group | groupKey 또는 lat/lng | truthy groupKey 우선. `:` 정확히 두 조각, trim 후 Number 유한·위도 ±90/경도 ±180. 없으면 parseFloat(lat/lng).toFixed(6). 잘못된 좌표 400 `좌표가 올바르지 않습니다.`. groupKey 배열/객체는 split 함수 오류로 500 |
+| marker-group | groupKey 또는 lat/lng | truthy groupKey 우선. `:` 정확히 두 조각, trim 후 Number 유한·위도 ±90/경도 ±180. 없으면 parseFloat(lat/lng).toFixed(6). 잘못된 좌표 400 `좌표가 올바르지 않습니다.`. groupKey 배열/객체는 ValidationPipe의 문자열 변환을 거쳐 잘못된 좌표 400 |
 | marker-cluster | precision | Number 변환 후 1/2/3만. 0x3/3e0 허용. 누락/빈 값/그 외 400 `precision은 1, 2, 3 중 하나여야 합니다.`. 방 조회보다 먼저 검사 |
-| marker-cluster | cellLatKey/cellLngKey | trim 후 Number로 유한/범위 검증하되 **문자열 그대로** 셀 PK에 사용. `37.4440`은 `37.444`과 다르다. 배열/객체의 trim 오류는 500 |
+| marker-cluster | cellLatKey/cellLngKey | trim 후 Number로 유한/범위 검증하되 **문자열 그대로** 셀 PK에 사용. `37.4440`은 `37.444`과 다르다. 배열/객체는 먼저 문자열로 바뀌어 잘못된 좌표 400 |
 | marker-cluster | limit | parseInt 10진수. 생략/NaN/0은 20, 음수는 1, 최대 50. 2x→2, 1.5→1, 0x10→0→20. limit+1로 hasMore 판정. cursor 없음 |
 
 tag/search/sort 등 선언하지 않은 쿼리는 **무시**한다. 장소 목록 API의 태그 필터를 여기에 추가하지 않는다. 잘못된 level/precision은 없는 방에서도 400인 반면 group 입력 오류는 먼저 방 404/403이 나올 수 있다. 숫자 파싱은 Java 기본 변환으로 일괄 치환하지 않는다.
@@ -106,3 +106,7 @@ cluster ROUND id 조회는 A에서 Seq Scan → Sort → Limit, B에서 places_m
 관측 중 별도 Prisma 프로세스의 DATABASE_URL에 하네스 인증값이 빠져 SQL 수집 1건이 실패했다. DB_USERNAME/DB_PASSWORD 환경값을 조합해 해결했으며 비밀값은 파일/출력에 기록하지 않았다. HTTP 관측 10건은 처음부터 통과했다. 관측 생성 후 fixture를 재대조하고 SQL 수집을 다시 실행한다.
 
 관측 fixture 재대조 + SQL/EXPLAIN: 전체 11건 성공·실패/skip/알려진 차이 0, 21.461초(v2 이미지 캐시), 재시작 0·대기 0ms. HTTP 199개 응답을 10개 JUnit 실행으로 묶으며 SQL 관측 1개를 더한다. 관측 테스트 수와 API 요청 수를 혼동하지 않는다.
+
+구현 비교 단계: MarkerComparisonTest 146건 성공·실패/skip/알려진 차이 0, 94.450초(v2 이미지 캐시), 재시작/대기 0. HTTP 관측 199개를 모두 양쪽 서버에서 대조하고 두 DB의 전체 스냅샷 불변을 검사한다. 인증 포함 markers 일반/셀 직접 경로 3 SQL, 301행 fallback 4, group 3, cluster 셀 없음 3·셀 있음/장소 없음 4·items 있음 5다. 비공개방 비방장 멤버는 권한 확인 1 SQL을 더한다. level/precision 입력 거절 1, 서비스 좌표 거절 2, 없는 방 2, 접근 거절 3이다.
+
+구현 중 최초 비교의 실패 4건은 문자열 파라미터를 배열/객체로 취급한 파서 때문이었다. v2 전역 ValidationPipe는 문자열로 먼저 변환하므로 실제 fixture의 400이 맞다. 파서와 이 문서의 잘못된 500 설명을 수정하고 146건 전체를 재실행했다. 기대값을 바꿔 통과시키지 않았다.
