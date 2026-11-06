@@ -110,3 +110,20 @@ cluster ROUND id 조회는 A에서 Seq Scan → Sort → Limit, B에서 places_m
 구현 비교 단계: MarkerComparisonTest 146건 성공·실패/skip/알려진 차이 0, 94.450초(v2 이미지 캐시), 재시작/대기 0. HTTP 관측 199개를 모두 양쪽 서버에서 대조하고 두 DB의 전체 스냅샷 불변을 검사한다. 인증 포함 markers 일반/셀 직접 경로 3 SQL, 301행 fallback 4, group 3, cluster 셀 없음 3·셀 있음/장소 없음 4·items 있음 5다. 비공개방 비방장 멤버는 권한 확인 1 SQL을 더한다. level/precision 입력 거절 1, 서비스 좌표 거절 2, 없는 방 2, 접근 거절 3이다.
 
 구현 중 최초 비교의 실패 4건은 문자열 파라미터를 배열/객체로 취급한 파서 때문이었다. v2 전역 ValidationPipe는 문자열로 먼저 변환하므로 실제 fixture의 400이 맞다. 파서와 이 문서의 잘못된 500 설명을 수정하고 146건 전체를 재실행했다. 기대값을 바꿔 통과시키지 않았다.
+
+### v3 SQL/EXPLAIN과 경계 검증
+
+실제 HTTP에서 StatementInspector로 수집한 SQL을 동일 파라미터로 EXPLAIN ANALYZE했다. 원본 SQL/바인딩/계획은 `src/test/resources/markers/explain-v3.json`, 재실행 결과는 build/reports/markers/explain-v3.json이다. JWT/방 조회는 SQL 수에 포함하되 이 계획 파일은 장소/셀 업무 조회를 대상으로 한다. 지도방 4개·대상 방 4장소·다른 방 1만 행이라는 v2와 같은 분포, ANALYZE·기본 플래너 조건이다.
+
+| v3 쿼리 | 작은 시드 | 다른 방 1만 행 추가 |
+| --- | --- | --- |
+| markers places | Seq Scan → Sort → Limit | places_mapId_latitude_longitude_idx Index Scan → Sort → Limit |
+| markers cells | Seq Scan → Sort | place_marker_cells_mapId_precision_maxLng_idx Index Scan → Sort |
+| group projection | places/users/maps Seq Scan과 Hash Join/Nested Loop → Sort | places 좌표 Index Scan과 Nested Loop → Sort |
+| cluster cell | Seq Scan | place_marker_cells_pkey Index Scan |
+| cluster ROUND id | Seq Scan → Sort → Limit | 좌표 Index Scan(mapId만 Index Cond, ROUND는 Filter) → Sort → Limit |
+| cluster id IN projection | Hash Join, Seq Scan | places_pkey Index Scan, Nested Loop/Materialize |
+
+v3 group/cluster의 장소 응답은 기존 PlaceQueryRepository.PROJECTION을 재사용한다. 작성자/방 JOIN과 리뷰 COUNT·AVG 상관 서브쿼리가 들어가며, 작은 리뷰 테이블은 각 Aggregate 하위에서 Seq Scan이었다. 앱 SQL 수가 적다는 이유로 DB 작업량 감소/성능 개선을 주장하지 않는다. PostgreSQL 플래너는 데이터·통계에 따라 달라지므로 정확한 scan/cost/time 값을 테스트 통과 조건으로 고정하지 않는다. 실제 HTTP SQL 수와 응답/DB 상태만 고정한다.
+
+추가 검증: v3 EXPLAIN 1건 + 경계 13건(699/700/701셀, 실수/영점/반구간 8, group 60행·limit 무시, 실제 장소 없는 셀) + 보호 경로 3건 + 핸들러별 120/121번째 요청 429 1건 = 총 18건 성공, 실패/skip/알려진 차이 0. 실행 42.897초(v2 이미지 캐시), 재시작 1·대기 0ms. 없는 장소의 저장 셀은 count=4/items=[]/hasMore=false를 그대로 반환하며 SQL 4회를 확인했다.
