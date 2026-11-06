@@ -76,6 +76,13 @@ public abstract class CompatibilityTestBase {
     registry.add("spring.datasource.username", env::username);
     registry.add("spring.datasource.password", env::databasePassword);
     registry.add("loco.jwt.secret", () -> env.secret);
+    registry.add(
+        "loco.kakao.base-url",
+        () ->
+            env.v2Enabled()
+                ? env.kakaoUrl() + "/v2/local/search/keyword.json"
+                : "http://127.0.0.1:1/no-external");
+    registry.add("loco.kakao.api-key", () -> "");
     registry.add("loco.uploads.directory", () -> env.uploads.toString());
     registry.add("spring.mail.host", env::smtpHost);
     registry.add("spring.mail.port", env::smtpPort);

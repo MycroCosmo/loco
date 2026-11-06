@@ -45,6 +45,9 @@ services:
     mem_limit: 1536m
     environment:
       PORT: 8081
+      KAKAO_SEARCH_BASE_URL: ${KAKAO_SEARCH_BASE_URL:-https://dapi.kakao.com/v2/local/search/keyword.json}
+      KAKAO_CONNECT_TIMEOUT_MS: ${KAKAO_CONNECT_TIMEOUT_MS:-2000}
+      KAKAO_RESPONSE_TIMEOUT_MS: ${KAKAO_RESPONSE_TIMEOUT_MS:-5000}
       KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY:-}
       KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:-}
       NAVER_CLIENT_ID: ${NAVER_CLIENT_ID:-}

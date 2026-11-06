@@ -39,6 +39,10 @@ public final class ApiProblem extends RuntimeException {
     return new ApiProblem(400, message, "Bad Request");
   }
 
+  public static ApiProblem internalServer(String message) {
+    return new ApiProblem(500, message, "Internal Server Error");
+  }
+
   public static ApiProblem invalid(List<String> messages) {
     return new ApiProblem(400, List.copyOf(messages), "Bad Request");
   }

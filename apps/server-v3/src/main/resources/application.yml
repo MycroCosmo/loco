@@ -4,6 +4,9 @@ server:
     max-swallow-size: -1
 
 spring:
+  http:
+    client:
+      factory: jdk
   servlet:
     multipart:
       resolve-lazily: true
@@ -40,6 +43,11 @@ spring:
     baseline-on-migrate: false
     baseline-version: 1
 
+logging:
+  level:
+    org.apache.hc.client5.http.wire: OFF
+    org.apache.hc.client5.http.headers: OFF
+
 management:
   endpoints:
     web:
@@ -47,6 +55,11 @@ management:
         exclude: '*'
 
 loco:
+  kakao:
+    base-url: ${KAKAO_SEARCH_BASE_URL:https://dapi.kakao.com/v2/local/search/keyword.json}
+    api-key: ${KAKAO_REST_API_KEY:}
+    connect-timeout-ms: ${KAKAO_CONNECT_TIMEOUT_MS:2000}
+    response-timeout-ms: ${KAKAO_RESPONSE_TIMEOUT_MS:5000}
   vips:
     executable: ${VIPS_EXECUTABLE:vips}
   uploads:

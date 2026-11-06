@@ -11,6 +11,19 @@ import org.springframework.http.HttpMethod;
 
 @Tag("v2-comparison")
 class KakaoPreloadTest extends SubmissionTestSupport {
+  @org.junit.jupiter.api.Test
+  void preloadRejectsOtherFetchTargetsWithoutFallback() throws Exception {
+    assertThat(
+            environment()
+                .kakaoControl(Map.of("variant", "normal", "probeBlocked", true))
+                .path("blocked")
+                .asBoolean())
+        .isTrue();
+    var state = environment().kakaoControl(null);
+    assertThat(state.path("blocked").asInt()).isEqualTo(1);
+    assertThat(state.path("requests").size()).isZero();
+  }
+
   static java.util.stream.Stream<com.fasterxml.jackson.databind.JsonNode> cases() throws Exception {
     try (var in = KakaoPreloadTest.class.getResourceAsStream("/kakao/http-v2.json")) {
       var rows = new com.fasterxml.jackson.databind.ObjectMapper().readTree(in).path("rows");

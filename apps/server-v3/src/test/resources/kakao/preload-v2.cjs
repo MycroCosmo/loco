@@ -18,8 +18,13 @@ http.createServer((req, res) => {
     if (req.method === 'POST') {
       let input = '';
       req.on('data', part => input += part);
-      req.on('end', () => {
+      req.on('end', async () => {
         settings = JSON.parse(input); requests = []; rewrites = 0; blocked = 0;
+        if (settings.probeBlocked) {
+          try { await global.fetch('http://127.0.0.1:' + port + '/blocked'); res.end('{"blocked":false}'); }
+          catch { res.end('{"blocked":true}'); }
+          return;
+        }
         res.end('{}');
       });
     } else {
@@ -32,6 +37,9 @@ http.createServer((req, res) => {
   requests.push({path: url.pathname, query: Object.fromEntries(url.searchParams),
     authorizationPresent: !!req.headers.authorization});
   const variant = settings.variant;
+  if (variant === 'redirect' && !url.searchParams.has('redirected')) {
+    res.writeHead(302, {Location: '/v2/local/search/keyword.json?redirected=1'});res.end();return;
+  }
   if (variant === 'connection-failure') {req.socket.destroy(); return;}
   if (['400','401','429','500','503'].includes(variant)) {
     res.writeHead(Number(variant), {'Content-Type': 'text/plain'});
@@ -47,9 +55,16 @@ http.createServer((req, res) => {
     : variant === 'missing-documents' ? {meta: {}}
     : variant === 'empty-meta' ? {meta: {}, documents: []}
     : variant === 'wrong-types' ? {meta: {total_count: 'two', is_end: 'yes'}, documents: [{id: 7, place_name: false, x: null, y: 'Infinity'}]}
-    : normal;
+    : variant === 'custom' ? settings.body : normal;
   res.setHeader('Content-Type', 'application/json');
   const send = () => res.end(JSON.stringify(body));
+  if (variant === 'drip') {
+    res.flushHeaders();
+    const timer = setInterval(() => res.write(' '), 500);
+    res.on('close', () => clearInterval(timer));
+    setTimeout(() => { clearInterval(timer); send(); }, settings.delayMillis ?? 6200);
+    return;
+  }
   if (variant === 'slow-body') {res.flushHeaders(); res.write(' ');}
   if (['delay', 'slow-body'].includes(variant)) setTimeout(send, settings.delayMillis ?? 250);
   else send();

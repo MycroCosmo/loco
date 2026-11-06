@@ -1,6 +1,6 @@
 # 8-B 카카오 장소 검색 — 결정과 구현 기록
 
-대상은 GET /api/places/search. 8-1 A / 8-2 B / 8-3 B / 8-4 A를 사용자 확인으로 확정했다. 공용 v2 preload를 구현·검증했으며, v3 외부 호출 구현은 추가 HTTP 클라이언트 선택(8-5) 답변을 기다린다. 실제 카카오 요청 0건, 실제/더미 API 키 사용 0건이다.
+대상은 GET /api/places/search. 8-1 A / 8-2 B / 8-3 B / 8-4 A / 8-5 A를 확정하고 v3 검색을 구현했다. 아래 검증 기록을 따른다. 실제 카카오 요청 0건, 실제/더미 API 키 사용 0건이다.
 
 ## 1. 근거와 관측 격리
 
@@ -9,7 +9,7 @@
 - `src/test/resources/kakao/observe-fake.cjs`는 AppModule을 불러오기 **전** 환경의 KAKAO_REST_API_KEY를 삭제한다(읽거나 출력하지 않음). 테스트 JWT만 기존 로컬 테스트 secret으로 발급한다.
 - global fetch는 원본의 정확한 Kakao origin/path만 허용하고, 이를 127.0.0.1의 가짜 HTTP 서버로 바꾼다. Authorization은 전달하지 않는다. 다른 fetch URL은 오류로 차단하고 원래 주소로 fallback하지 않는다. redirect도 error여서 외부 redirect를 따라가지 않는다.
 - native fetch가 받는 주소는 루프백뿐이다. 요청한 Kakao 주소 문자열을 파싱하는 것은 네트워크 호출이 아니다. 가짜 서버가 받은 path/query와 Authorization 부재를 fixture로 검증한다.
-- 이 교체는 외부 통신을 바꾸는 **테스트 대역**이다. 동작을 보존해야 하는 `timing-v2.cjs` 계측과 다르다. 이번 관측용 사용이 향후 하네스 방식(8-1)의 사용자 선택을 대신하지 않는다.
+- 이 교체는 외부 통신을 바꾸는 **테스트 대역**이다. 동작을 보존해야 하는 `timing-v2.cjs` 계측과 다르다. 이후 사용자 승인으로 공용 v2 시작 preload에도 적용했으며, 독립 관측 fixture는 유지했다.
 - observer의 3초 watchdog은 테스트가 멈추지 않게 하는 장치이며 v2 timeout 설정이 아니다. 250ms 지연은 실제 경과 200ms 이상과 정상 완료를 검사하고 fixture에는 지연 조건만 저장한다.
 
 관측 fixture는 `src/test/resources/kakao/http-v2.json`이다. 총 56 HTTP 사례, 가짜 upstream 도달 40회, 차단된 예상 밖 fetch 0회. 일반 테스트에서는 fixture와 정확히 비교하고 자동 갱신하지 않는다. HTTP 상태·본문·upstream 쿼리를 모두 기록했다.
@@ -60,62 +60,75 @@ meta={}면 응답 meta={}이고 undefined 키는 생략된다. meta 필드의 "t
 
 v2에 애플리케이션이 명시한 연결/응답 timeout, retry, circuit breaker는 없다. Node fetch 런타임 자체 제한까지 없다고 해석하지 않는다. 이번의 연결 실패는 실제 소켓 중단이며 DNS 오류/TCP 거절 각각의 별도 관측은 아니다.
 
-## 5. 검토했던 대안 (아래 확정 기록 우선)
+## 5. 확정 결정과 근거
 
-### 8-1 v2 카카오 대역·v3 base URL
+| 결정 | 확정 내용 |
+| --- | --- |
+| 8-1 A | 테스트 preload의 fail-closed fetch 교체·루프백 가짜 서버. v3 base URL 설정 주입, 운영 기본값은 v2 Kakao endpoint |
+| 8-2 B | 연결 2초·응답 **소켓 무활동 5초**, 설정값. 재시도 없음. 전체 수신 시간 제한은 구현하지 않음 |
+| 8-3 B | 모든 외부 호출/파싱 실패를 500 `카카오 검색 API 호출 실패`로 고정. 원인은 서버 로그에만 기록 |
+| 8-4 A | 정상 응답의 느슨한 매핑 유지. 런타임 스키마 검증은 이관 후 개선 후보 |
+| 8-5 A | Apache HttpClient 5, Spring Boot BOM 버전, 카카오 전용 인스턴스에서 자동 재시도 비활성화 |
 
-- **A 권장: 테스트 프로세스 preload에서 fail-closed fetch 교체 + 루프백 가짜 서버.** v2 파일 변경 없이 실제 Guard/DTO/service 경로를 관측한다. 가짜 응답·지연·단절을 제어하기 쉽다. 대신 테스트에서만 전역 fetch 동작을 바꾸므로 허용 URL, 헤더 제거, redirect/fallback 차단을 검사해야 한다. v3는 환경/설정으로 base URL을 주입하고 테스트는 루프백으로 고정한다. 운영 기본 주소는 현재 Kakao endpoint와 같게 한다. 키는 외부 환경에서만 주입하며 테스트는 사용하지 않는다.
-- **B: 테스트 네트워크의 HTTPS 프록시/DNS·인증서 대역 + v3 base URL 설정.** 원본 fetch 호출을 더 그대로 둘 수 있지만 TLS 신뢰·호스트·프록시 설정과 외부 연결 차단 관리가 복잡하다. Node fetch의 프록시 지원 경로도 검증해야 한다. 여기서 구현하지 않았다.
+**새 의존성 추가 예외: JDK HttpClient의 연결 재시도가 JVM 전역 속성으로만 제어되기 때문.** JDK 유지+전역 재시도 금지와 비교한 뒤 Apache 전용 설정을 선택했다. 실제 해석 버전은 Spring Boot 3.5.16 BOM의 HttpClient **5.5.2**이며 버전을 직접 덮어쓰지 않는다. [JDK 공식 속성](https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/module-summary.html).
 
-이번 관측은 별도 Node 프로세스 내 AppModule import 전 교체다. A 선택 시 공용 v2 하네스 시작 preload로 확장할지 독립 관측 앱을 유지할지는 격리 비용과 필요한 비교 케이스를 기준으로 정리한다. 운영 Compose에는 주입하지 않는다.
+Flutter `apps/mobile/lib/core/network/dio_client.dart`의 connectTimeout/receiveTimeout은 각 10초(25~26행, 재발급용 124~125행)다. 서버가 먼저 오류 메시지를 반환하도록 연결 2초·소켓 무활동 5초를 선택했다. 다만 [Dio receiveTimeout](https://pub.dev/packages/dio)은 전체 다운로드 시간이 아니라 첫 응답·데이터 이벤트 사이의 대기 제한이다.
 
-### 8-2 외부 호출 타임아웃
+현재 v3는 외부 본문을 모두 읽고 JSON을 매핑한 뒤 앱에 응답한다. 따라서 외부가 조금씩 계속 보내면 서버의 5초 무활동 제한은 발동하지 않고, 앱은 서버의 첫 응답을 기다리다 약 10초에서 실패할 수 있다. **이 10초는 앱의 대기 상한이지 서버 작업의 전체 시간 상한이 아니다.** 앱 연결 종료가 진행 중인 외부 호출을 자동 취소하지도 않는다. 전체 deadline·클라이언트 취소 전파는 이번에 구현하지 않는다.
 
-- **A: v2처럼 애플리케이션 timeout 미지정.** 이관 차이가 적다. 다만 지연 요청이 오래 점유할 수 있고 Node와 Java HTTP 런타임의 기본 제한은 별개다.
-- **B 권장: v3 연결·응답 timeout을 설정으로 추가하고 알려진 차이 등록.** 장애 시 대기를 제한할 수 있다. v2보다 먼저 실패하므로 지연 비교에서 의도된 차이를 검증해야 한다. 제안값 연결 2초/응답 5초는 아직 적용하지 않았으며 이 선택에서 함께 확정한다. 자동 재시도는 추가하지 않는다.
+## 6. 구현 구조·설정
 
-### 8-3 카카오 오류 본문 노출
+| 파일 | 역할 |
+| --- | --- |
+| KakaoSearchController | /api/places/search와 기존 @AuthenticatedApi 인증·회원 조회·120/분 |
+| KakaoSearchInputs | DTO 오류 순서, IsNumberString 범위, parseInt/parseFloat와 JS 문자열화 |
+| KakaoSearchResponse | nullish 기본값·잘못된 필드 타입·parseFloat·NaN/Infinity→null, -0→JSON 0 |
+| KakaoSearchClient | 카카오 전용 Apache 클라이언트, 연결/TLS·응답 무활동 timeout, 오류의 고정 응답·안전한 로그 |
+| kakao/preload-v2.cjs | 원본 v2 fetch를 가짜 서버로만 교체, 시나리오·수신 요청 수 제어 |
 
-- **A: v2처럼 상태·원문 본문을 message에 포함.** 기존 응답과 정확히 맞고 디버깅이 쉽지만 외부 서비스 세부 내용이 클라이언트에 노출된다.
-- **B 권장: 고정 message, 서버 로그에서만 원인 확인.** 노출과 응답 변동을 줄인다. 알려진 차이가 생기며 로그도 키·민감 값 제거와 길이 제한이 필요하다. 제안 응답은 기존 연결 실패 형태의 500 `{message:"카카오 검색 API 호출 실패",error:"Internal Server Error",statusCode:500}`. 적용 여부는 사용자 선택 후 확정한다.
+`spring.http.client.factory=jdk`를 명시해 새 Apache 의존성으로 기존 OAuth/Boot HTTP 팩터리가 자동 변경되지 않게 했다. 카카오 인스턴스만 Apache를 직접 구성한다. 클라이언트 종료 시 풀도 닫는다. 쿠키·redirect·자동 retry를 비활성화했다. TCP 연결과 TLS handshake에 연결 제한을 적용하며 풀에서 연결을 기다리는 시간도 같은 값으로 제한한다. 정상 body 읽기는 소켓 무활동 제한만 적용한다. [Apache socket timeout 설명](https://hc.apache.org/components/httpcomponents-client-5.3.x/5.3.1/httpclient5/apidocs/org/apache/hc/client5/http/config/ConnectionConfig.Builder.html).
 
-### 8-4 정상 외부 응답의 잘못된 타입 처리
+| 환경 키 | 기본값·의미 |
+| --- | --- |
+| KAKAO_SEARCH_BASE_URL | https://dapi.kakao.com/v2/local/search/keyword.json (전체 endpoint) |
+| KAKAO_REST_API_KEY | 외부 환경의 키. 코드·fixture에 넣지 않으며 테스트는 빈 값 |
+| KAKAO_CONNECT_TIMEOUT_MS | 2000, 양의 정수. 연결/TLS/풀 대기 |
+| KAKAO_RESPONSE_TIMEOUT_MS | 5000, 양의 정수. 응답 소켓 무활동 |
 
-- **A 권장(이관): v2의 느슨한 매핑 유지.** 숫자/boolean 문자열 필드, 좌표 null, 빈 meta를 fixture 그대로 재현한다. 기존 패턴에 맞지만 DTO 타입만 믿으면 구현을 잘못 만들기 쉽다.
-- **B: 외부 응답 스키마 검증 후 잘못된 타입은 고정 500.** v3 반환 계약을 예측하기 쉽다. v2 200과 달라지므로 알려진 차이와 필드별 허용 정책을 추가해야 한다.
+Compose v3에도 설정을 전달한다. .env.example에는 키만 둔다. 로컬 .env에서 기본값을 사용하려면 선택 설정 키를 삭제하거나 주석 처리한다(명시적 빈 문자열은 timeout 숫자가 아니다). 테스트는 base URL을 가짜 서버로 덮어쓰며 빠른 테스트에는 루프백의 닫힌 endpoint를 지정해 실제 Kakao로 나가지 않는다. v2/Flutter 원본은 수정하지 않는다.
 
-사용자가 **8-1 A / 8-2 B(연결 2초·응답 5초) / 8-3 B / 8-4 A**를 확정했다. 아래 구현 기록을 따른다. 위의 미선택·제안 표현은 최초 설계 당시의 대안을 보존한 것이다.
+오류 응답은 `{statusCode:500,message:"카카오 검색 API 호출 실패",error:"Internal Server Error"}`다. 로그는 상태 코드 또는 예외 **종류**만 기록한다. 오류 body는 진단용으로 최대 1,024바이트를 읽고 **그 길이만** 남긴다. 원문 body·URL·Authorization·키·예외 message/stack은 남기지 않으며 Apache wire/header 로그도 OFF다. 원문을 잘라 남기는 방식보다 노출을 줄인 대신 로그에서 원문 오류 설명을 볼 수 없는 한계가 있다.
 
-## 6. 재검증과 후속 구현 범위
+## 7. 필수 비교와 알려진 차이
+
+- 고정 56개 HTTP 사례에서 상태·JSON 구조/값·외부에 전달된 쿼리를 대조한다. 업무 DB는 양쪽 모두 전체 스냅샷 전후 불변이다. 인증된 요청의 SQL은 회원 확인 1개로 고정한다.
+- 추가 숫자 경계는 x/y/radius/page/size를 모두 대조한다. 1,010개 double은 Node String 결과와 대조해 지수 임계값·최소/최대·영점·큰 정수를 검사한다.
+- 정상 외부 응답의 배열/객체/boolean/null, 숫자 좌표의 JS 문자열화, 0/-0, 뒤에 문자가 붙은 parseFloat도 실제 HTTP로 비교한다.
+- 토큰 없음/만료/다른 서명/잘못된 형식/탈퇴/없는 회원은 401, 외부 호출 0회, DB 불변이다. 120개 정상 호출 뒤 121번째 429는 외부 요청 수가 120 그대로이며 DB 불변이다.
+- 연결 종료·오류 body 종료·503·헤더 지연·본문 무활동에서 외부 **HTTP 요청 1회**를 검사한다. redirect도 추가 요청 없이 실패한다. 진짜 TLS 연결 실패/handshake 무활동은 로컬 가짜 TCP 서버가 **연결 1회**를 관측한다. TLS가 실패하면 HTTP는 성립하지 않으므로 이를 "HTTP 요청 1회"라고 기록하지 않는다.
+- 6.2초 헤더 지연 또는 body 무활동은 v2 200, v3 약 5초 후 고정 500이다. 0.5초마다 body가 도착하며 전체 6.2초가 걸리는 경우는 두 앱 모두 200이다. 이 검사로 소켓 무활동과 전체 시간 제한을 구별한다.
+- 오류 로그에 반사된 Authorization/키/검색어/body가 없는지, 진단 길이가 1024인지 검증한다. 실제 API 키는 사용하지 않는다.
+
+보고서의 알려진 차이는 두 **정책**으로 등록한다. `kakao.failure-message`는 외부 4xx/5xx 원문과 JSON/응답 오류를 고정 500으로 바꾼 차이, `kakao.socket-timeout`은 5초 무활동 실패 차이다. 각각의 실제 v2/v3 결과를 필수 테스트로 확인하며 skip/abort하지 않는다. 기존 8개와 합치면 10개다.
+
+v2 컨테이너 재시작 때 임의 게시 포트가 바뀌던 테스트 문제는 가짜 서버 포트의 명시적 바인딩으로 해결했다. 이미지/컨테이너는 추가하지 않았고 timing-v2.cjs도 변경하지 않았다. 키 삭제와 fetch 교체는 start-v2.cjs의 preload에서만 실행해 기존 child Node 숫자/fixture 관측은 유지한다.
+
+## 8. 검증 기록·재실행
+
+- 최초 독립 v2 관측: 1/1 성공, 56 HTTP, 19.700초. 고정 fixture 재검증 19.333초.
+- 공용 preload 도입 f421a14: 57/57 성공, 36.316초(v2 이미지 캐시), 실패/skip/알려진 차이 0.
+- 첫 v3 API 비교: 56/56 성공, 고정 오류 알려진 차이 1. 후속 테스트에서 JSON -0 직렬화와 재시작 포트 문제를 찾아 수정했다.
+- 구현 집중 검증: 160/160 성공(test 22 + comparisonTest 138), 실패/skip 0, 알려진 차이 2, 146.172초(v2 이미지 캐시). 기존 OAuth 계약 18건과 Boot HTTP 팩터리 유지 검사도 포함한다.
+- 전체 검증 결과는 실행 완료 후 아래에 추가한다.
 
 ```powershell
 cd apps/server-v3
 $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
-.\gradlew.bat comparisonTest --tests '*KakaoObservationTest' --rerun --console=plain
+.\gradlew.bat test --tests '*KakaoTransportTest' --tests '*OAuthContractTest' comparisonTest --tests '*Kakao*Test' --console=plain
+# 전체 회귀·Spotless·build와 벽시계 시간
+.\scripts\measure-tests.ps1 -Label kakao-final -RestartMode quota
 ```
 
-일반 실행은 1 JUnit 안에서 56 HTTP fixture를 재검증한다. 생성 모드 `-PkakaoObserve=true`는 build/reports/kakao에만 출력하며 원본 fixture는 바꾸지 않는다. 최초 생성 검증은 1/1 성공, 실패·skip·알려진 차이 0, 19.700초(v2 이미지 캐시)였다.
+## 9. 이관 후 개선 후보
 
-고정 fixture 재검증도 1/1 성공, 실패·skip·알려진 차이 0, 19.333초(v2 이미지 캐시), 재시작 0·대기 0ms였다. 56개 HTTP 응답과 외부 쿼리를 빠짐없이 대조했다.
-
-선택 후에는 SearchInputs(JS parsing), 주입 가능한 외부 호출 어댑터, 응답 매핑, 고정/호환 오류를 분리한다. 인증·현재 회원 확인·120/분은 기존 패턴을 재사용한다. JWT 오류/탈퇴/없는 회원과 제한 초과에서는 외부 호출 0회를 검증하고, 정상/실패 모두 업무 DB가 변하지 않는지 검사한다. 가짜 서버로만 v2/v3 비교하며 실제 API·키를 테스트하지 않는다. 이번 작업은 이 설계에서 멈춘다.
-
-## 7. 확정 결정·진행 기록
-
-- 8-1 A: 공용 테스트 v2 시작 프로세스에 `preload-v2.cjs`를 주입한다. v2 원본 파일 변경 없이 고정 Kakao endpoint만 루프백 가짜 HTTP 서버로 전달하며 다른 fetch와 redirect/fallback을 차단한다. 기존 `timing-v2.cjs`는 변경하지 않는다. v3는 base URL을 설정으로 주입하고 운영 기본 endpoint는 v2와 같다.
-- 8-2 B: 연결 2초·응답 5초를 설정값으로 관리한다. 재시도 없음. Flutter `apps/mobile/lib/core/network/dio_client.dart`의 connectTimeout/receiveTimeout은 각각 10초(25~26행, 재발급 클라이언트 124~125행)다. 앱보다 서버가 먼저 오류 응답을 반환하려는 결정이다. 알려진 차이에 등록한다.
-- 8-3 B: 500 `카카오 검색 API 호출 실패`로 고정하며 원인은 서버 로그에만 남긴다. 키·Authorization 미기록, 본문 길이 제한. 알려진 차이에 등록한다.
-- 8-4 A: 느슨한 정상 응답 매핑을 유지한다. 스키마 검증은 이관 후 개선 후보로 남긴다.
-
-첫 구현 단계: `SharedHarness`가 기존 v2 컨테이너에 preload 파일과 가짜 서버 제어 포트만 추가한다. 추가 이미지 빌드/컨테이너는 없다. child `node -e`에는 preload 서버를 중복 실행하지 않으므로 기존 독립 관측도 유지한다. 재시작 뒤 게시된 포트를 다시 조회한다. 가짜 서버의 제어 경로는 테스트에서만 사용하고 운영 Compose에는 주입하지 않는다.
-
-`comparisonTest --tests '*KakaoPreloadTest' --tests '*KakaoObservationTest'`: 총 57건, 성공 57·실패 0·skip 0·알려진 차이 0, **36.316초**(v2 이미지 캐시), v2 빌드 호출/최초 기동 각 1·재시작 0·인증 대기 0ms. 공용 v2에 56개 기존 fixture를 재요청해 HTTP 상태·본문·가짜 서버에 도착한 path/query·Authorization 부재·전체 업무 DB 불변을 확인했다. 기존 독립 관측 1건도 통과했다. 아직 v3 검색 구현 및 전체 회귀/build 검증은 하지 않았다.
-
-### 8-5 HTTP 클라이언트 — 추가 선택 대기
-
-Java 21 기본 HttpClient는 연결 실패를 자동 재시도할 수 있고 `jdk.httpclient.disableRetryConnect`/`jdk.httpclient.redirects.retrylimit`은 JVM 공통 시스템 속성이다. 단순히 애플리케이션 retry 코드를 쓰지 않는 것으로는 "재시도 없음"을 보장할 수 없다. [Java 21 공식 네트워크 속성](https://docs.oracle.com/en/java/javase/21/docs/api/java.net.http/module-summary.html).
-
-- **A 권장: Apache HttpClient 5 의존성 추가.** Spring Boot BOM 버전을 따라 카카오 전용 클라이언트에서 자동 재시도를 비활성화한다. 다른 OAuth/HTTP 호출의 설정을 바꾸지 않는다. 단점은 런타임 의존성 추가다.
-- **B: JDK HttpClient 유지·JVM 전체 자동 재시도 금지.** 새 의존성은 없지만 JDK 기반 다른 외부 호출에도 공통 설정이 적용되며, 테스트/bootRun/JAR/Compose에서 설정 전달을 맞춰야 한다.
-
-어느 쪽이든 헤더 수신 이후 body가 느리게 오는 경우까지 응답 5초 한도를 검증하고, 연결 종료/5xx/timeout에서 가짜 서버 요청 수로 재시도 없음을 확인한다. 이 선택 전에는 의존성이나 JVM 재시도 설정을 변경하지 않는다.
+외부 응답 런타임 스키마 검증, 전체 deadline/취소 전파, 느린 body가 연결 풀·서버 스레드를 오래 점유하는 상황은 후속 검토 대상이다. 현재의 느슨한 200 매핑과 전체 시간 제한 부재가 근거다. 이번에는 해당 기능이나 실제 Kakao 호출을 추가하지 않는다.

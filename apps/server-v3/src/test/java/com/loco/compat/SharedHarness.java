@@ -150,10 +150,27 @@ public final class SharedHarness implements BeforeAllCallback {
 
     private void startComparisonServices() throws Exception {
       mailpit.start();
+      int kakaoPort;
+      try (var reservation =
+          new java.net.ServerSocket(0, 0, java.net.InetAddress.getLoopbackAddress())) {
+        kakaoPort = reservation.getLocalPort();
+      }
       v2 =
           new GenericContainer<>(v2Image())
               .withNetwork(network)
               .withExposedPorts(3000, 39091)
+              .withCreateContainerCmdModifier(
+                  cmd -> {
+                    var ports = new com.github.dockerjava.api.model.Ports();
+                    ports.bind(
+                        com.github.dockerjava.api.model.ExposedPort.tcp(3000),
+                        com.github.dockerjava.api.model.Ports.Binding.empty());
+                    ports.bind(
+                        com.github.dockerjava.api.model.ExposedPort.tcp(39091),
+                        com.github.dockerjava.api.model.Ports.Binding.bindIpAndPort(
+                            "127.0.0.1", kakaoPort));
+                    cmd.getHostConfig().withPortBindings(ports).withPublishAllPorts(false);
+                  })
               .withEnv("DATABASE_URL", "postgresql://db:5432/loco_v2_test?schema=public")
               .withEnv("DB_USERNAME", username())
               .withEnv("DB_PASSWORD", databasePassword())
