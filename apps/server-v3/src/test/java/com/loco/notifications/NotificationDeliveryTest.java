@@ -122,6 +122,46 @@ class NotificationDeliveryTest extends CompatibilityTestBase {
   }
 
   @Test
+  void recipientDatabaseFailureDoesNotStopOtherRecipients() throws Exception {
+    String other = "22222222-2222-4222-8222-222222222222";
+    sql("DELETE FROM map_members WHERE \"mapId\"='" + MAP + "'");
+    for (String id : List.of(USER, other)) {
+      sql("UPDATE users SET \"fcmToken\"='obsolete' WHERE id='" + id + "'");
+      sql(
+          "INSERT INTO map_members(id,\"mapId\",\"userId\",\"createdAt\") VALUES ('"
+              + UUID.randomUUID()
+              + "','"
+              + MAP
+              + "','"
+              + id
+              + "',now())");
+    }
+    sql(
+        "CREATE FUNCTION notification_clear_failure() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.id='"
+            + USER
+            + "' THEN RAISE EXCEPTION 'injected'; END IF; RETURN NEW; END; $$");
+    sql(
+        "CREATE TRIGGER notification_clear_failure BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION notification_clear_failure()");
+    when(fcm.send(anyString(), any())).thenReturn(FcmClient.Outcome.UNREGISTERED);
+    try {
+      dispatch.sendToMap(MAP, "excluded", message);
+      dispatch.drain().get(5, TimeUnit.SECONDS);
+      verify(fcm, times(2)).send("obsolete", message);
+      assertThat(token()).isEqualTo("obsolete");
+      try (var db = environment().connect(SharedHarness.Side.V3);
+          var row =
+              db.createStatement()
+                  .executeQuery("SELECT \"fcmToken\" FROM users WHERE id='" + other + "'")) {
+        row.next();
+        assertThat(row.getString(1)).isNull();
+      }
+    } finally {
+      sql("DROP TRIGGER notification_clear_failure ON users");
+      sql("DROP FUNCTION notification_clear_failure()");
+    }
+  }
+
+  @Test
   void disabledSkipsAllRecipientQueries() {
     when(fcm.enabled()).thenReturn(false);
     SqlQueryCounter.reset();

@@ -14,22 +14,6 @@ import org.springframework.http.HttpMethod;
 @Tag("v2-comparison")
 @Import(SqlQueryCounter.Configuration.class)
 class PlaceCreateComparisonTest extends CompatibilityTestBase {
-  @org.junit.jupiter.api.Test
-  void recordsDeferredFirebaseDelivery() {
-    var difference =
-        java.util.Map.<String, Object>of(
-            "case",
-            "places.firebase-delivery",
-            "kind",
-            "deferred",
-            "v2",
-            "sends to map members excluding author when Firebase and FCM are configured",
-            "v3",
-            "sendToMap interface, call order and mock contract only; Firebase delivery deferred by decision 3-6/4-6");
-    if (!environment().knownDifferences.contains(difference))
-      environment().knownDifferences.add(difference);
-  }
-
   static java.util.stream.Stream<JsonNode> cases() throws Exception {
     try (var input =
         PlaceCreateComparisonTest.class.getResourceAsStream("/places/create-v2.json")) {

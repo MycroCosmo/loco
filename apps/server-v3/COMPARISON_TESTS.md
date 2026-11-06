@@ -275,6 +275,18 @@ ComparisonCase.named("1번 묶음: 회원가입 → 로그인 → 재발급")
 
 ## 실행 시간 계측
 
+9번 알림·예약 작업은 `notifications` 테스트 묶음에서 검사한다. `NotificationComparisonTest`는 원본 v2의 공개/코드 가입·장소 생성 메시지와 커밋 후 비대기 호출을 비교한다. `TokenCleanupComparisonTest`는 실제 PostgreSQL 삭제 경계와 부분 실패를 비교한다. `NotificationDeliveryTest`는 N=0/1/3/10에서 JOIN SELECT 1회, 무효 토큰 UPDATE 경합, 수신자 DB 실패 격리를 검사한다.
+
+`dispatch.drain()`은 HTTP 응답 시점까지 제출된 작업의 완료 barrier다. 테스트 gate를 연 뒤 완료를 기다리고 DB를 초기화한다. SDK send 대역으로 검증한 메시지와 실제 FCM HTTP 요청은 구분한다. `FcmClientTest`의 루프백 서버는 JSON/header/오류/15초 socket timeout을, `retry-v2.cjs`는 원본 Node SDK의 8조건 retry 동작을 확인한다. 실제 서비스 계정·Firebase·Google OAuth 호출은 없다.
+
+지도방·장소 발송 보류 두 항목은 제거했고 `notifications.token-replacement`와 `tokens.cleanup-timezone`을 승인된 차이로 추가했다. 알려진 차이를 skip으로 처리하지 않고 양쪽의 서로 다른 결과를 각각 필수 assert한다. 이전 `recordsDeferredFirebaseDelivery`는 보고서 문자열만 추가하던 테스트로, 메시지/DB 검증으로 대체했다. `firebaseDeliveryRemainsAnExplicitKnownDifference`는 `joiningStillSucceedsWithFirebaseDisabled`로 바꾸고 HTTP 검사는 유지했다.
+
+9번 최종 전체는 1,340건(성공 1,339·실패 0·HEIC skip 1), 알려진 차이 10, 885.749초다. test 279/비교 1,061이며 build도 통과했다. 재실행 중 Windows TCP 4227 오류의 실패 이력은 NOTIFICATIONS_DESIGN.md에 따로 남겼다. 환경 연결 실패를 자동 재시도하거나 검사 제외로 숨기지 않는다.
+
+```powershell
+.\gradlew.bat test --tests '*Notification*Test' --tests '*FcmClientTest' --tests '*TokenCleanup*Test' comparisonTest --tests '*Notification*Test' --tests '*TokenCleanupComparisonTest' --tests '*FcmRetryComparisonTest' --console=plain
+```
+
 Windows에서 `pwsh -File scripts/measure-tests.ps1 -Label after -RestartMode quota`로 전체 빌드를 측정한다. 개선 전 재현은 `-Label before -RestartMode each-case`다. 결과는 `build/performance/<Label>/result.json`, 두 작업의 원본 보고서, 테스트 식별자 목록에 남는다. 스크립트는 test와 comparisonTest에 각각 --rerun을 지정해 테스트를 실제로 다시 실행한다. 이미지·도구 캐시는 유지한다.
 
 - 재시작: Docker restart 명령부터 현재 포트의 HTTP 준비 확인까지. 최초 기동은 기타다.

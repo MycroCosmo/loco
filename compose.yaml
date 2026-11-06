@@ -35,6 +35,8 @@ services:
       retries: 12
 
   v3:
+    # HTTP 종료 30초 + 알림 drain 30초 + 정리 여유. 설정 확대 시 함께 조정한다.
+    stop_grace_period: ${V3_STOP_GRACE_PERIOD:-70s}
     user: "1000:1000"
     volumes:
       - v2-uploads:/app/uploads

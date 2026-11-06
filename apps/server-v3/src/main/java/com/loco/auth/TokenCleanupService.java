@@ -24,13 +24,14 @@ public class TokenCleanupService {
     RuntimeException failure = null;
     var cutoff =
         LocalDateTime.ofInstant(clock.instant().minus(Duration.ofDays(30)), ZoneOffset.UTC);
+    var resetCutoff = LocalDateTime.ofInstant(clock.instant(), ZoneOffset.UTC);
     try {
       refreshCount = refresh.cleanup(cutoff);
     } catch (RuntimeException error) {
       failure = error;
     }
     try {
-      resetCount = reset.cleanup(LocalDateTime.ofInstant(clock.instant(), ZoneOffset.UTC));
+      resetCount = reset.cleanup(resetCutoff);
     } catch (RuntimeException error) {
       if (failure == null) failure = error;
       else failure.addSuppressed(error);

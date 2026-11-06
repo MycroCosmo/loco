@@ -123,7 +123,7 @@ class MapMembershipComparisonTest extends CompatibilityTestBase {
   }
 
   @Test
-  void firebaseDeliveryRemainsAnExplicitKnownDifference() throws Exception {
+  void joiningStillSucceedsWithFirebaseDisabled() throws Exception {
     environment().reset("maps/seed.sql");
     var result =
         request(
@@ -133,20 +133,6 @@ class MapMembershipComparisonTest extends CompatibilityTestBase {
             environment().token("valid", me, SharedHarness.Environment.EMAIL),
             null);
     assertThat(result.getStatusCode().value()).isEqualTo(201);
-    var difference =
-        Map.<String, Object>of(
-            "case",
-            "maps.firebase-delivery",
-            "kind",
-            "deferred",
-            "v2",
-            "sends when FIREBASE_SERVICE_ACCOUNT and recipient FCM token are configured",
-            "v3",
-            "notification interface and mock contract only; real delivery and invalid-token cleanup deferred",
-            "until",
-            "all notification-producing APIs, including place creation, are migrated");
-    if (!environment().knownDifferences.contains(difference))
-      environment().knownDifferences.add(difference);
   }
 
   @Test

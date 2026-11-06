@@ -3,11 +3,11 @@
 Java 포맷은 Spotless 8.1.0 + google-java-format 1.28.0으로 고정한다. Java 21·Gradle 8.14.6에서 실행하며, `./gradlew spotlessApply`로 `src`의 운영·테스트 Java 전체를 정리한다. `./gradlew spotlessCheck`가 검사하고 `check`·`build`에서도 포맷 위반은 실패한다. 빌드가 소스를 자동 수정하지는 않는다.
 포매터 실행에는 Gradle 자체도 JDK 21로 실행해야 한다. 최소 실행 조건과 단일 스타일을 기준으로 선택했다: [Spotless 8.1.0 요구사항](https://raw.githubusercontent.com/diffplug/spotless/gradle/8.1.0/plugin-gradle/README.md), [google-java-format 1.28.0 실행 조건](https://raw.githubusercontent.com/google/google-java-format/v1.28.0/README.md).
 
-현재 구현 API는 `GET /api/health`, `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`, `POST /api/auth/logout`, `POST /api/auth/forgot-password`, `POST /api/auth/reset-password`, `POST /api/auth/oauth/{provider}`이다. 승인된 v2 기준 갱신 외에는 v2와 Flutter 코드를 변경하지 않는다.
+현재 health·인증·사용자·지도방·장소·리뷰·이미지·마커·즐겨찾기·피드백·신고·카카오 검색 API를 이관했다. 승인된 v2 기준 갱신 외에는 v2와 Flutter 코드를 변경하지 않는다.
 빈 PostgreSQL DB에는 Flyway V1으로 v2와 같은 업무 테이블을 만든다. 인증용 JPA 엔티티는 기존 스키마에 매핑한다. 자세한 설계와 읽는 순서는 [인증 문서](AUTHENTICATION.md)를 참고한다.
 DB 기준은 사용자가 확정한 PostgreSQL 17(`postgis/postgis:17-3.6`)이다. 맞춰야 할 기존 운영 DB 버전은 없다.
 JWT 검증과 v2의 401·404·ValidationPipe 400 응답 기반을 구현했다.
-회원가입·로그인·재발급·로그아웃은 실제 API다. 사용자 조회 등 보호 경로는 아직 테스트 대역이다.
+사용자 조회를 포함한 보호 API는 실제 컨트롤러다. 하네스 전용 대역은 실제 API와 겹치지 않는 `/api/__test/harness/...` 경로에만 둔다.
 
 5단계 비교 하네스의 설계·실행·케이스 추가 방법은 [COMPARISON_TESTS.md](COMPARISON_TESTS.md)에 정리했다.
 v2 컨테이너를 공유하고, 같은 Flyway V1으로 만든 두 DB에서 응답과 데이터를 비교한다.
@@ -22,7 +22,19 @@ v2 컨테이너를 공유하고, 같은 Flyway V1으로 만든 두 DB에서 응�
 확정된 결정 밖의 새 설계 선택은 선택지와 장단점을 설명한 뒤 사용자 답을 기다린다.
 0~7번 묶음 확인을 마쳤다. 8-A 즐겨찾기·피드백·신고 5개 API와 8-B 카카오 검색을 이관했다. 카카오 검증은 실제 API·키 없이 가짜 서버만 사용한다.
 
-8번 묶음 확인 후 [9번 Firebase 발송·예약 작업 설계](NOTIFICATIONS_DESIGN.md)를 작성했다. 원본 v2의 알림·커밋·실패·삭제 경계를 외부 호출 없이 관측했으며 9-1~9-9 선택 대기다. v3 발송·예약 작업 구현과 기존 알림 보류 차이 두 건의 해제는 아직 하지 않았다.
+[9번 Firebase 발송·예약 작업](NOTIFICATIONS_DESIGN.md)을 확정한 9-1~9-9 결정대로 구현했다. FCM HTTP v1과 Google 인증 라이브러리, 이벤트 단위 제한 실행기, JOIN 수신자 조회, 조건부 무효 토큰 정리, 서울 03:00 cleanup을 사용한다. 원본 v2와 루프백 대역만 비교하며 실제 Firebase/Google 인증·단말 수신은 검증하지 않는다.
+
+알림 설정은 루트 `.env`의 `FIREBASE_SERVICE_ACCOUNT`를 v2·v3에 전달한다. 미설정/잘못된 값은 시작 로그에 비활성화로 표시하고 API는 계속 동작한다. 계정·키·토큰·오류 원문은 알림 로그에 남기지 않는다. `FCM_TIMEOUT_MS` 기본 15000은 전체 deadline이 아닌 소켓 무활동 제한이다. 재시도/워커 점유 한계는 설계 문서 6장의 수치를 참고한다.
+
+전용 실행기는 `NOTIFICATION_CORE_THREADS=2`, `NOTIFICATION_MAX_THREADS=4`, `NOTIFICATION_QUEUE_CAPACITY=100`, `NOTIFICATION_SHUTDOWN_SECONDS=30`을 기본으로 쓴다. 지도방 1건도 작업 1개이며 내부에서 멤버에게 개별 발송한다. 큐 포화·종료 초과는 로그를 남기고 유실될 수 있다. 내구성 큐/outbox는 아니다.
+
+Compose의 `V3_STOP_GRACE_PERIOD` 기본은 70초(HTTP 종료 30초 + 알림 30초 + 정리 여유 10초)다. Docker 기본 10초가 알림 drain을 먼저 끊지 않도록 맞춘 값이며 앱 종료 대기를 늘리면 함께 조정한다. DB/OAuth의 임의 지연까지 종료를 보장하는 값은 아니다.
+
+cleanup 기본은 `TOKEN_CLEANUP_ENABLED=true`, `TOKEN_CLEANUP_CRON=0 0 3 * * *`, `TOKEN_CLEANUP_ZONE=Asia/Seoul`이다. 설정이 필요 없는 예제 키는 환경에 빈 값으로 export하지 말고 생략한다. `TOKEN_CLEANUP_ENABLED=false`는 v3 예약 등록만 끈다. v2에는 해당 스위치가 없으므로 병행 기동하면 v2 UTC 03:00(한국 12:00)도 실행된다. 다중 v3 인스턴스에서는 한 인스턴스만 켜는 운영 설정이 가능하며 분산 잠금은 이번에 추가하지 않았다.
+
+후속 실험: 제한 풀 대 가상 스레드+동시성 상한, 중복·탈퇴 토큰 필터, 3단계 다중 서버에서 advisory lock 대 ShedLock. 현재의 새 토큰 보존 및 서울 새벽 실행은 비교 보고서에 별도 알려진 차이로 남긴다.
+
+9번 최종 전체 회귀·Spotless/build: **1,340건 중 성공 1,339·실패 0·HEIC 공통 제약 skip 1**, 알려진 차이 10, **885.749초**(v2 이미지 캐시). test 279건, comparisonTest 1,061건이다. 중간 Windows TCP 4227 연결 오류 1건은 소스 변경 없는 31건 재검증과 최종 전체 실행에서 통과했으며 [검증 이력](NOTIFICATIONS_DESIGN.md)에 보존했다.
 
 ## 탑다운으로 읽는 순서
 
@@ -109,7 +121,7 @@ Gradle을 별도로 설치할 필요는 없다. 첫 실행은 라이브러리·D
 빠른 테스트(코덱 6건 포함)와 v2 비교 테스트를 분리한다. `allTests`는 둘을 모두 실행하며, 선택 실행의 건수는 각 JUnit 보고서에서 확인한다. 기대 결과:
 
 - `BUILD SUCCESSFUL`, 실패 0개. Windows HEIC 원시 코덱 제약 1개는 SKIPPED이며 AVIF와 애니메이션 WebP는 필수 통과 대상이다.
-- 지도방 초대 코드 생성은 의도된 차이, Firebase 실제 전송 보류는 알려진 차이다. 동시 공개 가입·코드 가입에서 v2의 500과 v3의 모두 성공도 각각 개선된 차이로 보고한다. 테스트를 조용히 건너뛰지 않는다.
+- 지도방 초대 코드 생성은 의도된 차이다. Firebase 발송 보류는 9번에서 해소했고 새 토큰 보존·서울 새벽 cleanup을 알려진 차이로 보고한다. 동시 공개 가입·코드 가입에서 v2의 500과 v3의 모두 성공도 각각 개선된 차이로 보고한다. 테스트를 조용히 건너뛰지 않는다.
 - 429는 모든 인증 API의 한도·응답·헤더를 비교하는 필수 통과 대상이다.
 - 인증 없는 `/api/health`: 200, JSON 구조와 값이 정확히 `{"status":"ok"}`.
 - `/health`: 404. `/api`를 거치지 않으면 컨트롤러에 접근할 수 없다.
@@ -467,7 +479,7 @@ JWT 필터에 모든 요청의 회원 조회를 추가하지 않는다. 새 v2�
 v2·v3가 같은 DB에 장소 이미지 쓰기를 섞으면 v3의 원자적 UPDATE만으로 전체 정합성을 보장할 수 없다. v2가 앞서 읽은 배열 전체를 뒤늦게 저장하면 v3 결과를 덮어쓸 수 있다. 전환 시 POST/DELETE 장소 이미지 쓰기는 담당 서버 하나로 보내고, 개발 공유 Compose에서도 같은 장소에 양쪽 쓰기를 섞지 않는다. 비교 테스트는 v2/v3 독립 DB를 사용한다. Flutter의 순차 업로드·중복 삭제 방지는 한 클라이언트의 동작일 뿐 서버 정합성의 근거로 삼지 않는다.
 이후 선택지 답변에 **번호와 항목 이름이 함께 없으면**, 어느 결정에 대한 답인지 먼저 확인한다. 다른 주제의 답변을 연결하거나 문자 하나만으로 선택을 확정하지 않는다.
 테스트 대역은 `/api/__test/harness/...`에만 둔다. 실제 API 이관 시 별도 `v3Path`를 제거하는 규칙과 이름 기반 빌더·연속 요청 예시는 [하네스 문서](COMPARISON_TESTS.md)를 따른다.
-429는 기존 기반에서 필수 통과 케이스로 검증한다. 지도방 14개 API의 SQL 수는 인증 조회를 포함해 테스트로 고정한다. Firebase 전송은 장소 추가 등 알림을 보내는 모든 API 이관 후 한 번에 구현한다.
+429는 기존 기반에서 필수 통과 케이스로 검증한다. 지도방 14개 API의 SQL 수는 인증 조회를 포함해 테스트로 고정한다. 지도방·장소 알림 전송은 9번 묶음에서 함께 연결했으며 기존 보류 차이는 필수 메시지 비교 검사로 전환했다.
 작업 기록은 노션에서 관리한다.
 
 공식 참고: [Spring Boot 3.5 실행 환경](https://docs.spring.io/spring-boot/3.5/system-requirements.html),

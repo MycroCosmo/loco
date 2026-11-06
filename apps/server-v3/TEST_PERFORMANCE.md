@@ -182,3 +182,19 @@ v2 빌드 호출/기동은 각 1회, 재시작은 9회다. 인증 6회·장소 4
 추가 재시작 3회는 검색 핸들러의 슬롯 5/120/1개 예약에 따른 것이다. 기존 마커 관측의 약 61초 창 대기는 유지했다. 결과·manifest·summary·quota·로그는 `build/performance/kakao-final/`에 있다. categoriesSeconds의 동시 이미지 중복 한계는 기존과 같으며 전체 시간은 별도의 Stopwatch로 측정했다.
 
 부분 검증: 공용 preload 57/57 성공 36.316초, 구현 집중 160/160 성공 146.172초(test 22/비교 138, 기존 OAuth 계약 18 포함). 집중 실행 실패/skip 0, 알려진 차이 2. 실제 Kakao 호출·키 없이 루프백 가짜 서버만 사용했다. 연결/TLS 2초와 응답 소켓 무활동 5초를 검사하며 6.2초 동안 본문이 계속 도착하면 성공하는 검사로 전체 수신 deadline이 없음을 구분한다.
+
+## 9번 Firebase 발송·예약 작업 완료 — 2026-11-06
+
+`scripts/measure-tests.ps1 -Label notifications-verified -RestartMode quota`로 전체 회귀와 Spotless/build를 재실행했다. v2 이미지 캐시 기준 wall time **885.749초(14분 46초)**다.
+
+| 구분 | 전체 | 성공 | 실패 | SKIPPED |
+| --- | ---: | ---: | ---: | ---: |
+| 빠른 테스트 | 279 | 278 | 0 | 1 (기존 HEIC 공통 제약) |
+| v2 비교·관측 | 1,061 | 1,061 | 0 | 0 |
+| 합계 | 1,340 | 1,339 | 0 | 1 |
+
+기존 1,286개 식별자 대비 추가 56·제외 2. 제외는 지도방 보류 검사 이름 변경과 장소 보류 문자열 보고 전용 검사 제거이며 실제 메시지/DB 검사로 대체했다. 그 외 누락 0. 기존 알려진 차이 10 중 발송 보류 2를 해소하고 새 토큰 보존·서울 03:00 실행 2를 추가해 총 10이다. v2 빌드 호출/최초 기동 각 1, 재시작 17, authWaitMillis=0, withinCaseWaitMillis=61,013. 이전 838.209초보다 47.540초 늘었지만 15초 무활동·실제 backoff·새 비교 검사가 추가된 실행이므로 API 성능 회귀율이 아니다.
+
+첫 전체는 시간 기준 보완 전 1,339건/실패 0/890.891초였다. 보완 후 `notifications-complete`는 1,340건 중 실패 1(882.148초): 기존 장소 수정의 HTTP/SQL 검사 뒤 새 DB 확인 연결에서 BindException, 같은 시각 Windows TCP 4227(최근 동일 원격 주소에 사용한 로컬 끝점의 재사용 제한)을 확인했다. 소스/OS 설정 변경 없이 해당 31건 재검증 성공 35.538초, 이후 위 최종 전체가 통과했다. 실패를 자동 retry/skip으로 숨기거나 성공 실행 시간에 합산하지 않았다. 연결 재사용 최적화는 이번에 적용하지 않았다.
+
+원본 결과·manifest·quota·로그는 `build/performance/notifications-verified/`, 실패 이력은 `notifications-complete/`에 보존한다. 동시 이미지 구간 중복 때문에 categoriesSeconds가 정확한 wall time 분해가 아닌 기존 한계는 유지한다. 실제 Firebase·FCM·Google OAuth 호출/서비스 계정 사용 없이 대역과 루프백만 사용했다.

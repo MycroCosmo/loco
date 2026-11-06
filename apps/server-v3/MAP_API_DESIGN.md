@@ -212,7 +212,7 @@ API-12는 실제로 LAZY 순회 구현을 실행한 뒤 `join fetch m.user`로 �
 `MapReadIntegrationTest`, `MapWriteComparisonTest`, `MapDeletionComparisonTest`, `MapMembershipComparisonTest`, `MapInviteCodeComparisonTest`, `MapCoverComparisonTest`가 정상·오류 경로별 수를 고정한다. 코드 충돌 재시도는 후보마다 조회가 늘어나는 별도 경로이며 10회 한도를 단위 테스트로 검증한다.
 
 동시 가입은 DatabaseRequestRace가 지도방 부모 행을 잠그고 두 map_members INSERT의 실제 잠금 대기를 확인한 뒤 해제한다. 공개 가입·코드 가입 모두 v2 [201,500], v3 [201,201]과 동일 회원 행 1개를 관측했다. v3는 JPA native ON CONFLICT DO NOTHING을 사용한다. v2 실패를 재현하지 않으며 차이는 보고서에 `improved`로 표시한다.
-Firebase 실제 전송과 무효 FCM 토큰 정리는 보류했다. `NotificationSender`는 전송 경계, `DeferredNotificationSender`는 명시적 보류 구현, `MemberJoinedNotification.Delivery`는 커밋 후 호출 지점이다. 반복 가입도 호출하며 롤백이면 호출하지 않는다. 전송 실패가 가입 성공을 취소하지 않는 mock 계약을 검증한다. 이후 실제 송신 구현에서 비동기 전송·전송 실패·무효 토큰 정리를 함께 다룬다.
+3번 완료 시점에는 Firebase 실제 전송과 무효 FCM 토큰 정리를 보류했다. 후속 [9번 구현](NOTIFICATIONS_DESIGN.md)에서 `DeferredNotificationSender`를 제거하고 전용 실행기·FCM HTTP v1·조건부 무효 토큰 삭제를 연결했다. `MemberJoinedNotification.Delivery`의 커밋 후 제출 위치, 반복 가입 호출·롤백 시 미호출 계약은 유지한다. 아래 알려진 차이 개수는 3번 당시 기록이다.
 전체 지도방 비교 범위에서는 의도된 코드 생성 1건, Firebase 보류 1건, 관측된 동시 가입 개선 2건을 보고한다. 알려진 차이는 테스트 실패나 SKIPPED와 별도 집계한다.
 
 재검증(앱 디렉터리): `./gradlew test --tests '*MapMemberSqlTest'`로 SQL 3회 고정을 확인하고, `./gradlew comparisonTest --tests '*Map*Test'`로 v2 응답·DB·알려진 차이를 확인한다. 전체 회귀는 기존 `./gradlew allTests`다.

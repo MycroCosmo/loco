@@ -169,7 +169,7 @@ LocalImageFiles 재사용, Firebase 실제 전송 보류, 기존 스키마와 AP
 
 재검증: `./gradlew test --tests '*PlaceReadIntegrationTest' comparisonTest --tests '*PlaceObservationTest'`. 명시적 v2 재관측은 `./gradlew comparisonTest --tests '*PlaceObservationTest' -PplacesObserve=true`; 결과는 build/reports/places에만 생성하고 커밋된 기대값을 자동 교체하지 않는다.
 
-생성 단계는 `PlaceInputs`의 누락/null 구분과 v2 ValidationPipe 오류 순서를 44개 실제 관측으로 검증한다. `PlaceMutationService`는 장소 커밋 → `MarkerCells`의 정밀도별 SELECT/쓰기 커밋 → 비동기 알림 호출 순서다. 알림은 `NotificationSender.sendToMap` 계약까지만 연결하며 실제 Firebase 전송 보류는 기존 알려진 차이다.
+생성 단계는 `PlaceInputs`의 누락/null 구분과 v2 ValidationPipe 오류 순서를 44개 실제 관측으로 검증한다. `PlaceMutationService`는 장소 커밋 → `MarkerCells`의 정밀도별 SELECT/쓰기 커밋 → 비동기 알림 호출 순서다. 4번에서는 `NotificationSender.sendToMap` 계약까지만 연결했다. 후속 [9번 구현](NOTIFICATIONS_DESIGN.md)에서 같은 위치에 전용 실행기·FCM 전송을 연결하고 보류를 해소했다. 아래 차이 개수는 4번 당시 기록이다.
 
 `CoordinateKeys`는 정확한 이진 BigDecimal + HALF_UP을 사용한다. 실제 Node로 경계의 인접 double, ±0, 음수 반올림 0과 임의 좌표를 교차 검증한다. PostgreSQL ROUND와 다른 셀 누락은 그대로 유지한다.
 
