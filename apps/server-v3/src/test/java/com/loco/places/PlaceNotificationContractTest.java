@@ -16,6 +16,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 class PlaceNotificationContractTest extends CompatibilityTestBase {
   @MockitoBean NotificationSender sender;
 
+  @org.springframework.beans.factory.annotation.Autowired
+  com.loco.notifications.NotificationDispatch dispatch;
+
   @Override
   protected boolean usesV2Http() {
     return false;
@@ -69,6 +72,7 @@ class PlaceNotificationContractTest extends CompatibilityTestBase {
                       response.getBody().path("id").asText())));
     } finally {
       release.countDown();
+      dispatch.drain().get(5, TimeUnit.SECONDS);
     }
   }
 

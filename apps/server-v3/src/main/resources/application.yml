@@ -55,6 +55,15 @@ management:
         exclude: '*'
 
 loco:
+  notifications:
+    service-account: ${FIREBASE_SERVICE_ACCOUNT:}
+    base-url: ${FCM_BASE_URL:https://fcm.googleapis.com}
+    timeout-ms: ${FCM_TIMEOUT_MS:15000}
+    executor:
+      core: ${NOTIFICATION_CORE_THREADS:2}
+      max: ${NOTIFICATION_MAX_THREADS:4}
+      queue: ${NOTIFICATION_QUEUE_CAPACITY:100}
+      shutdown-seconds: ${NOTIFICATION_SHUTDOWN_SECONDS:30}
   kakao:
     base-url: ${KAKAO_SEARCH_BASE_URL:https://dapi.kakao.com/v2/local/search/keyword.json}
     api-key: ${KAKAO_REST_API_KEY:}

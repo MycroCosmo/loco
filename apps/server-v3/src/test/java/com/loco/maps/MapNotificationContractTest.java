@@ -14,6 +14,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 class MapNotificationContractTest extends CompatibilityTestBase {
   @MockitoBean NotificationSender sender;
 
+  @org.springframework.beans.factory.annotation.Autowired
+  com.loco.notifications.NotificationDispatch dispatch;
+
   @Override
   protected boolean usesV2Http() {
     return false;
@@ -50,6 +53,7 @@ class MapNotificationContractTest extends CompatibilityTestBase {
                   .getStatusCode()
                   .value())
           .isEqualTo(201);
+    dispatch.drain().get(5, java.util.concurrent.TimeUnit.SECONDS);
     verify(sender, times(2))
         .sendToUser(
             "22222222-2222-4222-8222-222222222222",
@@ -91,6 +95,7 @@ class MapNotificationContractTest extends CompatibilityTestBase {
                 .getStatusCode()
                 .value())
         .isEqualTo(201);
+    dispatch.drain().get(5, java.util.concurrent.TimeUnit.SECONDS);
     verify(sender).sendToUser(anyString(), any());
     try (var db = environment().connect(SharedHarness.Side.V3);
         var row =

@@ -2,7 +2,7 @@ package com.loco.notifications;
 
 import java.util.Map;
 
-/** 전송 경계. Firebase 구현은 알림을 발생시키는 API 이관 완료 후 추가한다. */
+/** 작업 내부 전송 경계. HTTP 호출 지점에서는 NotificationDispatch를 사용한다. */
 public interface NotificationSender {
   record Message(String title, String body, Map<String, String> data) {}
 

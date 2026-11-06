@@ -7,9 +7,9 @@ public record MemberJoinedNotification(String ownerId, NotificationSender.Messag
   @Component
   public static class Delivery {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delivery.class);
-    private final NotificationSender sender;
+    private final NotificationDispatch sender;
 
-    public Delivery(NotificationSender sender) {
+    public Delivery(NotificationDispatch sender) {
       this.sender = sender;
     }
 

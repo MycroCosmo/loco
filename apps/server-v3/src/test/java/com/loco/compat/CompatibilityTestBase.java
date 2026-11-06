@@ -83,6 +83,8 @@ public abstract class CompatibilityTestBase {
                 ? env.kakaoUrl() + "/v2/local/search/keyword.json"
                 : "http://127.0.0.1:1/no-external");
     registry.add("loco.kakao.api-key", () -> "");
+    registry.add("loco.notifications.service-account", () -> "");
+    registry.add("loco.notifications.base-url", () -> "http://127.0.0.1:1/no-external");
     registry.add("loco.uploads.directory", () -> env.uploads.toString());
     registry.add("spring.mail.host", env::smtpHost);
     registry.add("spring.mail.port", env::smtpPort);

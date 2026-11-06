@@ -38,6 +38,7 @@ public class FcmClient implements AutoCloseable {
   private final CloseableHttpClient http;
   private final Sleeper sleeper;
   private final Clock clock;
+  private volatile boolean closed;
 
   @Autowired
   public FcmClient(
@@ -91,6 +92,7 @@ public class FcmClient implements AutoCloseable {
 
   public Outcome send(String token, NotificationSender.Message message) {
     if (!enabled()) return Outcome.DISABLED;
+    if (closed || Thread.currentThread().isInterrupted()) return Outcome.FAILED;
     try {
       // SDK처럼 인증 갱신은 FCM retry 루프 밖에서 수행한다.
       String accessToken = credentials.accessToken();
@@ -102,6 +104,7 @@ public class FcmClient implements AutoCloseable {
       node.putObject("apns").putObject("payload").putObject("aps").put("sound", "default");
       node.putObject("android").put("priority", "high");
       for (int retry = 0; ; retry++) {
+        if (closed || Thread.currentThread().isInterrupted()) return Outcome.FAILED;
         Response result;
         try {
           var request =
@@ -201,6 +204,7 @@ public class FcmClient implements AutoCloseable {
 
   @PreDestroy
   public void close() throws IOException {
-    http.close();
+    closed = true;
+    http.close(org.apache.hc.core5.io.CloseMode.IMMEDIATE);
   }
 }

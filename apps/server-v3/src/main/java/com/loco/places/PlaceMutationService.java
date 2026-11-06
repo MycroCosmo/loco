@@ -6,8 +6,6 @@ import com.loco.users.User;
 import com.loco.web.ApiProblem;
 import jakarta.persistence.EntityManager;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -20,8 +18,7 @@ public class PlaceMutationService {
   private final TransactionTemplate transaction;
   private final PlaceQueryRepository queries;
   private final MarkerCells cells;
-  private final NotificationSender sender;
-  private final Executor executor;
+  private final com.loco.notifications.NotificationDispatch sender;
   private final java.time.Clock clock;
   private final com.loco.images.LocalImageFiles files;
 
@@ -33,8 +30,7 @@ public class PlaceMutationService {
       TransactionTemplate transaction,
       PlaceQueryRepository queries,
       MarkerCells cells,
-      NotificationSender sender,
-      @Qualifier("applicationTaskExecutor") Executor executor,
+      com.loco.notifications.NotificationDispatch sender,
       java.time.Clock clock,
       com.loco.images.LocalImageFiles files) {
     this.places = places;
@@ -45,7 +41,6 @@ public class PlaceMutationService {
     this.queries = queries;
     this.cells = cells;
     this.sender = sender;
-    this.executor = executor;
     this.clock = clock;
     this.files = files;
   }
@@ -130,15 +125,7 @@ public class PlaceMutationService {
                 + result.name()
                 + "\"을 추가했습니다.",
             Map.of("type", "place_added", "mapId", mapId, "placeId", result.id()));
-    executor.execute(
-        () -> {
-          try {
-            sender.sendToMap(mapId, userId, message);
-          } catch (RuntimeException error) {
-            org.slf4j.LoggerFactory.getLogger(PlaceMutationService.class)
-                .warn("Place notification failed", error);
-          }
-        });
+    sender.sendToMap(mapId, userId, message);
     return result;
   }
 }
