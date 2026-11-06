@@ -104,6 +104,7 @@ tasks.register('comparisonTest', Test) {
     systemProperty 'users.observe', providers.gradleProperty('usersObserve').getOrElse('false')
     systemProperty 'maps.observe', providers.gradleProperty('mapsObserve').getOrElse('false')
     systemProperty 'places.observe', providers.gradleProperty('placesObserve').getOrElse('false')
+    systemProperty 'reviews.observe', providers.gradleProperty('reviewsObserve').getOrElse('false')
     mustRunAfter tasks.named('test')
     dependsOn tasks.named('preparePrisma')
     inputs.file(v2Lockfile)
