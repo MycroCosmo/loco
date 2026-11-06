@@ -1,6 +1,6 @@
 # 5번 묶음: 리뷰 API 설계
 
-상태: v2 HTTP 69개 조합과 동시 작성 2개 상황 관측 후 4개 API 구현 완료. 모든 항목은 기존 결정으로 정해져 추가 승인 없이 구현했다. 전체 회귀 검증 중이다.
+상태: 4개 API 구현·전체 회귀·빌드 완료. v2 HTTP 69개 조합과 동시 작성 2개 상황을 먼저 관측했다. 모든 항목은 기존 결정으로 정해져 추가 승인 없이 구현했다.
 v2 기준은 현재 feature 브랜치의 `apps/server/src/places/places.service.ts`, 리뷰 DTO/컨트롤러, Prisma V1이다. v2·Flutter·V1은 수정하지 않는다.
 
 ## 1. API와 입력
@@ -79,3 +79,25 @@ POST/DELETE 성공 SQL 수는 인증 포함 기본 6회다. POST 공개방 일�
 `ReviewController`(인증 경로) → `ReviewInputs`(v2 DTO/trim) → `ReviewService`(권한/커밋 경계) → `ReviewRepository`(native 조회·UPSERT) → `ReviewResponses`(API별 필드) 순서로 읽는다. `PlaceReview`는 V1 관계/자료형을 매핑하며 cascade를 추가하지 않는다. native UPSERT는 JPA Auditing을 거치지 않으므로 UUID와 Clock 시각을 명시적으로 전달하고 충돌 시 ID/createdAt을 보존한다.
 
 공부할 개념: 유니크 제약과 ON CONFLICT, LAZY 관계와 JOIN projection, TransactionTemplate 커밋 후 읽기, Unicode 길이와 ECMAScript trim, timestamp/Instant 구분, 실제 DB 잠금을 이용한 동시 요청 재현.
+
+## 9. 최종 확인 — 2026-11-06
+
+`scripts/measure-tests.ps1 -Label reviews-final -RestartMode quota`로 빠른 테스트·v2 비교를 모두 재실행하고 Spotless/build까지 통과했다. v2 이미지 캐시 기준 전체 **410.372초**다.
+
+| 구분 | 전체 | 성공 | 실패 | SKIPPED |
+| --- | ---: | ---: | ---: | ---: |
+| 빠른 테스트 | 207 | 206 | 0 | 1 (기존 HEIC 공통 제약) |
+| v2 비교 | 526 | 526 | 0 | 0 |
+| 합계 | 733 | 732 | 0 | 1 |
+
+기존 633건 식별자 누락 0, 리뷰 관련 100건(빠른 16+비교 84) 추가다. 알려진 차이 5건은 기존 지도방 4건·장소 Firebase 보류 1건 그대로이며 리뷰 신규 차이는 없다. v2 기동 1회·재시작 9회·시나리오 대기 0ms다. v2·Flutter·infra·V1 변경은 없고, 배포 JAR에는 리뷰 API가 포함되며 테스트 하네스는 포함되지 않는다.
+
+원본 로그·테스트 목록·시간/비교 JSON은 `build/performance/reviews-final/`에 있다. 단계 커밋마다 검증 수치·시간을 본문에 남기고 push한다. 5번 묶음을 완료하고 다음 묶음은 사용자 확인 후 진행한다.
+
+```powershell
+# apps/server-v3에서 리뷰만 재확인
+./gradlew.bat test --tests '*ReviewReadIntegrationTest'
+./gradlew.bat comparisonTest --tests '*Review*Test'
+# 전체 회귀·포맷·배포 빌드
+./gradlew.bat test --rerun comparisonTest --rerun build
+```
