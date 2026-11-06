@@ -78,7 +78,7 @@ public final class PlaceResponses {
         core(t), jsonNumber(number(t, "averageRating")), number(t, "reviewCount").longValue(), map);
   }
 
-  private static Number jsonNumber(Number value) {
+  static Number jsonNumber(Number value) {
     double n = value.doubleValue();
     if (n == Math.rint(n)) return Long.valueOf((long) n);
     return Double.valueOf(n);

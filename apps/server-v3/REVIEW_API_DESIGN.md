@@ -63,3 +63,5 @@ DatabaseRequestRace로 두 요청이 실제 DB 잠금 대기에 도달한 후 �
 - 두 동시 요청은 신규/수정 모두 201이며 유니크 한 행을 유지한다. 기존 리뷰 ID도 보존한다. 경쟁에서 500을 재현하거나 알려진 차이를 추가할 필요가 없다.
 
 재실행: `./gradlew.bat comparisonTest --tests '*ReviewObservationTest'` (Linux는 `./gradlew`).
+
+읽기 단계: `ReviewReadIntegrationTest` 16건 성공(실패 0), 20.757초. v2 기대 응답/DB 불변과 SQL 수를 고정했다. 인증 포함 내 리뷰 2회, 공개방/방장 리뷰 4회, 비공개방 일반 멤버 5회이며 없는 장소 2회·비공개방 접근 거절 3회다. 리뷰 수가 늘어도 JOIN으로 사용자 정보를 읽는다.
