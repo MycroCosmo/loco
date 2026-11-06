@@ -1,6 +1,6 @@
 # 5번 묶음: 리뷰 API 설계
 
-상태: v2 HTTP 69개 조합과 동시 작성 2개 상황 관측 완료. 모든 항목은 기존 결정으로 정해져 추가 승인 없이 구현한다.
+상태: v2 HTTP 69개 조합과 동시 작성 2개 상황 관측 후 4개 API 구현 완료. 모든 항목은 기존 결정으로 정해져 추가 승인 없이 구현했다. 전체 회귀 검증 중이다.
 v2 기준은 현재 feature 브랜치의 `apps/server/src/places/places.service.ts`, 리뷰 DTO/컨트롤러, Prisma V1이다. v2·Flutter·V1은 수정하지 않는다.
 
 ## 1. API와 입력
@@ -65,3 +65,17 @@ DatabaseRequestRace로 두 요청이 실제 DB 잠금 대기에 도달한 후 �
 재실행: `./gradlew.bat comparisonTest --tests '*ReviewObservationTest'` (Linux는 `./gradlew`).
 
 읽기 단계: `ReviewReadIntegrationTest` 16건 성공(실패 0), 20.757초. v2 기대 응답/DB 불변과 SQL 수를 고정했다. 인증 포함 내 리뷰 2회, 공개방/방장 리뷰 4회, 비공개방 일반 멤버 5회이며 없는 장소 2회·비공개방 접근 거절 3회다. 리뷰 수가 늘어도 JOIN으로 사용자 정보를 읽는다.
+
+작성·삭제 단계: `comparisonTest --tests '*Review*Test'` 84건 성공, 실패/skip/알려진 차이 0, 84.240초(v2 이미지 캐시, 재시작 1회는 429 검증 준비, 시나리오 대기 0ms). 관측 2 + 전체 응답/DB 69 + 공개 멤버 1 + 집계 연속 요청 1 + 경쟁 2 + 실패 경계 4 + 인증 4 + 독립 120회 제한 1건이다. 인증 검증은 각 경로에 미인증·만료·다른 서명·잘못된 형식·탈퇴·없는 회원을 포함한다.
+
+POST/DELETE 성공 SQL 수는 인증 포함 기본 6회다. POST 공개방 일반 멤버는 7회, 비공개방 일반 멤버는 두 차례 권한 검사로 POST/DELETE 모두 8회다. 입력 400은 1회, 장소 404는 2회, 권한 403은 3회다. 테스트에서 정확히 고정한다.
+
+`ReviewFailureComparisonTest`는 DB 트리거로 쓰기 예외와 쓰기 직후 멤버십 소실을 재현한다. 전자는 500·전체 롤백, 후자는 403·리뷰 쓰기와 멤버십 삭제 커밋 유지다. `ReviewAggregationComparisonTest`는 작성→덮어쓰기→삭제→재삭제 후 목록/상세/내 장소의 평점·개수·리뷰순 정렬을 비교한다. 다른 회원 리뷰는 본인 삭제 요청으로 지워지지 않는다.
+
+테스트 개발 중 `timestamp without time zone`을 JDBC `Timestamp.toInstant()`로 검사해 KST 9시간 차이로 21건이 실패했다. 저장/응답 오류가 아니라 검증 타입 오류였으며 LocalDateTime 비교로 수정 후 위 84건을 재실행했다. DB timestamp(3)은 시간대 없는 값으로, API 문자열은 기존 UTC 표현 규칙으로 각각 검증한다.
+
+## 8. 코드 읽는 순서
+
+`ReviewController`(인증 경로) → `ReviewInputs`(v2 DTO/trim) → `ReviewService`(권한/커밋 경계) → `ReviewRepository`(native 조회·UPSERT) → `ReviewResponses`(API별 필드) 순서로 읽는다. `PlaceReview`는 V1 관계/자료형을 매핑하며 cascade를 추가하지 않는다. native UPSERT는 JPA Auditing을 거치지 않으므로 UUID와 Clock 시각을 명시적으로 전달하고 충돌 시 ID/createdAt을 보존한다.
+
+공부할 개념: 유니크 제약과 ON CONFLICT, LAZY 관계와 JOIN projection, TransactionTemplate 커밋 후 읽기, Unicode 길이와 ECMAScript trim, timestamp/Instant 구분, 실제 DB 잠금을 이용한 동시 요청 재현.

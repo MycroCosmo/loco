@@ -88,4 +88,28 @@ public class ReviewRepository {
   private static List<Tuple> tuples(jakarta.persistence.Query q) {
     return q.getResultList();
   }
+
+  public void upsert(
+      String placeId, String userId, ReviewInputs input, java.time.LocalDateTime now) {
+    em.createNativeQuery(
+            """
+        INSERT INTO place_reviews(id,"placeId","userId",rating,content,"createdAt","updatedAt")
+        VALUES (:id,:place,:user,:rating,:content,:now,:now)
+        ON CONFLICT ("placeId","userId") DO UPDATE SET rating=EXCLUDED.rating,content=EXCLUDED.content,"updatedAt"=EXCLUDED."updatedAt"
+        """)
+        .setParameter("id", java.util.UUID.randomUUID().toString())
+        .setParameter("place", placeId)
+        .setParameter("user", userId)
+        .setParameter("rating", input.rating())
+        .setParameter("content", input.content())
+        .setParameter("now", now)
+        .executeUpdate();
+  }
+
+  public void delete(String placeId, String userId) {
+    em.createNativeQuery("DELETE FROM place_reviews WHERE \"placeId\"=:place AND \"userId\"=:user")
+        .setParameter("place", placeId)
+        .setParameter("user", userId)
+        .executeUpdate();
+  }
 }

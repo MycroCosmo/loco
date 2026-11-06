@@ -25,4 +25,19 @@ public class ReviewController {
   public java.util.List<ReviewResponses.Mine> mine(@AuthenticationPrincipal JwtPrincipal user) {
     return reviews.mine(user.userId());
   }
+
+  @PostMapping("/places/{placeId}/reviews")
+  @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
+  public ReviewResponses.Summary submit(
+      @PathVariable String placeId,
+      @AuthenticationPrincipal JwtPrincipal user,
+      @RequestBody(required = false) com.fasterxml.jackson.databind.JsonNode body) {
+    return reviews.submit(placeId, user.userId(), ReviewInputs.parse(body));
+  }
+
+  @DeleteMapping("/places/{placeId}/reviews/me")
+  public ReviewResponses.Summary delete(
+      @PathVariable String placeId, @AuthenticationPrincipal JwtPrincipal user) {
+    return reviews.delete(placeId, user.userId());
+  }
 }
