@@ -1,6 +1,6 @@
 # 7번 묶음: 마커 조회 API
 
-기준: v2 main을 포함한 48f7b54의 places.controller.ts/places.service.ts. 2026-11-06 실제 HTTP 관측 199개(입력·권한 139, 분기 48, 누락 좌표 12)를 fixture로 고정한다. v2·Flutter·V1은 수정하지 않는다. 아래는 관측 후 확정한 이관 설계이며 구현/검증 결과는 마지막 절에 추가한다.
+기준: v2 main을 포함한 48f7b54의 places.controller.ts/places.service.ts. 2026-11-06 실제 HTTP 관측 199개(입력·권한 139, 분기 48, 누락 좌표 12)를 fixture로 고정한다. v2·Flutter·V1은 수정하지 않는다. 아래는 관측 후 확정한 이관 설계다. 3개 API 구현·전체 회귀·build를 완료했으며 결과는 7절에 기록한다.
 
 ## 1. 결정과 구현 순서
 
@@ -92,7 +92,7 @@ ORDER BY "createdAt" DESC,id DESC LIMIT $5;
 | cluster 장소 id IN | Seq Scan places | places_pkey Index Scan |
 | 방/작성자/리뷰 | 작은 테이블 Seq Scan, 리뷰 Aggregate | 같은 선택. 다른 방 장소 증가와 무관 |
 
-cluster ROUND id 조회는 A에서 Seq Scan → Sort → Limit, B에서 places_mapId_latitude_longitude_idx Index Scan → Sort → Limit였다. B의 Index Cond는 mapId뿐이며 두 ROUND 조건은 Filter다. v3 native projection 계획은 구현 검증 후 함께 덧붙인다. 인덱스를 쓴다는 사실만으로 모든 조건이 Index Cond인 것은 아니다. ROUND 표현식은 기존 좌표 B-tree의 범위 조건과 달라 mapId로 좁힌 뒤 Filter로 처리하는지 원본 plan에서 확인한다. PostGIS 전환 시 이 SQL/분포를 기준으로 비교하되 지금은 개선하지 않는다.
+cluster ROUND id 조회는 A에서 Seq Scan → Sort → Limit, B에서 places_mapId_latitude_longitude_idx Index Scan → Sort → Limit였다. B의 Index Cond는 mapId뿐이며 두 ROUND 조건은 Filter다. v3 native projection 계획은 7절에 함께 기록했다. 인덱스를 쓴다는 사실만으로 모든 조건이 Index Cond인 것은 아니다. ROUND 표현식은 기존 좌표 B-tree의 범위 조건과 달라 mapId로 좁힌 뒤 Filter로 처리하는지 원본 plan에서 확인한다. PostGIS 전환 시 이 SQL/분포를 기준으로 비교하되 지금은 개선하지 않는다.
 
 ## 6. 이관 후 개선 후보
 
@@ -127,3 +127,34 @@ cluster ROUND id 조회는 A에서 Seq Scan → Sort → Limit, B에서 places_m
 v3 group/cluster의 장소 응답은 기존 PlaceQueryRepository.PROJECTION을 재사용한다. 작성자/방 JOIN과 리뷰 COUNT·AVG 상관 서브쿼리가 들어가며, 작은 리뷰 테이블은 각 Aggregate 하위에서 Seq Scan이었다. 앱 SQL 수가 적다는 이유로 DB 작업량 감소/성능 개선을 주장하지 않는다. PostgreSQL 플래너는 데이터·통계에 따라 달라지므로 정확한 scan/cost/time 값을 테스트 통과 조건으로 고정하지 않는다. 실제 HTTP SQL 수와 응답/DB 상태만 고정한다.
 
 추가 검증: v3 EXPLAIN 1건 + 경계 13건(699/700/701셀, 실수/영점/반구간 8, group 60행·limit 무시, 실제 장소 없는 셀) + 보호 경로 3건 + 핸들러별 120/121번째 요청 429 1건 = 총 18건 성공, 실패/skip/알려진 차이 0. 실행 42.897초(v2 이미지 캐시), 재시작 1·대기 0ms. 없는 장소의 저장 셀은 count=4/items=[]/hasMore=false를 그대로 반환하며 SQL 4회를 확인했다.
+
+### 최종 전체 회귀 — 2026-11-06
+
+캐시된 v2 이미지로 scripts/measure-tests.ps1 -Label markers-final -RestartMode quota를 실행했다. test/comparisonTest를 실제 재실행하고 Spotless/build를 통과했다.
+
+| 구분 | 전체 | 성공 | 실패 | SKIPPED |
+| --- | ---: | ---: | ---: | ---: |
+| 빠른 테스트 | 230 | 229 | 0 | 1 (기존 HEIC 공통 제약) |
+| v2 비교 | 789 | 789 | 0 | 0 |
+| 합계 | 1,019 | 1,018 | 0 | 1 |
+
+전체 wall time **638.288초**. 기존 844건 식별자 누락 0·추가 175건, 알려진 차이는 기존 8건 그대로다. v2 빌드 호출/최초 기동 각 1, 재시작 12, 시나리오 내 대기 0ms. 원본 로그·manifest·summary는 build/performance/markers-final/에 있다. 이전 실행보다 테스트/EXPLAIN 범위가 늘었으므로 API 처리 성능의 변화로 해석하지 않는다. 기존 동시 이미지 구간 중복 때문에 categoriesSeconds를 정확한 wall time 분해로 사용하지 않는 원칙도 유지한다.
+
+v2·Flutter·infra·V1 변경 없음, 실행 JAR의 MarkerController/Inputs/QueryRepository 포함·테스트 대역 미포함, git diff --check 통과를 확인했다. 새 알려진 차이/개선은 추가하지 않았다. 마커 셀 누락과 기존 조회 제약은 이관 후 개선 후보로 보존한다.
+
+코드는 MarkerController → MarkerInputs → MarkerQueryRepository 순서로 읽는다. controller의 level/precision 선검사와 repository의 권한 후 좌표 검사를 구별하고, PrismaFloats는 ORM Float 경계, CoordinateKeys는 JS 문자열 반올림, PlaceQueryRepository.PROJECTION은 기존 장소/작성자/리뷰 응답을 재사용하는 부분이다. EXPLAIN에서는 Index Cond와 Filter, Sort/Limit, 상관 서브쿼리의 loops를 구별해서 읽는다.
+
+재확인 명령(apps/server-v3, Java 21·Docker 필요):
+
+```powershell
+# v2 고정 응답/조회 분기/권한/429/수치 경계/SQL 관측 전체
+./gradlew.bat comparisonTest --tests '*Marker*' --rerun
+# 실제 v3 HTTP의 SQL/EXPLAIN (v2 기동 없음)
+./gradlew.bat test --tests '*MarkerSqlIntegrationTest' --rerun
+# 기준을 다시 조사할 때만: 출력은 build/reports/markers, 기존 fixture 자동 교체 없음
+./gradlew.bat comparisonTest --tests '*MarkerObservationTest' -PmarkersObserve=true --rerun
+# 전체 회귀 + build + wall time 기록
+./scripts/measure-tests.ps1 -Label markers-recheck -RestartMode quota
+```
+
+[v2 원본 SQL/EXPLAIN](src/test/resources/markers/explain-v2.json), [v3 원본 SQL/EXPLAIN](src/test/resources/markers/explain-v3.json). 인덱스·PostGIS·성능 개선은 실행하지 않았으며 7번 묶음에서 멈춘다.

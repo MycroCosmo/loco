@@ -136,3 +136,17 @@ v2 빌드 호출/기동은 각 1회, 재시작은 9회다. 인증 6회·장소 4
 이전 733건 식별자 누락 0, 새 111건이다. 알려진 차이는 기존 5건과 이미지 동시성 개선 3건을 더한 8건이다. v2 빌드 호출/기동 각 1회, 재시작 11회, 시나리오 내 대기 0ms. 원본·manifest는 `build/performance/place-images-final/`에 있다. 이전 410.372초보다 82.368초 늘었지만 범위가 달라 최적화 효과/성능 회귀로 해석하지 않는다.
 
 이번 실행에는 동시 이미지 요청이 포함된다. 기존 v2 이미지 경과 시간 합산은 겹친 실행 구간을 중복 계산하므로 `imageMillis`, `requestExcludingImageMillis`, `categoriesSeconds`를 정확한 wall time 분해로 발표하지 않는다. Stopwatch 전체 시간은 영향을 받지 않는다. 원격 이미지 구간의 합집합 계측과 비관적 락 대비 성능 비교 계획 전체는 IMAGE_API_DESIGN.md의 **2단계 실험 백로그**로 보존하며 이번에는 구현·실행하지 않았다.
+
+## 마커 조회 API 완료 시점 전체 회귀 — 2026-11-06
+
+`scripts/measure-tests.ps1 -Label markers-final -RestartMode quota`로 두 테스트 작업을 실제 재실행하고 Spotless/build를 통과했다. v2 이미지 캐시 기준 전체 wall time **638.288초**다.
+
+| 구분 | 전체 | 성공 | 실패 | SKIPPED |
+| --- | ---: | ---: | ---: | ---: |
+| 빠른 테스트 | 230 | 229 | 0 | 1 (기존 HEIC 공통 제약) |
+| v2 비교 | 789 | 789 | 0 | 0 |
+| 합계 | 1,019 | 1,018 | 0 | 1 |
+
+기존 844건 식별자 누락 0·추가 175건. 알려진 차이 8건 그대로, v2 빌드 호출/기동 각 1·재시작 12·시나리오 대기 0ms. 원본 로그·manifest·summary는 `build/performance/markers-final/`에 있다. 직전 492.740초보다 145.548초 늘었지만 테스트와 SQL/EXPLAIN 관측 범위가 추가됐으며 기능의 성능 회귀율로 해석하지 않는다. 동시 이미지 시간이 겹치는 categoriesSeconds의 한계도 위 기록과 같다.
+
+마커 각 API의 실제 SQL과 작은 시드/다른 방 장소 1만 행 조건의 EXPLAIN ANALYZE는 [마커 설계](MARKER_API_DESIGN.md)에 기록했다. 플래너·인덱스·쿼리 성능 개선은 하지 않았다. 해당 계획의 cost/time은 향후 PostGIS 실험의 관측 자료이며 고정 성능 통과 기준이 아니다.
