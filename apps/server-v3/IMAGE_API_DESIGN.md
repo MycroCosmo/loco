@@ -242,3 +242,5 @@ B에서도 v2의 오류 우선순서를 위해 파일 유무·장소·작성자�
 POST 단계: 입력/권한/극단 비율 42건과 저장·UPDATE·커밋 실패 3건, 기존 프로필/커버 회귀 89건을 함께 실행했다. 전체 134건 모두 성공, 실패/skip/알려진 차이 0, 127.531초(v2 이미지 캐시), 재시작/대기 0이다. 인증 포함 정상 POST SQL 4회, 서비스의 장소/권한/정원/디코딩 거절 2회, multipart/파일 누락 거절 1회다. 변환은 TransactionTemplate 밖이고 cardinality 조건과 array_append는 한 UPDATE다. 영속 엔티티를 읽지 않는 native 경로라 오래된 엔티티 flush로 배열을 덮어쓰지 않는다.
 
 PlaceImageController는 HTTP/인증 경로, PlaceImageService는 사전/최종 검사와 새 파일 보상, PlaceImageRepository는 원자적 배열 DML을 맡는다. PlaceImageTestSupport는 두 DB/파일 시드와 변동 URL 대응을 공유한다. 장소 inside 축소에는 최소 1픽셀을 유지해 1×3000/3000×1 입력도 v2와 맞춘다. 선행 문서 커밋의 EOF 빈 줄 경고를 정리했고 현재 git diff --check는 통과했다.
+
+DELETE 단계: 観측 입력 14·권한 8·DB/파일 실패 6건, 총 28건 성공·실패/skip/알려진 차이 0, 39.608초(v2 이미지 캐시), 재시작/대기 0이다. 이미지 URL 미존재는 UPDATE 없이 200, updatedAt을 보존한다. 성공 삭제는 array_remove 후 TransactionTemplate 커밋이 끝나야 파일을 삭제한다. 인증 포함 정상 SQL 4회, 미존재/비문자 no-op 3회, 입력 400은 1회, 권한/장소 거절은 2회다. 같은 URL 경쟁에서 UPDATE 0건이면 재조회하여 삭제·권한 상태를 확인한다.

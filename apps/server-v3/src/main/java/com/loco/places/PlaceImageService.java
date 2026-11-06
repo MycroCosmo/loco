@@ -57,4 +57,39 @@ public class PlaceImageService {
     if (!state.authorId().equals(user)) throw ApiProblem.forbidden("권한이 없습니다.");
     if (state.urls().length >= 3) throw ApiProblem.badRequest("최대 3장까지 업로드 가능합니다.");
   }
+
+  private record Removal(PlaceResponses.Core response, boolean removed) {}
+
+  public PlaceResponses.Core delete(
+      String id, String user, com.fasterxml.jackson.databind.JsonNode body) {
+    var value =
+        body == null
+            ? com.fasterxml.jackson.databind.node.MissingNode.getInstance()
+            : body.path("imageUrl");
+    if (value.isMissingNode()
+        || value.isNull()
+        || (value.isBoolean() && !value.booleanValue())
+        || (value.isNumber() && value.doubleValue() == 0)
+        || (value.isTextual() && value.asText().isEmpty()))
+      throw ApiProblem.badRequest("삭제할 이미지가 필요합니다.");
+    var place = images.find(id);
+    if (!place.authorId().equals(user)) throw ApiProblem.forbidden("이미지 삭제 권한이 없습니다.");
+    // v2는 DTO 없이 truthy 비문자 값도 받으며, 포함되지 않은 URL은 갱신하지 않는다.
+    if (!value.isTextual() || !java.util.Arrays.asList(place.urls()).contains(value.asText()))
+      return queries.core(id);
+    String url = value.asText();
+    var result =
+        transaction.execute(
+            status -> {
+              int changed = images.remove(id, user, url, LocalDateTime.now(clock));
+              if (changed == 0) {
+                var current = images.find(id);
+                if (!current.authorId().equals(user))
+                  throw ApiProblem.forbidden("이미지 삭제 권한이 없습니다.");
+              }
+              return new Removal(queries.core(id), changed > 0);
+            });
+    if (result.removed()) files.delete(url);
+    return result.response();
+  }
 }

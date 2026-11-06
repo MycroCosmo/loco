@@ -25,4 +25,12 @@ public class PlaceImageController {
       HttpServletRequest request) {
     return images.upload(id, user.userId(), ImageUploadRequest.file(request));
   }
+
+  @DeleteMapping("/places/{id}/images")
+  public PlaceResponses.Core delete(
+      @PathVariable String id,
+      @AuthenticationPrincipal JwtPrincipal user,
+      @RequestBody(required = false) com.fasterxml.jackson.databind.JsonNode body) {
+    return images.delete(id, user.userId(), body);
+  }
 }

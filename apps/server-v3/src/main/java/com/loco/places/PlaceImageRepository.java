@@ -42,4 +42,17 @@ public class PlaceImageRepository {
         .setParameter("user", user)
         .executeUpdate();
   }
+
+  public int remove(String id, String user, String url, LocalDateTime now) {
+    return em.createNativeQuery(
+            """
+        UPDATE places SET "imageUrls"=array_remove("imageUrls",:url),"updatedAt"=:now
+        WHERE id=:id AND "createdById"=:user AND :url=ANY("imageUrls")
+        """)
+        .setParameter("url", url)
+        .setParameter("now", now)
+        .setParameter("id", id)
+        .setParameter("user", user)
+        .executeUpdate();
+  }
 }
