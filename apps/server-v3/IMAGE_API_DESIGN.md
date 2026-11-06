@@ -1,6 +1,6 @@
 # 6번 묶음: 장소 이미지 API 설계
 
-상태: **6-1 B / 6-2 B / 6-3 B / 6-4 B(범위 조정) 확정. 구현 진행 중.** 조건부 원자적 UPDATE와 락 밖 변환을 적용한다. 이번에는 정합성 시나리오·SQL 수 고정까지만 진행하며, 방식별 성능 비교는 2단계 실험 백로그다.
+상태: **6-1 B / 6-2 B / 6-3 B / 6-4 B(범위 조정) 확정. POST/DELETE 구현·전체 회귀·build 완료.** 조건부 원자적 UPDATE와 락 밖 변환을 적용한다. 이번에는 정합성 시나리오·SQL 수 고정까지만 진행하며, 방식별 성능 비교는 2단계 실험 백로그다.
 
 대상은 POST/DELETE `/api/places/:placeId/images`다. 기준은 Git `d31c750`의 v2 `places.controller.ts`, `places.service.ts:addImage/removeImage`, `upload.service.ts`, `image-upload.options.ts`다. 관측 과정에서도 v2·Flutter·V1·운영 Java 코드는 수정하지 않았다.
 
@@ -8,7 +8,7 @@
 
 - Java 21, Spring Data JPA, PostgreSQL 17, TEXT UUID, 기존 Place LAZY 관계·native projection·Clock·TransactionTemplate을 사용한다. 새 라이브러리는 제안하지 않는다.
 - 저장 위치는 기존 공유 로컬 볼륨의 `uploads/places/`, 공개 상대 URL은 `/uploads/places/<UUID>.webp`다. 개발 v3 UID/GID 1000:1000을 유지한다.
-- 변환기는 승인된 B(libvips) 인터페이스를 재사용한다. 장소 이미지는 **1200×1200 안에 비율 유지(fit inside), 확대 없음, WebP quality 80**이다. 프로필/커버의 중앙 크롭과 구별해야 한다. 관측에서 2400×1600→1200×800, 64×48→64×48이었다. 기존 LocalImageStorage.Purpose에 장소 용도와 inside 처리를 추가하는 것이 구현 대상이며 아직 변경하지 않았다.
+- 변환기는 승인된 B(libvips) 인터페이스를 재사용한다. 장소 이미지는 **1200×1200 안에 비율 유지(fit inside), 확대 없음, WebP quality 80**이다. 프로필/커버의 중앙 크롭과 구별해야 한다. 관측에서 2400×1600→1200×800, 64×48→64×48이었다. 기존 LocalImageStorage.Purpose에 PLACE 용도와 inside 처리를 추가했다.
 - POST 201, DELETE 200. 둘 다 장소 전체 필드와 `createdBy {id,nickname,profileImageUrl}`을 반환한다. 평점/개수/map 추가 필드는 없다. 기존 PlaceResponses.Core를 재사용할 수 있다.
 - 두 경로 모두 인증·현재 회원 조회·핸들러별 기본 120회/분 대상이다. 이미지 변경은 places.updatedAt을 갱신하되 장소 마커 셀·리뷰·알림을 갱신하지 않는다.
 
@@ -212,7 +212,7 @@ B에서도 v2의 오류 우선순서를 위해 파일 유무·장소·작성자�
 ./gradlew.bat comparisonTest --tests '*PlaceImage*ObservationTest' -PplaceImagesObserve=true
 ```
 
-이 테스트의 성공은 **v2 관측 재현 성공**이다. 아직 없는 v3 이미지 API와의 호환성 성공을 의미하지 않는다. 관측만인 이번 단계에서는 기존 전체 733건 회귀를 다시 실행하지 않았다.
+이 절은 구현 전 관측 단계의 기록이다. 당시 성공은 **v2 관측 재현 성공**이며 v3 호환성 성공을 의미하지 않는다. 당시 전체 733건 회귀는 실행하지 않았고, 이후 구현 검증 결과는 10절에서 별도로 기록한다.
 
 2026-11-06 검증 결과(v2 이미지 캐시):
 
@@ -250,3 +250,20 @@ DELETE 단계: 관측 입력 14·권한 8·DB/파일 실패 6건, 총 28건 성�
 ImageRequestRaces는 테스트 전용 시작 barrier와 DB gate로 실제 HTTP 경합을 재현한다. 성능 계측은 추가하지 않는다. v3 정상 I/O 정합성 행렬에서 깨진 URL·고아 파일·성공 업로드 URL 유실은 모두 0이다. 서로 다른 삭제/혼합 두 요청의 인증 포함 SQL 합계는 8, 같은 URL 중복 삭제는 실패한 UPDATE의 재조회 때문에 9다. 초기 3장 거절은 요청당 2, 최종 정원/장소/작성자 거절은 4로 고정했다. N=16은 기본 연결 풀을 유지하며 동시에 출발하고, 최대 4개 UPDATE의 실제 경합을 확인한 뒤 gate를 해제한다.
 
 개선 차이 보고는 v2/v3를 모두 실행하고 결과를 검사한 뒤 등록한다. 초기 2장에서 업로드 2건은 v2 4장/201 두 건 → v3 3장/201·400, 다른 URL 삭제 2건은 v2 깨진 URL 1 → v3 0, 업로드 후 삭제 경합은 v2 고아 파일·업로드 URL 유실 각 1 → v3 각 0이다. v2 재현 6조건도 그대로 유지한다.
+
+최종 전체 검증(2026-11-06): 빠른 테스트 229건 중 성공 228·실패 0·기존 HEIC 공통 제약 skip 1, v2 비교 615건 전부 성공. 합계 844건 중 성공 843·실패 0·skip 1, 알려진 차이 8건(기존 5+이미지 개선 3)이다. 캐시된 v2 이미지 기준 전체 wall time **492.740초**, v2 빌드 호출/기동 각 1·재시작 11·시나리오 대기 0ms다. Spotless/build와 git diff --check를 통과했다. 이전 전체 733개 테스트 식별자의 누락은 0이고 111개가 추가됐다. 이 수치는 테스트 실행 시간이며 조건부 UPDATE와 비관적 락의 성능 비교가 아니다.
+
+v2·Flutter·infra·V1 변경 없음, 실행 JAR에 PlaceImageController/Service/Repository 포함 및 테스트 대역 미포함을 확인했다. 원본 결과·로그·테스트 목록·알려진 차이는 build/performance/place-images-final/에 보존한다. 동시 요청 때문에 기존 원격 이미지 시간 합산에는 중복 구간이 있으므로 구간별 categoriesSeconds를 정확한 wall time 분해로 해석하지 않는다. 원격 구간 합집합 계측과 대안 락 비교는 2단계 실험 백로그다.
+
+재확인 명령(apps/server-v3에서 Java 21·Docker 준비):
+
+```powershell
+# 이번 묶음 정합성만 (v2 서버 없이)
+./gradlew.bat test --tests '*PlaceImageConcurrencyTest' --rerun
+# 장소 이미지 전체 비교·원래 v2 관측 재현
+./gradlew.bat comparisonTest --tests '*PlaceImage*' --rerun
+# 전체 회귀·build 및 wall time 기록
+./scripts/measure-tests.ps1 -Label place-images-recheck -RestartMode quota
+```
+
+이번 묶음은 여기서 완료한다. 마커 조회 등 다음 묶음과 2단계 성능 실험은 시작하지 않는다.

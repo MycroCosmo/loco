@@ -280,7 +280,7 @@ Windows에서 `pwsh -File scripts/measure-tests.ps1 -Label after -RestartMode qu
 - 재시작: Docker restart 명령부터 현재 포트의 HTTP 준비 확인까지. 최초 기동은 기타다.
 - 케이스 준비: 양쪽 DB TRUNCATE·SQL 시드·bcrypt 해시 주입·메일 비우기. 추가 사례별 SQL/파일 fixture 준비는 기타다.
 - HTTP: 하네스의 TestRestTemplate가 서버 응답 헤더를 받을 때까지의 실제 구간 합집합. 동시 요청을 이중 합산하지 않는다. 응답 본문 역직렬화·검증은 기타다.
-- 이미지: API의 메타데이터·디코딩·크롭·WebP 인코딩·파일 저장 구간. v2의 UploadService.saveAsWebP는 테스트 컨테이너 preload로, v3의 LocalImageStorage.save는 테스트 BeanPostProcessor로 감싼다. 원래 함수를 그대로 호출하며 예외도 그대로 전파한다. 현재 이미지 API 비교는 순차이므로 이미지 시간을 HTTP 합집합에서 빼 나머지 요청 시간을 구한다. 이미지 업로드 동시 테스트를 추가할 때는 원격 이미지 구간도 합집합 계측으로 바꿔야 한다.
+- 이미지: API의 메타데이터·디코딩·크롭·WebP 인코딩·파일 저장 구간. v2의 UploadService.saveAsWebP는 테스트 컨테이너 preload로, v3의 LocalImageStorage.save는 테스트 BeanPostProcessor로 감싼다. 원래 함수를 그대로 호출하며 예외도 그대로 전파한다. 순차 실행에서는 이미지 시간을 HTTP 합집합에서 빼 나머지 요청 시간을 구한다. 6번 묶음부터 실제 동시 이미지 요청을 포함하므로, 원격 이미지 시간 합산에는 겹친 구간이 중복된다. 이 실행의 imageMillis/requestExcludingImageMillis/categoriesSeconds는 정확한 wall time 분해나 성능 비교에 사용하지 않는다. 전체 Stopwatch 시간은 유효하다. 원격 구간 합집합 계측은 2단계 성능 실험에서 처리한다.
 - 기타: 전체 Gradle wall time에서 위 구간을 뺀 나머지. 컴파일·환경 기동/종료·DB 상태 비교·Node 라이브러리 교차 검증·파일 fixture 준비·독립 코덱 probe·제한 대기 등을 포함한다. 요청별 처리 시간의 일반적인 성능 보장은 아니다.
 
 테스트용 `http://v2.harness.invalid`는 HTTP interceptor에서 현재 컨테이너 주소로 바뀐다. 재시작으로 호스트 포트가 달라져도 시나리오가 오래된 URL을 사용하지 않는다. 해당 별칭은 외부 DNS로 전송하지 않는다. v2 운영 소스·Dockerfile·요청 제한값을 수정하거나 IP를 바꾸지 않는다.
