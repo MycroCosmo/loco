@@ -8,6 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, String> {
+  @Transactional
+  @Modifying
+  @Query("delete from PasswordResetToken t where t.usedAt is not null or t.expiresAt < :now")
+  int cleanup(LocalDateTime now);
+
   Optional<PasswordResetToken> findByTokenHash(String tokenHash);
 
   Optional<PasswordResetToken> findFirstByUserIdAndTokenHashAndUsedAtIsNullAndExpiresAtGreaterThan(

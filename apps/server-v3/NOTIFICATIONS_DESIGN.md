@@ -228,6 +228,15 @@ A도 선택한 v3 adapter는 별도의 루프백 transport 계약으로 JSON/hea
 
 ## 8. 검증 결과·재실행
 
+구현 단계 중간 검증(전체 회귀와 구분):
+- 발송 adapter: 45/45 성공, 실패/skip/알려진 차이 0, 31.671초.
+- 이벤트 실행기·수신자 조회: 44/44 성공, 실패/skip/알려진 차이 0, 27.598초.
+- cleanup 및 원본 v2 비교·로컬 전송: **60/60 성공**(test 50, comparisonTest 10), 실패/skip 0, 승인된 알려진 차이 2, **76.355초**. 이미지 캐시 사용. 재시도 원본 관측 8행은 JUnit 1건 안에 포함된다.
+- `TokenCleanupService`는 두 repository 삭제를 독립 커밋하고 한쪽 실패에도 다른 쪽을 시도한다. `TokenCleanupSchedule`은 서울 03:00 및 on/off 설정만 담당한다. 두 파일을 분리해 실제 시간까지 기다리지 않고 삭제 계약과 cron 등록을 각각 검증한다.
+- `NotificationComparisonTest`는 원본 v2 메시지·응답 비대기·커밋 경계와 토큰 경합을, `TokenCleanupComparisonTest`는 삭제 경계·부분 실패·시간대 차이를 비교한다. `retry-v2.cjs`와 `FcmRetryComparisonTest`는 인증 없이 루프백에서 원본 SDK 재시도를 검증한다. `TokenCleanupScheduleTest`는 실제 Spring cron 등록과 비활성화를 확인한다.
+
+아래는 구현 전 관측 이력이다.
+
 - 원본 v2 관측 3 JUnit 안에 서비스 21·HTTP 호출 지점 6·cleanup 6, 합계 **33개 관측 기록**을 고정했다. 33개 전부가 HTTP 요청이라는 뜻은 아니다.
 - 최초 관측 성공 3/3, 19.977초(v2 이미지 캐시). 작성 중 로그의 JSON 출력 혼입, 장소 address 누락, Prisma SQL을 N+1로 가정한 오류를 고쳐 원본 v2는 변경하지 않았다.
 - 고정 fixture 재검증 + 기존 v3 알림 계약: **10/10 성공(test 7 + comparisonTest 3), 실패/skip 0, 이번 실행 알려진 차이 0, 37.602초**, Spotless 통과. 9번 발송 구현이 완료됐다는 의미가 아니다.

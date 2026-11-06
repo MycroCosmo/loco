@@ -24,7 +24,11 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = "loco.uploads.directory=")
+    properties = {
+      "loco.uploads.directory=",
+      "loco.notifications.service-account=",
+      "loco.cleanup.enabled=false"
+    })
 class HealthIntegrationTest {
   private static final String JWT_SECRET = UUID.randomUUID().toString() + UUID.randomUUID();
 

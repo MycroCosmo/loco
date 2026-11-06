@@ -8,6 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, String> {
+  @Transactional
+  @Modifying
+  @Query("delete from RefreshToken t where t.revokedAt is not null or t.expiresAt < :cutoff")
+  int cleanup(LocalDateTime cutoff);
+
   Optional<RefreshToken> findByTokenHash(String tokenHash);
 
   @Modifying(clearAutomatically = true, flushAutomatically = true)

@@ -55,6 +55,10 @@ management:
         exclude: '*'
 
 loco:
+  cleanup:
+    enabled: ${TOKEN_CLEANUP_ENABLED:true}
+    cron: ${TOKEN_CLEANUP_CRON:0 0 3 * * *}
+    zone: ${TOKEN_CLEANUP_ZONE:Asia/Seoul}
   notifications:
     service-account: ${FIREBASE_SERVICE_ACCOUNT:}
     base-url: ${FCM_BASE_URL:https://fcm.googleapis.com}

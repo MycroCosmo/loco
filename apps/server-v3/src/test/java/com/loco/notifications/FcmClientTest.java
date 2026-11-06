@@ -170,6 +170,80 @@ class FcmClientTest {
   }
 
   @Test
+  void defaultSocketTimeoutIsFifteenSecondsThenRetries() throws Exception {
+    server.createContext(
+        "/",
+        exchange -> {
+          int attempt = calls.incrementAndGet();
+          try {
+            if (attempt == 1) Thread.sleep(16000);
+            byte[] bytes = "{\"name\":\"offline/message\"}".getBytes();
+            exchange.sendResponseHeaders(200, bytes.length);
+            exchange.getResponseBody().write(bytes);
+          } catch (InterruptedException stop) {
+            Thread.currentThread().interrupt();
+          } finally {
+            exchange.close();
+          }
+        });
+    long start = System.nanoTime();
+    try (var client = client(15000)) {
+      assertThat(client.send("offline-device", message)).isEqualTo(FcmClient.Outcome.SENT);
+    }
+    assertThat(Duration.ofNanos(System.nanoTime() - start).toMillis())
+        .isGreaterThanOrEqualTo(14900);
+    assertThat(calls.get()).isEqualTo(2);
+    assertThat(waits).containsExactly(0L);
+  }
+
+  @Test
+  void productionSleeperActuallyWaitsBetweenRetries() throws Exception {
+    server.createContext(
+        "/",
+        exchange -> {
+          int attempt = calls.incrementAndGet();
+          byte[] bytes = "{\"name\":\"offline/message\"}".getBytes();
+          exchange.sendResponseHeaders(attempt < 3 ? 503 : 200, bytes.length);
+          exchange.getResponseBody().write(bytes);
+          exchange.close();
+        });
+    long start = System.nanoTime();
+    try (var client = new FcmClient(auth, json, Clock.systemUTC(), endpoint, 15000)) {
+      assertThat(client.send("offline-device", message)).isEqualTo(FcmClient.Outcome.SENT);
+    }
+    assertThat(calls.get()).isEqualTo(3);
+    assertThat(Duration.ofNanos(System.nanoTime() - start).toMillis()).isGreaterThanOrEqualTo(1000);
+  }
+
+  @Test
+  void continuousBodyCanOutlastSocketTimeout() throws Exception {
+    server.createContext(
+        "/",
+        exchange -> {
+          calls.incrementAndGet();
+          exchange.sendResponseHeaders(200, 0);
+          try {
+            for (int i = 0; i < 12; i++) {
+              exchange.getResponseBody().write(' ');
+              exchange.getResponseBody().flush();
+              Thread.sleep(50);
+            }
+            exchange.getResponseBody().write("{\"name\":\"offline/message\"}".getBytes());
+          } catch (InterruptedException stop) {
+            Thread.currentThread().interrupt();
+          } finally {
+            exchange.close();
+          }
+        });
+    long start = System.nanoTime();
+    try (var client = client(200)) {
+      assertThat(client.send("offline-device", message)).isEqualTo(FcmClient.Outcome.SENT);
+    }
+    assertThat(calls.get()).isOne();
+    assertThat(Duration.ofNanos(System.nanoTime() - start).toMillis()).isGreaterThanOrEqualTo(600);
+  }
+
+  @Test
   void positiveHttpDateRetryAfterUsesClock() {
     var now = Clock.fixed(Instant.parse("2026-11-06T00:00:00Z"), ZoneOffset.UTC);
     assertThat(FcmClient.retryDelay("Fri, 06 Nov 2026 00:00:02 GMT", 0, now)).isEqualTo(2000);
