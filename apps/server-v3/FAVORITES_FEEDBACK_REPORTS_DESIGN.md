@@ -70,3 +70,11 @@ DatabaseRequestRace의 외부 행 잠금 뒤 실제 요청 두 개가 DB 잠금 
 - 동시 동일 제출 두 행은 내용·행 수·UUID/시간 형식으로 별도 비교한다. 나머지 모든 테이블은 전후 원문 비교한다. 임의 필터 쿼리로 행을 빼는 방식은 하네스가 계속 거부한다.
 
 SQL 수는 인증 조회를 포함해 고정했다. GET favorites 2, POST favorites 성공/중복 3·없는 방/본인 방 2·입력 오류 1, DELETE 성공 3·404/403 2, feedback/report 성공·DB 오류 2·입력 오류 1이다. 증가는 테스트 실패다.
+
+### 전체 회귀·완료
+
+`scripts/measure-tests.ps1 -Label submissions-final -RestartMode quota`: 전체 1,145건, 성공 1,144·실패 0·기존 HEIC 공통 제약 skip 1. 빠른 테스트 230(229 성공), v2 비교 915 전부 성공. 기존 알려진 차이 8 유지, 8-A 신규 차이 0. Spotless/build 통과, v2 이미지 캐시 기준 전체 **729.391초**다.
+
+이전 1,019개 테스트 식별자 누락 0·추가 126. v2 빌드 호출/최초 기동 각 1, 재시작 14. 인증 대기 0ms와 시나리오 내부 대기 61,005ms는 다른 지표다. 이번 시간은 두 작업·준비·build를 포함한 Stopwatch wall time이며 JUnit 개별 시간 합산이 아니다. 원본은 build/performance/submissions-final/에 있다.
+
+운영 JAR에 세 기능 Controller가 포함되고 테스트 대역/Kakao 클래스는 없음을 확인했다. v2·Flutter·infra·V1 변경은 없다. 8-A 구현은 완료했고 8-B는 설계·가짜 서버 관측까지만 진행해 선택을 기다린다.

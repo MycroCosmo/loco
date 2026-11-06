@@ -138,7 +138,7 @@ v3 group/cluster의 장소 응답은 기존 PlaceQueryRepository.PROJECTION을 �
 | v2 비교 | 789 | 789 | 0 | 0 |
 | 합계 | 1,019 | 1,018 | 0 | 1 |
 
-전체 wall time **638.288초**. 기존 844건 식별자 누락 0·추가 175건, 알려진 차이는 기존 8건 그대로다. v2 빌드 호출/최초 기동 각 1, 재시작 12, 시나리오 내 대기 0ms. 원본 로그·manifest·summary는 build/performance/markers-final/에 있다. 이전 실행보다 테스트/EXPLAIN 범위가 늘었으므로 API 처리 성능의 변화로 해석하지 않는다. 기존 동시 이미지 구간 중복 때문에 categoriesSeconds를 정확한 wall time 분해로 사용하지 않는 원칙도 유지한다.
+전체 wall time **638.288초**. 기존 844건 식별자 누락 0·추가 175건, 알려진 차이는 기존 8건 그대로다. v2 빌드 호출/최초 기동 각 1, 재시작 12, 인증 대기 0ms·시나리오 내 대기 61,008ms. 8번 검증 중 원본 quota.json 재확인으로 대기 수치를 정정했다. 원본 로그·manifest·summary는 build/performance/markers-final/에 있다. 이전 실행보다 테스트/EXPLAIN 범위가 늘었으므로 API 처리 성능의 변화로 해석하지 않는다. 기존 동시 이미지 구간 중복 때문에 categoriesSeconds를 정확한 wall time 분해로 사용하지 않는 원칙도 유지한다.
 
 v2·Flutter·infra·V1 변경 없음, 실행 JAR의 MarkerController/Inputs/QueryRepository 포함·테스트 대역 미포함, git diff --check 통과를 확인했다. 새 알려진 차이/개선은 추가하지 않았다. 마커 셀 누락과 기존 조회 제약은 이관 후 개선 후보로 보존한다.
 

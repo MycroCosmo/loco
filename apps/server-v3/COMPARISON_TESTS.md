@@ -15,9 +15,9 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 .\gradlew.bat comparisonTest --rerun --console=plain
 ~~~
 
-전체 검증은 154건이다. 기존 149건에 이미지 코덱 5건을 추가했다. 기존 하네스·엔티티 62건, 회원가입·로그인 검증 15건, 재발급·로그아웃 검증 20건, 비밀번호 찾기·재설정 15건, OAuth 계약 18건과 URL 검증 1건, 보호 경로 회원 상태 검증 4건을 포함한다. 기존 429 알려진 차이 1건을 필수 HTTP 검증 10건으로 바꾸고 제한 계산 테스트 5건을 추가했다.
-`test` 53건과 `comparisonTest` 101건을 합친 기대 결과는 **성공 152 / 실패 0 / 코덱 알려진 차이 1 / 코덱 공통 지원 제약 1**이다. API 비교 101건의 알려진 차이는 0이다.
-HEIC·AVIF 코덱 2건은 사유가 있는 SKIPPED이며 [코덱 보고서](CODEC_COMPATIBILITY.md)에서 v2 읽기 결과와 구분해 확인한다. HTTP 오류 응답까지 비교 완료한 것으로 해석하지 않는다.
+8-A 구현·8-B 관측 시점 전체 검증은 1,145건이다. `test` 230건(성공 229·HEIC 공통 제약 skip 1), `comparisonTest` 915건 전부 성공이며 실패는 0이다. 알려진 차이는 기존 8건 유지, 이번 묶음 신규 차이는 0이다. 전체 실행 729.391초(v2 이미지 캐시), 자세한 범위·이력은 [실행 기록](TEST_PERFORMANCE.md)에 있다.
+AVIF·애니메이션 WebP는 libvips 전환 후 통과한다. HEIC 단독 코덱 1건만 [공통 지원 제약](CODEC_COMPATIBILITY.md)으로 제외되며 실제 HEIC 업로드 HTTP 실패·파일 상태 비교는 별도 필수 검사다.
+카카오 검색 관측은 1 JUnit 안에서 가짜 서버 기반 v2 HTTP 56사례를 검사한다. v3 검색 구현·양쪽 비교 완료를 뜻하지 않으며 실제 카카오 API/키를 사용하지 않는다.
 429도 필수 통과 대상이며 JUnit abort/skip으로 처리하지 않는다. OAuth 18건은 v3 계약 검증이고 v2 HTTP 비교와 구분한다.
 기본 `test`는 단위·v3 단독 검증만 실행한다. `comparisonTest`는 `@Tag("v2-comparison")` 클래스만 실행하고 v2·Mailpit을 한 번 준비한다. Prisma 스키마 검증도 이 작업에 포함한다. 두 그룹 전체는 `allTests`로 실행한다(`check`·`build`도 전체 검증).
 

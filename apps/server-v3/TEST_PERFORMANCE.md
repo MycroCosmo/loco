@@ -147,6 +147,22 @@ v2 빌드 호출/기동은 각 1회, 재시작은 9회다. 인증 6회·장소 4
 | v2 비교 | 789 | 789 | 0 | 0 |
 | 합계 | 1,019 | 1,018 | 0 | 1 |
 
-기존 844건 식별자 누락 0·추가 175건. 알려진 차이 8건 그대로, v2 빌드 호출/기동 각 1·재시작 12·시나리오 대기 0ms. 원본 로그·manifest·summary는 `build/performance/markers-final/`에 있다. 직전 492.740초보다 145.548초 늘었지만 테스트와 SQL/EXPLAIN 관측 범위가 추가됐으며 기능의 성능 회귀율로 해석하지 않는다. 동시 이미지 시간이 겹치는 categoriesSeconds의 한계도 위 기록과 같다.
+기존 844건 식별자 누락 0·추가 175건. 알려진 차이 8건 그대로, v2 빌드 호출/기동 각 1·재시작 12. 인증 대기는 0ms, 시나리오 내부 대기는 61,008ms다(8번 검증 중 원본 quota.json을 재확인해 기존의 잘못된 "시나리오 대기 0ms"를 정정). 원본 로그·manifest·summary는 `build/performance/markers-final/`에 있다. 직전 492.740초보다 145.548초 늘었지만 테스트와 SQL/EXPLAIN 관측 범위가 추가됐으며 기능의 성능 회귀율로 해석하지 않는다. 동시 이미지 시간이 겹치는 categoriesSeconds의 한계도 위 기록과 같다.
 
 마커 각 API의 실제 SQL과 작은 시드/다른 방 장소 1만 행 조건의 EXPLAIN ANALYZE는 [마커 설계](MARKER_API_DESIGN.md)에 기록했다. 플래너·인덱스·쿼리 성능 개선은 하지 않았다. 해당 계획의 cost/time은 향후 PostGIS 실험의 관측 자료이며 고정 성능 통과 기준이 아니다.
+
+## 8-A 완료·8-B 설계 시점 전체 회귀 — 2026-11-06
+
+`scripts/measure-tests.ps1 -Label submissions-final -RestartMode quota`로 두 테스트 작업을 재실행하고 Spotless/build를 통과했다. v2 이미지 캐시 기준 전체 wall time **729.391초(12분 9초)**다.
+
+| 구분 | 전체 | 성공 | 실패 | SKIPPED |
+| --- | ---: | ---: | ---: | ---: |
+| 빠른 테스트 | 230 | 229 | 0 | 1 (기존 HEIC 공통 제약) |
+| v2 비교·관측 | 915 | 915 | 0 | 0 |
+| 합계 | 1,145 | 1,144 | 0 | 1 |
+
+이전 1,019개 식별자 누락 0·추가 126. 알려진 차이는 기존 8 유지. v2 빌드 호출/최초 기동 각 1·재시작 14, authWaitMillis=0, withinCaseWaitMillis=61,005다. 결과·manifest·quota·로그는 `build/performance/submissions-final/`에 있다. 이전 638.288초 대비 91.103초 증가했지만 검증 범위가 늘었으므로 API 성능 회귀율이 아니다. categoriesSeconds의 동시 이미지 중복 한계는 기존과 같다.
+
+시나리오 중 잔여 요청 수가 소진되면 V2RequestQuota가 재시작하지 않고 61초 창 만료를 기다린다. 이번 MarkerObservationTest의 markers 입력 묶음은 61.291초였고, 이전 markers-final quota에도 61.008초 대기가 있었다. authWaitMillis만 보고 전체 대기 0으로 쓰지 않는다. 묶음 시작 전 필요한 슬롯 예약 확대는 후속 하네스 정리 후보이며 이번에 수정하거나 성능 개선을 했다고 주장하지 않는다.
+
+부분 검증: v2 제출 관측 7/7(29.209초), 8-A와 하네스 133/133(122.406초), 카카오 가짜 서버 fixture 1/1(19.333초). 각 실패/skip/알려진 차이 0. 8-B는 56개 v2 HTTP 관측을 1 JUnit에 포함하며 v3 검색 구현은 없다.
