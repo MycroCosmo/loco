@@ -1,0 +1,61 @@
+[ {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=1",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=5",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=6",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=9",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=11",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=14",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=37.444401&neLat=37.444402&swLng=127&neLng=128&level=6",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/marker-cluster?precision=3&cellLatKey=37.444&cellLngKey=127.889&limit=2",
+  "user" : 1,
+  "status" : 200,
+  "body" : {
+    "count" : 0,
+    "items" : [ ],
+    "hasMore" : false
+  }
+} ]

@@ -1,0 +1,568 @@
+[ {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=0",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=1",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=5",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=6",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=8",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=9",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=10",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=11",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=14",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=15",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=5.5",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=x",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=5x",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=NaN",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=Infinity",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=0x6",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=6e0",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=%20",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=%EF%BB%BF6",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=6&level=7",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=%5B%5D",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "지도 영역 좌표가 올바르지 않습니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=NaN&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "지도 영역 좌표가 올바르지 않습니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=Infinity&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "지도 영역 좌표가 올바르지 않습니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-Infinity&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "지도 영역 좌표가 올바르지 않습니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=x&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "지도 영역 좌표가 올바르지 않습니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=37x&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=1e2&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=0x10&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=37&swLat=38&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=%20%20&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "지도 영역 좌표가 올바르지 않습니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-0.00001&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=91&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "지도 영역 좌표가 올바르지 않습니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=38&neLat=36&swLng=128&neLng=126",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&tag=missing&search=missing&precision=1",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level%5Bx%5D=6",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat%5Bx%5D=37&swLng=126&neLat=38&neLng=128",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "지도 영역 좌표가 올바르지 않습니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=37.4444&neLat=37.4444&swLng=127.8888&neLng=127.8888",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "4개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 4,
+    "groupKey" : "37.444400:127.888800"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000002/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000006",
+    "name" : "place-6",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000002/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 2,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000006",
+    "name" : "place-6",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000002/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 3,
+  "status" : 403,
+  "body" : {
+    "message" : "접근 권한이 없습니다.",
+    "error" : "Forbidden",
+    "statusCode" : 403
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000003/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 1,
+  "status" : 403,
+  "body" : {
+    "message" : "접근 권한이 없습니다.",
+    "error" : "Forbidden",
+    "statusCode" : 403
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000003/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 2,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000007",
+    "name" : "place-7",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000003/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 3,
+  "status" : 403,
+  "body" : {
+    "message" : "접근 권한이 없습니다.",
+    "error" : "Forbidden",
+    "statusCode" : 403
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000004/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000005",
+    "name" : "place-5",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000004/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 2,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000005",
+    "name" : "place-5",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000004/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 3,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000005",
+    "name" : "place-5",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/missing/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180",
+  "user" : 1,
+  "status" : 404,
+  "body" : {
+    "message" : "지도방을 찾을 수 없습니다.",
+    "error" : "Not Found",
+    "statusCode" : 404
+  }
+}, {
+  "path" : "/api/maps/missing/places/markers?level=bad&precision=bad",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000003/places/markers?level=bad&precision=bad",
+  "user" : 1,
+  "status" : 400,
+  "body" : {
+    "message" : "level은 숫자여야 합니다.",
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+} ]
