@@ -15,9 +15,9 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21'
 .\gradlew.bat comparisonTest --rerun --console=plain
 ~~~
 
-8-A 구현·8-B 관측 시점 전체 검증은 1,145건이다. `test` 230건(성공 229·HEIC 공통 제약 skip 1), `comparisonTest` 915건 전부 성공이며 실패는 0이다. 알려진 차이는 기존 8건 유지, 이번 묶음 신규 차이는 0이다. 전체 실행 729.391초(v2 이미지 캐시), 자세한 범위·이력은 [실행 기록](TEST_PERFORMANCE.md)에 있다.
+8-B 구현 완료 시점 전체 검증은 1,286건이다. `test` 234건(성공 233·HEIC 공통 제약 skip 1), `comparisonTest` 1,052건 전부 성공이며 실패는 0이다. 알려진 차이는 기존 8건 + 카카오 오류/timeout 정책 2건으로 총 10건이다. 전체 실행 838.209초(v2 이미지 캐시), 기존 1,145개 식별자 누락 0·추가 141개다. 자세한 범위·이력은 [실행 기록](TEST_PERFORMANCE.md)에 있다.
 AVIF·애니메이션 WebP는 libvips 전환 후 통과한다. HEIC 단독 코덱 1건만 [공통 지원 제약](CODEC_COMPATIBILITY.md)으로 제외되며 실제 HEIC 업로드 HTTP 실패·파일 상태 비교는 별도 필수 검사다.
-카카오 검색 관측은 1 JUnit 안에서 가짜 서버 기반 v2 HTTP 56사례를 검사한다. v3 검색 구현·양쪽 비교 완료를 뜻하지 않으며 실제 카카오 API/키를 사용하지 않는다.
+카카오 검색은 기존 독립 관측 1 JUnit(HTTP 56사례)에 더해 공용 preload와 v2/v3 실제 API를 비교한다. 입력·외부 쿼리·느슨한 매핑·실패 응답, 401/429의 외부 호출 0회와 전체 업무 DB 불변을 검증한다. TLS 실패는 연결 횟수, HTTP 실패는 요청 횟수로 재시도 부재를 검사한다. 실제 카카오 API/키는 사용하지 않는다. 고정 오류와 소켓 무활동 timeout은 [알려진 차이 2개](KAKAO_SEARCH_DESIGN.md)로 등록하며 skip하지 않는다.
 429도 필수 통과 대상이며 JUnit abort/skip으로 처리하지 않는다. OAuth 18건은 v3 계약 검증이고 v2 HTTP 비교와 구분한다.
 기본 `test`는 단위·v3 단독 검증만 실행한다. `comparisonTest`는 `@Tag("v2-comparison")` 클래스만 실행하고 v2·Mailpit을 한 번 준비한다. Prisma 스키마 검증도 이 작업에 포함한다. 두 그룹 전체는 `allTests`로 실행한다(`check`·`build`도 전체 검증).
 

@@ -119,7 +119,9 @@ v2 컨테이너 재시작 때 임의 게시 포트가 바뀌던 테스트 문제
 - 공용 preload 도입 f421a14: 57/57 성공, 36.316초(v2 이미지 캐시), 실패/skip/알려진 차이 0.
 - 첫 v3 API 비교: 56/56 성공, 고정 오류 알려진 차이 1. 후속 테스트에서 JSON -0 직렬화와 재시작 포트 문제를 찾아 수정했다.
 - 구현 집중 검증: 160/160 성공(test 22 + comparisonTest 138), 실패/skip 0, 알려진 차이 2, 146.172초(v2 이미지 캐시). 기존 OAuth 계약 18건과 Boot HTTP 팩터리 유지 검사도 포함한다.
-- 전체 검증 결과는 실행 완료 후 아래에 추가한다.
+- 최종 전체 회귀·Spotless/build: **1,286건=성공 1,285·실패 0·HEIC 공통 제약 skip 1**, 알려진 차이 10, **838.209초(13분 58초, v2 이미지 캐시)**. test 234건(233 성공/1 skip), comparisonTest 1,052건 전부 성공. 기존 1,145개 식별자 누락 0·추가 141개.
+- v2 빌드 호출/최초 기동 각 1·재시작 17. authWaitMillis=0, withinCaseWaitMillis=61,006으로 기존 마커 관측의 창 대기는 남아 있다. 원본 결과·로그·manifest·quota는 `build/performance/kakao-final/`에 보존한다.
+- Compose 문법 검사 통과(컨테이너 추가 기동 없음), 실행 JAR의 HttpClient 5.5.2 포함·테스트 대역 제외를 확인했다. v2/Flutter 원본·V1·v2 Dockerfile·timing-v2.cjs 변경 없음. 실제 Kakao API·키 사용은 없으며 운영 외부 연결은 이번 검증 범위가 아니다.
 
 ```powershell
 cd apps/server-v3
