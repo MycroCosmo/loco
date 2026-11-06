@@ -84,7 +84,6 @@ public final class DatabaseSnapshot {
         }
       }
       ids.addAll(primary);
-      if (name.equals("reports")) ids.add("targetId");
       if (name.equals("place_marker_cells")) ids.add("placeId");
       if (name.equals("refresh_tokens") || name.equals("password_reset_tokens"))
         hashes.add("tokenHash");
@@ -230,6 +229,12 @@ public final class DatabaseSnapshot {
                 continue;
               }
               if (value.isNull()) continue;
+              // 신고 대상은 FK가 아닌 임의 TEXT다. 실제 생성 PK와 연결된 값만 별칭화한다.
+              if (name.equals("reports") && column.equals("targetId")) {
+                if (aliases.containsKey(value.asText()))
+                  row.put(column, aliases.get(value.asText()));
+                continue;
+              }
               if (table.ids().contains(column)) row.put(column, alias(value, seedIds, aliases));
               else if (table.times().contains(column)) {
                 LocalDateTime.parse(value.asText());
@@ -264,7 +269,21 @@ public final class DatabaseSnapshot {
   }
 
   public void assertUnchanged(DatabaseSnapshot after) {
-    if (!rawRows().equals(after.rawRows())) throw new AssertionError("변경하지 않아야 하는 DB가 변경됨");
+    assertUnchangedExcept(after, Set.of());
+  }
+
+  public void assertUnchangedExcept(DatabaseSnapshot after, Set<String> separatelyComparedTables) {
+    if (!tables.keySet().containsAll(separatelyComparedTables)
+        || !after.tables.keySet().equals(tables.keySet()))
+      throw new AssertionError("DB 비교 테이블 목록 불일치");
+    var beforeRows = rawRows();
+    var afterRows = after.rawRows();
+    separatelyComparedTables.forEach(
+        name -> {
+          beforeRows.remove(name);
+          afterRows.remove(name);
+        });
+    if (!beforeRows.equals(afterRows)) throw new AssertionError("변경하지 않아야 하는 DB가 변경됨");
   }
 
   private Map<String, List<String>> rawRows() {

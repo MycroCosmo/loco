@@ -3,7 +3,7 @@
 기반 하네스는 **비교 도구와 테스트 환경**이다. 1번 묶음의 실제 API 검증은 AuthenticationCases와 AuthenticationFlowTest에서 추가한다.
 v2는 계정 상태 회귀 수정이 포함된 저장소 소스를 그대로 빌드한다.
 첫 비교 케이스는 없는 경로 404와 미인증 보호 경로 401이다.
-401과 쓰기 비교의 v3 컨트롤러는 테스트 전용이다. 실제 기능 API의 이관 완료를 뜻하지 않는다.
+초기에는 테스트 전용 컨트롤러를 사용했다. 인증·회원 이관에 이어 8-A에서 쓰기 비교도 실제 `/api/feedback`으로 전환했다. 남은 하네스 대역은 프레임워크 자체 검증용이다.
 
 ## 실행과 결과 읽기
 
@@ -199,8 +199,8 @@ SQL 초기 데이터와 JSON 요청은 `src/test/resources/compat/` 아래에 �
 ### 테스트 대역과 실제 API를 구분하는 규칙
 
 `HarnessControllers`의 모든 경로는 **`/api/__test/harness/...`** 아래에 둔다.
-로그인·회원·피드백 대역도 각각 `/api/__test/harness/auth/login`, `/api/__test/harness/users/me`, `/api/__test/harness/feedback`이다.
-대역의 GET/PUT/POST를 실제 `/api/auth/login`, `/api/users/me`, `/api/feedback`에 등록하지 않는다.
+입력 검증용 로그인 대역은 `/api/__test/harness/auth/login`이다. 회원·피드백 API 비교는 실제 경로를 사용하며 피드백 쓰기 대역은 8-A에서 제거했다.
+대역을 실제 `/api/auth/login`, `/api/users/me`, `/api/feedback`에 등록하지 않는다.
 테스트 소스의 `@TestComponent`와 명시적 `@Import`로만 등록하며 운영 JAR에는 포함하지 않는다.
 
 비교 케이스의 `path`는 v2 실제 경로다. 대역 비교일 때만 `v3Path`로 별도 경로를 지정한다.

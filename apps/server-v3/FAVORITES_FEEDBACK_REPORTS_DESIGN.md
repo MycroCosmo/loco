@@ -56,3 +56,17 @@ DatabaseRequestRace의 외부 행 잠금 뒤 실제 요청 두 개가 DB 잠금 
 4. 8-B 가짜 외부 서버 관측 fixture와 KAKAO_SEARCH_DESIGN.md의 선택지만 커밋/push하고 멈춤.
 
 최초 관측 생성: JUnit 7건 성공·실패/skip/알려진 차이 0, 29.209초(v2 이미지 캐시), 재시작 0·대기 0ms. 순차 97응답 + 동시 4조건×2요청 = 105개 HTTP다. SQL 수와 전체 회귀 결과는 구현 검증 후 추가한다.
+
+### 8-A 구현 검증
+
+`comparisonTest --tests '*Submission*Test' --tests '*HarnessInfrastructureTest'`: 총 133, 성공 133, 실패/skip/알려진 차이 0, 122.406초(v2 이미지 캐시), 재시작 2회·대기 0ms.
+
+- 관측 fixture 97개를 두 앱에 재요청하고 HTTP 전체 응답·3개 변경 테이블 전체 컬럼 및 전체 DB 상태를 비교한다. 동시 요청 4조건도 같은 결과다.
+- 5개 API별 6개 인증 상태(토큰 없음/만료/서명/형식/탈퇴/없는 회원)는 모두 DTO와 쓰기보다 먼저 401이다. 현재 회원 확인이 필요한 경우만 SQL 1개, 그 외 0개다.
+- favorite 추가/삭제, feedback/report 저장은 BEFORE trigger 오류와 DEFERRABLE constraint trigger의 커밋 오류에서 500이며 전체 DB가 원래대로다(8건).
+- 각 핸들러의 120개 요청은 401, 121번째만 429이며 잔여 횟수·Retry-After도 비교한다. 429를 알려진 차이로 두지 않는다.
+- 비공개 비회원 즐겨찾기 추가→목록에서 inviteCode/집계 확인→삭제→목록·DB 0행을 이어서 검증한다.
+- 하네스의 가짜 feedback 경로를 제거하고 실제 API로 쓰기·연속 요청 검증을 전환했다. report targetId의 임의 문자열·없는 UUID는 값 차이를 탐지하고 실제 생성 PK 참조만 별칭으로 맞춘다.
+- 동시 동일 제출 두 행은 내용·행 수·UUID/시간 형식으로 별도 비교한다. 나머지 모든 테이블은 전후 원문 비교한다. 임의 필터 쿼리로 행을 빼는 방식은 하네스가 계속 거부한다.
+
+SQL 수는 인증 조회를 포함해 고정했다. GET favorites 2, POST favorites 성공/중복 3·없는 방/본인 방 2·입력 오류 1, DELETE 성공 3·404/403 2, feedback/report 성공·DB 오류 2·입력 오류 1이다. 증가는 테스트 실패다.

@@ -30,18 +30,17 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
   void writeRequestUsesIndependentDatabasesAndComparesNewIds() throws Exception {
     for (String path : List.of("/api/feedback")) {
       assertThat(request(v3Url(), path, HttpMethod.POST, null, Map.of()).getStatusCode().value())
-          .isEqualTo(404);
+          .isEqualTo(401);
     }
     assertThat(
             request(v3Url(), "/api/users/me", HttpMethod.GET, null, null).getStatusCode().value())
         .isEqualTo(401);
     runCase(
-        ComparisonCase.named("쓰기 비교 대역")
+        ComparisonCase.named("실제 피드백 쓰기 비교")
             .step(
                 ComparisonStep.named("피드백 작성")
                     .method(HttpMethod.POST)
                     .path("/api/feedback")
-                    .v3Path("/api/__test/harness/feedback")
                     .bodyResource("compat/feedback.json")
                     .expectedStatus(201)
                     .authenticated()
@@ -83,7 +82,6 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
                 ComparisonStep.named("첫 쓰기")
                     .method(HttpMethod.POST)
                     .path("/api/feedback")
-                    .v3Path("/api/__test/harness/feedback")
                     .authenticated()
                     .expectedStatus(201)
                     .bodyResource("compat/feedback.json")
@@ -95,7 +93,6 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
                 ComparisonStep.named("이전 응답으로 두 번째 쓰기")
                     .method(HttpMethod.POST)
                     .path("/api/feedback")
-                    .v3Path("/api/__test/harness/feedback")
                     .authenticated()
                     .expectedStatus(201)
                     .body(values -> Map.of("content", values.text("message")))
@@ -270,6 +267,55 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
     environment().clearMail();
     assertThat(environment().mailRequest("GET", "/api/v1/messages").path("messages").size())
         .isZero();
+  }
+
+  @Test
+  void reportTargetsKeepLiteralValuesAndReuseOnlyRealPrimaryKeyAliases() throws Exception {
+    for (var side : SharedHarness.Side.values()) {
+      String room = UUID.randomUUID().toString();
+      insertMap(side, room, "reported room");
+      for (String target :
+          List.of(room, "", "arbitrary text", "99999999-9999-4999-8999-999999999999"))
+        execute(
+            side,
+            "INSERT INTO reports(id,\"reporterId\",\"targetType\",\"targetId\",reason) VALUES (?,?,'MAP',?,?)",
+            UUID.randomUUID().toString(),
+            SharedHarness.Environment.USER_ID,
+            target,
+            target.equals(room) ? "generated room" : "literal " + target);
+    }
+    var rules = new DatabaseSnapshot.Rules(Map.of("reports", List.of("reason")), Map.of());
+    compare(rules);
+    execute(
+        SharedHarness.Side.V3,
+        "UPDATE reports SET \"targetId\"='different text' WHERE \"targetId\"='arbitrary text'");
+    assertThatThrownBy(() -> compare(rules)).isInstanceOf(AssertionError.class);
+    execute(
+        SharedHarness.Side.V3,
+        "UPDATE reports SET \"targetId\"='arbitrary text' WHERE \"targetId\"='different text'");
+    execute(
+        SharedHarness.Side.V3,
+        "UPDATE reports SET \"targetId\"='88888888-8888-4888-8888-888888888888' WHERE reason LIKE 'literal 999%'");
+    assertThatThrownBy(() -> compare(rules)).isInstanceOf(AssertionError.class);
+  }
+
+  @Test
+  void separateTableComparisonDoesNotHideMutationsOfOtherTables() throws Exception {
+    var before = snapshot(SharedHarness.Side.V3, DEFAULT);
+    execute(
+        SharedHarness.Side.V3,
+        "INSERT INTO feedbacks(id,content,\"userId\") VALUES (?,?,?)",
+        UUID.randomUUID().toString(),
+        "separately compared",
+        SharedHarness.Environment.USER_ID);
+    before.assertUnchangedExcept(
+        snapshot(SharedHarness.Side.V3, DEFAULT), java.util.Set.of("feedbacks"));
+    execute(SharedHarness.Side.V3, "UPDATE users SET nickname='unexpected'");
+    assertThatThrownBy(
+            () ->
+                before.assertUnchangedExcept(
+                    snapshot(SharedHarness.Side.V3, DEFAULT), java.util.Set.of("feedbacks")))
+        .isInstanceOf(AssertionError.class);
   }
 
   private void insertMap(SharedHarness.Side side, String id, String title) throws Exception {

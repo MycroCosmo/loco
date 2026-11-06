@@ -1,7 +1,6 @@
 package com.loco.compat;
 
 import com.loco.security.AuthenticatedApi;
-import com.loco.security.JwtPrincipal;
 import com.loco.security.PublicApi;
 import com.loco.web.ApiController;
 import jakarta.validation.Valid;
@@ -11,14 +10,10 @@ import java.util.Map;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 @TestConfiguration(proxyBeanMethods = false)
 @Import(HarnessControllers.ProbeController.class)
@@ -39,26 +34,6 @@ public class HarnessControllers {
   @AuthenticatedApi
   @Import(PublicProbeController.class)
   public static class ProbeController {
-    private final JdbcTemplate jdbc;
-
-    public ProbeController(JdbcTemplate jdbc) {
-      this.jdbc = jdbc;
-    }
-
-    // 하네스의 쓰기/DB 비교 동작을 검증하는 테스트 전용 대역이며 운영 API가 아니다.
-    @PostMapping("/__test/harness/feedback")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Map<String, String> writeProbe(
-        @AuthenticationPrincipal JwtPrincipal user, @RequestBody Map<String, String> body) {
-      String id = java.util.UUID.randomUUID().toString();
-      jdbc.update(
-          "INSERT INTO feedbacks (id, \"userId\", content) VALUES (?, ?, ?)",
-          id,
-          user.userId(),
-          body.get("content"));
-      return Map.of("message", "피드백이 제출되었습니다.", "id", id);
-    }
-
     @GetMapping("/__test/harness/public-override")
     @PublicApi
     public Map<String, String> publicOverride() {
