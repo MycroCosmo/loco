@@ -1,0 +1,268 @@
+{
+  "date": "2026-11-06",
+  "command": "./gradlew.bat spotlessCheck comparisonTest --tests '*PlaceImage*ObservationTest'",
+  "wallSeconds": 48.6068318,
+  "scope": "v2 forced-overlap diagnostic, not a strategy performance benchmark",
+  "requestMillisIncludesDeliberateGate": true,
+  "blockedQueryAgeIsNotPureLockWait": true,
+  "scenarios": {
+    "delete-then-upload": [
+      {
+        "repetition": 1,
+        "requestMillis": [
+          145.264,
+          117.3322
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          137.888,
+          107.952
+        ]
+      },
+      {
+        "repetition": 2,
+        "requestMillis": [
+          153.0524,
+          113.6328
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          145.779,
+          104.344
+        ]
+      },
+      {
+        "repetition": 3,
+        "requestMillis": [
+          149.3646,
+          115.1239
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          142.263,
+          105.313
+        ]
+      }
+    ],
+    "delete-two": [
+      {
+        "repetition": 1,
+        "requestMillis": [
+          141.2499,
+          113.4556
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          133.78,
+          106.103
+        ]
+      },
+      {
+        "repetition": 2,
+        "requestMillis": [
+          165.4707,
+          127.4088
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          157.709,
+          119.396
+        ]
+      },
+      {
+        "repetition": 3,
+        "requestMillis": [
+          148.1381,
+          112.4824
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          140.571,
+          103.637
+        ]
+      }
+    ],
+    "upload-2": [
+      {
+        "repetition": 1,
+        "requestMillis": [
+          142.5578,
+          110.7606
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          133.322,
+          95.53
+        ]
+      },
+      {
+        "repetition": 2,
+        "requestMillis": [
+          119.3715,
+          90.7625
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          109.851,
+          80.839
+        ]
+      },
+      {
+        "repetition": 3,
+        "requestMillis": [
+          146.8537,
+          114.2015
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          137.633,
+          104.633
+        ]
+      }
+    ],
+    "upload-4": [
+      {
+        "repetition": 1,
+        "requestMillis": [
+          230.6564,
+          197.3793,
+          164.5573,
+          137.2072
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          220.951,
+          187.574,
+          147.189,
+          120.483
+        ]
+      },
+      {
+        "repetition": 2,
+        "requestMillis": [
+          212.0802,
+          187.6959,
+          157.0775,
+          123.7541
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          201.813,
+          176.696,
+          145.256,
+          107.96
+        ]
+      },
+      {
+        "repetition": 3,
+        "requestMillis": [
+          199.508,
+          170.8286,
+          139.9669,
+          109.2745
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          189.923,
+          161.483,
+          129.807,
+          98.167
+        ]
+      }
+    ],
+    "upload-8": [
+      {
+        "repetition": 1,
+        "requestMillis": [
+          333.7582,
+          305.6357,
+          276.2504,
+          244.7269,
+          215.4002,
+          187.5118,
+          157.5913,
+          121.1881
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          324.793,
+          296.692,
+          262.904,
+          233.331,
+          195.291,
+          168.481,
+          137.797,
+          105.443
+        ]
+      },
+      {
+        "repetition": 2,
+        "requestMillis": [
+          332.1783,
+          295.9085,
+          265.4407,
+          238.4281,
+          204.3755,
+          174.0207,
+          140.815,
+          112.2129
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          322.551,
+          285.458,
+          252.162,
+          224.377,
+          192.903,
+          160.004,
+          130.554,
+          99.305
+        ]
+      },
+      {
+        "repetition": 3,
+        "requestMillis": [
+          332.2318,
+          301.4297,
+          274.2917,
+          240.366,
+          211.6281,
+          177.3567,
+          148.1054,
+          116.2769
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          322.538,
+          291.89,
+          262.024,
+          229.222,
+          198.295,
+          167.459,
+          136.749,
+          104.577
+        ]
+      }
+    ],
+    "upload-then-delete": [
+      {
+        "repetition": 1,
+        "requestMillis": [
+          153.0494,
+          128.6329
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          143.524,
+          120.163
+        ]
+      },
+      {
+        "repetition": 2,
+        "requestMillis": [
+          158.3252,
+          124.4068
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          147.918,
+          114.589
+        ]
+      },
+      {
+        "repetition": 3,
+        "requestMillis": [
+          152.3172,
+          124.418
+        ],
+        "blockedQueryAgeMillisAtRelease": [
+          143.136,
+          116.856
+        ]
+      }
+    ]
+  }
+}

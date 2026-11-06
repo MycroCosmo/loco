@@ -1,0 +1,151 @@
+[ {
+  "repetition" : 1,
+  "requests" : 4,
+  "initialImages" : 2,
+  "statuses" : [ 201, 201, 201, 201 ],
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp", "/uploads/places/$new1.webp", "/uploads/places/$new2.webp", "/uploads/places/$new3.webp", "/uploads/places/$new4.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/$new1.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/$new3.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/$new4.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/$new2.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  },
+  "finalImages" : 6,
+  "brokenUrls" : 0,
+  "orphanFiles" : 0,
+  "lostUploadedUrls" : 0,
+  "filesBeforeDatabaseRelease" : 6,
+  "brokenUrlHttpStatuses" : [ ],
+  "orphanFileHttpStatuses" : [ ]
+}, {
+  "repetition" : 2,
+  "requests" : 4,
+  "initialImages" : 2,
+  "statuses" : [ 201, 201, 201, 201 ],
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp", "/uploads/places/$new1.webp", "/uploads/places/$new2.webp", "/uploads/places/$new3.webp", "/uploads/places/$new4.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/$new3.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/$new4.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/$new2.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/$new1.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  },
+  "finalImages" : 6,
+  "brokenUrls" : 0,
+  "orphanFiles" : 0,
+  "lostUploadedUrls" : 0,
+  "filesBeforeDatabaseRelease" : 6,
+  "brokenUrlHttpStatuses" : [ ],
+  "orphanFileHttpStatuses" : [ ]
+}, {
+  "repetition" : 3,
+  "requests" : 4,
+  "initialImages" : 2,
+  "statuses" : [ 201, 201, 201, 201 ],
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp", "/uploads/places/$new1.webp", "/uploads/places/$new2.webp", "/uploads/places/$new3.webp", "/uploads/places/$new4.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/$new2.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/$new1.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/$new3.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/$new4.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  },
+  "finalImages" : 6,
+  "brokenUrls" : 0,
+  "orphanFiles" : 0,
+  "lostUploadedUrls" : 0,
+  "filesBeforeDatabaseRelease" : 6,
+  "brokenUrlHttpStatuses" : [ ],
+  "orphanFileHttpStatuses" : [ ]
+} ]

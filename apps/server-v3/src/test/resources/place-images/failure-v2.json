@@ -1,0 +1,351 @@
+[ {
+  "case" : "POST-db-update",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp" ],
+    "updated" : false,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  }
+}, {
+  "case" : "POST-db-commit",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp" ],
+    "updated" : false,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  }
+}, {
+  "case" : "DELETE-db-update",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp" ],
+    "updated" : false,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  }
+}, {
+  "case" : "DELETE-db-commit",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp" ],
+    "updated" : false,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  }
+}, {
+  "case" : "POST-storage-failure",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp" ],
+    "updated" : false,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  }
+}, {
+  "case" : "DELETE-missing-file",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ "/uploads/places/old-b.webp" ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  },
+  "state" : {
+    "urls" : [ "/uploads/places/old-b.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  },
+  "beforeState" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp" ],
+    "updated" : false,
+    "files" : {
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ "/uploads/places/old-a.webp" ],
+    "orphanFiles" : [ ]
+  }
+}, {
+  "case" : "DELETE-directory",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ "/uploads/places/old-b.webp" ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  },
+  "state" : {
+    "urls" : [ "/uploads/places/old-b.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "directory"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  },
+  "beforeState" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-b.webp" ],
+    "updated" : false,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "directory"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ "/uploads/places/old-a.webp" ],
+    "orphanFiles" : [ ]
+  }
+}, {
+  "case" : "DELETE-external",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ "/uploads/places/old-b.webp", "/uploads/places/old-b.webp" ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  },
+  "state" : {
+    "urls" : [ "/uploads/places/old-b.webp", "/uploads/places/old-b.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ "/uploads/places/old-a.webp" ]
+  },
+  "beforeState" : {
+    "urls" : [ "https://example.test/external.webp", "/uploads/places/old-b.webp", "/uploads/places/old-b.webp" ],
+    "updated" : false,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ "https://example.test/external.webp" ],
+    "orphanFiles" : [ "/uploads/places/old-a.webp" ]
+  }
+}, {
+  "case" : "DELETE-duplicate-url",
+  "status" : 200,
+  "body" : {
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "Alpha",
+    "address" : "Seoul address",
+    "roadAddress" : "road cafe",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ "foo", "bar" ],
+    "imageUrls" : [ "/uploads/places/old-b.webp" ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  },
+  "state" : {
+    "urls" : [ "/uploads/places/old-b.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  },
+  "beforeState" : {
+    "urls" : [ "/uploads/places/old-a.webp", "/uploads/places/old-a.webp", "/uploads/places/old-b.webp" ],
+    "updated" : false,
+    "files" : {
+      "/uploads/places/old-a.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ ]
+  }
+} ]

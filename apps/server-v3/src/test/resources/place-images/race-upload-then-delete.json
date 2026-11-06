@@ -1,0 +1,91 @@
+[ {
+  "repetition" : 1,
+  "requests" : 2,
+  "initialImages" : 2,
+  "statuses" : [ 201, 200 ],
+  "state" : {
+    "urls" : [ "/uploads/places/old-b.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/$new1.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ "/uploads/places/$new1.webp" ]
+  },
+  "finalImages" : 1,
+  "brokenUrls" : 0,
+  "orphanFiles" : 1,
+  "lostUploadedUrls" : 1,
+  "filesBeforeDatabaseRelease" : 3,
+  "brokenUrlHttpStatuses" : [ ],
+  "orphanFileHttpStatuses" : [ 200 ]
+}, {
+  "repetition" : 2,
+  "requests" : 2,
+  "initialImages" : 2,
+  "statuses" : [ 201, 200 ],
+  "state" : {
+    "urls" : [ "/uploads/places/old-b.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/$new1.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ "/uploads/places/$new1.webp" ]
+  },
+  "finalImages" : 1,
+  "brokenUrls" : 0,
+  "orphanFiles" : 1,
+  "lostUploadedUrls" : 1,
+  "filesBeforeDatabaseRelease" : 3,
+  "brokenUrlHttpStatuses" : [ ],
+  "orphanFileHttpStatuses" : [ 200 ]
+}, {
+  "repetition" : 3,
+  "requests" : 2,
+  "initialImages" : 2,
+  "statuses" : [ 201, 200 ],
+  "state" : {
+    "urls" : [ "/uploads/places/old-b.webp" ],
+    "updated" : true,
+    "files" : {
+      "/uploads/places/$new1.webp" : {
+        "kind" : "file",
+        "bytes" : 144,
+        "sha256" : "d88887d78a214f53f9d08492b1426c89ea85ee77faca3888f30a18e1e5da617c"
+      },
+      "/uploads/places/old-b.webp" : {
+        "kind" : "file",
+        "bytes" : 76,
+        "sha256" : "26527fe11e8c4085714fe7e5650ac24842965c58295b00f02cf6f5dd5cbe66a9"
+      }
+    },
+    "brokenUrls" : [ ],
+    "orphanFiles" : [ "/uploads/places/$new1.webp" ]
+  },
+  "finalImages" : 1,
+  "brokenUrls" : 0,
+  "orphanFiles" : 1,
+  "lostUploadedUrls" : 1,
+  "filesBeforeDatabaseRelease" : 3,
+  "brokenUrlHttpStatuses" : [ ],
+  "orphanFileHttpStatuses" : [ 200 ]
+} ]

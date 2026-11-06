@@ -1,0 +1,58 @@
+[ {
+  "repetition" : 1,
+  "requests" : 2,
+  "initialImages" : 2,
+  "statuses" : [ 200, 200 ],
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp" ],
+    "updated" : true,
+    "files" : { },
+    "brokenUrls" : [ "/uploads/places/old-a.webp" ],
+    "orphanFiles" : [ ]
+  },
+  "finalImages" : 1,
+  "brokenUrls" : 1,
+  "orphanFiles" : 0,
+  "lostUploadedUrls" : 0,
+  "filesBeforeDatabaseRelease" : 2,
+  "brokenUrlHttpStatuses" : [ 404 ],
+  "orphanFileHttpStatuses" : [ ]
+}, {
+  "repetition" : 2,
+  "requests" : 2,
+  "initialImages" : 2,
+  "statuses" : [ 200, 200 ],
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp" ],
+    "updated" : true,
+    "files" : { },
+    "brokenUrls" : [ "/uploads/places/old-a.webp" ],
+    "orphanFiles" : [ ]
+  },
+  "finalImages" : 1,
+  "brokenUrls" : 1,
+  "orphanFiles" : 0,
+  "lostUploadedUrls" : 0,
+  "filesBeforeDatabaseRelease" : 2,
+  "brokenUrlHttpStatuses" : [ 404 ],
+  "orphanFileHttpStatuses" : [ ]
+}, {
+  "repetition" : 3,
+  "requests" : 2,
+  "initialImages" : 2,
+  "statuses" : [ 200, 200 ],
+  "state" : {
+    "urls" : [ "/uploads/places/old-a.webp" ],
+    "updated" : true,
+    "files" : { },
+    "brokenUrls" : [ "/uploads/places/old-a.webp" ],
+    "orphanFiles" : [ ]
+  },
+  "finalImages" : 1,
+  "brokenUrls" : 1,
+  "orphanFiles" : 0,
+  "lostUploadedUrls" : 0,
+  "filesBeforeDatabaseRelease" : 2,
+  "brokenUrlHttpStatuses" : [ 404 ],
+  "orphanFileHttpStatuses" : [ ]
+} ]

@@ -42,7 +42,9 @@ public abstract class ImageUploadRequests extends CompatibilityTestBase {
 
   protected abstract String uploadPath();
 
-  protected record Part(String field, String filename, String mime, byte[] bytes) {}
+  protected record Part(String field, String filename, String mime, byte[] bytes) {
+    public Part {}
+  }
 
   protected byte[] fixture(String extension) throws Exception {
     try (var stream = getClass().getResourceAsStream("/codec/quadrants." + extension)) {
