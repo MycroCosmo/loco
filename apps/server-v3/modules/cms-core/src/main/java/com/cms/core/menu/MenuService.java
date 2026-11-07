@@ -290,6 +290,15 @@ public class MenuService {
       MenuTreeRevision meta, Map<String, MenuNode> nodes, MenuNode node) {
     var order = new TreeMap<String, Integer>();
     for (var n : nodes.values()) order.put(n.id, n.sortOrder);
-    return Map.of("node", view(node), "sortOrders", order, "treeRevision", meta.revision);
+    var fields = new LinkedHashMap<String, Object>();
+    fields.put("id", node.id);
+    fields.put("parentId", node.parentId);
+    fields.put("sortOrder", node.sortOrder);
+    fields.put("title", node.title);
+    fields.put("type", node.type.name());
+    fields.put("routeKey", node.routeKey);
+    fields.put("permissionKey", node.permissionKey);
+    fields.put("visible", node.visible);
+    return Map.of("node", fields, "sortOrders", order, "treeRevision", meta.revision);
   }
 }

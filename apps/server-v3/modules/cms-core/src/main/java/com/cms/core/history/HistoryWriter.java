@@ -40,7 +40,7 @@ public class HistoryWriter {
             resourceType,
             id,
             LocalDateTime.now(clock).truncatedTo(ChronoUnit.MILLIS),
-            before,
-            after));
+            HistoryPayload.checked(resourceType, before),
+            HistoryPayload.checked(resourceType, after)));
   }
 }

@@ -10,6 +10,30 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "change_history", schema = "cms")
 public class ChangeHistory {
+  public record View(
+      String id,
+      String actorId,
+      String action,
+      String resourceType,
+      String resourceId,
+      java.time.Instant occurredAt,
+      Map<String, Object> before,
+      Map<String, Object> after,
+      int payloadVersion) {}
+
+  public View view() {
+    return new View(
+        id,
+        actorId,
+        action,
+        resourceType,
+        resourceId,
+        occurredAt.toInstant(java.time.ZoneOffset.UTC),
+        beforeData,
+        afterData,
+        payloadVersion);
+  }
+
   @Id @UuidGenerator private String id;
 
   @Column(name = "actor_id")

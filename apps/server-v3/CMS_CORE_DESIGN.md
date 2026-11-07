@@ -1,8 +1,8 @@
 # CMS(B) 핵심 모듈 설계안
 
-상태: **2026-11-07 CMS 2단계 완료. CLI 경계 수정 완료. C-12/C-13 확정에 따라 3단계를 구현·검증하고 완료 후 중단한다(15~16절).**
+상태: **CMS 4단계 완료. C-14 A 이력 조회·수집 검증 결과는17절에 기록했다. 5단계는 진행하지 않는다.**
 
-작성일: 2026-11-07. 기준 main `9dc3c09`는 PR #2의 merge commit이며 이관 최종 `7f25789`를 부모로 보존한다. 이 main에서 `feature/cms-core`를 만들었다. 아래 1.1절이 최신 확정 기록이다. 8절의 미채택 대안은 비교 이력으로 보존한다. 아직 구현하지 않은 업무 모델·API 초안과 완료된 1·2단계를 구분한다.
+작성일: 2026-11-07. 기준 main `9dc3c09`는 PR #2의 merge commit이며 이관 최종 `7f25789`를 부모로 보존한다. 이 main에서 `feature/cms-core`를 만들었다. 아래 1.1절과 단계별 기록이 최신 확정 내용이다. 8절의 미채택 대안은 비교 이력으로 보존한다. 아직 구현하지 않은 업무 모델·API 초안과 완료된 단계를 구분한다.
 
 ## 1. 근거와 확정 범위
 
@@ -286,7 +286,7 @@ A는 core가 S3 SDK 타입을 노출하지 않는 계약, 조립 인프라에서
 
 C-9-3의 초기 파일 크기·형식과 C-4의 세션/로그인 수명·횟수는 사용자 승인됐다. 변경할 때는 항목 이름과 변경값을 함께 기록한다. 대용량 presigned 업로드·비동기 변환은 기존 3단계 이후 백로그로 유지한다.
 
-## 9. 승인된 구현 순서 — 이번에는 3단계 완료 후 중단
+## 9. 승인된 구현 순서 — 이번에는 4단계 완료 후 중단
 
 1. C-1/C-7 경계·core 단독 기동·migration 테스트. 현재 V1/기존 회귀 유지 확인.
 2. 관리자 계정·초기 생성·세션/CSRF·앱 JWT와의 교차 인증 차단. 이력 기반도 함께 준비.
@@ -295,7 +295,7 @@ C-9-3의 초기 파일 크기·형식과 C-4의 세션/로그인 수명·횟수�
 5. 파일 포트·MinIO·변환 어댑터·보상 정리, UI 통합. 실제 외부 키 사용 없는 테스트.
 6. 선택된 LOCO 전용 관리 메뉴 연결, 기존 앱 전체 비교와 CMS 활성 상태 통합 회귀.
 
-각 구현 단계는 별도 커밋·검증 수치·시간 기록을 남기는 방식으로 제안한다. **현재 요청은 3번까지이며, C-12/C-13은 확정됐으며 3단계 완료 후 중단한다.** 새 업무 결정이 생기면 C-번호와 항목 이름으로 답을 기다린다.
+각 구현 단계는 별도 커밋·검증 수치·시간 기록을 남긴다. **현재 요청은 4번까지이며, C-14는 A로 확정됐다.** 새 업무 결정이 생기면 C-번호와 항목 이름으로 답을 기다린다.
 
 ## 10. 최초 설계 커밋 dc524f7의 검증·한계(과거 기록)
 
@@ -598,3 +598,153 @@ C-13 A: 코드 등록 READ_ONLY/MANAGER 템플릿에서 선택한 업무 키의 
 제외1건은 기존 HEIC 공통 제약이다. 알려진 차이 **11건(개선6·의도5·보류0)**의 case/kind/reason은 이전 보고서와 모두 동일하다. v2 재시작은17회였다. 기존 CLI 수정 회귀의1,470건과 manifest를 대조했으며, Governance16건과 V3→V4 업그레이드1건이 추가됐다. 기존 파라미터 테스트2건은 `-parameters` 적용으로 표시명만 `[1] false`/`[2] true`에서 `[1] partial=false`/`[2] partial=true`로 바뀌었다. 테스트 삭제는 없다.
 
 측정 산출물은 로컬 `build/performance/cms-governance-final/`의 `result.json`, `test-manifest.txt`, `comparisonTest-summary.json`, `gradle.log`에 남긴다. 운영 core JAR에는 테스트 전용 경합 도구·가상 업무 컨트롤러가 포함되지 않는다. core 운영 코드의 LOCO 의존과 호스트 migration 위치 참조는 없으며, v2·Flutter·V1~V3는 수정하지 않았다. **CMS 3단계 완료. 4단계는 사용자 확인 후 진행한다.**
+
+## 17. CMS 4단계 — 이력 조회·수집 검증
+
+### C-14 변경 이력 조회 권한 (A 확정)
+
+목록과 상세 모두 SYSTEM_ADMIN만 허용한다. 일반 관리자의 자기 접근 근거 조회는 기존 C-12대로 유지하지만, 자기 변경 이력 열람 권한으로 확대하지 않는다. B(별도 cms.history READ로 감사 담당자에게 위임)는 초기 core 이력이 관리자 계정·역할·권한 변경 정보를 포함하고, 현재 확정 범위가 최고관리자 전용 보안 관리이므로 채택하지 않았다. C-12와 같은 경계를 유지해 권한을 이해하기 쉽게 한다.
+
+한계는 감사·조사 업무도 최고관리자에게 집중되고 독립 감사 담당자를 지정할 수 없다는 점이다. **6단계에서 LOCO 업무 이력이 생기면 “core 보안 이력은 SYSTEM_ADMIN, 업무 이력은 해당 업무 권한 READ 보유자”로 열람 범위를 나눌지 다시 결정한다.** 이번 구현에서 업무 권한으로 이력 열람을 자동 허용하지 않는다.
+
+### 테스트 실행 범위
+
+CMS core만 변경하면 `:cms-core:test :test`(core 전체 + root 빠른 테스트)를 실행한다. LOCO 앱 src/main·공통 설정·빌드 구성 변경 단계와 머지 전에는 `allTests`를 실행한다. 실제 실행 범위·성공/실패/제외·시간을 커밋 본문에 적는다. `build`는 현재 check에서 비교 테스트까지 실행하므로 core 전용 단계에서 관성적으로 실행하지 않는다. 이번 변경은 core 내부와 문서에 한정한다.
+
+### 구현 파일과 API 계약
+
+- `HistoryQueryService`: SYSTEM_ADMIN을 서비스에서 다시 확인한 뒤 JPA EntityManager로 조회한다. 조건에 실제로 지정된 필터만 SQL에 추가하며 값은 모두 바인딩한다. 엔티티 전체나 관리자 비밀번호 해시는 응답으로 직렬화하지 않는다.
+- `HistoryController`: 기존 관리자 SecurityFilterChain 안에 목록·상세 GET을 연결한다. 관리자 세션 필요, 일반 관리자403, 없는 상세404다. 권한 검사가 상세 존재 확인보다 먼저 실행된다.
+- `ChangeHistory.View`: ID·actorId·action·resourceType/resourceId·occurredAt·before/after·payloadVersion만 반환한다. DB의 timestamp는 기존 UTC Clock 기준이며 HTTP 시간은 UTC Instant다.
+- `HistoryPayload`: account/role/menu별 허용 필드와 값 타입을 검사한 복사본만 HistoryWriter에 전달한다. 메뉴 snapshot도 엔티티/객체 직렬화 대신 명시적인 필드 map으로 바꿨다. 알 수 없는 resource·필드·중첩 객체·byte[]는 저장 전에 거절한다. 새 업무 이력은 해당 payload 계약과 테스트를 등록해야 한다.
+- `HistoryIntegrationTest`: 실제 PostgreSQL·HTTP, 13개 쓰기 성공/롤백, 서비스 메서드 목록, 비밀값 배제, 1만 건 SQL/EXPLAIN을 검증한다. 운영 코드에는 테스트 대역이나 경합 우회 설정을 추가하지 않았다.
+
+| API | 입력·응답 |
+| --- | --- |
+| GET `/admin/api/core/history` | 선택 필터 resourceType, resourceId, actorId, from, until; cursor, size(기본50, 1~100). `{items:[...],nextCursor:string|null}` |
+| GET `/admin/api/core/history/{id}` | 동일 필드의 이력 상세1건. 대상/행위자 삭제 후에도 당시 ID와 snapshot으로 조회 가능 |
+
+기간은 ISO-8601 offset/UTC 입력을 UTC로 변환하며 **from 포함·until 제외**다. from≥until, 빈 문자열 필터, 잘못된 시간·cursor·페이지 크기는400이다. 정렬은 `occurred_at DESC,id DESC`; 같은 시각에도 ID를 보조 기준으로 써서 중복/누락 없이 다음 페이지로 이동한다. cursor는 시간/UUID의 Base64URL이고 권한 정보가 아니다. 다음 페이지에도 동일한 필터를 전달한다. size+1건만 읽어 다음 cursor를 계산하고 전체 COUNT 쿼리는 실행하지 않는다. HTTP GET에 CSRF 변경 요청 검사를 추가하지 않으며, 기존 모든 쓰기 요청의 CSRF 검사는 유지한다.
+
+### 모든 업무 쓰기 경로와 이력 계약
+
+| 서비스 메서드 | resource / action | 검증 |
+| --- | --- | --- |
+| AdminService.bootstrap | admin-account / CREATE (actor null) | 일회성 상태·계정·역할 연결·이력 함께 커밋/롤백 |
+| AdminService.createAccount | admin-account / CREATE | 계정 생성, 초기 비밀번호/해시 미기록 |
+| AdminService.changePassword | admin-account / PASSWORD_CHANGE | 비밀번호·authVersion·초기 변경 상태 롤백, 전후 비밀번호 값 미기록 |
+| AdminService.setActive | admin-account / STATUS_CHANGE | 활성 상태·authVersion·이력 롤백 |
+| RoleService.create | role / CREATE | 템플릿 권한 포함 역할 생성과 이력 |
+| RoleService.rename | role / RENAME | 이름·version·이력 롤백 |
+| RoleService.permissions | role / PERMISSIONS_CHANGE | 권한 컬렉션·version·이력 롤백 |
+| RoleService.delete | role / DELETE | 삭제 후에도 before 이력 조회, 실패 시 역할/권한 복원 |
+| RoleService.assign | admin-account / ROLES_CHANGE | 역할 연결·authVersion·이력 롤백 |
+| MenuService.create | menu / CREATE | 메뉴·형제 순서·트리 revision·이력 롤백 |
+| MenuService.update | menu / UPDATE | 제목/표시 등 필드·revision·이력 롤백 |
+| MenuService.move | menu / MOVE | 부모/형제 순서·불변 ID·revision·이력 롤백 |
+| MenuService.delete | menu / DELETE | 삭제·형제 순서·revision·이력 롤백 |
+
+각 경로를 실제 서비스 프록시로 실행해 **추가 이력 정확히1건**, actor/action/resource·payloadVersion, 허용 JSON 필드·전후 변경을 검사한다. 같은13개 경로에 이력 테이블 CHECK 실패를 주입하고 CMS 업무 테이블 전체 snapshot이 이전과 완전히 같은지 비교한다. 단순히 HistoryWriter 메서드 호출 횟수만 검사하지 않는다.
+
+메서드 목록 검사는 core 클래스패스의 *Service, @Service, 클래스/메서드 @Transactional 타입에서 public 메서드를 발견한다. 읽기 메서드는 명시적으로 분류하고, 업무 쓰기는 실행 가능한 Mutation 시나리오와 반드시 대응한다. 새 메서드/새 서비스/오버로드를 분류 없이 추가하면 실패한다. 쓰기 메서드의 트랜잭션 제거도 실패한다. HistoryWriter.account/record는 동일 트랜잭션 안의 수집 기반으로 별도 분류하고13개 경로 및 금지 payload 검사에서 실제 실행한다. 엔티티 setter나 Repository는 업무 진입점 목록이 아니며, 업무 쓰기를 서비스 밖으로 옮겨 이 검사를 우회하는 구조는 허용하지 않는다.
+
+### 비밀값 배제
+
+엔티티 전체나 요청 객체를 JSONB에 넣지 않는다. 계정 이력은 loginId/displayName/active/mustChangePassword/역할 코드, 역할 이력은 code/name/권한, 메뉴 이력은 명시적 노드 필드/순서/revision만 허용한다. mustChangePassword는 비밀번호 값이 아닌 상태다. 비밀번호 변경도 전후 비밀번호·해시 대신 이벤트와 상태만 남긴다.
+
+모든13개 성공 경로에서 before/after의 정확한 최상위 키와 금지 키를 검사하고, 실제 입력 비밀번호·DB 해시가 없는지 대조한다. 추가10건은 password/hash/session/CSRF/파일 본문 및 중첩 map/list/byte[]가 수집 경계를 통과하지 못하고 함께 실행한 업무 UPDATE도 롤백되는지 확인한다. 실제 HTTP 계정 생성에서는 세션/CSRF 토큰, 비밀번호, 위조 actorId와 추가 비밀 필드가 이력에 들어가지 않으며 actor가 서버의 인증 principal에서 정해짐을 검사한다. 파일 저장 기능은 아직 없으므로 파일 본문은 수집 경계의 거절 입력으로 검증하며 파일 업로드 이력은 후속 단계의 쓰기 경로 목록에 추가해야 한다.
+
+### 1만 건 조회 측정 방법
+
+PostgreSQL17, 이력10,000건, 메뉴/역할 각각5,000건, 대상10개(각1,000건), 행위자100명(각100건), 같은 시각2건씩 분포시킨다. 테스트 fixture는 계정/권한과 관계없는 합성 ID와 공개 문자열만 사용한다. ANALYZE 후 실제 Hibernate StatementInspector가 포착한 SQL을 같은 바인딩으로 `EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)` 실행한다. planner 설정/seqscan을 강제하지 않는다. DB가 캐시에 올라온 로컬 소규모 관측이며 운영 SLA·부하 성능 수치가 아니다.
+
+현재 인덱스는 V3의 `change_history_time(occurred_at,id)`, `change_history_resource(resource_type,resource_id,occurred_at)` 그대로다. 행위자 전용 인덱스와 대상 인덱스의 id 추가는 실제 이력 규모·조회 비율 증가 시 비교할 후속 후보로 남긴다. 이번 단계에는 새 마이그레이션이나 인덱스를 추가하지 않는다.
+
+### 1만 건 실제 SQL·EXPLAIN 결과
+
+최종 core 실행의 관측이다. 최신순은 시간 인덱스 역방향 스캔(0.029ms), 대상은 대상 인덱스 역방향 스캔+Incremental Sort(0.053ms), 행위자는 Seq Scan+Sort(0.498ms, 9,900행 필터 제외), 기간은 시간 인덱스 역방향 범위 스캔(0.028ms)이었다. 아래 시간은 단일 EXPLAIN 실행의 DB Execution Time이며 HTTP 응답 시간/반복 측정 평균이 아니다. 최신/대상/기간은 인덱스를 사용했고, 행위자는 사용하지 않았다.
+
+```text
+PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2); rows=10000; ANALYZE; default planner; size=50 (fetch 51)
+
+recent
+SELECT h.* FROM cms.change_history h ORDER BY h.occurred_at DESC, h.id DESC fetch first ? rows only
+bindings=[51]
+Limit  (cost=0.29..5.19 rows=51 width=127) (actual time=0.012..0.020 rows=51 loops=1)
+  Buffers: shared hit=4
+  ->  Index Scan Backward using change_history_time on change_history h  (cost=0.29..962.03 rows=10000 width=127) (actual time=0.011..0.016 rows=51 loops=1)
+        Buffers: shared hit=4
+Planning Time: 0.054 ms
+Execution Time: 0.029 ms
+
+target
+SELECT h.* FROM cms.change_history h WHERE h.resource_type = ? AND h.resource_id = ? ORDER BY h.occurred_at DESC, h.id DESC fetch first ? rows only
+bindings=[menu, resource-0, 51]
+Limit  (cost=1.80..78.62 rows=51 width=127) (actual time=0.035..0.045 rows=51 loops=1)
+  Buffers: shared hit=13
+  ->  Incremental Sort  (cost=1.80..754.95 rows=500 width=127) (actual time=0.034..0.042 rows=51 loops=1)
+        Sort Key: occurred_at DESC, id DESC
+        Presorted Key: occurred_at
+        Full-sort Groups: 2  Sort Method: quicksort  Average Memory: 33kB  Peak Memory: 33kB
+        Buffers: shared hit=13
+        ->  Index Scan Backward using change_history_resource on change_history h  (cost=0.29..732.87 rows=500 width=127) (actual time=0.020..0.031 rows=52 loops=1)
+              Index Cond: ((resource_type = 'menu'::text) AND (resource_id = 'resource-0'::text))
+              Buffers: shared hit=13
+Planning Time: 0.051 ms
+Execution Time: 0.053 ms
+
+actor
+SELECT h.* FROM cms.change_history h WHERE h.actor_id = ? ORDER BY h.occurred_at DESC, h.id DESC fetch first ? rows only
+bindings=[actor-0, 51]
+Limit  (cost=333.32..333.45 rows=51 width=127) (actual time=0.486..0.490 rows=51 loops=1)
+  Buffers: shared hit=205
+  ->  Sort  (cost=333.32..333.57 rows=100 width=127) (actual time=0.485..0.487 rows=51 loops=1)
+        Sort Key: occurred_at DESC, id DESC
+        Sort Method: quicksort  Memory: 50kB
+        Buffers: shared hit=205
+        ->  Seq Scan on change_history h  (cost=0.00..330.00 rows=100 width=127) (actual time=0.006..0.473 rows=100 loops=1)
+              Filter: (actor_id = 'actor-0'::text)
+              Rows Removed by Filter: 9900
+              Buffers: shared hit=205
+Planning Time: 0.041 ms
+Execution Time: 0.498 ms
+
+period
+SELECT h.* FROM cms.change_history h WHERE h.occurred_at >= ? AND h.occurred_at < ? ORDER BY h.occurred_at DESC, h.id DESC fetch first ? rows only
+bindings=[2026-01-01 00:10:00.0, 2026-01-01 00:11:00.0, 51]
+Limit  (cost=0.29..75.31 rows=51 width=127) (actual time=0.012..0.019 rows=51 loops=1)
+  Buffers: shared hit=4
+  ->  Index Scan Backward using change_history_time on change_history h  (cost=0.29..176.81 rows=120 width=127) (actual time=0.011..0.015 rows=51 loops=1)
+        Index Cond: ((occurred_at >= '2026-01-01 00:10:00'::timestamp without time zone) AND (occurred_at < '2026-01-01 00:11:00'::timestamp without time zone))
+        Buffers: shared hit=4
+Planning Time: 0.068 ms
+Execution Time: 0.028 ms
+```
+
+재실행 명령 (apps/server-v3, Java21/Docker):
+
+```powershell
+# 이번 단계 실행 범위: core 전체 + root 빠른 테스트
+.\gradlew.bat :cms-core:test --rerun :cms-core:spotlessCheck :spotlessCheck --console=plain
+.\gradlew.bat :test --rerun --console=plain
+# 이력만 집중 검사, SQL/EXPLAIN 산출물도 재생성
+.\gradlew.bat :cms-core:test --tests '*HistoryIntegrationTest' --rerun --console=plain
+# LOCO src/main·공통 설정·빌드 구성 변경 단계 또는 머지 전
+.\gradlew.bat allTests --rerun-tasks --console=plain
+```
+
+EXPLAIN 산출물은 `modules/cms-core/build/reports/history-query-plans.txt`다. 실제 실행 SQL을 수집하므로 쿼리가 변경되면 함께 다시 측정한다. 특정 인덱스가 항상 선택되도록 테스트를 고정하지는 않는다(통계·버전에 따라 planner 선택 가능).
+
+### 4단계 최종 검증 결과 (2026-11-07)
+
+| 실행 범위 | 전체 | 성공 | 실패 | 제외 | 명령 벽시계 시간 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| cms-core:test + core/root Spotless 검사 | 86 | 86 | 0 | 0 | 64.679초 |
+| root :test (core는 위 실행 결과 재사용) | 291 | 290 | 0 | 1 | 113.771초 |
+| 합계 | **377** | **376** | **0** | **1** | **178.450초(약2분58초)** |
+
+시간 합계는 두 Gradle 명령의 벽시계 시간 합이며 명령 사이 문서 작업 시간은 포함하지 않는다. 기존 HEIC 공통 제약1건만 제외됐다. 3단계 manifest의 core/root335건과 비교해 삭제0·추가42건이다(새 HistoryIntegrationTest: 성공 경로13·롤백13·금지 payload10·목록 검사/조회/API/HTTP 비밀값/EXPLAIN6). 실제 PostgreSQL17 컨테이너에서 실행했다.
+
+이번 단계는 **core 코드와 설계 문서만 변경**했다. LOCO src/main, 공통 설정, 빌드 구성, 기존 Flyway SQL은 변경하지 않았다. 승인된 범위 기준에 따라 **allTests·v2 comparisonTest·전체 build는 미실행**이다. 알려진 차이11건의 전체 비교 재검증은 이번 수치에 포함하지 않으며, 머지 전 allTests로 다시 확인한다. 포맷 검사는 통과했다. 측정 결과와 manifest는 `build/performance/cms-history-final/`에 남겼다.
+
+**CMS 4단계 완료 후 중단. 5단계는 사용자 확인 후 진행한다.**

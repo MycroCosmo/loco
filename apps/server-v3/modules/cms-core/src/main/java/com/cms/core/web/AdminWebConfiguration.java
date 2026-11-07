@@ -17,7 +17,12 @@ import org.springframework.security.web.csrf.*;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableWebSecurity
-@Import({AdminController.class, AdminAdvice.class, GovernanceController.class})
+@Import({
+  AdminController.class,
+  AdminAdvice.class,
+  GovernanceController.class,
+  HistoryController.class
+})
 public class AdminWebConfiguration {
   @Bean
   org.springframework.security.authentication.AuthenticationManager adminAuthenticationManager() {
