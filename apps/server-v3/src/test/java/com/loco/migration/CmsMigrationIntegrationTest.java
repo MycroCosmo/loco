@@ -127,6 +127,45 @@ class CmsMigrationIntegrationTest {
             });
   }
 
+  @Test
+  void upgradingV3PreservesAdminIdentityAssignmentsAndExistingHistory() throws Exception {
+    host()
+        .withPropertyValues("spring.flyway.target=3")
+        .run(context -> assertThat(context).hasNotFailed());
+    sql(
+        "INSERT INTO cms.admin_account VALUES ('existing-admin','existing','test-only-hash','Existing',true,false,7,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)");
+    sql(
+        "INSERT INTO cms.admin_account_role SELECT 'existing-admin',id FROM cms.admin_role WHERE code='SYSTEM_ADMIN'");
+    String account =
+        sql("SELECT row_to_json(a)::text FROM cms.admin_account a WHERE id='existing-admin'");
+    String assignments = sql("SELECT json_agg(ar)::text FROM cms.admin_account_role ar");
+    String history =
+        sql("SELECT json_agg(h ORDER BY installed_rank)::text FROM public.flyway_schema_history h");
+    String columns = publicColumns();
+    host()
+        .withPropertyValues("spring.flyway.target=4")
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThat(
+                      sql(
+                          "SELECT row_to_json(a)::text FROM cms.admin_account a WHERE id='existing-admin'"))
+                  .isEqualTo(account);
+              assertThat(sql("SELECT json_agg(ar)::text FROM cms.admin_account_role ar"))
+                  .isEqualTo(assignments);
+              assertThat(
+                      sql(
+                          "SELECT json_agg(h ORDER BY installed_rank)::text FROM public.flyway_schema_history h WHERE version IN ('1','2','3')"))
+                  .isEqualTo(history);
+              assertThat(publicColumns()).isEqualTo(columns);
+              assertThat(sql("SELECT revision FROM cms.menu_tree_revision WHERE id=1"))
+                  .isEqualTo("0");
+              assertThat(sql("SELECT version FROM cms.admin_role WHERE code='SYSTEM_ADMIN'"))
+                  .isEqualTo("0");
+              assertThat(context.getBean(Flyway.class).migrate().migrationsExecuted).isZero();
+            });
+  }
+
   private void baseline() {
     Flyway.configure()
         .dataSource(database.getJdbcUrl(), database.getUsername(), database.getPassword())

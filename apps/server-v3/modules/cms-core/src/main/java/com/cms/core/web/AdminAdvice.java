@@ -13,6 +13,25 @@ import org.springframework.web.bind.annotation.*;
 @RestControllerAdvice(basePackages = "com.cms.core")
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class AdminAdvice {
+  @ExceptionHandler({
+    org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
+    org.springframework.web.bind.MissingServletRequestParameterException.class
+  })
+  ResponseEntity<?> parameter() {
+    return ResponseEntity.badRequest().body(Map.of("statusCode", 400, "message", "Invalid input"));
+  }
+
+  @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+  ResponseEntity<?> integrity() {
+    return ResponseEntity.status(409)
+        .body(Map.of("statusCode", 409, "message", "Resource conflict"));
+  }
+
+  @ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException.class)
+  ResponseEntity<?> conflict() {
+    return ResponseEntity.status(409).body(Map.of("statusCode", 409, "message", "Stale version"));
+  }
+
   @ExceptionHandler(AdminProblem.class)
   ResponseEntity<?> problem(AdminProblem problem) {
     return ResponseEntity.status(problem.status())

@@ -59,6 +59,10 @@ public class AdminAccount {
     return roles.stream().anyMatch(r -> r.getCode().equals("SYSTEM_ADMIN"));
   }
 
+  public Set<AdminRole> getRoles() {
+    return java.util.Collections.unmodifiableSet(roles);
+  }
+
   public AdminIdentity identity() {
     return new AdminIdentity(
         id, loginId, displayName, active, authVersion, mustChangePassword, isSystemAdmin());

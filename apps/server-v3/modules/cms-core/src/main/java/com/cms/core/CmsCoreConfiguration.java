@@ -16,6 +16,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
   CoreAuditingConfiguration.class,
   AdminService.class,
   HistoryWriter.class,
+  com.cms.core.permission.PermissionCatalog.class,
+  com.cms.core.permission.PermissionService.class,
+  com.cms.core.account.RoleService.class,
+  com.cms.core.menu.MenuService.class,
   AdminWebConfiguration.class
 })
 public class CmsCoreConfiguration {}

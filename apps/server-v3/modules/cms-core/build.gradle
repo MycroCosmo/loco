@@ -7,6 +7,8 @@ group = 'com.cms'
 version = rootProject.version
 
 java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+// Spring MVC and Spring Data need parameter names in this plain java-library module.
+tasks.withType(JavaCompile).configureEach { options.compilerArgs.add('-parameters') }
 repositories { mavenCentral() }
 
 spotless { java { googleJavaFormat('1.28.0') } }

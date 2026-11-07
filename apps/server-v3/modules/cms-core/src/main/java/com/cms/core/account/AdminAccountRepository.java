@@ -19,4 +19,7 @@ public interface AdminAccountRepository extends JpaRepository<AdminAccount, Stri
   @Query(
       "select count(a) from AdminAccount a join a.roles r where a.active=true and r.code='SYSTEM_ADMIN'")
   long activeSystemAdmins();
+
+  @Query("select count(a) from AdminAccount a join a.roles r where r.id=:roleId")
+  long assignedToRole(String roleId);
 }

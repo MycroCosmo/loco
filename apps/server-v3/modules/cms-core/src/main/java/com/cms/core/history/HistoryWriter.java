@@ -22,10 +22,22 @@ public class HistoryWriter {
       String id,
       Map<String, Object> before,
       Map<String, Object> after) {
+    record(actor, action, "admin-account", id, before, after);
+  }
+
+  @Transactional(propagation = Propagation.MANDATORY)
+  public void record(
+      String actor,
+      String action,
+      String resourceType,
+      String id,
+      Map<String, Object> before,
+      Map<String, Object> after) {
     history.saveAndFlush(
         new ChangeHistory(
             actor,
             action,
+            resourceType,
             id,
             LocalDateTime.now(clock).truncatedTo(ChronoUnit.MILLIS),
             before,

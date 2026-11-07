@@ -43,13 +43,14 @@ public class ChangeHistory {
   public ChangeHistory(
       String actorId,
       String action,
+      String resourceType,
       String resourceId,
       LocalDateTime now,
       Map<String, Object> before,
       Map<String, Object> after) {
     this.actorId = actorId;
     this.action = action;
-    this.resourceType = "admin-account";
+    this.resourceType = resourceType;
     this.resourceId = resourceId;
     this.occurredAt = now;
     this.beforeData = before;

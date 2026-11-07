@@ -1,6 +1,6 @@
 # CMS(B) 핵심 모듈 설계안
 
-상태: **2026-11-07 CMS 2단계 완료. CLI 마이그레이션 경계를 수정하고, 3단계 구현 전 C-12/C-13 결정을 기다린다(14~15절).**
+상태: **2026-11-07 CMS 2단계 완료. CLI 경계 수정 완료. C-12/C-13 확정에 따라 3단계를 구현·검증하고 완료 후 중단한다(15~16절).**
 
 작성일: 2026-11-07. 기준 main `9dc3c09`는 PR #2의 merge commit이며 이관 최종 `7f25789`를 부모로 보존한다. 이 main에서 `feature/cms-core`를 만들었다. 아래 1.1절이 최신 확정 기록이다. 8절의 미채택 대안은 비교 이력으로 보존한다. 아직 구현하지 않은 업무 모델·API 초안과 완료된 1·2단계를 구분한다.
 
@@ -286,7 +286,7 @@ A는 core가 S3 SDK 타입을 노출하지 않는 계약, 조립 인프라에서
 
 C-9-3의 초기 파일 크기·형식과 C-4의 세션/로그인 수명·횟수는 사용자 승인됐다. 변경할 때는 항목 이름과 변경값을 함께 기록한다. 대용량 presigned 업로드·비동기 변환은 기존 3단계 이후 백로그로 유지한다.
 
-## 9. 승인된 구현 순서 — 3단계 신규 결정 확인 대기
+## 9. 승인된 구현 순서 — 이번에는 3단계 완료 후 중단
 
 1. C-1/C-7 경계·core 단독 기동·migration 테스트. 현재 V1/기존 회귀 유지 확인.
 2. 관리자 계정·초기 생성·세션/CSRF·앱 JWT와의 교차 인증 차단. 이력 기반도 함께 준비.
@@ -295,7 +295,7 @@ C-9-3의 초기 파일 크기·형식과 C-4의 세션/로그인 수명·횟수�
 5. 파일 포트·MinIO·변환 어댑터·보상 정리, UI 통합. 실제 외부 키 사용 없는 테스트.
 6. 선택된 LOCO 전용 관리 메뉴 연결, 기존 앱 전체 비교와 CMS 활성 상태 통합 회귀.
 
-각 구현 단계는 별도 커밋·검증 수치·시간 기록을 남기는 방식으로 제안한다. **현재 요청은 3번까지이며, 신규 정책 C-12/C-13은 확정 후 구현한다.** 새 업무 결정이 생기면 C-번호와 항목 이름으로 답을 기다린다.
+각 구현 단계는 별도 커밋·검증 수치·시간 기록을 남기는 방식으로 제안한다. **현재 요청은 3번까지이며, C-12/C-13은 확정됐으며 3단계 완료 후 중단한다.** 새 업무 결정이 생기면 C-번호와 항목 이름으로 답을 기다린다.
 
 ## 10. 최초 설계 커밋 dc524f7의 검증·한계(과거 기록)
 
@@ -473,11 +473,11 @@ Argon2id 해시 실측: Windows 11 / Java 21.0.5, 동일 프로세스 준비 실
 
 직전 1,468개 manifest 대비 누락0·신규2다. 알려진 차이11(개선6·의도5·보류0)의 case/kind/reason은 모두 동일하다. 변경은 CLI·회귀 테스트·이 문서뿐이며 V1/V2/V3 SQL, v2, Flutter, 기존 비교 fixture는 바꾸지 않았다. 로그·시간·건수·manifest는 `build/cms-cli-boundary*`에 보존했다. 수정 전 재현은 새 음성 검사2건 모두 실패했고, 수정 후 위 전체 실행에서 통과했다.
 
-빠른 재확인은 `./gradlew.bat :cms-core:test --rerun --console=plain`으로 한다. 3단계 운영 코드와 교차 이동 실험은 C-12/C-13 결정 후 진행한다.
+빠른 재확인은 `./gradlew.bat :cms-core:test --rerun --console=plain`으로 한다. 3단계 운영 코드와 교차 이동 실험은 16절에서 이어간다.
 
 ## 15. 3단계 구현 전 추가 결정
 
-C-2/C-3/C-9-2의 트리·권한 계산·잠금 방식은 확정됐다. 아래 두 정책은 기존 문서와 노션에 구체적인 선택이 없다. 이번에는 CLI 수정만 마치고 역할·메뉴 운영 코드는 추가하지 않는다.
+C-2/C-3/C-9-2의 트리·권한 계산·잠금 방식은 확정됐다. 아래 두 정책은 2026-11-07 사용자 답변으로 모두 A가 확정됐다. 미채택 B는 비교 이력으로 보존한다.
 
 ### C-12 보안 관리 권한의 위임 범위
 
@@ -485,7 +485,7 @@ C-2/C-3/C-9-2의 트리·권한 계산·잠금 방식은 확정됐다. 아래 �
 
 | 선택 | 범위 | 장점 | 단점 |
 | --- | --- | --- | --- |
-| A. 최고관리자만 보안 관리 (권장) | 계정 관리·역할 CRUD·권한 편집·역할 배정은 SYSTEM_ADMIN만. 일반 관리자는 자기 접근 근거를 조회 | 2단계 정책 유지, 역할 편집을 통한 자기 권한 상승 경로가 단순하게 차단됨 | 역할 설정·계정 배정 업무가 최고관리자에게 집중 |
+| **A. 최고관리자만 보안 관리 (확정)** | 계정 관리·역할 CRUD·권한 편집·역할 배정은 SYSTEM_ADMIN만. 일반 관리자는 자기 접근 근거를 조회 | 2단계 정책 유지, 역할 편집을 통한 자기 권한 상승 경로가 단순하게 차단됨 | 역할 설정·계정 배정 업무가 최고관리자에게 집중 |
 | B. 별도 보안 관리 권한으로 위임 | 계정/역할 관리 키를 나누어 위임. 부여 가능한 권한은 수행자 보유 범위 안으로 제한하고 SYSTEM_ADMIN 부여·보호는 최고관리자만 | 운영 담당자가 제한된 범위의 권한 설정을 직접 처리 | 공유 역할 편집·자기 역할 변경까지 포함한 권한 상승 방지 검사와 설명이 더 복잡 |
 
 두 안 모두 일반 업무 키는 READ/MANAGE·역할 합집합이고, MANAGE가 READ를 포함한다. 업무 권한과 메뉴 위치를 결합하지 않는다.
@@ -496,13 +496,105 @@ C-2/C-3/C-9-2의 트리·권한 계산·잠금 방식은 확정됐다. 아래 �
 
 | 선택 | 범위 | 장점 | 단점 |
 | --- | --- | --- | --- |
-| A. 코드 등록 템플릿 (권장) | 조회자(선택한 업무 키의 READ), 관리자(선택한 업무 키의 MANAGE) 등의 고정 템플릿에서 일반 역할 생성 | 추가 템플릿 편집 API·테이블 없이 이해하기 쉬움, 기존 역할에 권한이 조용히 전파되지 않음 | 템플릿 종류 변경에는 코드 배포 필요 |
+| **A. 코드 등록 템플릿 (확정)** | 조회자(선택한 업무 키의 READ), 관리자(선택한 업무 키의 MANAGE) 등의 고정 템플릿에서 일반 역할 생성 | 추가 템플릿 편집 API·테이블 없이 이해하기 쉬움, 기존 역할에 권한이 조용히 전파되지 않음 | 템플릿 종류 변경에는 코드 배포 필요 |
 | B. DB에서 편집하는 템플릿 | 권한 있는 관리자가 이름·업무 키·동작 조합을 저장하고 복사해 역할 생성 | 조직별 조합을 배포 없이 재사용 | 템플릿 CRUD·권한·버전·이력과 일반 역할의 차이를 관리해야 함 |
 
-### 결정 후 진행할 검증
+### 3단계 필수 검증
 
 - `sample.documents`만 core 가상 업무로 등록해 READ/MANAGE, 합집합, 권한 회수, 접근 근거를 검사한다.
 - 트리 메타 행 비관적 락을 잡은 뒤 revision 검사와 이동/정렬/이력을 한 트랜잭션에서 처리한다. 이동 전후 대상·모든 자손의 ID, 연결 데이터·권한·이력 참조, 설명 결과를 비교한다.
 - LOCO의 DatabaseRequestRace에 의존하지 않고 core 테스트에서 같은 방식의 DB gate/pg_stat_activity 관측을 사용한다. 실제 두 HTTP 이동 요청이 메타 행에서 대기한 것을 확인한 뒤 해제한다. 낡은 revision은409, 순환0을 필수 검사한다.
 - 락 없는 비교는 운영 우회 옵션을 추가하지 않고 테스트 전용 트랜잭션에서 두 사전 검사를 먼저 완료시킨 뒤 A→B/B→A 쓰기를 실행한다. 최종 순환 수·성공/거절 수를 기록하고, 메타 락+revision 실행 결과와 구분한다.
 - API/스키마·이력은 다음 가용 V4에서 추가하며, CLI는 그때도 마이그레이션하지 않는다.
+
+## 16. 3단계 확정·구현 기록
+
+C-12 A: 보안 관리(계정·역할 CRUD·권한 편집·역할 배정)는 SYSTEM_ADMIN만 수행한다. 일반 관리자는 자신의 접근 근거만 조회한다. **보안 관리 업무가 최고관리자에게 집중**되는 한계가 있다. 관리자 수 증가 자체만으로 B로 자동 전환하지 않는다. 역할 배정/회수의 반복적인 승인 지연, 최고관리자 부재 시 대응 지연, 부서별 관리 담당자 필요가 운영 기록으로 확인되면 B를 별도 설계한다. 이때 위임할 업무 키 범위, 수행자 보유 권한 상한, 공유/자기 역할 편집에 의한 권한 상승 방지, 마지막 최고관리자 보호·감사·회수 테스트를 승인받은 뒤 전환한다.
+
+C-13 A: 코드 등록 READ_ONLY/MANAGER 템플릿에서 선택한 업무 키의 권한을 **생성 시 한 번 복사**한다. 기존 역할은 템플릿·카탈로그 변경에 자동 동기화되지 않는다. 노션 결정 변경 기록에도 두 결정을 반영했다.
+
+### 파일과 저장·인증 경계
+
+- `V4__roles_permissions_and_menu_tree.sql`: 역할의 version과 `cms.role_permission`, `cms.menu_node`, `cms.menu_tree_revision`을 추가한다. 메뉴 ID는 TEXT UUID이고 parent FK와 별개다. 기존 V1~V3와 public 테이블은 변경하지 않는다. CLI는 계속 Flyway OFF·JPA validate만 실행한다.
+- `PermissionCatalog`: 코드가 제공하는 업무 키/라벨/허용 동작과 화면 키를 등록한다. 호스트는 `Contribution` bean으로 확장하며 core는 업무 의미를 해석하지 않는다. 카탈로그는 코드가 원본이므로 별도 편집 DB 테이블/API를 만들지 않았다. 중복 키·등록되지 않은 화면/권한 조합은 거절한다.
+- `Action`/`PermissionService`: MANAGE⊃READ, 역할 합집합으로 판정한다. 설명 응답은 accountId, permissionKey, 요청 동작, allowed, reason, 부여 역할 ID/code/동작 및 MANAGE로 READ가 포함되는지를 반환한다. 일반 관리자는 자기 자신만 설명을 볼 수 있다. SYSTEM_ADMIN도 등록된 키/동작만 사용하지만 그 범위에서는 보호된 최고관리자 자격으로 허용된다.
+- `AdminRole`/`RoleService`: 고정 code·UUID와 수정 가능한 이름/권한, JPA @Version을 둔다. 권한은 업무 키마다 READ 또는 MANAGE 하나를 저장하고 READ 포함은 판정 시 계산한다. SYSTEM_ADMIN 역할은 편집/삭제 불가, 사용 중 역할 삭제 거절, 낡은 version409다. READ_ONLY/MANAGER 템플릿은 선택한 키만 복사한다. `cms.accounts`·`cms.roles`는 SYSTEM_ADMIN 전용이며 일반 역할에 그 권한을 넣는 요청도 거절한다.
+- 계정 역할 배정은 기존 `AdministrationState` 행 잠금 안에서 수행자 자격과 마지막 활성 최고관리자를 다시 검사한다. expected authVersion이 다르면409다. 배정 저장 시 authVersion을 증가시켜 기존 세션은 다음 요청에서401이 된다. 역할 자체의 권한 편집은 세션을 종료하지 않고 다음 업무 요청부터 새 권한으로 판정한다(권한 회수403 검증). 비활성 계정도 다음 요청에서401이다.
+- `MenuNode`/`MenuRepository`: parentId와 sortOrder만 위치로 사용한다. 부모는 GROUP만 허용하고 PAGE는 자식 없는 화면 항목이다. 화면 키/권한 키는 코드 카탈로그에 등록된 짝이어야 한다. 자기 자신·자손 아래 이동, 없는 부모, 다른 부모의 beforeSiblingId, 자식 있는 메뉴 삭제를 거절한다. 메뉴 삭제로 업무 데이터/권한/이력을 cascade 삭제하지 않는다.
+- `MenuTreeRevision`/`MenuTreeRepository`/`MenuService`: 생성·수정·이동·삭제 모두 동일한 메타 행 SELECT FOR UPDATE 이후 권한과 revision을 검사한다. 형제 순서는 연속 정수로 재배치한다. 변경과 revision 증가·이력은 한 트랜잭션이다. 읽기는 REPEATABLE_READ 스냅샷에서 revision과 전체 메뉴 목록을 읽고 메모리에서 정리한다. 부모별 LAZY 순회는 하지 않는다.
+- 이동 미리보기는 잠금을 예약하지 않는다. 저장 시 다시 검사하며, 미리보기에는 이전/새 부모·위치와 `permissionsChanged:false`, `권한 변화 없음`을 반환한다. 이동은 권한 테이블을 변경하지 않는다. GROUP 권한 상속은 없으며, 탐색에는 허용된 PAGE와 그 조상 GROUP만 포함한다. visible=false는 해당 탐색 가지를 숨기지만 업무 API의 권한을 회수하지 않는다.
+- `GovernanceController`: 관리자 체인 안에 역할·메뉴·설명 API를 연결한다. `HistoryWriter.record`는 허용된 DTO snapshot을 같은 트랜잭션에 기록하며 계정·역할·메뉴의 resourceType/resourceId를 구분한다. 기존 계정 이력의 형식은 유지한다.
+- core가 일반 java-library이므로 Spring MVC 인자 바인딩과 Spring Data의 이름 있는 쿼리를 위해 `-parameters`를 명시했다. 라이브러리는 추가하지 않았다. `CoreStandaloneIntegrationTest`는 최신 V4를 실행하고, 기존 V2/V3 검사는 각각 target을 유지한다. V3→V4 업그레이드 테스트는 기존 관리자 ID·역할 연결·public 컬럼·이전 Flyway 이력 보존을 확인한다.
+
+### 3단계 API
+
+아래 경로는 `/admin/api/core` 기준이다. 모든 변경 요청은 관리자 세션과 CSRF가 필요하다.
+
+| API | 권한·입력 |
+| --- | --- |
+| GET/POST `/roles`, GET/PUT/DELETE `/roles/{id}` | SYSTEM_ADMIN. 생성 `{code,name,template?,permissionKeys?}`, 이름 수정 `{name,version}`, 삭제 `?version=` |
+| PUT `/roles/{id}/permissions` | SYSTEM_ADMIN. `{permissions:{업무키:READ또는MANAGE},version}` 전체 교체 |
+| PUT `/accounts/{id}/roles` | SYSTEM_ADMIN. `{roleIds:[...],authVersion}` 전체 교체 |
+| GET `/role-templates`, GET `/permissions` | SYSTEM_ADMIN. 코드 템플릿/카탈로그 조회 |
+| GET `/permissions/explain?permissionKey=...&action=READ` | 본인 설명. `accountId`로 다른 계정을 지정하는 것은 SYSTEM_ADMIN만 |
+| GET `/menus` | cms.menus READ. `{revision,nodes:[...]}` 평탄 목록 |
+| POST `/menus` | cms.menus MANAGE. `{title,type,parentId?,beforeSiblingId?,routeKey?,permissionKey?,visible,revision}` |
+| PUT `/menus/{id}` | cms.menus MANAGE. `{title,routeKey?,permissionKey?,visible,revision}`. GROUP/PAGE 유형은 생성 후 불변 |
+| POST `/menus/{id}/move-preview`, PUT `/menus/{id}/position` | cms.menus MANAGE. `{parentId?,beforeSiblingId?,revision}`. 부모 누락/null은 루트, beforeSiblingId 누락/null은 마지막 |
+| DELETE `/menus/{id}?revision=...` | cms.menus MANAGE. 자식/업무 FK 참조가 있으면 삭제 거절 |
+| GET `/navigation` | 로그인한 관리자의 현재 접근 권한에 따른 탐색. 메뉴 편집 권한은 필요 없음 |
+
+역할 및 트리 version/revision은 낡은 편집 내용으로 덮어쓰는 것을 막는다. 409 시 최신 값을 다시 읽고 변경을 검토한다. 메뉴 편집 권한은 보안 관리 권한이나 해당 업무 데이터 접근 권한을 부여하지 않는다. 프런트 화면과 LOCO 전용 업무 등록은 이번 단계에 포함하지 않는다.
+
+### 실제 DB 경합 관측
+
+`GovernanceIntegrationTest`와 core 테스트 전용 `DatabaseRequestRace`를 사용했다. 운영 코드에 락을 끄는 옵션은 없다. 테스트 클래스패스에는 LOCO가 없으며, 업무는 `sample.documents`와 테스트 전용 `sample.document` FK로만 구성했다.
+
+| 비교 | 재현 방법 | 5회 관측 결과 |
+| --- | --- | --- |
+| 락 없는 사전 검사→UPDATE | 각 트랜잭션이 A→B/B→A의 순환 검사를 마친 뒤 barrier로 함께 쓰기. 시험용 JDBC 트랜잭션만 사용 | 10건 커밋, **순환 발생 5/5회**, 매회 2개 노드 참여(합계10) |
+| 운영 비관적 락+revision | DB gate가 메타 행을 잡은 동안 실제 HTTP 요청2건의 pg_stat_activity Lock 대기를 확인한 뒤 해제 | **200 5건 / 409 5건, 순환0/5회**, revision은 회당1 증가 |
+
+락 없는 경우의 10건 커밋은 정합성 성공이 아니다. 두 사전 검사가 모두 통과할 수 있는 일정으로 경쟁을 강제한 재현이며, 운영에서 발생할 확률이나 처리량 측정으로 해석하지 않는다. 보호된 경로의 후발 요청은 갱신된 revision 때문에409로 거절된다. 최신 revision으로 재시도해도 자손 아래 이동은 별도 순환 검사로 거절한다.
+
+같은 형제 동시 정렬, 이동 대 삭제도 실제 두 요청을 gate에서 만나게 해 각200/409와 정렬·순환 불변식을 확인했다. 마지막 활성 최고관리자 동시 강등은 administration_state gate에서 재현해200/409 및 활성 최고관리자1명을 확인했다.
+
+### 15절 검증 대응
+
+| 요구 | 실제 검사 |
+| --- | --- |
+| core가 업무를 모름 | core 독립 기동/컴파일 경계 유지. 가상 sample.documents의 READ/MANAGE·읽기 전용 sample.archive만 테스트 등록 |
+| 하위 메뉴 이동 시 ID·연결 유지 | 대상/모든 자손 ID, 자손 전체 DTO(권한 키 포함), sample.document의 기존 ID/내용/menu_id, role_permission 전후 동일, 기존 history ID/resourceId/JSON 불변 |
+| 권한 변화 없음·접근 근거 | 미리보기 문구/false 및 이동 전후 Explanation 완전 동일. 역할 합집합·MANAGE의 READ 포함·없는 역할·비활성·일반 관리자의 타인 설명 거절 |
+| 회수·메뉴 숨김 | 역할 권한 회수 후 같은 세션의 업무 쓰기403/읽기200. 숨긴 메뉴의 업무 API 접근은 기존 권한에 따라200. 그룹만으로 권한을 얻지 않음 |
+| 트리/역할 이력 원자성 | 이력 CHECK 실패 주입 후 메뉴·형제 순서·revision·이력 및 역할 권한/version 전체 롤백 |
+| 동시 이동·정렬·삭제 | 위 경합 표 및200/409, 순환0·정렬 연속·낡은 revision 거절 |
+| 스키마/기존 앱 보존 | V3→V4 이관 보존, core 최신 기동, CLI 스키마 없는 DB 불변 회귀 유지, LOCO 전체 회귀·알려진 차이 비교 |
+
+재실행:
+
+```powershell
+# apps/server-v3, Java21/Docker
+.\gradlew.bat :cms-core:test --rerun --console=plain
+# 경합 및 sample.documents 권한·메뉴 검사만
+.\gradlew.bat :cms-core:test --tests '*GovernanceIntegrationTest' --rerun --console=plain
+# 기존 LOCO 전체 비교 + core + build + 시간/manifest
+.\scripts\measure-tests.ps1 -Label cms-governance-final
+```
+
+집중 실행에서 core44건과 호스트 health·migration15건을 합쳐59건 모두 성공했다(Gradle 1분33초). 최종 전체 회귀 수치와 시간은 아래에 기록한다. 이번 작업은 3단계에서 중단한다.
+
+### 최종 전체 회귀·build 결과 (2026-11-07)
+
+`measure-tests.ps1 -Label cms-governance-final`을 v2 이미지 캐시가 있는 상태에서 실행했다. 전체 벽시계 시간은 **1,103.009초(18분23초)**이며, Gradle build·Spotless 검사를 포함한다.
+
+| 작업 | 전체 | 성공 | 실패 | 제외 |
+| --- | ---: | ---: | ---: | ---: |
+| test (v3) | 291 | 290 | 0 | 1 |
+| cms-core:test | 44 | 44 | 0 | 0 |
+| comparisonTest (기존 LOCO 전체) | 1,152 | 1,152 | 0 | 0 |
+| 합계 | **1,487** | **1,486** | **0** | **1** |
+
+제외1건은 기존 HEIC 공통 제약이다. 알려진 차이 **11건(개선6·의도5·보류0)**의 case/kind/reason은 이전 보고서와 모두 동일하다. v2 재시작은17회였다. 기존 CLI 수정 회귀의1,470건과 manifest를 대조했으며, Governance16건과 V3→V4 업그레이드1건이 추가됐다. 기존 파라미터 테스트2건은 `-parameters` 적용으로 표시명만 `[1] false`/`[2] true`에서 `[1] partial=false`/`[2] partial=true`로 바뀌었다. 테스트 삭제는 없다.
+
+측정 산출물은 로컬 `build/performance/cms-governance-final/`의 `result.json`, `test-manifest.txt`, `comparisonTest-summary.json`, `gradle.log`에 남긴다. 운영 core JAR에는 테스트 전용 경합 도구·가상 업무 컨트롤러가 포함되지 않는다. core 운영 코드의 LOCO 의존과 호스트 migration 위치 참조는 없으며, v2·Flutter·V1~V3는 수정하지 않았다. **CMS 3단계 완료. 4단계는 사용자 확인 후 진행한다.**

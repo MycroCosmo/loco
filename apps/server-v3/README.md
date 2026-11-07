@@ -540,3 +540,7 @@ TransactionTemplate의 커밋 경계, multipart 지연 파싱, 네이티브 프�
 
 `MarkerCells`는 장소 쓰기와 별개로 SELECT 후 각 셀을 커밋한다. 키 생성(`CoordinateKeys`)과 PostgreSQL ROUND가 다른 기존 제약도 보존한다. `PrismaFloats`는 Prisma 5의 Float 입출력 변환을 맞추며 Node는 테스트 oracle에서만 사용한다.
 입력/응답 fixture와 DB·부분 실패·알림 계약은 `src/test/java/com/loco/places`에 있다. `PlaceWriteSupport`는 UUID/시각 형식 검사와 비-ID 기준의 DB 행 대응을 공유한다.
+
+## CMS 역할·메뉴 기반
+
+관리자 보안 관리는 SYSTEM_ADMIN만, 업무 권한은 READ/MANAGE 합집합이다. 코드 템플릿을 복사해 역할을 만들며 기존 역할로 자동 전파하지 않는다. 메뉴 이동은 UUID를 유지하고 트리 메타 행 잠금+revision으로 동시 순환을 막는다. API·실제 DB 경합 수치·검증 명령은 [CMS 설계 16절](CMS_CORE_DESIGN.md#16-3단계-확정구현-기록)을 참고한다. CLI는 기존 스키마 검증만 하며 V4 적용은 배포 앱 기동 시 수행한다.
