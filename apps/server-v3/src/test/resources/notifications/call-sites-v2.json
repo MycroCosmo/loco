@@ -1,0 +1,146 @@
+{
+  "transport" : {
+    "blockedProbes" : 3,
+    "unexpectedAttempts" : 0,
+    "credentialMode" : "no service-account values; empty object only in SDK stub",
+    "firebaseNetwork" : false
+  },
+  "rows" : [ {
+    "name" : "public-join",
+    "status" : 201,
+    "deliveryPendingAtResponse" : true,
+    "committedMembers" : 1,
+    "messages" : [ {
+      "token" : "owner-token",
+      "notification" : {
+        "title" : "새 멤버 가입",
+        "body" : "compat님이 \"room-4\"에 가입했습니다."
+      },
+      "data" : {
+        "type" : "member_joined",
+        "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000004"
+      },
+      "apns" : {
+        "payload" : {
+          "aps" : {
+            "sound" : "default"
+          }
+        }
+      },
+      "android" : {
+        "priority" : "high"
+      }
+    } ]
+  }, {
+    "name" : "repeat-public-join",
+    "status" : 201,
+    "deliveryPendingAtResponse" : true,
+    "committedMembers" : 1,
+    "messages" : [ {
+      "token" : "owner-token",
+      "notification" : {
+        "title" : "새 멤버 가입",
+        "body" : "compat님이 \"room-4\"에 가입했습니다."
+      },
+      "data" : {
+        "type" : "member_joined",
+        "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000004"
+      },
+      "apns" : {
+        "payload" : {
+          "aps" : {
+            "sound" : "default"
+          }
+        }
+      },
+      "android" : {
+        "priority" : "high"
+      }
+    } ]
+  }, {
+    "name" : "private-code",
+    "status" : 201,
+    "deliveryPendingAtResponse" : true,
+    "committedMembers" : 1,
+    "messages" : [ {
+      "token" : "owner-token",
+      "notification" : {
+        "title" : "새 멤버 가입",
+        "body" : "compat님이 \"room-3\"에 가입했습니다."
+      },
+      "data" : {
+        "type" : "member_joined",
+        "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000003"
+      },
+      "apns" : {
+        "payload" : {
+          "aps" : {
+            "sound" : "default"
+          }
+        }
+      },
+      "android" : {
+        "priority" : "high"
+      }
+    } ]
+  }, {
+    "name" : "owner-joins-self",
+    "status" : 201,
+    "deliveryPendingAtResponse" : true,
+    "committedMembers" : 1,
+    "messages" : [ {
+      "token" : "self-token",
+      "notification" : {
+        "title" : "새 멤버 가입",
+        "body" : "compat님이 \"room-1\"에 가입했습니다."
+      },
+      "data" : {
+        "type" : "member_joined",
+        "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001"
+      },
+      "apns" : {
+        "payload" : {
+          "aps" : {
+            "sound" : "default"
+          }
+        }
+      },
+      "android" : {
+        "priority" : "high"
+      }
+    } ]
+  }, {
+    "name" : "place-created",
+    "status" : 201,
+    "deliveryPendingAtResponse" : true,
+    "committedPlace" : true,
+    "committedCells" : 3,
+    "messages" : [ {
+      "token" : "owner-token",
+      "notification" : {
+        "title" : "새 장소 추가",
+        "body" : "compat님이 \"room-1\"에 \"notification-place\"을 추가했습니다."
+      },
+      "data" : {
+        "type" : "place_added",
+        "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+        "placeId" : "$createdPlace"
+      },
+      "apns" : {
+        "payload" : {
+          "aps" : {
+            "sound" : "default"
+          }
+        }
+      },
+      "android" : {
+        "priority" : "high"
+      }
+    } ]
+  }, {
+    "name" : "marker-failure-after-place-commit",
+    "status" : 500,
+    "committedPlaces" : 1,
+    "sends" : 0
+  } ]
+}

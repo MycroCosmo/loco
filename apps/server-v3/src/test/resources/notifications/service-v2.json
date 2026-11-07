@@ -1,0 +1,180 @@
+{
+  "transport" : {
+    "blockedProbes" : 3,
+    "unexpectedAttempts" : 0,
+    "credentialMode" : "no service-account values; empty object only in SDK stub",
+    "firebaseNetwork" : false
+  },
+  "rows" : [ {
+    "name" : "configuration:undefined",
+    "selects" : 0,
+    "sends" : 0,
+    "disabled" : true
+  }, {
+    "name" : "configuration:",
+    "selects" : 0,
+    "sends" : 0,
+    "disabled" : true
+  }, {
+    "name" : "configuration:{broken",
+    "selects" : 0,
+    "sends" : 0,
+    "disabled" : true
+  }, {
+    "name" : "configuration:{}",
+    "selects" : 0,
+    "sends" : 0,
+    "disabled" : true
+  }, {
+    "name" : "configuration:null",
+    "selects" : 0,
+    "sends" : 0,
+    "disabled" : true
+  }, {
+    "name" : "missing-user",
+    "selects" : 1,
+    "messages" : [ ]
+  }, {
+    "name" : "null-token",
+    "selects" : 1,
+    "messages" : [ ]
+  }, {
+    "name" : "empty-token",
+    "selects" : 1,
+    "messages" : [ ]
+  }, {
+    "name" : "token",
+    "selects" : 1,
+    "messages" : [ {
+      "token" : "offline-token",
+      "notification" : {
+        "title" : "관측 제목",
+        "body" : "관측 내용"
+      },
+      "data" : {
+        "type" : "probe",
+        "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001"
+      },
+      "apns" : {
+        "payload" : {
+          "aps" : {
+            "sound" : "default"
+          }
+        }
+      },
+      "android" : {
+        "priority" : "high"
+      }
+    } ]
+  }, {
+    "name" : "deleted-user-token",
+    "selects" : 1,
+    "messages" : [ {
+      "token" : "deleted-token",
+      "notification" : {
+        "title" : "관측 제목",
+        "body" : "관측 내용"
+      },
+      "data" : {
+        "type" : "probe",
+        "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001"
+      },
+      "apns" : {
+        "payload" : {
+          "aps" : {
+            "sound" : "default"
+          }
+        }
+      },
+      "android" : {
+        "priority" : "high"
+      }
+    } ]
+  }, {
+    "name" : "messaging/internal-error",
+    "sends" : 1,
+    "remainingToken" : "old-token"
+  }, {
+    "name" : "messaging/invalid-registration-token",
+    "sends" : 1,
+    "remainingToken" : "old-token"
+  }, {
+    "name" : "messaging/registration-token-not-registered",
+    "sends" : 1,
+    "remainingToken" : null
+  }, {
+    "name" : "replacement-token-race",
+    "sentToken" : "old-token",
+    "remainingToken" : null
+  }, {
+    "name" : "map-3-recipients-2-duplicate-tokens",
+    "logicalUserReads" : 3,
+    "selects" : 2,
+    "messages" : [ {
+      "token" : "shared-token",
+      "notification" : {
+        "title" : "관측 제목",
+        "body" : "관측 내용"
+      },
+      "data" : {
+        "type" : "probe",
+        "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001"
+      },
+      "apns" : {
+        "payload" : {
+          "aps" : {
+            "sound" : "default"
+          }
+        }
+      },
+      "android" : {
+        "priority" : "high"
+      }
+    }, {
+      "token" : "shared-token",
+      "notification" : {
+        "title" : "관측 제목",
+        "body" : "관측 내용"
+      },
+      "data" : {
+        "type" : "probe",
+        "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001"
+      },
+      "apns" : {
+        "payload" : {
+          "aps" : {
+            "sound" : "default"
+          }
+        }
+      },
+      "android" : {
+        "priority" : "high"
+      }
+    } ],
+    "sql" : [ "SELECT \"public\".\"map_members\".\"id\", \"public\".\"map_members\".\"userId\" FROM \"public\".\"map_members\" WHERE (\"public\".\"map_members\".\"mapId\" = $1 AND \"public\".\"map_members\".\"userId\" <> $2) OFFSET $3", "SELECT \"public\".\"users\".\"id\", \"public\".\"users\".\"fcmToken\" FROM \"public\".\"users\" WHERE \"public\".\"users\".\"id\" IN ($1,$2,$3) OFFSET $4" ]
+  }, {
+    "name" : "map-concurrent-sends",
+    "pendingBeforeRelease" : 2
+  }, {
+    "name" : "map-10-recipients",
+    "logicalUserReads" : 10,
+    "selects" : 2,
+    "sends" : 9
+  }, {
+    "name" : "empty-map",
+    "selects" : 1,
+    "sends" : 0
+  }, {
+    "name" : "db-failure:user-read",
+    "direct" : "rejected",
+    "fanout" : "resolved"
+  }, {
+    "name" : "db-failure:token-clear",
+    "direct" : "rejected",
+    "fanout" : "resolved"
+  }, {
+    "name" : "db-failure:member-read",
+    "direct" : "resolved",
+    "fanout" : "rejected"
+  } ]
+}

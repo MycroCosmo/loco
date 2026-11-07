@@ -1,0 +1,1577 @@
+{
+  "transport" : {
+    "realKakaoCalls" : 0,
+    "apiKeyUsed" : false,
+    "rewrites" : 40,
+    "blocked" : 0
+  },
+  "rows" : [ {
+    "name" : "no-token",
+    "query" : "query=cafe",
+    "variant" : "normal",
+    "authenticated" : false,
+    "status" : 401,
+    "body" : {
+      "message" : "Unauthorized",
+      "statusCode" : 401
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "input:",
+    "query" : "",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "query should not be empty", "query must be a string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "input:query=",
+    "query" : "query=",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "query should not be empty" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "input:query=%20%20",
+    "query" : "query=%20%20",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "  ",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "input:query=cafe",
+    "query" : "query=cafe",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "input:query=a&query=b",
+    "query" : "query=a&query=b",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "query must be a string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "input:query%5Bx%5D=a",
+    "query" : "query%5Bx%5D=a",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "query must be a string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "input:query=cafe&unknown=x",
+    "query" : "query=cafe&unknown=x",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "property unknown should not exist" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "input:query=cafe&x=&y=&radius=&page=&size=",
+    "query" : "query=cafe&x=&y=&radius=&page=&size=",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string", "y must be a number string", "radius must be a number string", "page must be a number string", "size must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "x:0",
+    "query" : "query=cafe&x=0",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "x:-0",
+    "query" : "query=cafe&x=-0",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "x:%2B0",
+    "query" : "query=cafe&x=%2B0",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "x:1",
+    "query" : "query=cafe&x=1",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "x" : "1"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "x:-1",
+    "query" : "query=cafe&x=-1",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "x" : "-1"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "x:1.5",
+    "query" : "query=cafe&x=1.5",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "x" : "1.5"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "x:-0.5",
+    "query" : "query=cafe&x=-0.5",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "x" : "-0.5"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "x:.5",
+    "query" : "query=cafe&x=.5",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "x" : "0.5"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "x:1.",
+    "query" : "query=cafe&x=1.",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "x:1e2",
+    "query" : "query=cafe&x=1e2",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "x:0x10",
+    "query" : "query=cafe&x=0x10",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "x:NaN",
+    "query" : "query=cafe&x=NaN",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "x:Infinity",
+    "query" : "query=cafe&x=Infinity",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "x:%20",
+    "query" : "query=cafe&x=%20",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "x:%201%20",
+    "query" : "query=cafe&x=%201%20",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "x:1x",
+    "query" : "query=cafe&x=1x",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "x:1&x=2",
+    "query" : "query=cafe&x=1&x=2",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 400,
+    "body" : {
+      "message" : [ "x must be a number string" ],
+      "error" : "Bad Request",
+      "statusCode" : 400
+    },
+    "upstream" : [ ]
+  }, {
+    "name" : "radius:0",
+    "query" : "query=cafe&radius=0",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "radius:-1",
+    "query" : "query=cafe&radius=-1",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "radius" : "-1"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "radius:1.5",
+    "query" : "query=cafe&radius=1.5",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "radius" : "1"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "radius:-0.5",
+    "query" : "query=cafe&radius=-0.5",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "radius:100000",
+    "query" : "query=cafe&radius=100000",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "radius" : "100000"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "page:0",
+    "query" : "query=cafe&page=0",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "page:-1",
+    "query" : "query=cafe&page=-1",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "page" : "-1"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "page:1.5",
+    "query" : "query=cafe&page=1.5",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "page" : "1"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "page:-0.5",
+    "query" : "query=cafe&page=-0.5",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "page:100000",
+    "query" : "query=cafe&page=100000",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15",
+        "page" : "100000"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "size:0",
+    "query" : "query=cafe&size=0",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "0"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "size:-1",
+    "query" : "query=cafe&size=-1",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "-1"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "size:1.5",
+    "query" : "query=cafe&size=1.5",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "1"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "size:-0.5",
+    "query" : "query=cafe&size=-0.5",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "0"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "size:100000",
+    "query" : "query=cafe&size=100000",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "100000"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "all-options",
+    "query" : "query=%20coffee%20&x=127.25&y=37.5&radius=1.9&page=2.9&size=3.9",
+    "variant" : "normal",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : " coffee ",
+        "size" : "3",
+        "x" : "127.25",
+        "y" : "37.5",
+        "radius" : "1",
+        "page" : "2"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:400",
+    "query" : "query=cafe",
+    "variant" : "400",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "message" : "카카오 API 오류: 400 - fake upstream 400\nbody detail",
+      "error" : "Internal Server Error",
+      "statusCode" : 500
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:401",
+    "query" : "query=cafe",
+    "variant" : "401",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "message" : "카카오 API 오류: 401 - fake upstream 401\nbody detail",
+      "error" : "Internal Server Error",
+      "statusCode" : 500
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:429",
+    "query" : "query=cafe",
+    "variant" : "429",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "message" : "카카오 API 오류: 429 - fake upstream 429\nbody detail",
+      "error" : "Internal Server Error",
+      "statusCode" : 500
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:500",
+    "query" : "query=cafe",
+    "variant" : "500",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "message" : "카카오 API 오류: 500 - fake upstream 500\nbody detail",
+      "error" : "Internal Server Error",
+      "statusCode" : 500
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:503",
+    "query" : "query=cafe",
+    "variant" : "503",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "message" : "카카오 API 오류: 503 - fake upstream 503\nbody detail",
+      "error" : "Internal Server Error",
+      "statusCode" : 500
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:connection-failure",
+    "query" : "query=cafe",
+    "variant" : "connection-failure",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "message" : "카카오 검색 API 호출 실패",
+      "error" : "Internal Server Error",
+      "statusCode" : 500
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:delay",
+    "query" : "query=cafe",
+    "variant" : "delay",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : 2,
+        "isEnd" : false
+      },
+      "documents" : [ {
+        "id" : "p1",
+        "placeName" : "Cafe",
+        "addressName" : "address",
+        "roadAddressName" : "road",
+        "phone" : "010",
+        "categoryName" : "food",
+        "latitude" : 37.5,
+        "longitude" : 127.25,
+        "placeUrl" : "https://example.invalid/p1"
+      }, {
+        "id" : "",
+        "placeName" : "",
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : 1.25,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ],
+    "delayMs" : 250,
+    "completed" : true
+  }, {
+    "name" : "upstream:invalid-json",
+    "query" : "query=cafe",
+    "variant" : "invalid-json",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "statusCode" : 500,
+      "message" : "Internal server error"
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:204",
+    "query" : "query=cafe",
+    "variant" : "204",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "statusCode" : 500,
+      "message" : "Internal server error"
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:missing-meta",
+    "query" : "query=cafe",
+    "variant" : "missing-meta",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "statusCode" : 500,
+      "message" : "Internal server error"
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:missing-documents",
+    "query" : "query=cafe",
+    "variant" : "missing-documents",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "statusCode" : 500,
+      "message" : "Internal server error"
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:empty-meta",
+    "query" : "query=cafe",
+    "variant" : "empty-meta",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : { },
+      "documents" : [ ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:wrong-types",
+    "query" : "query=cafe",
+    "variant" : "wrong-types",
+    "authenticated" : true,
+    "status" : 200,
+    "body" : {
+      "meta" : {
+        "totalCount" : "two",
+        "isEnd" : "yes"
+      },
+      "documents" : [ {
+        "id" : 7,
+        "placeName" : false,
+        "addressName" : "",
+        "roadAddressName" : "",
+        "phone" : "",
+        "categoryName" : "",
+        "latitude" : null,
+        "longitude" : null,
+        "placeUrl" : ""
+      } ]
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  }, {
+    "name" : "upstream:error-body-drop",
+    "query" : "query=cafe",
+    "variant" : "error-body-drop",
+    "authenticated" : true,
+    "status" : 500,
+    "body" : {
+      "statusCode" : 500,
+      "message" : "Internal server error"
+    },
+    "upstream" : [ {
+      "path" : "/v2/local/search/keyword.json",
+      "query" : {
+        "query" : "cafe",
+        "size" : "15"
+      },
+      "authorizationPresent" : false
+    } ]
+  } ]
+}

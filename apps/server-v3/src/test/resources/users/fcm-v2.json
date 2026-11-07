@@ -1,0 +1,143 @@
+[ {
+  "input" : "{}",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"fcmToken\":null}",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"fcmToken\":\"token\"}",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : "token",
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"fcmToken\":\"seed-token\"}",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : "seed-token",
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"fcmToken\":\"\"}",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : "",
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"fcmToken\":12}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "fcmToken" : "seed-token",
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"fcmToken\":true}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "fcmToken" : "seed-token",
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"fcmToken\":[]}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "fcmToken" : "seed-token",
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"fcmToken\":{}}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "fcmToken" : "seed-token",
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"fcmToken\":{\"set\":\"operation\"}}",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : "operation",
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"fcmToken\":{\"set\":null}}",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "{\"fcmToken\":{\"set\":12}}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "fcmToken" : "seed-token",
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"fcmToken\":{\"other\":1}}",
+  "status" : 500,
+  "body" : {
+    "statusCode" : 500,
+    "message" : "Internal server error"
+  },
+  "fcmToken" : "seed-token",
+  "updatedAtChanged" : false
+}, {
+  "input" : "{\"fcmToken\":\"token\",\"other\":1}",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : "token",
+  "updatedAtChanged" : true
+}, {
+  "input" : "[]",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "[1]",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : null,
+  "updatedAtChanged" : true
+}, {
+  "input" : "null-body",
+  "status" : 200,
+  "body" : {
+    "message" : "FCM 토큰이 업데이트되었습니다."
+  },
+  "fcmToken" : null,
+  "updatedAtChanged" : true
+} ]

@@ -1,0 +1,133 @@
+name: loco-v3
+
+services:
+  db:
+    image: postgis/postgis:17-3.6
+    cpus: 2
+    mem_limit: 4g
+    command: ["postgres", "-c", "shared_buffers=1GB"]
+    environment:
+      POSTGRES_DB: loco
+      POSTGRES_USER: ${DB_USERNAME:?Set DB_USERNAME in the root .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the root .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    tmpfs:
+      - /docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  mailpit:
+    image: axllent/mailpit:v1.27.4
+    cpus: 0.5
+    mem_limit: 256m
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  v3:
+    # HTTP 종료 30초 + 알림 drain 30초 + 정리 여유. 설정 확대 시 함께 조정한다.
+    stop_grace_period: ${V3_STOP_GRACE_PERIOD:-70s}
+    user: "1000:1000"
+    volumes:
+      - v2-uploads:/app/uploads
+    build:
+      context: .
+      dockerfile: infra/docker/server-v3.Dockerfile
+    cpus: 2
+    mem_limit: 1536m
+    environment:
+      PORT: 8081
+      HOST: ${HOST:-0.0.0.0}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+      FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT:-}
+      FCM_BASE_URL: ${FCM_BASE_URL:-https://fcm.googleapis.com}
+      FCM_TIMEOUT_MS: ${FCM_TIMEOUT_MS:-15000}
+      NOTIFICATION_CORE_THREADS: ${NOTIFICATION_CORE_THREADS:-2}
+      NOTIFICATION_MAX_THREADS: ${NOTIFICATION_MAX_THREADS:-4}
+      NOTIFICATION_QUEUE_CAPACITY: ${NOTIFICATION_QUEUE_CAPACITY:-100}
+      NOTIFICATION_SHUTDOWN_SECONDS: ${NOTIFICATION_SHUTDOWN_SECONDS:-30}
+      TOKEN_CLEANUP_ENABLED: ${TOKEN_CLEANUP_ENABLED:-true}
+      TOKEN_CLEANUP_CRON: ${TOKEN_CLEANUP_CRON:-0 0 3 * * *}
+      TOKEN_CLEANUP_ZONE: ${TOKEN_CLEANUP_ZONE:-Asia/Seoul}
+      KAKAO_SEARCH_BASE_URL: ${KAKAO_SEARCH_BASE_URL:-https://dapi.kakao.com/v2/local/search/keyword.json}
+      KAKAO_CONNECT_TIMEOUT_MS: ${KAKAO_CONNECT_TIMEOUT_MS:-2000}
+      KAKAO_RESPONSE_TIMEOUT_MS: ${KAKAO_RESPONSE_TIMEOUT_MS:-5000}
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY:-}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:-}
+      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID:-}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET:-}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USER: ${SMTP_USER:-noreply@loco.app}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      DB_URL: jdbc:postgresql://db:5432/loco
+      DB_USERNAME: ${DB_USERNAME:?Set DB_USERNAME in the root .env}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the root .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env}
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--output", "/dev/null", "http://127.0.0.1:8081/api/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  v2:
+    build:
+      context: .
+      dockerfile: infra/docker/server-v2.Dockerfile
+    cpus: 2
+    mem_limit: 1536m
+    environment:
+      NODE_ENV: production
+      FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT:-}
+      KAKAO_REST_API_KEY: ${KAKAO_REST_API_KEY:-}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET:-}
+      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID:-}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET:-}
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USER: ${SMTP_USER:-noreply@loco.app}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      PORT: 3000
+      HOST: ${HOST:-0.0.0.0}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+      DATABASE_URL: postgresql://db:5432/loco?schema=public
+      DB_USERNAME: ${DB_USERNAME:?Set DB_USERNAME in the root .env}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the root .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env}
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - v2-uploads:/app/uploads
+    depends_on:
+      v3:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/users/me').then(r => process.exit(r.status === 401 ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  postgres-data:
+  v2-uploads:

@@ -1,0 +1,13 @@
+[ {
+  "existing" : false,
+  "statuses" : [ 201, 201 ],
+  "preservedId" : true,
+  "rating" : 4,
+  "content" : "race review"
+}, {
+  "existing" : true,
+  "statuses" : [ 201, 201 ],
+  "preservedId" : true,
+  "rating" : 4,
+  "content" : "race review"
+} ]

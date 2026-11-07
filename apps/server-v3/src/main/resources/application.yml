@@ -1,0 +1,84 @@
+server:
+  port: ${PORT:8081}
+  address: ${HOST:0.0.0.0}
+  tomcat:
+    max-swallow-size: -1
+
+spring:
+  http:
+    client:
+      factory: jdk
+  servlet:
+    multipart:
+      resolve-lazily: true
+      max-file-size: 10MB
+      max-request-size: -1
+  application:
+    name: loco-server-v3
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASS:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.ssl.enable: ${SMTP_SECURE:false}
+      mail.smtp.starttls.enable: true
+  config:
+    import: optional:file:.env[.properties]
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    baseline-version: 1
+
+logging:
+  level:
+    org.apache.hc.client5.http.wire: OFF
+    org.apache.hc.client5.http.headers: OFF
+
+management:
+  endpoints:
+    web:
+      exposure:
+        exclude: '*'
+
+loco:
+  http:
+    allowed-origins: ${ALLOWED_ORIGINS:}
+  cleanup:
+    enabled: ${TOKEN_CLEANUP_ENABLED:true}
+    cron: ${TOKEN_CLEANUP_CRON:0 0 3 * * *}
+    zone: ${TOKEN_CLEANUP_ZONE:Asia/Seoul}
+  notifications:
+    service-account: ${FIREBASE_SERVICE_ACCOUNT:}
+    base-url: ${FCM_BASE_URL:https://fcm.googleapis.com}
+    timeout-ms: ${FCM_TIMEOUT_MS:15000}
+    executor:
+      core: ${NOTIFICATION_CORE_THREADS:2}
+      max: ${NOTIFICATION_MAX_THREADS:4}
+      queue: ${NOTIFICATION_QUEUE_CAPACITY:100}
+      shutdown-seconds: ${NOTIFICATION_SHUTDOWN_SECONDS:30}
+  kakao:
+    base-url: ${KAKAO_SEARCH_BASE_URL:https://dapi.kakao.com/v2/local/search/keyword.json}
+    api-key: ${KAKAO_REST_API_KEY:}
+    connect-timeout-ms: ${KAKAO_CONNECT_TIMEOUT_MS:2000}
+    response-timeout-ms: ${KAKAO_RESPONSE_TIMEOUT_MS:5000}
+  vips:
+    executable: ${VIPS_EXECUTABLE:vips}
+  uploads:
+    directory: ${UPLOAD_DIRECTORY:uploads}
+  jwt:
+    secret: ${JWT_SECRET}

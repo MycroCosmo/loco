@@ -1,0 +1,17 @@
+**
+!apps/
+!apps/server/
+!apps/server/**
+!apps/server-v3/
+!apps/server-v3/**
+!infra/
+!infra/docker/
+!infra/docker/**
+**/.env
+**/.env.*
+**/node_modules
+**/build
+**/dist
+**/.gradle
+**/uploads
+**/.git

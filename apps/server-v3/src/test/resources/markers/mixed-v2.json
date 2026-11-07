@@ -1,0 +1,218 @@
+[ {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=1",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "name" : "Alpha",
+    "latitude" : 38.1234,
+    "longitude" : 127.8888,
+    "count" : 1
+  }, {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "2개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 2,
+    "groupKey" : "37.444400:127.888800"
+  }, {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+    "name" : "Gamma",
+    "latitude" : 37.444401,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=5",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "name" : "Alpha",
+    "latitude" : 38.1234,
+    "longitude" : 127.8888,
+    "count" : 1
+  }, {
+    "type" : "group",
+    "id" : "37.444400:127.888800",
+    "name" : "2개 장소",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "count" : 2,
+    "groupKey" : "37.444400:127.888800"
+  }, {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000003",
+    "name" : "Gamma",
+    "latitude" : 37.444401,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=6",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "cluster",
+    "id" : "37.444:127.889",
+    "name" : "3개 장소",
+    "latitude" : 37.44440033333333,
+    "longitude" : 127.8888,
+    "count" : 3,
+    "clusterKey" : "37.444:127.889",
+    "precision" : 3,
+    "cellLatKey" : "37.444",
+    "cellLngKey" : "127.889"
+  }, {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "name" : "Alpha",
+    "latitude" : 38.1234,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=9",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "cluster",
+    "id" : "37.44:127.89",
+    "name" : "3개 장소",
+    "latitude" : 37.44440033333333,
+    "longitude" : 127.8888,
+    "count" : 3,
+    "clusterKey" : "37.44:127.89",
+    "precision" : 2,
+    "cellLatKey" : "37.44",
+    "cellLngKey" : "127.89"
+  }, {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "name" : "Alpha",
+    "latitude" : 38.1234,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=11",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "cluster",
+    "id" : "37.4:127.9",
+    "name" : "3개 장소",
+    "latitude" : 37.44440033333333,
+    "longitude" : 127.8888,
+    "count" : 3,
+    "clusterKey" : "37.4:127.9",
+    "precision" : 1,
+    "cellLatKey" : "37.4",
+    "cellLngKey" : "127.9"
+  }, {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "name" : "Alpha",
+    "latitude" : 38.1234,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-90&swLng=-180&neLat=90&neLng=180&level=14",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "cluster",
+    "id" : "37.4:127.9",
+    "name" : "3개 장소",
+    "latitude" : 37.44440033333333,
+    "longitude" : 127.8888,
+    "count" : 3,
+    "clusterKey" : "37.4:127.9",
+    "precision" : 1,
+    "cellLatKey" : "37.4",
+    "cellLngKey" : "127.9"
+  }, {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000004",
+    "name" : "Alpha",
+    "latitude" : 38.1234,
+    "longitude" : 127.8888,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=37.444401&neLat=37.444402&swLng=127&neLng=128&level=6",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "cluster",
+    "id" : "37.444:127.889",
+    "name" : "3개 장소",
+    "latitude" : 37.44440033333333,
+    "longitude" : 127.8888,
+    "count" : 3,
+    "clusterKey" : "37.444:127.889",
+    "precision" : 3,
+    "cellLatKey" : "37.444",
+    "cellLngKey" : "127.889"
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/marker-cluster?precision=3&cellLatKey=37.444&cellLngKey=127.889&limit=2",
+  "user" : 1,
+  "status" : 200,
+  "body" : {
+    "count" : 3,
+    "items" : [ {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000001",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Alpha",
+      "address" : "Seoul address",
+      "roadAddress" : "road cafe",
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "foo", "bar" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-03T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 0,
+      "reviewCount" : 0
+    }, {
+      "id" : "cccccccc-cccc-4ccc-8ccc-000000000002",
+      "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+      "createdById" : "11111111-1111-4111-8111-111111111111",
+      "name" : "Beta",
+      "address" : "Seoul address",
+      "roadAddress" : null,
+      "latitude" : 37.4444,
+      "longitude" : 127.8888,
+      "phone" : null,
+      "category" : null,
+      "memo" : null,
+      "tags" : [ "Foo" ],
+      "imageUrls" : [ ],
+      "createdAt" : "2026-01-02T00:00:00.000Z",
+      "updatedAt" : "2026-01-01T00:00:00.000Z",
+      "createdBy" : {
+        "id" : "11111111-1111-4111-8111-111111111111",
+        "nickname" : "compat",
+        "profileImageUrl" : null
+      },
+      "averageRating" : 3.5,
+      "reviewCount" : 2
+    } ],
+    "hasMore" : true
+  }
+} ]

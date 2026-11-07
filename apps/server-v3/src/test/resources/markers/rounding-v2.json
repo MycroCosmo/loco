@@ -1,0 +1,126 @@
+[ {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-1&neLat=38&swLng=-1&neLng=1&level=5",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000080",
+    "name" : "rounding",
+    "latitude" : 37.05,
+    "longitude" : 0,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-1&neLat=38&swLng=-1&neLng=1&level=6",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000080",
+    "name" : "rounding",
+    "latitude" : 37.05,
+    "longitude" : 0,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-1&neLat=38&swLng=-1&neLng=1&level=9",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000080",
+    "name" : "rounding",
+    "latitude" : 37.05,
+    "longitude" : 0,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-1&neLat=38&swLng=-1&neLng=1&level=11",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/marker-cluster?precision=1&cellLatKey=37.0&cellLngKey=0.0",
+  "user" : 1,
+  "status" : 200,
+  "body" : {
+    "count" : 0,
+    "items" : [ ],
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/marker-cluster?precision=1&cellLatKey=37.1&cellLngKey=0.0",
+  "user" : 1,
+  "status" : 200,
+  "body" : {
+    "count" : 0,
+    "items" : [ ],
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-1&neLat=38&swLng=-1&neLng=1&level=5",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000081",
+    "name" : "rounding",
+    "latitude" : -1.0E-5,
+    "longitude" : 0,
+    "count" : 1
+  }, {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000080",
+    "name" : "rounding",
+    "latitude" : 37.05,
+    "longitude" : 0,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-1&neLat=38&swLng=-1&neLng=1&level=6",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000080",
+    "name" : "rounding",
+    "latitude" : 37.05,
+    "longitude" : 0,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-1&neLat=38&swLng=-1&neLng=1&level=9",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ {
+    "type" : "place",
+    "id" : "cccccccc-cccc-4ccc-8ccc-000000000080",
+    "name" : "rounding",
+    "latitude" : 37.05,
+    "longitude" : 0,
+    "count" : 1
+  } ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/markers?swLat=-1&neLat=38&swLng=-1&neLng=1&level=11",
+  "user" : 1,
+  "status" : 200,
+  "body" : [ ]
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/marker-cluster?precision=1&cellLatKey=-0.0&cellLngKey=0.0",
+  "user" : 1,
+  "status" : 200,
+  "body" : {
+    "count" : 0,
+    "items" : [ ],
+    "hasMore" : false
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places/marker-cluster?precision=1&cellLatKey=0.0&cellLngKey=0.0",
+  "user" : 1,
+  "status" : 200,
+  "body" : {
+    "count" : 0,
+    "items" : [ ],
+    "hasMore" : false
+  }
+} ]

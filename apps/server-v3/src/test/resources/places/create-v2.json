@@ -1,0 +1,771 @@
+[ {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "name must be shorter than or equal to 100 characters", "name must be a string", "address must be a string", "latitude must not be greater than 90", "latitude must not be less than -90", "latitude must be a number conforming to the specified constraints", "longitude must not be greater than 180", "longitude must not be less than -180", "longitude must be a number conforming to the specified constraints" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "[]",
+  "status" : 400,
+  "body" : {
+    "message" : [ "name must be shorter than or equal to 100 characters", "name must be a string", "address must be a string", "latitude must not be greater than 90", "latitude must not be less than -90", "latitude must be a number conforming to the specified constraints", "longitude must not be greater than 180", "longitude must not be less than -180", "longitude must be a number conforming to the specified constraints" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "[1]",
+  "status" : 400,
+  "body" : {
+    "message" : [ "property 0 should not exist", "name must be shorter than or equal to 100 characters", "name must be a string", "address must be a string", "latitude must not be greater than 90", "latitude must not be less than -90", "latitude must be a number conforming to the specified constraints", "longitude must not be greater than 180", "longitude must not be less than -180", "longitude must be a number conforming to the specified constraints" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"unknown\":1}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "property unknown should not exist", "name must be shorter than or equal to 100 characters", "name must be a string", "address must be a string", "latitude must not be greater than 90", "latitude must not be less than -90", "latitude must be a number conforming to the specified constraints", "longitude must not be greater than 180", "longitude must not be less than -180", "longitude must be a number conforming to the specified constraints" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":null,\"address\":null,\"latitude\":null,\"longitude\":null}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "name must be shorter than or equal to 100 characters", "name must be a string", "address must be a string", "latitude must not be greater than 90", "latitude must not be less than -90", "latitude must be a number conforming to the specified constraints", "longitude must not be greater than 180", "longitude must not be less than -180", "longitude must be a number conforming to the specified constraints" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":1,\"address\":1,\"roadAddress\":1,\"latitude\":\"1\",\"longitude\":true,\"phone\":1,\"category\":1,\"memo\":1,\"tags\":[1]}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "name must be shorter than or equal to 100 characters", "name must be a string", "address must be a string", "roadAddress must be a string", "latitude must not be greater than 90", "latitude must not be less than -90", "latitude must be a number conforming to the specified constraints", "longitude must not be greater than 180", "longitude must not be less than -180", "longitude must be a number conforming to the specified constraints", "phone must be a string", "category must be a string", "memo must be shorter than or equal to 500 characters", "memo must be a string", "each value in tags must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"roadAddress\":null}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"roadAddress\":1}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "roadAddress must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"roadAddress\":\"text\"}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : "text",
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"roadAddress\":[]}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "roadAddress must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"phone\":null}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"phone\":1}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "phone must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"phone\":\"text\"}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : "text",
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"phone\":[]}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "phone must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"category\":null}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"category\":1}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "category must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"category\":\"text\"}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : "text",
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"category\":[]}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "category must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"memo\":null}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"memo\":1}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "memo must be shorter than or equal to 500 characters", "memo must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"memo\":\"text\"}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : "text",
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"memo\":[]}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "memo must be shorter than or equal to 500 characters", "memo must be a string" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"tags\":null}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"tags\":1}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "each value in tags must be a string", "tags must be an array" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"tags\":\"text\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "tags must be an array" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"tags\":[]}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":0.0,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 0,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":-0.0,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 0,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":-1.0E-5,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : -1.0E-5,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.05,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.05,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.44441,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.44441,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.44449,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.44449,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4499,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4499,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":90.0,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 90,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":-90.0,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : -90,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":90.1,\"longitude\":127.8888}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "latitude must not be greater than 90" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":-90.1,\"longitude\":127.8888}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "latitude must not be less than -90" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888,\"memo\":\"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\"}",
+  "status" : 400,
+  "body" : {
+    "message" : [ "name must be shorter than or equal to 100 characters", "memo must be shorter than or equal to 500 characters" ],
+    "error" : "Bad Request",
+    "statusCode" : 400
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000001/places",
+  "input" : "{\"name\":\"\",\"address\":\"\",\"latitude\":37.4444,\"longitude\":180}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "",
+    "address" : "",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 180,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000002/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888}",
+  "status" : 201,
+  "body" : {
+    "id" : "$id",
+    "mapId" : "aaaaaaaa-aaaa-4aaa-8aaa-000000000002",
+    "createdById" : "11111111-1111-4111-8111-111111111111",
+    "name" : "new-place",
+    "address" : "address",
+    "roadAddress" : null,
+    "latitude" : 37.4444,
+    "longitude" : 127.8888,
+    "phone" : null,
+    "category" : null,
+    "memo" : null,
+    "tags" : [ ],
+    "imageUrls" : [ ],
+    "createdAt" : "$time",
+    "updatedAt" : "$time",
+    "createdBy" : {
+      "id" : "11111111-1111-4111-8111-111111111111",
+      "nickname" : "compat",
+      "profileImageUrl" : null
+    }
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000003/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888}",
+  "status" : 403,
+  "body" : {
+    "message" : "비공개 지도방에는 장소를 추가할 수 없습니다.",
+    "error" : "Forbidden",
+    "statusCode" : 403
+  }
+}, {
+  "path" : "/api/maps/aaaaaaaa-aaaa-4aaa-8aaa-000000000004/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888}",
+  "status" : 403,
+  "body" : {
+    "message" : "지도방에 가입해야 장소를 추가할 수 있습니다.",
+    "error" : "Forbidden",
+    "statusCode" : 403
+  }
+}, {
+  "path" : "/api/maps/missing/places",
+  "input" : "{\"name\":\"new-place\",\"address\":\"address\",\"latitude\":37.4444,\"longitude\":127.8888}",
+  "status" : 404,
+  "body" : {
+    "message" : "지도방을 찾을 수 없습니다.",
+    "error" : "Not Found",
+    "statusCode" : 404
+  }
+} ]

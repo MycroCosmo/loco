@@ -1,0 +1,34 @@
+// Design-only dependency resolution; does not change the application's configurations or JAR.
+allprojects { p ->
+    p.afterEvaluate {
+        def baseline = p.configurations.runtimeClasspath
+        def sdk = p.configurations.create('notificationSdkProbe') { extendsFrom baseline }
+        p.dependencies.add(sdk.name, 'com.google.firebase:firebase-admin:9.11.0')
+        p.tasks.register('notificationDependencyReport') {
+            doLast {
+                def entries = { config -> config.resolvedConfiguration.resolvedArtifacts.collect { a ->
+                    [id: a.moduleVersion.id.toString(), name: a.moduleVersion.id.group + ':' + a.name,
+                     bytes: a.file.length()]
+                }.sort { it.id } }
+                def baseEntries = entries(baseline)
+                def sdkEntries = entries(sdk)
+                def authVersion = sdkEntries.find { it.name == 'com.google.auth:google-auth-library-oauth2-http' }.id
+                def direct = p.configurations.create('notificationHttpProbe') { extendsFrom baseline }
+                p.dependencies.add(direct.name, authVersion)
+                def summarize = { list ->
+                    def added = list.findAll { a -> !baseEntries.any { it.id == a.id } }
+                    def removed = baseEntries.findAll { a -> !list.any { it.id == a.id } }
+                    [count: list.size(), bytes: list.sum { it.bytes }, added: added, replaced: removed,
+                     deltaBytes: list.sum { it.bytes } - baseEntries.sum { it.bytes }]
+                }
+                def report = [baseline: summarize(baseEntries), firebaseAdmin: summarize(sdkEntries),
+                              directHttpWithAuth: summarize(entries(direct))]
+                def output = p.layout.buildDirectory.file('reports/notifications/dependencies.json').get().asFile
+                output.parentFile.mkdirs()
+                output.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(report))
+                    .replaceAll(/(?m)[ \t]+$/, '') + '\n'
+                println "Dependency report: ${output}"
+            }
+        }
+    }
+}
