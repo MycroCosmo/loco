@@ -25,6 +25,7 @@ repositories {
 }
 
 dependencies {
+    implementation project(':cms-core')
     implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
@@ -88,6 +89,7 @@ tasks.withType(Test).configureEach {
 }
 
 tasks.named('test', Test) {
+    dependsOn ':cms-core:test'
     description = '단위·v3 단독 테스트 (v2 및 Prisma CLI 실행 없음)'
     useJUnitPlatform { excludeTags 'v2-comparison' }
     systemProperty 'compat.v2.enabled', 'false'
@@ -140,7 +142,7 @@ tasks.register('allTests') {
     dependsOn tasks.named('test'), tasks.named('comparisonTest')
 }
 
-tasks.named('check') { dependsOn tasks.named('comparisonTest') }
+tasks.named('check') { dependsOn tasks.named('comparisonTest'), ':cms-core:check' }
 
 tasks.register('codecTest', Test) {
     description = 'Java 21 이미지 코덱 호환성 검증 (DB·v2 서버 기동 없음)'

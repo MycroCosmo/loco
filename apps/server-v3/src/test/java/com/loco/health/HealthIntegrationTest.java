@@ -95,6 +95,25 @@ class HealthIntegrationTest {
   }
 
   @Test
+  void cmsCoreLoadsWithoutChangingThePublicBaseline(
+      @Autowired com.cms.core.CmsCoreConfiguration core, @Autowired EntityManager entityManager) {
+    assertThat(core).isNotNull();
+    assertThat(
+            entityManager
+                .createNativeQuery(
+                    "SELECT count(*) FROM public.flyway_schema_history WHERE version IN ('1','2') AND success",
+                    Long.class)
+                .getSingleResult())
+        .isEqualTo(2L);
+    assertThat(
+            entityManager
+                .createNativeQuery(
+                    "SELECT count(*) FROM pg_namespace WHERE nspname='cms'", Long.class)
+                .getSingleResult())
+        .isEqualTo(1L);
+  }
+
+  @Test
   void databaseHasNoSpatialExtensions(@Autowired EntityManager entityManager) {
     assertThat(
             entityManager

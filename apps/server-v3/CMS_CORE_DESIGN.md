@@ -1,8 +1,8 @@
 # CMS(B) 핵심 모듈 설계안
 
-상태: **설계만 작성, 선택 대기. 구현·DDL·의존성 추가·설정 변경 없음.**
+상태: **2026-11-07 사용자 결정 확정. 9절 1단계(core 경계·단독 기동·마이그레이션)만 구현하며 완료 후 중단한다.**
 
-작성일: 2026-11-07. 기준 main `9dc3c09`는 PR #2의 merge commit이며 이관 최종 `7f25789`를 부모로 보존한다. 이 main에서 `feature/cms-core`를 만들었다. 아래의 테이블명·패키지·경로·정책 수치는 제안이며, “권장”은 사용자 확정을 뜻하지 않는다.
+작성일: 2026-11-07. 기준 main `9dc3c09`는 PR #2의 merge commit이며 이관 최종 `7f25789`를 부모로 보존한다. 이 main에서 `feature/cms-core`를 만들었다. 아래 1.1절이 최신 확정 기록이다. 8절의 미채택 대안은 비교 이력으로 보존한다. 아직 구현하지 않은 업무 모델·API 초안과 완료된 1단계 기반을 구분한다.
 
 ## 1. 근거와 확정 범위
 
@@ -21,6 +21,26 @@
 | LOCO 파일 | 노션 초기 “1단계 MinIO”보다 이후 로컬 유지 결정이 최신 | 기존 /uploads는 유지. CMS 객체 저장소와 별도로 3단계 이전 계획에 연결 |
 
 기존 회귀 기준은 전체 1,434건(성공1,433·실패0·HEIC 공통 제약 skip1), 알려진 차이11, 1,037.162초다. **이 문서 작성 중 재실행한 결과가 아니라 main에 기록된 이전 검증**이다.
+
+### 1.1 사용자 확정 결정 — 2026-11-07
+
+| 번호·항목 이름 | 확정 내용 | 근거·영향 |
+| --- | --- | --- |
+| C-1 모듈 분리 방식 | A: Gradle 멀티 모듈, modules/cms-core 하나만 추가 | LOCO → core만. 실행 앱은 기존 root 유지 |
+| C-2 메뉴 트리 표현 | A: parent_id + 독립 UUID | 이동 시 ID 재생성 금지를 실제 이동 테스트로 고정(3단계 구현) |
+| C-3 권한 모델 | B: 역할 + 업무 키별 READ/MANAGE, MANAGE⊃READ, 상속·deny 없음, 역할 템플릿 | 작은 권한 집합과 설명 가능한 판정 |
+| C-4 관리자 인증·계정·초기 생성 | A: 별도 AdminAccount + 세션 + 일회성 CLI, idle30분·절대8시간·로그인5회/분 승인 | 인증은 2단계부터. 앱 JWT와 분리 |
+| C-5 관리자 화면 기술 | **A 변형: Vue3 + Vite + TypeScript SPA + vue-router, Nuxt 미사용** | SSR/SEO 불필요, Nuxt 메이저 적응 비용 회피. apps/admin·개발 프록시 /admin/api 동일 출처. 구현 시 지원 안정 Vue/Vite/Node 버전 고정 |
+| C-6 변경 이력 수집 | A: 서비스 명시 기록 + 같은 트랜잭션 | 업무 성공과 이력 저장 함께 커밋 |
+| C-7 DB 배치·Flyway | B: 같은 DB·cms schema·기존 public history·다음 가용 버전 | 이번 V2는 빈 cms schema만 생성, 업무 테이블은 각 후속 단계에서 추가 |
+| C-8 파일 저장소·LOCO 이전 | A: CMS만 객체 저장 포트 + 로컬 MinIO, LOCO /uploads 유지 | 기존 앱 파일·URL 계약 유지 |
+| C-9-1 실행·HTTP 경계 | A: 한 프로세스, /admin/** 별도 SecurityFilterChain | v2 호환 전역 필터는 /admin에 적용하지 않는다. 관리자 HTTP 경로를 만드는 2단계에서 적용·회귀 검사 |
+| C-9-2 트리 동시 변경 | A: 트리 메타 행 비관적 락 + revision | 이미지 3장 제한은 한 행 조건이라 조건부 UPDATE, 메뉴 순환 방지는 여러 행 조건이라 비관적 락 |
+| C-9-3 CMS 파일 초기 정책 | A 승인 | 비공개, JPEG/PNG/WebP/AVIF→WebP만 보관, 일반 PDF/TXT/CSV 원본 attachment, 각각10MiB |
+| C-9-4 이력 보존·수집 | A 승인 | 최소 성공 변경 정보, 초기 자동 삭제 없음. 운영 전 보존 기간 재검토 |
+| C-9-5 첫 LOCO 확장 | A 승인 | 조회 메뉴부터, 운영 조치는 별도 설계 |
+
+의사결정과 구현 완료는 다르다. 인증·트리·권한·이력·파일·프런트는 이번 1단계에 구현하지 않는다. 기존 선택지 중 Nuxt 권장안은 C-5 A 변형으로 대체했다. [노션 결정 변경 기록](https://app.notion.com/p/40c140eabf0e81dca76de00565fe725b)에도 동일 결정을 반영한다.
 
 ## 2. 해결할 문제와 성공 조건
 
@@ -168,7 +188,7 @@ core에는 `ObjectStorage`의 put/read/delete와 `ImageTransformer` 계약만 �
 
 ## 8. 결정할 항목 — 선택지·장단점
 
-아래 권장 조합은 제안이다. **번호·항목 이름·선택지**가 없는 답은 어느 결정인지 확인한 뒤 반영한다. 신규 라이브러리 버전·운영 수치는 구현 승인을 받은 뒤 선택된 안 범위에서 검증하며, 설계를 바꾸는 선택은 다시 질문한다.
+아래 선택지는 설계 당시 비교 이력이며 최신 선택은 1.1절에 확정했다. **번호·항목 이름·선택지**가 없는 새 답은 어느 결정인지 확인한 뒤 반영한다. 신규 라이브러리 버전·운영 수치는 구현 승인을 받은 뒤 선택된 안 범위에서 검증하며, 설계를 바꾸는 선택은 다시 질문한다.
 
 ### C-1 모듈 분리 방식
 
@@ -207,19 +227,19 @@ B는 노션의 메뉴 단위 RBAC를 좁힌 안이다. UI 메뉴에는 permissio
 | B. 별도 AdminAccount + 관리자 전용 토큰 + CLI | 외부 관리자 클라이언트 확장 쉬움 | issuer/audience/서명키 분리·refresh/회수 장치 필요, 즉시 회수에 DB 조회가 다시 필요. 기존 세션 결정 변경 |
 | C. 앱 회원에 관리자 역할 추가 + 세션 | 계정 중복 적고 가입 흐름 재사용 | 앱 탈퇴/OAuth/비밀번호 정책과 관리 권한이 결합, core가 LOCO 회원에 의존하기 쉬워 이번 전제와 맞지 않음 |
 
-A의 초기 수명은 idle 30분, 절대 8시간, 로그인 5회/분(IP와 정규화 계정 각각) 제안이며 확정값은 아니다. 제한은 성공 시 필요한 카운터만 정리하고 존재 여부를 노출하지 않는다. 3단계에서 프록시 신뢰·Redis 세션/요청 제한으로 이어진다. MFA/SSO는 초기 범위 밖이며 인터넷에 관리자 UI를 공개하기 전 접근 제한·MFA 정책을 별도 확인한다. [Spring Security 체인 분리](https://docs.spring.io/spring-security/reference/servlet/configuration/java.html).
+A의 초기 수명은 idle 30분, 절대 8시간, 로그인 5회/분(IP와 정규화 계정 각각)으로 사용자 승인됐다. 제한은 성공 시 필요한 카운터만 정리하고 존재 여부를 노출하지 않는다. 3단계에서 프록시 신뢰·Redis 세션/요청 제한으로 이어진다. MFA/SSO는 초기 범위 밖이며 인터넷에 관리자 UI를 공개하기 전 접근 제한·MFA 정책을 별도 확인한다. [Spring Security 체인 분리](https://docs.spring.io/spring-security/reference/servlet/configuration/java.html).
 
-### C-5 관리자 화면 기술
+### C-5 관리자 화면 기술 — A 변형 확정
 
 | 선택 | 장점 | 단점 |
 | --- | --- | --- |
-| **A. Vue 3 + 지원 중인 Nuxt + TypeScript(권장)** | 사용자 Vue/Nuxt3 TS 경험, 파일 라우팅·레이아웃, 메뉴/권한 화면 구성에 익숙 | Nuxt3 경험에서 현재 버전으로 적응 필요, 관리자 SEO가 필요 없어 SSR은 초기 이점이 작음 |
+| **A 변형(확정). Vue 3 + Vite + TypeScript SPA + vue-router** | Vue/TS 경험 재사용, SSR·Nuxt 없이 최소 프런트 구성 | 라우터·레이아웃·폼 구조는 앱에서 구성해야 함 |
 | B. React + Vite + TypeScript | React 경험 활용, SPA 빌드 단순 | 라우터/상태/폼 조합을 추가 선택해야 함, Nuxt 경험 재사용은 적음 |
 | C. Thymeleaf 서버 렌더링 | 배포 한 개, 세션/CSRF와 자연스럽게 연결, 별도 Node 서버 불필요 | 트리 드래그·권한 매트릭스 등 상호작용에 별도 JS가 늘어남, 프런트 재사용 어려움 |
 
-현 저장소 apps에는 mobile/server/server-v3만 있고 관리자 프런트는 없다. A/B는 `apps/admin` 후보, C는 서버 templates/static 후보다. A의 초기 실행은 SSR 없는 관리자 SPA를 제안하고, 개발 서버 프록시로 `/admin/api`를 Spring에 전달해 브라우저 동일 출처를 유지한다. 배포도 정적 앱과 API를 같은 origin 아래 제공하는 구성을 제안한다. 인증 로직을 Nuxt 서버에 중복 구현하지 않는다.
+**설계 초안의 Nuxt 권장안을 Vue3 + Vite + TypeScript SPA + vue-router로 변경했다. Nuxt와 SSR은 사용하지 않는다.** 사용자 경험을 재사용하되 백엔드 우선으로 프런트 구성 요소를 줄인다. 현 저장소 apps에는 mobile/server/server-v3만 있고 관리자 프런트는 없다. A/B는 `apps/admin` 후보, C는 서버 templates/static 후보다. A의 초기 실행은 SSR 없는 관리자 SPA를 제안하고, 개발 서버 프록시로 `/admin/api`를 Spring에 전달해 브라우저 동일 출처를 유지한다. 배포도 정적 앱과 API를 같은 origin 아래 제공하는 구성을 제안한다. 인증 로직을 Nuxt 서버에 중복 구현하지 않는다.
 
-2026-11-07 확인한 [Nuxt 공식 로드맵](https://github.com/nuxt/nuxt/blob/main/docs/5.community/6.roadmap.md)은 Nuxt3 지원 종료를 2026-07-31로 명시한다. A를 선택해도 Nuxt3에 고정하지 않고 지원 중인 안정 메이저/Node 조합을 구현 시 검증·고정한다. 이 문서는 Nuxt/Node 업그레이드를 실행하지 않는다.
+2026-11-07 확인한 [Nuxt 공식 로드맵](https://github.com/nuxt/nuxt/blob/main/docs/5.community/6.roadmap.md)은 Nuxt3 지원 종료를 2026-07-31로 명시한다. 이 근거를 검토한 사용자는 Nuxt 자체를 제외했다. Vue/Vite/Node의 지원 중인 안정 버전은 apps/admin을 구현할 때 검증·고정하며 이번 단계에서는 설치하지 않는다.
 
 ### C-6 변경 이력 수집
 
@@ -264,9 +284,9 @@ A는 core가 S3 SDK 타입을 노출하지 않는 계약, 조립 인프라에서
 | **C-9-4 이력 보존·수집 범위** | 변경 성공과 필요한 최소 actor/대상/허용 전후 값만, 자동 삭제 없이 시작. 조사 근거 보존 / 계속 증가하므로 운영 전 보존 기간 재결정 필요 | 같은 최소 수집 + 보존180일·정기 삭제. 용량 통제 / 180일은 현재 업무 근거 없는 제안이며 과거 조사 정보 소실 | A. 비밀번호·토큰·파일 본문·불필요한 IP/민감정보 제외는 두 안 공통. 법정 보존을 충족한다는 판단은 하지 않음 |
 | **C-9-5 첫 LOCO 확장 범위** | core 완료 뒤 회원/지도방/장소/리뷰/신고·피드백 조회부터 연결. 권한·UI 경계 검증, 기존 앱 정책 유지 / 운영 조치 기능은 다음 묶음 | 신고 처리·회원 정지·강제 비공개 쓰기까지 포함. 운영 가치 빠름 / 현재 없는 상태·앱 API 반응·경합 계약을 먼저 결정해야 함 | A. B를 고르면 core와 분리된 LOCO 업무 설계/마이그레이션 승인 후 구현. 기존 비교 fixture를 맞추려고 새 운영 상태를 숨기지 않음 |
 
-C-9-3의 초기 파일 크기·형식, C-4의 세션/로그인 수명·횟수는 같은 선택에 포함된 **제안값**이다. 원하는 값이 다르면 항목 이름과 변경값을 함께 답하면 된다. 대용량 presigned 업로드·비동기 변환은 기존 3단계 이후 백로그로 유지한다.
+C-9-3의 초기 파일 크기·형식과 C-4의 세션/로그인 수명·횟수는 사용자 승인됐다. 변경할 때는 항목 이름과 변경값을 함께 기록한다. 대용량 presigned 업로드·비동기 변환은 기존 3단계 이후 백로그로 유지한다.
 
-## 9. 선택 후 구현 순서 제안
+## 9. 승인된 구현 순서 — 이번에는 1단계에서 중단
 
 1. C-1/C-7 경계·core 단독 기동·migration 테스트. 현재 V1/기존 회귀 유지 확인.
 2. 관리자 계정·초기 생성·세션/CSRF·앱 JWT와의 교차 인증 차단. 이력 기반도 함께 준비.
@@ -275,9 +295,9 @@ C-9-3의 초기 파일 크기·형식, C-4의 세션/로그인 수명·횟수는
 5. 파일 포트·MinIO·변환 어댑터·보상 정리, UI 통합. 실제 외부 키 사용 없는 테스트.
 6. 선택된 LOCO 전용 관리 메뉴 연결, 기존 앱 전체 비교와 CMS 활성 상태 통합 회귀.
 
-각 구현 단계는 별도 커밋·검증 수치·시간 기록을 남기는 방식으로 제안한다. **현재는 1번도 시작하지 않는다.** 선택 후에도 새 업무 결정이 생기면 번호를 추가하고 답을 기다린다.
+각 구현 단계는 별도 커밋·검증 수치·시간 기록을 남기는 방식으로 제안한다. **이번 요청은 1번까지만 구현·검증·커밋·push하고 중단한다.** 새 업무 결정이 생기면 C-번호와 항목 이름으로 답을 기다린다.
 
-## 10. 이번 설계 작업 검증·한계
+## 10. 최초 설계 커밋 dc524f7의 검증·한계(과거 기록)
 
 - main merge commit의 두 부모와 이관 최종 커밋 포함을 확인한 뒤 main에서 분기했다.
 - 노션 결정·현재 보안/HTTP/파일/마이그레이션/DB 비교 코드를 읽고 설계 근거와 추정을 구분했다.
@@ -302,3 +322,45 @@ C-9-3 CMS 파일 초기 정책:
 C-9-4 이력 보존·수집 범위:
 C-9-5 첫 LOCO 확장 범위:
 ```
+
+## 11. 1단계 구현 범위와 검증 방법
+
+- `settings.gradle`에 `:cms-core` 하나만 추가했다. 물리 경로는 `modules/cms-core`, 기존 root는 실행 앱이다. core의 생산 의존성은 기존 Boot BOM 아래 Spring Context이며 새 외부 라이브러리를 도입하지 않았다. core에는 LOCO 프로젝트 의존을 금지하는 Gradle 검사와 실제 컴파일/런타임 경계 테스트가 있다.
+- `CmsCoreConfiguration`은 조립용 진입점이며 root `LocoApplication`이 명시적으로 import한다. core 자체는 실행 서버/별도 main이 아닌 library JAR다. 독립 기동은 LOCO 없는 테스트 호스트에서 Spring Boot·JPA·Flyway를 시작하는 뜻이며 별도 배포 서버를 추가하지 않았다.
+- core가 소유한 `db/cms/V2__create_cms_schema.sql`은 `CREATE SCHEMA cms`만 실행한다. V2 번호는 C-7 B에 따라 호스트의 다음 가용 버전이다. 기존 `db/migration/V1__baseline.sql`과 public history를 유지하고 application.yml의 두 location을 같은 Flyway에서 실행한다. 관리되지 않은 기존 cms schema는 조용히 편입하지 않고 실패시켜 확인하게 한다.
+- 후속 테이블은 다음 버전으로 추가한다. V2는 배포 후 고치지 않는다. V2 기반 업그레이드 테스트는 target(2), 기존 Prisma baseline 테스트는 target(1)을 유지한다. 실제 앱 health 테스트와 전체 회귀는 최신 마이그레이션을 실행한다.
+- 기존 Dockerfile의 `COPY apps/server-v3/ ./`와 `.dockerignore`의 하위 경로 포함 규칙이 새 모듈 소스/리소스도 포함한다. Gradle bootJar가 core JAR를 런타임에 넣는지 산출물로 확인한다. Dockerfile을 불필요하게 바꾸지 않는다.
+- `test`에는 core test가 포함되고 `check`에는 core check(포맷 포함)가 연결된다. `scripts/measure-tests.ps1`은 root test/comparisonTest와 core test XML을 각각 합산한다. 기존 manifest 식별자를 유지해 기존 케이스 누락 여부를 비교한다.
+- 관리자 계정·메뉴·권한·이력·파일 업무 테이블/API, `/admin` 필터 체인, apps/admin·MinIO는 아직 없다. 승인된 관리자 HTTP 정책은 인증/화면 경로가 생기는 2단계에서 적용한다. 기존 전역 HTTP 필터의 앱 동작은 이번 단계에 바꾸지 않았다.
+
+실행 위치: `apps/server-v3`, Java 21 JDK·Docker 필요. 기존 전체 비교에는 Node/npm도 필요하다.
+
+```powershell
+# core만: v2/Prisma/libvips 준비나 LOCO 앱 기동 없음
+.\gradlew.bat :cms-core:test --rerun --console=plain
+# 실제 LOCO 조립과 V1→V2 업그레이드 (core test도 실행)
+.\gradlew.bat :test --tests '*CmsMigrationIntegrationTest' --tests '*HealthIntegrationTest' --rerun --console=plain
+# 기존 전체 회귀 + core + 포맷 + build, 수치/manifest 저장
+.\scripts\measure-tests.ps1 -Label cms-foundation-final
+```
+
+확인 결과는 core 독립 JPA 기동, V2 1회 적용·재실행0, 빈 DB의 V1/V2 순서, V1 사용자·public 컬럼·checksum 포함 history 보존, 미관리 cms 거절이다. core에는 V1/LOCO 클래스가 없어야 하며 root 앱에는 core가 포함되어야 한다. 최종 건수·시간은 아래 최종 검증에 기록했다.
+
+1단계 집중 검증: 새 테스트 7건과 기존 health 6건을 합쳐 **13/13 성공·실패/skip0, 35.869초**. core3 + 호스트10이며 v2 컨테이너를 띄우지 않은 실행이다. 임시 Gradle init script로 core에 root 프로젝트 의존을 주입하자 `cms-core must not depend on a host project`로 빌드가 거절됐다(의도된 음성 검사이며 회귀 실패로 합산하지 않음).
+
+개발 중 첫 독립 기동 검사에서 테스트용 `@TestConfiguration`만 지정해 Boot의 시작 설정 검색이 실패했다(3건 중 1건, 20.298초). LOCO 없는 테스트 호스트를 `@SpringBootConfiguration`으로 명시한 뒤 6/6 성공(27.742초), 실제 앱 조립 검사까지 더한 위 13/13 결과를 얻었다. 생산 코드의 별도 실행 앱이나 인증 기능을 추가해서 우회하지 않았다.
+
+### 1단계 최종 검증 — 2026-11-07
+
+`measure-tests.ps1 -Label cms-foundation-final` 결과: **전체1,441·성공1,440·실패0·skip1(기존 HEIC 공통 제약), 알려진 차이11, 1,037.621초(17분18초)**. v2 이미지 캐시 기준이며 Spotless/root build/core build 통과다.
+
+| 작업 | 전체 | 성공 | 실패 | skip |
+| --- | ---: | ---: | ---: | ---: |
+| root test | 286 | 285 | 0 | 1 |
+| cms-core:test | 3 | 3 | 0 | 0 |
+| comparisonTest | 1,152 | 1,152 | 0 | 0 |
+| 합계 | 1,441 | 1,440 | 0 | 1 |
+
+기존 1,434개 식별자 누락0·추가7. 알려진 차이의 ID·분류 변경0(개선6·의도5·보류0), v2 빌드/최초 기동 각1·재시작17, 인증 대기0ms·시나리오 창 대기61,014ms다. 결과·manifest·quota·로그는 `build/performance/cms-foundation-final/`에 보존한다. 실행 JAR에 core library와 기존 V1이 포함되고 테스트 호스트는 포함되지 않는 것을 확인했다. core JAR에는 설정 클래스와 V2만 있고 LOCO 클래스/V1/테스트 클래스는 없다.
+
+새 기능·실험 성능의 측정이 아니라 회귀 실행 시간이다. 기존 측정의 동시 이미지 구간 중복 한계도 유지한다. v2·Flutter·V1·기존 비교 fixture는 변경하지 않았다. 노션 결정 변경 표에 승인된 13개 항목을 기록했다. **여기서 1단계를 마치며, 관리자 인증·메뉴·프런트·MinIO 구현은 다음 승인까지 진행하지 않는다.**

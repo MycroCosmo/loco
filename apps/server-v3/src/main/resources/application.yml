@@ -41,6 +41,8 @@ spring:
     open-in-view: false
   flyway:
     enabled: true
+    default-schema: public
+    locations: classpath:db/migration,classpath:db/cms
     baseline-on-migrate: false
     baseline-version: 1
 

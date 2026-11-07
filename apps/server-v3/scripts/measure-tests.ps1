@@ -16,9 +16,17 @@ try {
     $timing = @{restart=0.0;preparation=0.0;request=0.0;image=0.0}
     $tasks = @{}
     $manifest = @()
-    foreach ($task in @('test','comparisonTest')) {
+    $groups = @(
+        @{name='test'; directory='build/test-results/test'; report='fast'},
+        @{name='comparisonTest'; directory='build/test-results/comparisonTest'; report='compatibility'},
+        @{name='cms-core:test'; directory='modules/cms-core/build/test-results/test'; report=$null}
+    )
+    foreach ($group in $groups) {
+        $task = $group.name
         $counts = @{total=0;failed=0;skipped=0}
-        Get-ChildItem "build/test-results/$task/TEST-*.xml" | ForEach-Object {
+        $results = @(Get-ChildItem (Join-Path $group.directory 'TEST-*.xml'))
+        if ($results.Count -eq 0) { throw "No test results for $task" }
+        $results | ForEach-Object {
             [xml]$xml = Get-Content $_.FullName -Raw
             $counts.total += [int]$xml.testsuite.tests
             $counts.failed += [int]$xml.testsuite.failures + [int]$xml.testsuite.errors
@@ -28,7 +36,8 @@ try {
         $counts.passed = $counts.total - $counts.failed - $counts.skipped
         $tasks[$task] = $counts
         foreach($key in @('total','passed','failed','skipped')) { $totals[$key] += $counts[$key] }
-        $report = if($task -eq 'test') {'fast'} else {'compatibility'}
+        $report = $group.report
+        if (!$report) { continue }
         foreach($file in @('summary','timing')) { Copy-Item "build/reports/$report/$file.json" (Join-Path $destination "$task-$file.json") }
         $observed = Get-Content "build/reports/$report/timing.json" -Raw | ConvertFrom-Json
         $timing.restart += $observed.restartMillis / 1000

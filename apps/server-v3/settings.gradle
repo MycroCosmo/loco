@@ -1,1 +1,3 @@
 rootProject.name = 'loco-server-v3'
+include 'cms-core'
+project(':cms-core').projectDir = file('modules/cms-core')
