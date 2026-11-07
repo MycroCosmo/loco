@@ -351,7 +351,10 @@ class HistoryIntegrationTest {
             "PermissionService.explain/4",
             "PermissionService.require/3",
             "HistoryQueryService.list/2",
-            "HistoryQueryService.detail/2");
+            "HistoryQueryService.detail/2",
+            "FileService.list/3",
+            "FileService.detail/2",
+            "FileService.download/2");
     var writes = Arrays.stream(Mutation.values()).map(m -> m.method).collect(Collectors.toSet());
     var methods = new TreeSet<String>();
     var resolver = new PathMatchingResourcePatternResolver();
@@ -387,6 +390,9 @@ class HistoryIntegrationTest {
     }
     var expected = new TreeSet<>(reads);
     expected.addAll(writes);
+    // File facades span explicit transactions; their executable contracts test success and
+    // rollback.
+    expected.addAll(FileServiceIntegrationTest.WRITE_CONTRACTS);
     expected.addAll(Set.of("HistoryWriter.account/5", "HistoryWriter.record/6"));
     assertThat(methods)
         .as(
@@ -405,6 +411,8 @@ class HistoryIntegrationTest {
         Arguments.of("role", Map.of("name", new byte[] {1, 2, 3})),
         Arguments.of("menu", Map.of("node", Map.of("fileBody", "binary"))),
         Arguments.of("menu", Map.of("sortOrders", Map.of("token", "secret"))),
+        Arguments.of("file", Map.of("body", new byte[] {1, 2, 3})),
+        Arguments.of("file", Map.of("signedUrl", "https://example.invalid/?signature=secret")),
         Arguments.of("unknown", Map.of("content", "secret")));
   }
 

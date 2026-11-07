@@ -57,6 +57,17 @@ management:
       exposure:
         exclude: '*'
 
+cms:
+  storage:
+    enabled: ${CMS_STORAGE_ENABLED:false}
+    endpoint: ${CMS_STORAGE_ENDPOINT:}
+    region: ${CMS_STORAGE_REGION:us-east-1}
+    bucket: ${CMS_STORAGE_BUCKET:}
+    access-key: ${CMS_STORAGE_ACCESS_KEY:}
+    secret-key: ${CMS_STORAGE_SECRET_KEY:}
+    create-bucket: ${CMS_STORAGE_CREATE_BUCKET:false}
+    cleanup-interval-ms: 600000
+
 loco:
   http:
     allowed-origins: ${ALLOWED_ORIGINS:}

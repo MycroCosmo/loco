@@ -28,6 +28,7 @@ public class PermissionCatalog {
     add(new Definition("cms.accounts", "관리자 계정", Set.of(Action.READ, Action.MANAGE), true));
     add(new Definition("cms.roles", "역할·권한", Set.of(Action.READ, Action.MANAGE), true));
     add(new Definition("cms.menus", "메뉴 편집", Set.of(Action.READ, Action.MANAGE), false));
+    add(new Definition("cms.files", "공유 파일", Set.of(Action.READ, Action.MANAGE), false));
     for (var contribution : contributions) {
       for (var definition : contribution.permissions()) add(definition);
       for (var screen : contribution.screens())

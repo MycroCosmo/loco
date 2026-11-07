@@ -22,11 +22,16 @@ class CoreBoundaryTest {
     assertThat(compile("class Probe { com.loco.LocoApplication host; }"))
         .as("a reverse dependency cannot compile")
         .isFalse();
+    assertThat(compile("class Probe { software.amazon.awssdk.services.s3.S3Client storage; }"))
+        .as("S3 SDK belongs to the host adapter, never core")
+        .isFalse();
   }
 
   @Test
   void runtimeHasNoHostClassesOrBaseline() {
     assertThatThrownBy(() -> Class.forName("com.loco.LocoApplication"))
+        .isInstanceOf(ClassNotFoundException.class);
+    assertThatThrownBy(() -> Class.forName("software.amazon.awssdk.services.s3.S3Client"))
         .isInstanceOf(ClassNotFoundException.class);
     assertThat(getClass().getResource("/db/migration/V1__baseline.sql")).isNull();
     assertThat(getClass().getResource("/db/cms/V2__create_cms_schema.sql")).isNotNull();

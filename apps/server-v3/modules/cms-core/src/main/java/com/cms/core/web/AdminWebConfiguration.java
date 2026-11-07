@@ -21,7 +21,8 @@ import org.springframework.security.web.csrf.*;
   AdminController.class,
   AdminAdvice.class,
   GovernanceController.class,
-  HistoryController.class
+  HistoryController.class,
+  FileController.class
 })
 public class AdminWebConfiguration {
   @Bean

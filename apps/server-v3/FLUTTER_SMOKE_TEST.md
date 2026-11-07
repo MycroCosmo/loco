@@ -28,7 +28,7 @@
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-루트 `.env`에서 `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`을 로컬용으로 채운다. JWT_SECRET은 최소 32 UTF-8 바이트다. 파일은 Git에 넣지 않는다. 외부 키 없는 실행에서는 `FIREBASE_SERVICE_ACCOUNT`, `KAKAO_REST_API_KEY`, `KAKAO_CLIENT_SECRET`, `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`이 비어 있는지 **값을 출력하지 않고** 확인한다. 셸 환경변수가 `.env`를 덮어쓸 수 있으므로 기존 외부 설정도 확인한다.
+루트 `.env`에서 `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`과 CMS 저장소용 `CMS_STORAGE_ACCESS_KEY`, `CMS_STORAGE_SECRET_KEY`를 로컬용으로 채운다. CMS 키는 로컬 SeaweedFS 접속용이며 실제 AWS 키를 쓰지 않는다. JWT_SECRET은 최소 32 UTF-8 바이트다. 파일은 Git에 넣지 않는다. 외부 키 없는 실행에서는 `FIREBASE_SERVICE_ACCOUNT`, `KAKAO_REST_API_KEY`, `KAKAO_CLIENT_SECRET`, `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`이 비어 있는지 **값을 출력하지 않고** 확인한다. 셸 환경변수가 `.env`를 덮어쓸 수 있으므로 기존 외부 설정도 확인한다.
 
 SMTP 항목은 아래 로컬 값으로 맞춘다. 기존 `.env`의 실제 SMTP 설정이 Compose 기본값보다 우선한다.
 
@@ -49,7 +49,7 @@ docker compose -p loco-v3-smoke ps
 Invoke-RestMethod http://localhost:8081/api/health
 ```
 
-기대 결과: db/mailpit/v3 healthy, health JSON `{"status":"ok"}`. Flyway가 비어 있는 smoke DB에 V1을 적용한다. v2 서비스는 이 명령으로 시작하지 않는다. 기존 개발 스택에서 v2가 실행 중이라면 앱이 그쪽 3000 포트로 연결되지 않는지 특히 확인한다.
+기대 결과: db/mailpit/storage/v3 healthy, health JSON `{"status":"ok"}`. Flyway가 비어 있는 smoke DB에 V1과 현재 CMS 마이그레이션(V2~V5)을 적용한다. SeaweedFS는 v3의 의존 서비스로 함께 시작하며 LOCO /uploads는 기존 볼륨을 유지한다. v2 서비스는 이 명령으로 시작하지 않는다. 기존 개발 스택에서 v2가 실행 중이라면 앱이 그쪽 3000 포트로 연결되지 않는지 특히 확인한다.
 
 Mailpit UI: [http://localhost:8025](http://localhost:8025). v3는 [Compose](../../compose.yaml)의 CPU 2/1.5GB·UID/GID 1000:1000으로 실행하고 업로드 볼륨을 사용한다. Mailpit CPU 0.5/256MB, DB CPU 2/4GB·shared_buffers 1GB다. DB는 호스트에 직접 공개되지 않는다.
 

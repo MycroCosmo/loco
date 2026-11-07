@@ -238,7 +238,7 @@ $env:DATABASE_URL = $null
 ## Docker Compose로 v2·v3 함께 실행
 
 아래 명령은 **저장소 루트**에서 실행한다. Docker가 켜져 있고 호스트의 3000·8081·8025·1025 포트가 비어 있어야 한다.
-첫 실행에는 `.env.example`을 `.env`로 복사하고 `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` 값을 채운다. 기존 `.env`는 덮어쓰지 않는다.
+첫 실행에는 `.env.example`을 `.env`로 복사하고 `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `CMS_STORAGE_ACCESS_KEY`, `CMS_STORAGE_SECRET_KEY`를 로컬용 값으로 채운다. 저장소 키는 실제 AWS 키가 아니다. 기존 `.env`는 덮어쓰지 않는다.
 JWT 비밀 값은 UTF-8 기준 최소 32바이트의 충분히 긴 무작위 값으로 설정하며 v2·v3에 같은 값이 주입된다.
 Nimbus의 HS256 키 길이 요구 사항 때문에 v3는 비어 있거나 32바이트 미만인 값으로 시작하지 않는다. 짧은 기존 개발 키가 있다면 두 앱을 함께 변경하고 토큰을 다시 발급한다.
 `.env`에서 `$` 등 치환될 수 있는 문자를 값에 포함할 때는 작은따옴표로 감싼다.
@@ -544,3 +544,19 @@ TransactionTemplate의 커밋 경계, multipart 지연 파싱, 네이티브 프�
 ## CMS 역할·메뉴 기반
 
 관리자 보안 관리는 SYSTEM_ADMIN만, 업무 권한은 READ/MANAGE 합집합이다. 코드 템플릿을 복사해 역할을 만들며 기존 역할로 자동 전파하지 않는다. 메뉴 이동은 UUID를 유지하고 트리 메타 행 잠금+revision으로 동시 순환을 막는다. API·실제 DB 경합 수치·검증 명령은 [CMS 설계 16절](CMS_CORE_DESIGN.md#16-3단계-확정구현-기록)을 참고한다. CLI는 기존 스키마 검증만 하며 V4 적용은 배포 앱 기동 시 수행한다.
+
+## CMS 파일 백엔드 (5-A)
+
+로컬 저장소는 SeaweedFS S3 게이트웨이이며 SDK·이미지 변환은 호스트에만 있다. core는 저장/변환 포트와 JPA 상태·이력을 관리한다. [C-15~23 결정과 검증](CMS_CORE_DESIGN.md#20-c-23-c-확정--파일-선등록조건부-상태-전이)을 참고한다. 관리자 SPA는 후속 5-B다.
+
+저장소를 포함해 실행하려면 저장소 루트 `.env`에 기존 DB/JWT 설정과 **로컬용으로 새로 만든** `CMS_STORAGE_ACCESS_KEY`, `CMS_STORAGE_SECRET_KEY`를 지정한다. 실제 AWS 키를 사용하지 않는다. 예제 파일은 키 이름만 제공한다. 루트에서 `docker compose up -d --build --wait`를 실행하면 storage health 이후 v3가 V5를 적용하고 비공개 버킷을 준비한다. storage는 digest 고정·CPU1/1GiB, 전용 `cms-objects` 볼륨을 사용한다. 기존 DB·LOCO 업로드 볼륨은 유지한다. `docker compose down -v`로 기존 데이터를 지우지 않는다.
+
+Compose는 endpoint `http://storage:8333`, region `us-east-1`, bucket `cms-files`를 기본 사용한다. 호스트에서 직접 앱을 실행할 때만 `CMS_STORAGE_ENABLED=true`, `CMS_STORAGE_ENDPOINT=http://localhost:8333`, region/bucket/접속 키를 설정한다. 초기 로컬 버킷 준비는 `CMS_STORAGE_CREATE_BUCKET=true`로 켠다. 이 플래그는 관리자 bootstrap CLI를 통한 DB migration과 무관하다. CLI는 여전히 스키마 검증만 한다. 운영 버킷은 별도 준비하고 기본 create=false를 유지한다.
+
+파일 API prefix는 `/admin/api/core/files`다. GET 목록(`page=0&size=50`), GET `/{id}` 상세, GET `/{id}/content` 스트리밍 다운로드, POST multipart `file` 한 개, DELETE `/{id}`를 제공한다. 관리자 세션과 변경 요청 CSRF가 필요하다. `cms.files` READ는 모든 ACTIVE 파일 조회·다운로드, MANAGE는 업로드·삭제도 허용하며 SYSTEM_ADMIN은 모두 허용한다. 업로더 소유 제한은 없다. 다운로드는 attachment·no-store·nosniff이며 객체 URL이나 서명 URL은 노출하지 않는다.
+
+업로드는 UPLOADING 선커밋→변환/PUT→조건부 ACTIVE+이력 커밋이다. 실패·오래된 업로드는 FAILED/ABANDONED, 삭제는 DELETE_PENDING을 거쳐 정리한다. 대조는10분마다 수행하며 생성10분 미만은 보존한다. ACTIVE 객체는 대조로 삭제하지 않는다. 응답 유실 후 재업로드는 중복 파일을 만들 수 있다(C-19 B). 파일은 각10MiB 이하, 이미지 JPEG/PNG/WebP/AVIF는 WebP만 저장하고 PDF/TXT/CSV는 원본을 저장한다. 일반 파일 검사는 악성코드 검사나 PDF의 안전성 보증이 아니다.
+
+집중 재검증은 `./gradlew :cms-core:test :test --tests '*CmsFilesIntegrationTest' --tests '*StorageTransportTest' --tests '*CmsImageTransformerTest'`로 실행한다. 전체 범위는 `./gradlew allTests build`다(Windows는 `gradlew.bat`). 실제 AWS 접속 없이 로컬 SeaweedFS와 루프백 장애 대역으로 확인한다. 대조 비용 보고서는 `build/reports/cms-storage/reconciliation.txt`, 전체 결과는 Gradle HTML 보고서에서 확인한다.
+
+5-A 최종 전체 검증: **1,563건 중 성공1,562·실패0·HEIC 공통 제약 건너뜀1**, 알려진 차이11건 불변, **1,145.692초**(v2 이미지 캐시). core99·root312·비교1,152건, allTests/build/Spotless 통과. DB gate의 두 순서 모두 ACTIVE 객체 누락0이며 Linux Compose 이미지5종 흐름도 통과했다. 초기 SeaweedFS 준비 시점 문제와 수정 근거는 설계20절에 기록했다. **5-B 화면과6단계는 미착수**다.

@@ -54,8 +54,8 @@ class CoreStandaloneIntegrationTest {
   void bootsAndMigratesWithoutLocoOrItsConfiguration() throws Exception {
     assertThat(core).isNotNull();
     assertThat(entities.isOpen()).isTrue();
-    assertThat(flyway.info().applied()).hasSize(3);
-    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
+    assertThat(flyway.info().applied()).hasSize(4);
+    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("5");
     assertThat(flyway.migrate().migrationsExecuted).isZero();
     try (var connection = dataSource.getConnection();
         var sql = connection.createStatement();

@@ -10,10 +10,21 @@ final class HistoryPayload {
   private HistoryPayload() {}
 
   static Map<String, Object> checked(String resource, Map<String, Object> input) {
-    if (resource == null || !Set.of("admin-account", "role", "menu").contains(resource))
+    if (resource == null || !Set.of("admin-account", "role", "menu", "file").contains(resource))
       throw new IllegalArgumentException("Unregistered history resource");
     if (input == null) return null;
     switch (resource) {
+      case "file" -> {
+        keys(
+            input,
+            Set.of("originalName", "mediaType", "byteSize", "sha256", "createdBy", "status"));
+        optional(input, "originalName", v -> v instanceof String);
+        optional(input, "mediaType", v -> v instanceof String);
+        optional(input, "byteSize", v -> v instanceof Long n && n > 0);
+        optional(input, "sha256", v -> v instanceof String s && s.matches("[a-f0-9]{64}"));
+        optional(input, "createdBy", HistoryPayload::uuid);
+        optional(input, "status", v -> "ACTIVE".equals(v) || "DELETE_PENDING".equals(v));
+      }
       case "admin-account" -> {
         keys(input, Set.of("loginId", "displayName", "active", "mustChangePassword", "roles"));
         optional(input, "loginId", v -> v instanceof String);

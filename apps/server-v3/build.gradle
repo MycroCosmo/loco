@@ -36,6 +36,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.apache.httpcomponents.client5:httpclient5'
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.52.0'
+    // C-15: S3 SDK and transport belong only to the assembly host.
+    implementation platform('software.amazon.awssdk:bom:2.57.11')
+    implementation('software.amazon.awssdk:s3') {
+        exclude group: 'software.amazon.awssdk', module: 'netty-nio-client'
+    }
+    implementation 'software.amazon.awssdk:apache5-client'
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
     runtimeOnly 'org.postgresql:postgresql'

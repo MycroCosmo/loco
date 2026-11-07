@@ -200,6 +200,32 @@ class CmsMigrationIntegrationTest {
             "DB_PASSWORD=" + database.getPassword());
   }
 
+  @Test
+  void upgradingV4AddsFileStateWithoutChangingExistingSchemasOrHistory() throws Exception {
+    host()
+        .withPropertyValues("spring.flyway.target=4")
+        .run(context -> assertThat(context).hasNotFailed());
+    String columns = publicColumns();
+    String history =
+        sql("SELECT json_agg(h ORDER BY installed_rank)::text FROM public.flyway_schema_history h");
+    String roles = sql("SELECT json_agg(r ORDER BY id)::text FROM cms.admin_role r");
+    host()
+        .withPropertyValues("spring.flyway.target=5")
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThat(publicColumns()).isEqualTo(columns);
+              assertThat(
+                      sql(
+                          "SELECT json_agg(h ORDER BY installed_rank)::text FROM public.flyway_schema_history h WHERE version<>'5'"))
+                  .isEqualTo(history);
+              assertThat(sql("SELECT json_agg(r ORDER BY id)::text FROM cms.admin_role r"))
+                  .isEqualTo(roles);
+              assertThat(sql("SELECT count(*) FROM cms.stored_file")).isEqualTo("0");
+              assertThat(context.getBean(Flyway.class).migrate().migrationsExecuted).isZero();
+            });
+  }
+
   private String publicColumns() throws Exception {
     return sql(
         "SELECT json_agg(c ORDER BY table_name,ordinal_position)::text FROM "

@@ -21,6 +21,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
   com.cms.core.permission.PermissionService.class,
   com.cms.core.account.RoleService.class,
   com.cms.core.menu.MenuService.class,
+  com.cms.core.file.FileService.class,
   AdminWebConfiguration.class
 })
 public class CmsCoreConfiguration {}

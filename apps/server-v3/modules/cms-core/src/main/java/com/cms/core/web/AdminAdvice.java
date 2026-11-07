@@ -13,6 +13,17 @@ import org.springframework.web.bind.annotation.*;
 @RestControllerAdvice(basePackages = "com.cms.core")
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class AdminAdvice {
+  @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
+  ResponseEntity<?> multipart() {
+    return ResponseEntity.badRequest()
+        .body(Map.of("statusCode", 400, "message", "Invalid multipart request"));
+  }
+
+  @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+  ResponseEntity<?> fileSize() {
+    return ResponseEntity.status(413).body(Map.of("statusCode", 413, "message", "File too large"));
+  }
+
   @ExceptionHandler({
     org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
     org.springframework.web.bind.MissingServletRequestParameterException.class

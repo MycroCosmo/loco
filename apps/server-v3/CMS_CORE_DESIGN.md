@@ -1,6 +1,6 @@
 # CMS(B) 핵심 모듈 설계안
 
-상태: **CMS 4단계 완료. C-15~C-22 확정(19절), 추가 C-23 고아 정리·메타데이터 등록 경합 보호 선택 대기. 5-A 구현·5-B·6단계는 미착수.**
+상태: **C-23 C 반영, 5-A 백엔드 구현·전체 allTests/build 검증 완료(20절). 5-B·6단계는 미착수.**
 
 작성일: 2026-11-07. 기준 main `9dc3c09`는 PR #2의 merge commit이며 이관 최종 `7f25789`를 부모로 보존한다. 이 main에서 `feature/cms-core`를 만들었다. 아래 1.1절과 단계별 기록이 최신 확정 내용이다. 8절의 미채택 대안은 비교 이력으로 보존한다. 아직 구현하지 않은 업무 모델·API 초안과 완료된 단계를 구분한다.
 
@@ -119,9 +119,9 @@ HttpOnly/Secure(운영 HTTPS)/SameSite cookie, 로그인 시 session ID 교체, 
 
 ### 5.4 파일과 기존 /uploads
 
-core에는 `ObjectStorage`의 put/read/delete와 `ImageTransformer` 계약만 둔다. 업로드는 권한·CSRF·크기/실제 형식 확인 → 이미지 변환(일반 파일은 원본) → 서버 생성 불변 object key 저장 → 메타데이터/업무 연결/이력 DB 커밋 순서다. 객체 저장은 DB 트랜잭션과 원자적이지 않다. DB 실패 시 **이 요청이 만든 key만** 보상 삭제하며, 보상 실패/프로세스 종료 고아는 식별 가능한 상태와 재정리 대상으로 남긴다.
+core에는 `ObjectStorage`의 put/open/delete/list와 `ImageTransformer` 계약만 둔다. C-23 C로 업로드 순서를 확정했다: 권한·CSRF·입력 크기 검사 → UPLOADING 메타데이터 선커밋(성공 이력 없음) → 실제 형식 검사·이미지 변환·PUT(트랜잭션 밖) → 조건부 ACTIVE 전이+성공 이력 커밋. 객체 저장은 DB 트랜잭션과 원자적이지 않다. 실패 시 **이 요청이 만든 key만** 보상 삭제하며 FAILED/ABANDONED 재정리는20절을 따른다. 5-A에는 업무 연결을 추가하지 않는다.
 
-삭제는 DB 연결 해제와 DELETE_PENDING 표식을 먼저 커밋하고 실제 객체 삭제를 재시도할 수 있게 한다. 존재하지 않는 객체의 삭제는 성공으로 처리한다. 업로드 후 미연결 파일의 정리 유예시간, 재시도 횟수/주기는 구현 전에 수치 검증한다. 같은 객체를 여러 업무에 연결하려면 참조 집계 정책을 별도로 정해야 하며 초기에는 소유 업무 연결 한 곳을 제안한다.
+삭제는 DELETE_PENDING+삭제 이력을 먼저 커밋하고 실제 객체 삭제를 재시도한다. 존재하지 않는 객체의 삭제는 성공이다. 대조는10분마다 수행하며 UPLOADING/FAILED와 메타데이터 없는 객체에10분 유예를 적용한다. DELETE_PENDING/ABANDONED는 매 회차 시도 수를 기록하고 성공 시 행을 지운다. ACTIVE는 업무 미연결 여부와 관계없이 보존한다. 업무 연결·참조 집계 정책은6단계에서 설계한다.
 
 기존 `LocalImageStorage`에는 프로필/지도방/장소 크롭, /uploads URL, HEIC v2 호환 실패 같은 LOCO 정책이 섞여 있다. core가 이 클래스를 참조하면 분리 목표를 어긴다. 변환 포트 어댑터는 조립 쪽에 두고 기존 libvips 동작을 연결할 수 있지만 core에서 LOCO를 import하지 않는다. 공통 구현을 추출할 경우 별도 호환 리팩터링 커밋과 코덱/HTTP 회귀가 선행돼야 한다. 지금 추출하지 않는다.
 
@@ -794,7 +794,7 @@ C-21과 별도로 일반 파일은 원본 바이트를 그대로 저장하고 SH
 1. core 포트에 SDK/libvips/LOCO 참조 없음, core 단독 대역 계약 테스트.
 2. 실제 로컬 SeaweedFS에 이미지 WebP와 일반 파일 원본 바이트/체크섬 확인, 형식/크기/권한/경로 입력 경계. cms.files READ/MANAGE를 가진 다른 관리자도 공유 가능해야 한다.
 3. 객체 PUT 성공 후 최종 DB/이력 실패: 성공 파일 메타데이터·성공 이력0, 해당 요청 객체만 보상 삭제.
-4. 보상 DELETE 실패·프로세스 중단·PUT 응답 유실: 주기 전체 목록 대조가 생성10분 미만 객체를 보존하고,10분 이상·메타데이터 없는 객체만 삭제. 재정리 후 영구 고아0, 정상 파일 보호. DELETE_PENDING은 매 회차 재시도·시도 수 기록. 목록 페이지 수·대조 객체/메타데이터 수·시간을 측정한다. 메타데이터 등록과 고아 삭제 경합도 검증한다(C-23 선택 후).
+4. 보상 DELETE 실패·프로세스 중단·PUT 응답 유실: 주기 전체 목록 대조가 생성10분 미만 객체를 보존하고,10분 이상·메타데이터 없는 객체만 삭제. 재정리 후 영구 고아0, 정상 파일 보호. DELETE_PENDING은 매 회차 재시도·시도 수 기록. 목록 페이지 수·대조 객체/메타데이터 수·시간을 측정한다. C-23 C에 따라 오래된 UPLOADING/FAILED를 먼저 ABANDONED로 전이한 뒤 정리하며, ACTIVE 전이와의 두 순서를 DB gate로 검증한다.
 5. 최종 DB 커밋 후 HTTP 응답 실패: 커밋 객체/메타데이터/성공 이력 유지. C-19 B는 재업로드 시 새fileId·중복 파일이 생길 수 있으며 한계로 고정한다. 각 커밋 파일은 실체가 있고 각 성공 변경에 이력1건이 있어야 한다. 같은fileId 재사용/멱등 키 검사는 이번 범위에서 제외한다.
 6. 삭제 DB 실패 시 기존 파일 유지, 논리 삭제 커밋 후 물리 삭제 실패 시 다운로드 차단·재정리 성공, 중복 삭제 안전성.
 7. 파일 쓰기 경로를 4단계 inventory/JSONB 허용 계약/민감값·롤백 테스트에 추가. 파일 본문·서명 URL 미기록.
@@ -810,18 +810,18 @@ C-21과 별도로 일반 파일은 원본 바이트를 그대로 저장하고 SH
 | C-16 객체 키 규칙 | A: cms/files/{fileId UUID} | 이름·업무 위치와 식별자 분리 |
 | C-17 다운로드 방식 | A: 서버 경유 스트리밍 | 매 요청 관리자 권한 확인, 서명 URL을 응답/이력에 넣지 않음 |
 | C-18 초기 파일 소유·권한 | **C: 소유 개념 없음. cms.files READ는 전체 조회·다운로드, MANAGE는 업로드·삭제, SYSTEM_ADMIN 전체 허용** | C-3의 단순 READ/MANAGE 유지. 업로더 소유는 관리자 간 파일 공유를 막아 과도한 권한 문제를 반복하므로 미채택. createdBy는 감사 정보일 뿐 소유 권한이 아님. 6단계에서 연결된 업무 권한을 따르도록 확장 검토 |
-| C-19 복구 | **B: 객체 저장→DB 저장 + 동기 보상, 주기 전체 목록 대조로 고아·DELETE_PENDING 재정리** | 응답 유실 후 재업로드하면 중복 파일 가능. 각 파일/메타데이터의 정합성과 이력은 유지. 영속 업로드 작업 기록+멱등 키(A)는 이후 실험 백로그 |
+| C-19 복구 | **B: 동기 보상+주기 대조. C-23 C로 UPLOADING 선등록→객체 저장→조건부 ACTIVE+이력 커밋으로 구체화** | 응답 유실 후 재업로드하면 중복 파일 가능. 각 파일/메타데이터의 정합성과 이력은 유지. 영속 업로드 작업 기록+멱등 키(A)는 이후 실험 백로그 |
 | C-20 로컬 저장소 | **C: SeaweedFS S3 게이트웨이, 이미지 digest 고정, CPU1·메모리1GiB** | 기존 MinIO→S3 계획을 S3 호환 로컬 서버(SeaweedFS)→S3로 변경. 사용자 근거는 MinIO 커뮤니티 이미지 미배포·저장소 archive 이후 유지보수 위험. SDK/포트 구조로 저장 서버를 교체하며 실제 AWS 호출·키 사용은 금지 |
 | C-21 이미지 변환 | A: 비율 유지, 확대·크롭 없이 긴 변 최대2048px, WebP Q80·메타데이터 제거·애니메이션 첫 프레임, 디코딩 전40MP 상한 | 기존 LOCO 이미지 처리에는 적용하지 않음 |
 | C-22 timeout·대조 | 연결2초·읽기5초·호출 전체10초, SDK 자동 재시도 없음. **10분마다 전체 대조, 메타데이터 없는 객체는 생성 후10분 이상일 때만 삭제. DELETE_PENDING은 매 회차 재시도·시도 수 기록** | 목록 대조 비용을 실제 객체 수·페이지 수·DB 조회 수·시간으로 측정. 생성10분 미만은 보존 |
 
-추가 문서 정리: 이전 단계의 MinIO 선택지·과거 완료 기록은 이력으로 보존하고 현재 실행 기준은 이 절과1.1절/5.4절/9절을 따른다. LOCO /uploads는 여전히 로컬 유지이며 별도 이전 작업이다. 현재 .env.example에는 MINIO 접속 키가 없음을 확인했다. 구현 시 공급자 중립적인 `CMS_STORAGE_ENDPOINT`, `CMS_STORAGE_REGION`, `CMS_STORAGE_BUCKET`, `CMS_STORAGE_ACCESS_KEY`, `CMS_STORAGE_SECRET_KEY` 등의 키만 추가하고 값은 남기지 않는다. AWS 기본 자격증명 체인을 테스트에서 사용하지 않는다.
+추가 문서 정리: 이전 단계의 MinIO 선택지·과거 완료 기록은 이력으로 보존하고 현재 실행 기준은 이 절과1.1절/5.4절/9절을 따른다. LOCO /uploads는 여전히 로컬 유지이며 별도 이전 작업이다. 현재 .env.example에는 MINIO 접속 키가 없음을 확인했다. 공급자 중립적인 `CMS_STORAGE_ENDPOINT`, `CMS_STORAGE_REGION`, `CMS_STORAGE_BUCKET`, `CMS_STORAGE_ACCESS_KEY`, `CMS_STORAGE_SECRET_KEY` 등의 키만 추가했으며 값은 남기지 않았다. AWS 기본 자격증명 체인을 테스트에서 사용하지 않는다.
 
 SeaweedFS/S3 계약은 로컬 게이트웨이에서 path-style 서명 PUT/GET/HEAD/LIST/DELETE, 페이지 continuation, 권한 거부/누락 객체 오류, 중복 DELETE, SDK 재시도0을 검증하고 S3 문서상 계약과의 차이를 기록한다. **실제 AWS S3와 실행 비교했다는 뜻은 아니다.** 계약 관측은 구현 검증 이후 기록한다.
 
 착수 조사에서 공식 배포 이미지 `chrislusf/seaweedfs:4.52`를 pull해 digest `sha256:57877e32bb90073b37dc109b438ba66e84fd5ed9ced5f5c04f56444ef243ce59`를 확인했다. Maven Central의 AWS SDK S3 release 메타데이터는2.57.11이었다. 이것은 이미지 캐시/배포 메타데이터 확인이며 컨테이너 기동·SDK 호환성·실제 S3 계약 검증 결과가 아니다. 구현 시 해당 버전의 의존성과 계약을 확인한 뒤 사용한다.
 
-### C-23 고아 정리와 메타데이터 등록의 경합 보호 — 선택 대기
+### C-23 최초 대안 검토 (과거 기록 — 새 안 C 확정은20절)
 
 10분 유예와 삭제 직전 DB 존재 확인만으로는 다음 일정이 가능하다. 이는 아직 실행 측정한 결과가 아니라 설계상 가능한 경쟁 일정이다.
 
@@ -841,4 +841,97 @@ SeaweedFS/S3 계약은 로컬 게이트웨이에서 path-style 서명 PUT/GET/HE
 
 A라면 전체 목록 대조를 한 트랜잭션/한 번의 잠금으로 감싸지 않는다. 후보 객체1건씩 잠금을 잡고 최신 DB와 객체를 재확인해 처리한다. B도 목록에서 읽은 과거 상태를 그대로 사용하지 않는다. 어느 안이든 외부 객체를 직접 삭제하는 관리 도구까지 원자성을 보장하지는 않는다.
 
-선택 후 실제 DB gate와 로컬 SeaweedFS를 사용해 업로드 최종 등록↔고아 삭제의 두 순서를 강제하고 **정상 메타데이터가 가리키는 객체 누락0**, 오래된 진짜 고아 재정리, 새 객체 보존을 검사한다. 아직 C-23을 임의로 선택하지 않았으며 운영 코드·Compose·의존성은 변경하지 않았다. 따라서 allTests는 구현 완료 후 실행한다.
+이 절은 C-23 결정 전의 검토 기록이다. 이후 사용자가 새 안 C를 확정했으며 구현·검증은20절을 따른다. A/B의 명시적 잠금은 채택하지 않았다.
+
+## 20. C-23 C 확정 — 파일 선등록·조건부 상태 전이
+
+C-23 C: 파일 메타데이터를 UPLOADING으로 먼저 커밋한다(성공 이력 없음). 변환·PUT은 트랜잭션 밖에서 실행한다. 최종 UPDATE는 id와 status=UPLOADING 조건으로 ACTIVE 전이하고 성공 이력을 같은 트랜잭션에 넣는다. 0행이면 실패 응답·자기 객체 삭제 시도. PUT/최종 DB 실패는 UPLOADING→FAILED 조건부 전이·자기 객체 보상 삭제로 처리한다. 커밋 결과가 불명확하거나 DB를 확인할 수 없으면 ACTIVE 객체를 추측으로 삭제하지 않고 후속 대조로 넘긴다.
+
+대조는 생성10분 경과 UPLOADING/FAILED를 조건부 UPDATE로 ABANDONED에 먼저 전이해 승자를 정한다. 그 후 객체 DELETE·행 정리. DELETE 실패는 ABANDONED·시도 수를 유지하고 다음 회차에 재시도한다. DELETE_PENDING도 같은 정리 경로를 사용한다. metadata 없는 cms/files/{UUID} 객체는 생성10분 경과 시 제거한다. 조회/목록/다운로드는 ACTIVE만 노출한다. 늦은 PUT이 ABANDONED 정리 이후 끝나도 ACTIVE 전이는0행이며 자기 객체를 다시 삭제한다. 프로세스가 중단되면 후속 대조가 새로 남은 오래된 고아를 처리한다.
+
+**한 행 조건=조건부 UPDATE(이미지3장 제한·파일 상태) / 여러 행 조건=비관적 락(메뉴 트리)**다. 파일에는 별도 작업 테이블·멱등 키·SELECT FOR UPDATE·advisory lock을 추가하지 않는다. 조건부 UPDATE가 사용하는 DB 내부 행 잠금은 존재하며, 명시적인 비관적 잠금 조회를 쓰지 않는다는 의미다. C-19 B의 응답 유실 재업로드 중복 한계는 유지한다. C-19의 이전 '객체 저장 후 첫 메타데이터 작성' 순서는 이번 C-23의 '선등록 후 성공 전이'로 갱신한다.
+
+18절 경합 검증은 실제 DB gate와 로컬 SeaweedFS로 ACTIVE 전이 우선/ABANDONED 전이 우선을 각각 강제한다. ACTIVE가 가리키는 객체 누락0, 오래된 고아 정리,10분 미만 진행 중 업로드 보존, 늦은 PUT 보상 정리를 확인한다. A/B 잠금 대안은 미채택 기록으로 보존한다.
+
+### 5-A 파일 역할과 확정 계약
+
+| 파일/경계 | 필요한 이유·핵심 설정 |
+| --- | --- |
+| core `V5__stored_files.sql`, `StoredFile`, `StoredFileRepository` | public Flyway history의 다음 버전으로 cms 파일 상태·삭제 시도 수를 추가. 기존 V1~4 불변. UUID와 객체 키는 한 번 생성하며 상태 전이는 변경 행 수로 승패를 판단 |
+| core `ObjectStorage`, `ImageTransformer` | 저장·변환 포트만 공개. core 컴파일/런타임에 AWS SDK·LOCO 변환기가 없음을 경계 테스트로 확인 |
+| core `FileService` | REQUIRES_NEW TransactionTemplate로 선등록/성공 전이/정리 상태의 짧은 커밋을 분리. PUT·변환·DELETE는 그 트랜잭션 밖. 명시적 행 잠금 조회 없음 |
+| core `FileController`, `AdminAdvice` | 관리자 세션·CSRF 아래 파일 API와400/413/415 오류. attachment·no-store·nosniff 서버 경유 스트리밍. 정적/공개 객체 URL 없음 |
+| core `HistoryPayload`, `PermissionCatalog` | `cms.files` READ/MANAGE와 file 이력 계약. 기존 호스트 확장 백로그를 앞당기지 않고 core 파일 계약만 추가 |
+| 호스트 `S3ObjectStorage`, `CmsStorageConfiguration` | AWS SDK v2 S3 **2.57.11**, Apache5 transport. netty transport 제외. 명시적 endpoint·static credentials·path-style만 사용하여 로컬 테스트가 AWS 기본 인증 체인으로 새지 않음 |
+| 호스트 `CmsImageTransformer` | 기존 저수준 libvips 포트를 사용하되 LOCO 크롭·로컬 저장 정책은 호출하지 않음. 40MP 사전 검사, 긴 변2048px·비율 유지·확대 없음·첫 프레임·Q80·메타데이터 제거 |
+| Compose·`.env.example` | SeaweedFS4.52 digest 고정, CPU1/1GiB, 새 `cms-objects` 볼륨. 기존 DB/업로드 볼륨 보존. 접속 정보 키는 CMS_STORAGE_*; 값은 예제에 없음 |
+
+`FileService.upload/4`, `delete/2`, `reconcile/0`을 쓰기 목록 검사에 추가했다. 성공 업로드/논리 삭제만 UPLOAD/DELETE 이력을 남긴다. UPLOADING·FAILED·ABANDONED와 재시도는 성공 업무가 아닌 내부 복구 상태라 성공 이력을 남기지 않는다. 파일 이력의 허용 필드는 originalName/mediaType/byteSize/sha256/createdBy/status다. body·서명 URL은 수집 경계에서 거절하며 세션·CSRF·접속 키·본문은 HTTP 업로드의 실제 이력에도 없어야 한다. 이력 INSERT 실패는 ACTIVE 전이나 DELETE_PENDING 전이를 함께 롤백한다.
+
+일반 파일은 최대10MiB 원본 바이트를 저장한다. TXT/CSV는 UTF-8·제어문자, PDF는 `%PDF-` 시작/끝부분 `%%EOF`를 확인한다. 확장자만으로 파일을 신뢰하지 않으며 PDF 문법 전체·악성코드 안전성까지 보증하지 않는다. 이미지도 입력/변환 후10MiB를 검사한다. 객체 키는 파일명과 무관한 `cms/files/{UUID}`다. 파일명은255자 이하, 경로 구분자·제어문자·빈 값·`.`/`..`를 거절한다. 응답에는 메타데이터와 UUID만 있고 객체 키/서명 URL은 없다.
+
+### 장애·경합 검증 대응
+
+| 상황 | 실제 검증과 기대 결과 |
+| --- | --- |
+| ACTIVE 우선 | 실제 DB gate로 ACTIVE UPDATE를 먼저 대기시킨 후 ABANDONED UPDATE를 대기. 잠금 해제 후 ACTIVE+UPLOAD 이력1, 객체 존재. ACTIVE 객체 누락0 |
+| ABANDONED 우선 | 반대 순서로 대기. 업로드 ACTIVE UPDATE0행→409, UPLOAD 이력0, 객체 정리. ACTIVE 객체 누락0 |
+| 긴 변환/늦은 PUT | PUT 전에 멈춤. 생성10분 미만은 보존, 오래된 행은 정리. 행 정리 후 늦게 도착한 PUT도 ACTIVE로 공개되지 않고 자기 객체 삭제 |
+| PUT 응답 유실·DB/이력 실패 | 실제 SeaweedFS PUT 성공 뒤 테스트 포트가 예외를 내거나 DB CHECK로 이력을 실패. FAILED·성공 이력0, 자기 객체 보상. DELETE도 실패하면 유예 후 대조가 재정리 |
+| 논리 삭제·물리 삭제 실패 | DELETE_PENDING은 목록/다운로드에 보이지 않음. 매 회차 시도 수 증가, 성공 뒤 행 제거. 이력 실패면 ACTIVE+객체 그대로 |
+| 성공 커밋 뒤 HTTP 응답 실패 | 테스트 ResponseBodyAdvice에서 실제 응답 작성 전에 실패. ACTIVE+객체+이력 보존, 재업로드는 별도 UUID로 중복 가능(C-19 B 한계) |
+| 공개·다른 관리자 접근 | 익명 객체 GET403. 관리자에 cms.files READ만 있으면 다른 업로더 파일도 조회/다운로드 가능, MANAGE만 쓰기 허용 |
+| 마이그레이션 | core 단독 V5 기동·호스트 V4→V5에서 기존 public 스키마, V1~4 checksum/history, 역할 보존. CLI는 여전히 migration 미실행 |
+
+테스트 전용 `FOR UPDATE`는 두 UPDATE의 대기 순서를 재현하는 gate이며 운영 구현에 사용한 잠금 방식이 아니다. 시간 경계는 DB timestamp(3)에 맞춰 Java 생성 시각도 밀리초로 저장한다.
+
+### 로컬 S3 계약과 이후 실제 S3 전환의 경계
+
+로컬 SeaweedFS에서 path-style 서명 PUT/GET/HEAD/LIST/DELETE, byte 일치, 익명 GET403, 없는 객체 GET404/NoSuchKey, 중복 DELETE 성공을 검증했다. 1,001개 객체가 continuation으로2페이지에 걸쳐 모두 읽히며 ACTIVE 객체는 삭제되지 않는다. 다음 비교는 **AWS 공식 문서와 로컬 관측의 대조이며 실제 AWS 호출 결과가 아니다**.
+
+- [GetObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html): 일반 S3 버킷은 path-style을 지원하나 directory bucket은 지원하지 않는다. S3의 없는 객체 응답은 ListBucket 권한에 따라403/404가 달라진다. 로컬 단일 관리자 자격 증명에서 본404를 모든 AWS IAM 구성의 응답으로 일반화하지 않는다.
+- [DeleteObject](https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html): 현재 어댑터는 버전ID를 쓰지 않는다. 실제 S3 버전 관리 버킷에서는 삭제 마커/과거 버전 보존이 있으므로 물리 제거 의미가 다르다. 버전 관리·IAM·TLS·리전 설정은 실제 S3 이전 시 별도 계약 검증 대상이다.
+- [ListObjectsV2](https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html): 페이지 크기1,000과 continuation을 따른다. ETag를 파일 해시로 쓰지 않고 앱 SHA-256을 저장한다.
+
+[SDK timeout](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/timeouts.html)은 연결2초·소켓 무활동5초·API 전체10초, SDK 시도1회(자동 재시도0)다. 반환된 다운로드 스트림도 호출 시작부터10초에 abort하도록 보완했다. 루프백 HTTP 장애 대역에서500 요청1회, 소켓 무활동 제한과 바이트가 계속 도착하는 스트림 전체 제한을 검증한다. 저장소의 시간 제한이며 이미지 변환+DB+다운로드를 합친 HTTP 요청 전체10초를 뜻하지 않는다.
+
+### 목록 대조 비용과 한계
+
+단일 로컬 SeaweedFS CPU1/1GiB, ACTIVE 객체1,001개·작은 텍스트 본문·warm 서버에서 전체 대조를 측정한다. LIST2회, 대조 객체1,001, 삭제0, 실패0이 기준이다. 파일 보고서의 메타데이터 존재 SELECT1,001+unfinished SELECT1은 **코드 경로에서 계산한 횟수**이며 별도 SQL 계측값은 아니다. 모든 객체가10분 이상 된 조건에서 매 객체 존재 확인을 수행한다. 행/객체 수에 비례하는 현재 비용은 이후 배치 조회/작업 기록 대안의 기준으로 남긴다. 전체 목록을 메모리에 한꺼번에 올리지 않고 페이지로 순회하지만 미완료 행 ID 목록은 한 번에 읽는다.
+
+프로세스 종료 뒤 남은 객체/행은 같은 상태를 만든 장애 검증으로 확인했다. 실제 kill/restart를 모든 명령 사이에 삽입한 검증은 아니다. 여러 인스턴스의 동시 대조는 중복 DELETE·시도 수 증가가 가능하며, 조건부 상태 전이와 멱등 DELETE로 ACTIVE를 보호한다. 실행 잠금·정확히 한 번 정리는 이번 범위가 아니다. C-19 A의 영속 작업+멱등 키는 실험 백로그이며 응답 유실 중복은 유지한다.
+
+### 첫 PUT 실패의 원인과 기동 검증 보완
+
+전체 빠른 테스트에서 최초 PUT이5초 소켓 timeout으로 두 번 실패했고, 집중 실행에서는 통과했다. 저장소 로그를 보존해 두 번째 실패에서14:24:15~18 UTC에 `FILER LOCK ... no lock server found`가 반복되는 것을 확인했다. 같은 로그의 `the cluster has 0 filers`와 맞물렸다. 이전 준비 조건(S3 익명 요청403, master cluster status)은 파일러가 내부 잠금 서비스에 등록되기 전에 성공할 수 있었다. 파일러 `/readyz`도 해당 고정 버전에서는 메타데이터 저장소 읽기만 확인하므로 이 조건을 대체하지 못한다.
+
+Compose와 Testcontainers는 이제 `weed shell`의 읽기 전용 `cluster.ps`에서 파일러 등록을 확인한 뒤 시작한다. 셸 연결2초·프로세스4초 제한으로 준비 확인을 반복하며 업무 PUT은 재시도하지 않는다. C-22 연결2초/소켓5초/전체10초는 그대로다. SeaweedFS 내부 잠금 서비스 준비와 C-23의 애플리케이션 DB 상태 전이 방식은 별개다. 로컬 서버의 익명 통계 전송은 `-master.telemetry=false`로 비활성화했다.
+
+근거는 고정 이미지의 commit 기준 [cluster.ps](https://github.com/seaweedfs/seaweedfs/blob/984eac6a7/weed/shell/command_cluster_ps.go), [파일러 health handler](https://github.com/seaweedfs/seaweedfs/blob/984eac6a7/weed/server/filer_server_handlers.go)와 실제 컨테이너 로그다. 초기 실패 기록은 `build/performance/cms-files-final/storage-failure.xml`, 재현 로그는 `build/performance/cms-files-complete/seaweedfs-failure.log`에 보존했다. 이후 실행도 `build/reports/cms-storage/seaweedfs.log`에 접속 값 제거 후 로그를 남긴다.
+
+### 검증 수치 (최종 전체 실행의 파일 검증)
+
+- DB gate ACTIVE 우선: 객체 누락0, 성공 이력1. ABANDONED 우선: 성공 이력0, 자기 객체 정리, ACTIVE 객체 누락0. 각 순서를1회씩 강제했으며 대규모 확률 경합 측정은 아니다.
+- CPU1/1GiB SeaweedFS,1,001개 ACTIVE 객체·2페이지: 대조 **1.421초**, 준비+대조2.760초, 삭제0·실패0. warm 로컬 단일 실행값이며 성능 개선 수치나 운영 SLA가 아니다. 생성 후11분으로 Clock을 진행시켜 모든 객체를 실제 존재 비교 대상으로 만들었다.
+- 루프백 장애 대역:500 응답 요청1회. 계속 바이트가 오는 GET은10.016초에 중단, 무활동 GET은5.015초에 중단, 각각 요청1회. 연결2초는 SDK 설정으로 확인했고 원격 블랙홀 네트워크를 만들어 시간을 측정하지는 않았다.
+- 실제 Linux Compose Java21/libvips/SeaweedFS: JPEG·PNG·WebP·AVIF·애니메이션 WebP 5개 각각 업로드201→다운로드200(WebP)→삭제204→상세404. 별도 프로젝트로 실행 후 컨테이너만 종료했고 기존 볼륨을 삭제하지 않았다. Windows Java21에서도 같은 입력의 실제 libvips 변환·저장 통합 테스트 통과.
+- 준비 조건 보완 후 전체 실행의 SeaweedFS 로그에서 `no lock server found`0건. 애플리케이션 재시도0과 승인된 timeout은 변경하지 않았다.
+
+### 최종 전체 회귀·빌드 (2026-11-07)
+
+실행 범위: 호스트/공통 설정/Compose/빌드가 바뀌므로 **core + root 빠른 테스트 + v2 comparisonTest + allTests + build/Spotless** 전체를 실행했다. v2 이미지 캐시 조건이다.
+
+```powershell
+./gradlew.bat spotlessApply :cms-core:spotlessApply :cms-core:test --rerun :test --rerun :comparisonTest --rerun allTests build --console=plain
+```
+
+| 범위 | 전체 | 성공 | 실패 | 건너뜀 |
+| --- | ---: | ---: | ---: | ---: |
+| cms-core:test | 99 | 99 | 0 | 0 |
+| root test | 312 | 311 | 0 | 1 |
+| comparisonTest | 1,152 | 1,152 | 0 | 0 |
+| 합계 | **1,563** | **1,562** | **0** | **1** |
+
+전체 벽시계 시간 **1,145.692초(19분5.692초)**, build/Spotless 통과. 건너뜀1은 기존 HEIC 공통 제약이다. 알려진 차이 **11건(개선6·의도5·보류0)**의 case/kind/reason/v2/v3 전체 값은 이전 결과와 동일하다. 이전 core/root 케이스는 파라미터 번호와 byte[] 객체 표시 주소를 정규화해 누락0을 확인했고, v2 비교1,152개 케이스 목록도 그대로다. v2 재시작17회, 시나리오 내 창 대기61초는 기존 하네스 정책이며 변경하지 않았다.
+
+결과·manifest·시간 분해는 `build/performance/cms-files-verified/`에 남긴다. 이 시간에는 최초 실패한 두 번의 실행·원인 조사·집중 재검증·Compose 수동 검증은 포함하지 않았다. 실패 이력과 원인은 바로 앞 절에 보존했다. v2/Flutter 코드·기존 비교 fixture·V1~V4 migration은 변경하지 않았다. 실제 AWS 호출/키 사용은 없고 **5-A에서 종료**한다.
