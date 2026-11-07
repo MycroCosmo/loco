@@ -91,7 +91,58 @@ class LocoReadIntegrationTest {
           id + "@example.test",
           id.equals(user1) ? "100%_회원" : "일반회원",
           id.equals(user1) ? null : java.sql.Timestamp.valueOf("2026-02-01 00:00:00"));
+    for (int i = 1; i <= 2; i++)
+      sql.update(
+          """
+      INSERT INTO maps(id,"ownerId",title,description,tags,visibility,"inviteCode","coverImageUrl","createdAt","updatedAt")
+      VALUES (?,?,?,'private description',ARRAY['tag'],CAST(? AS "Visibility"),'invite-'||?,'/uploads/hidden.webp','2026-01-01','2026-01-01')
+      """,
+          mapId(i),
+          user1,
+          "Map " + i,
+          i == 1 ? "PRIVATE" : "PUBLIC",
+          i);
     SqlQueryCounter.reset();
+  }
+
+  String mapId(int i) {
+    return "00000000-0000-4000-8000-00000000020" + i;
+  }
+
+  @Test
+  void mapsIncludePrivateButNeverInviteCodeOrImages() throws Exception {
+    var before = snapshot();
+    assertThat(ok("/maps").path("items").size()).isEqualTo(2);
+    var detail = ok("/maps/" + mapId(1));
+    assertThat(detail.path("visibility").asText()).isEqualTo("PRIVATE");
+    assertThat(detail.path("description").asText()).isEqualTo("private description");
+    assertThat(detail.toString())
+        .doesNotContain("inviteCode", "invite-", "coverImageUrl", "/uploads/", "email");
+    assertThat(ok("/maps?visibility=PRIVATE&tag=tag&ownerId=" + user1).path("items").size())
+        .isEqualTo(1);
+    assertThat(ok("/maps?tag=ta").path("items").size()).isZero();
+    assertThat(ok("/maps?search=" + encode("Map 2")).path("items").get(0).path("id").asText())
+        .isEqualTo(mapId(2));
+    assertThat(get(http, "/admin/api/loco/maps?visibility=BAD").statusCode()).isEqualTo(400);
+    assertThat(snapshot()).isEqualTo(before);
+  }
+
+  @Test
+  void mapReadIsExplicitAndRevocationIsImmediate() throws Exception {
+    String name = "map" + UUID.randomUUID().toString().substring(0, 8);
+    var member = admins.createAccount(root, name, "Map reader", password);
+    admins.changePassword(member, password, password);
+    member = admins.authenticate(name, password);
+    var role = roles.create(root, name, "Map reader", "READ_ONLY", Set.of("loco.maps"));
+    roles.assign(root, member.id(), Set.of(role.id()), member.authVersion());
+    var reader = login(name, password);
+    assertThat(get(reader, "/admin/api/loco/maps/" + mapId(1)).statusCode()).isEqualTo(200);
+    assertThat(get(reader, "/admin/api/loco/users").statusCode()).isEqualTo(403);
+    assertThat(catalog.definition("loco.maps").label()).contains("비공개 포함");
+    roles.permissions(root, role.id(), Map.of(), role.version());
+    var denied = get(reader, "/admin/api/loco/maps");
+    assertThat(denied.statusCode()).isEqualTo(403);
+    assertThat(json.readTree(denied.body()).path("code").asText()).isEqualTo("PERMISSION_DENIED");
   }
 
   HttpClient login(String name, String password) throws Exception {

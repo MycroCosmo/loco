@@ -8,7 +8,7 @@ import org.springframework.context.annotation.*;
 @Configuration(proxyBeanMethods = false)
 public class AdminScreens {
   public static final List<String> KEYS =
-      List.of("cms.accounts", "cms.roles", "cms.menus", "cms.files", "loco.users");
+      List.of("cms.accounts", "cms.roles", "cms.menus", "cms.files", "loco.users", "loco.maps");
 
   @Bean
   PermissionCatalog.Contribution adminScreenContribution() {

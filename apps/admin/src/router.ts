@@ -21,6 +21,7 @@ export const router = createRouter({ history: createWebHistory('/admin/'), route
   { path: '/files', component: FilesView, meta: { permission: 'cms.files' } },
   { path: '/history', component: HistoryView, meta: { systemOnly: true } },
   { path: '/loco/users', component: LocoReadView, props: { resource: 'users' }, meta: { permission: 'loco.users' } },
+  { path: '/loco/maps', component: LocoReadView, props: { resource: 'maps' }, meta: { permission: 'loco.maps' } },
   { path: '/:pathMatch(.*)*', component: { render: () => h('h1', '없는 화면입니다') } },
 ] })
 router.beforeEach(async to => {

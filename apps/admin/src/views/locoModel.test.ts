@@ -2,6 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { locoPage, locoQuery, locoRow } from './locoModel'
 
 describe('LOCO read contracts', () => {
+  it('shows private maps and descriptions only in detail, without invitation data', () => {
+    const map = { id: 'm1', title: 'Private', ownerId: 'u1', visibility: 'PRIVATE', tags: ['a'], createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', description: 'text', inviteCode: 'hidden' }
+    expect(locoRow('maps')(map).fields.some(f => f.label === '설명')).toBe(false)
+    expect(locoRow('maps', true)(map).fields.find(f => f.label === '설명')?.value).toBe('text')
+    expect(JSON.stringify(locoRow('maps', true)(map))).not.toContain('hidden')
+  })
   const member = { id: 'u1', nickname: '<script>text</script>', emailMasked: '김***@***', provider: 'LOCAL', deletedAt: null, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' }
   it('renders only approved fields, never unknown raw properties', () => {
     const row = locoRow('users')({ ...member, email: 'never@example.test', fcmToken: 'never-token' })

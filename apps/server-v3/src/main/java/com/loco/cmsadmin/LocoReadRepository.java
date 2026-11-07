@@ -33,7 +33,8 @@ public class LocoReadRepository {
                         "t.\"deletedAt\" IS " + (value.equals("ACTIVE") ? "NULL" : "NOT NULL"));
                 }
                 case "search" -> {
-                  clauses.add("t.nickname ILIKE :search ESCAPE '\\'");
+                  String field = resource == LocoReadResource.USERS ? "nickname" : "title";
+                  clauses.add("t." + field + " ILIKE :search ESCAPE '\\'");
                   params.put(
                       key,
                       "%"

@@ -9,7 +9,13 @@ public enum LocoReadResource {
       "회원 조회",
       "id,nickname,email,provider,deletedAt,createdAt,updatedAt",
       "",
-      Set.of("id", "search", "provider", "status"));
+      Set.of("id", "search", "provider", "status")),
+  MAPS(
+      "maps",
+      "지도방 조회 (비공개 포함)",
+      "id,title,ownerId,visibility,tags,createdAt,updatedAt",
+      "description",
+      Set.of("id", "ownerId", "search", "visibility", "tag"));
 
   final String table;
   final String label;
