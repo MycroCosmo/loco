@@ -343,6 +343,7 @@ class HistoryIntegrationTest {
             "AdminService.list/1",
             "RoleService.templates/0",
             "RoleService.list/1",
+            "RoleService.assignment/2",
             "RoleService.get/2",
             "MenuService.list/1",
             "MenuService.navigation/1",

@@ -49,3 +49,27 @@ export function tree(value: unknown) {
 }
 export type Tree = ReturnType<typeof tree>
 export type MenuNode = ReturnType<typeof menuNode>
+
+export function action(value: unknown): 'READ' | 'MANAGE' {
+  if (value !== 'READ' && value !== 'MANAGE') throw new Error('알 수 없는 권한 동작입니다.')
+  return value
+}
+export function role(value: unknown) {
+  const v = object(value)
+  const permissions: Record<string, 'READ' | 'MANAGE'> = {}
+  for (const [key, value] of Object.entries(object(v.permissions))) permissions[key] = action(value)
+  return { id: text(v.id), code: text(v.code), name: text(v.name), version: number(v.version), systemProtected: boolean(v.systemProtected), permissions }
+}
+export type Role = ReturnType<typeof role>
+export function assignment(value: unknown) {
+  const v = object(value)
+  return { accountId: text(v.accountId), roleIds: list(text)(v.roleIds), authVersion: number(v.authVersion) }
+}
+export function permission(value: unknown) {
+  const v = object(value)
+  return { key: text(v.key), label: text(v.label), allowedActions: list(action)(v.allowedActions), systemOnly: boolean(v.systemOnly) }
+}
+export function roleTemplate(value: unknown) {
+  const v = object(value)
+  return { code: text(v.code), action: action(v.action) }
+}

@@ -162,6 +162,36 @@ class GovernanceIntegrationTest {
   }
 
   @Test
+  void assignmentReadIsSystemOnlyAndKeepsEmptyGrantRolesAndVersion() throws Exception {
+    var member = member("member");
+    var empty = roles.create(root, "EMPTY", "Empty", null, Set.of());
+    var reader = roles.create(root, "READ", "Read", "READ_ONLY", Set.of("sample.documents"));
+    var current =
+        roles.assign(root, member.id(), Set.of(empty.id(), reader.id()), member.authVersion());
+    var read = request("GET", CORE + "/accounts/" + member.id() + "/roles", null, login("root"));
+    assertThat(read.status()).isEqualTo(200);
+    assertThat(read.body().path("accountId").asText()).isEqualTo(member.id());
+    assertThat(read.body().path("authVersion").asLong()).isEqualTo(current.authVersion());
+    var ids = new ArrayList<String>();
+    read.body().path("roleIds").forEach(id -> ids.add(id.asText()));
+    assertThat(ids).containsExactlyInAnyOrder(empty.id(), reader.id());
+    var denied =
+        request("GET", CORE + "/accounts/" + member.id() + "/roles", null, login("member"));
+    assertThat(denied.status()).isEqualTo(403);
+    assertThat(denied.body().path("code").asText()).isEqualTo("PERMISSION_DENIED");
+    assertThat(
+            request(
+                    "PUT",
+                    CORE + "/accounts/" + member.id() + "/roles",
+                    Map.of("roleIds", List.of(), "authVersion", member.authVersion()),
+                    login("root"))
+                .status())
+        .isEqualTo(409);
+    assertThat(roles.assignment(root, member.id()).roleIds())
+        .containsExactlyInAnyOrder(empty.id(), reader.id());
+  }
+
+  @Test
   void templatesCopyOnceAndUnionExplainsManageIncludingRead() {
     var reader = role("READER", "READ_ONLY", "sample.documents");
     var writer = role("WRITER", "MANAGER", "sample.documents");

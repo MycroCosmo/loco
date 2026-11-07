@@ -53,6 +53,20 @@ class HealthIntegrationTest {
   @Autowired TestRestTemplate client;
 
   @Test
+  void frontendScreenKeysMatchTheActualHostCatalog(
+      @Autowired com.cms.core.permission.PermissionCatalog catalog) throws Exception {
+    var source = java.nio.file.Files.readString(java.nio.file.Path.of("../admin/src/screens.ts"));
+    var keys =
+        java.util.regex.Pattern.compile("key: '([^']+)'")
+            .matcher(source)
+            .results()
+            .map(match -> match.group(1))
+            .toList();
+    assertThat(keys).containsExactlyElementsOf(com.loco.cmsinfra.AdminScreens.KEYS);
+    keys.forEach(key -> catalog.screen(key, key));
+  }
+
+  @Test
   void adminShellAndHashedAssetsArePublicButApisAreNot() {
     for (String page : com.loco.cmsinfra.AdminUiConfiguration.PAGES) {
       var shell = client.getForEntity(url(page), String.class);

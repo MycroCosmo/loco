@@ -287,3 +287,10 @@ E2E는 격리된 테스트 DB·로컬 SeaweedFS·합성 관리자만 쓴다. 실
 - CMS 전용 AdminAdvice/필터/권한 서비스에서 오류 code를 보낸다. CSRF_INVALID는 CsrfException, PERMISSION_DENIED는 권한 검사, STALE_REVISION은 트리 revision 검사에서 지정한다. LOCO 응답 처리는 변경하지 않았다.
 - `client.ts`는 요청마다 현재 CSRF 쿠키를 읽고 GET 중복 요청을 합친다. 실패한 쓰기는 자동 재시도하지 않는다. `contracts.ts`는 unknown 응답을 검사한다. `session.ts`는 앱 단일 세션 상태와 권한 요청을 관리하고 만료 때 데이터를 폐기한다. 로그인/비밀번호 변경 화면은 비밀번호를 영속 저장하지 않는다.
 - 검증: core 인증 통합 24건 성공/실패0/건너뜀0, Gradle60.045초. Vitest9건 성공/실패0, 0.320초. typecheck/build 성공. E2E는 최종 단계에서 실제 호스트로 검증한다.
+
+### 3단계: 계정·역할·접근 근거
+
+- SYSTEM_ADMIN 전용 역할 배정 GET은 REPEATABLE_READ에서 roleIds/authVersion을 읽는다. 권한이 비어 있는 배정 역할도 보존하며 오래된 authVersion의 저장은 거절한다. 이력 서비스 목록 검사에 읽기 메서드로 명시 분류했다.
+- AccountsView/RolesView/AccessView는 계정 생성·상태·역할 배정, 역할 생성/이름/권한/삭제와 템플릿 복사, 서버 explain의 접근 근거를 제공한다. ConfirmDialog는 native dialog의 키보드 초점 제한과 닫은 뒤 초점 복귀를 사용한다.
+- AdminScreens는 호스트의 화면 등록이고 screens.ts와 키 일치 테스트를 둔다. NavigationTree는 서버가 필터링한 업무 메뉴만 표시하며 고정 관리 도구는 explain/서버 systemAdmin 값에 따른다.
+- 검증: core 역할17+이력44=61건 성공/실패0/건너뜀0, 42.917초. 최초 신규 메서드 분류 누락 실패는 읽기 분류 추가 후 재검증했다. Vitest9건 성공(0.280초), typecheck/build 성공. 호스트 화면 키 계약 테스트는 마지막 전체 회귀에서 함께 실행한다.

@@ -16,6 +16,20 @@ public class RoleService {
 
   public record Template(String code, Action action) {}
 
+  public record AssignmentView(String accountId, List<String> roleIds, long authVersion) {}
+
+  @Transactional(
+      readOnly = true,
+      isolation = org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
+  public AssignmentView assignment(AdminIdentity actor, String id) {
+    access.systemAdmin(actor);
+    var account = accounts.findById(id).orElseThrow(() -> new AdminProblem(404, "Not found"));
+    return new AssignmentView(
+        id,
+        account.getRoles().stream().map(AdminRole::getId).sorted().toList(),
+        account.identity().authVersion());
+  }
+
   private final AdminRoleRepository roles;
   private final AdminAccountRepository accounts;
   private final AdministrationStateRepository state;

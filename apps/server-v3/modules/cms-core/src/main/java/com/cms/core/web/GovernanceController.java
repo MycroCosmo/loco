@@ -84,6 +84,12 @@ public class GovernanceController {
     return roles.assign(actor, id, input.roleIds(), input.authVersion());
   }
 
+  @GetMapping("/accounts/{id}/roles")
+  public RoleService.AssignmentView assignment(
+      @AuthenticationPrincipal AdminIdentity actor, @PathVariable String id) {
+    return roles.assignment(actor, id);
+  }
+
   @GetMapping("/role-templates")
   public List<RoleService.Template> templates(@AuthenticationPrincipal AdminIdentity actor) {
     access.systemAdmin(actor);
