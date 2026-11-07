@@ -15,7 +15,8 @@ public class AdminScreens {
           "cms.files",
           "loco.users",
           "loco.maps",
-          "loco.places");
+          "loco.places",
+          "loco.reports");
 
   @Bean
   PermissionCatalog.Contribution adminScreenContribution() {

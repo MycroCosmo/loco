@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { session } from '../composables/session'
 import { locoApi } from '../api/client'
 import { useAction } from '../composables/action'
 import { locoScreens, locoRow, locoPage, locoQuery, type LocoResource } from './locoModel'
 const props = defineProps<{ resource: LocoResource }>()
+const route = useRoute()
 const config = computed(() => locoScreens[props.resource])
 const filters = ref<Record<string, string>>({}), from = ref(''), until = ref(''), size = ref(50)
 const page = ref<ReturnType<ReturnType<typeof locoPage>>>({ items: [], nextCursor: null })
 const detail = ref<ReturnType<ReturnType<typeof locoRow>> | null>(null)
+const relations = ref<ReturnType<ReturnType<typeof locoRow>>['relations']>([])
 const cursors = ref<(string | null)[]>([null])
 const { busy, error, run } = useAction()
 let applied = 'size=50', generation = 0
@@ -16,11 +20,13 @@ async function load(cursor: string | null) {
   const query = new URLSearchParams(applied)
   if (cursor) query.set('cursor', cursor)
   const result = await locoApi.read(`/${resource}?${query}`, locoPage(resource))
-  if (current === generation) { page.value = result; detail.value = null }
+  if (current === generation) { page.value = result; detail.value = null; relations.value = [] }
 }
-watch(() => props.resource, () => {
+watch(() => [props.resource, route.query.id], () => {
   generation++; filters.value = {}; from.value = ''; until.value = ''; size.value = 50
   page.value = { items: [], nextCursor: null }; detail.value = null; cursors.value = [null]; applied = 'size=50'
+  relations.value = []
+  if (typeof route.query.id === 'string') { filters.value.id = route.query.id; applied = locoQuery(props.resource, filters.value, '', '', 50) }
   void run(() => load(null))
 }, { immediate: true })
 function search() { void run(async () => { applied = locoQuery(props.resource, filters.value, from.value, until.value, size.value); await load(null); cursors.value = [null] }) }
@@ -29,7 +35,8 @@ function previous() { void run(async () => { await load(cursors.value.at(-2) ?? 
 function show(id: string) { void run(async () => {
   const current = generation
   const result = await locoApi.read(`/${props.resource}/${id}`, locoRow(props.resource, true))
-  if (current === generation) detail.value = result
+  const allowed = await Promise.all(result.relations.map(async relation => ({ relation, allowed: await session.allowed('loco.'+relation.resource, 'READ') })))
+  if (current === generation) { detail.value = result; relations.value = allowed.filter(r => r.allowed).map(r => r.relation) }
 }) }
 </script>
 <template>
@@ -50,5 +57,5 @@ function show(id: string) { void run(async () => {
   <div class="table-scroll"><table><caption>{{ config.title }} 결과</caption><thead><tr><th>ID</th><th v-for="f in page.items[0]?.fields ?? []" :key="f.label">{{ f.label }}</th><th>상세</th></tr></thead>
     <tbody><tr v-for="row in page.items" :key="row.id"><td>{{ row.id }}</td><td v-for="f in row.fields" :key="f.label">{{ f.value }}</td><td><button :disabled="busy" @click="show(row.id)">상세 {{ row.id.slice(0,8) }}</button></td></tr></tbody></table></div>
   <button :disabled="busy || cursors.length < 2" @click="previous">이전 결과</button><span> {{ cursors.length }}번째 조회 </span><button :disabled="busy || !page.nextCursor" @click="next">다음 결과</button>
-  <section v-if="detail"><h2>상세 정보</h2><p>{{ detail.id }}</p><dl><template v-for="f in detail.fields" :key="f.label"><dt>{{ f.label }}</dt><dd class="preserve-text">{{ f.value }}</dd></template></dl></section>
+  <section v-if="detail"><h2>상세 정보</h2><p>{{ detail.id }}</p><dl><template v-for="f in detail.fields" :key="f.label"><dt>{{ f.label }}</dt><dd class="preserve-text">{{ f.value }}</dd></template></dl><nav aria-label="관련 업무"><RouterLink v-for="r in relations" :key="r.label" :to="{ path: '/loco/'+r.resource, query: { id: r.id } }">{{ r.label }}</RouterLink></nav></section>
 </template>

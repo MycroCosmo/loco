@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { templatePermissions } from './roleModel'
 import { api, nothing } from '../api/client'
 import { list, role, permission, roleTemplate, type Role } from '../api/contracts'
 import { session } from '../composables/session'
@@ -9,6 +10,7 @@ const roles=ref<Role[]>([]), permissions=ref<ReturnType<typeof permission>[]>([]
 const code=ref(''), name=ref(''), template=ref(''), keys=ref<string[]>([])
 const selected=ref<Role|null>(null), renamed=ref(''), grants=ref<Record<string,'READ'|'MANAGE'|''>>({}), deleting=ref(false)
 const {busy,error,notice,run}=useAction()
+watch(template, () => { keys.value = [] })
 async function load() { [roles.value,permissions.value,templates.value]=await Promise.all([api.read('/roles',list(role)),api.read('/permissions',list(permission)),api.read('/role-templates',list(roleTemplate))]) }
 function select(r:Role) { selected.value=r; renamed.value=r.name; grants.value=Object.fromEntries(permissions.value.filter(p=>!p.systemOnly).map(p=>[p.key,r.permissions[p.key]??''])) }
 onMounted(()=>run(load))
@@ -34,7 +36,7 @@ function remove() { void run(async()=>{if(!selected.value)return; await api.send
   </section>
   <h2>역할 생성</h2><form @submit.prevent="create"><label for="role-code">역할 코드</label><input id="role-code" v-model="code" required aria-describedby="roles-error"><label for="role-name">역할 이름</label><input id="role-name" v-model="name" required aria-describedby="roles-error">
     <label for="role-template">시작 템플릿</label><select id="role-template" v-model="template"><option value="">빈 역할</option><option v-for="t in templates" :key="t.code" :value="t.code">{{ t.code }} ({{ t.action }})</option></select>
-    <fieldset v-if="template"><legend>복사할 업무 권한 키</legend><label v-for="p in permissions.filter(p=>!p.systemOnly)" :key="p.key" :for="'template-'+p.key"><input :id="'template-'+p.key" type="checkbox" v-model="keys" :value="p.key">{{ p.label }}<br></label></fieldset>
+    <fieldset v-if="template"><legend>복사할 업무 권한 키</legend><p>선택한 템플릿의 동작을 지원하는 권한만 표시합니다. LOCO 조회는 READ만 지원합니다.</p><label v-for="p in templatePermissions(permissions, templates.find(t=>t.code===template)?.action)" :key="p.key" :for="'template-'+p.key"><input :id="'template-'+p.key" type="checkbox" v-model="keys" :value="p.key">{{ p.label }}<br></label></fieldset>
     <p>템플릿은 생성 시 복사되며 이후 변경이 기존 역할에 전파되지 않습니다.</p><button :disabled="busy">역할 생성</button>
   </form>
   <ConfirmDialog :open="deleting" title="역할 삭제" :busy="busy" :error="error" @cancel="deleting=false" @confirm="remove"><p>{{ selected?.name }} 역할을 삭제합니다. 배정된 역할은 서버가 삭제를 거절합니다.</p></ConfirmDialog>

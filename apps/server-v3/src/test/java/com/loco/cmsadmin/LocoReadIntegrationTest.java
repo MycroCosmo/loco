@@ -160,6 +160,68 @@ class LocoReadIntegrationTest {
     assertThat(catalog.definition("loco.places").label()).contains("비공개 포함");
   }
 
+  String reportId(int i) {
+    return "00000000-0000-4000-8000-00000000040" + i;
+  }
+
+  void seedReports() {
+    for (int i = 1; i <= 2; i++)
+      sql.update(
+          """
+      INSERT INTO reports(id,"reporterId","targetType","targetId",reason,detail,"createdAt")
+      VALUES (?,?,'MAP',?,'reason','<script>untrusted text</script>','2026-01-01')
+      """,
+          reportId(i),
+          user1,
+          mapId(i == 1 ? 1 : 9));
+  }
+
+  @Test
+  void reportsKeepDeletedTargetAndFilterWithoutWrites() throws Exception {
+    seedReports();
+    var before = snapshot();
+    assertThat(ok("/reports?targetType=MAP&reporterId=" + user1).path("items").size()).isEqualTo(2);
+    assertThat(ok("/reports?targetId=" + mapId(1)).path("items").size()).isEqualTo(1);
+    assertThat(ok("/reports").toString()).doesNotContain("untrusted text", "detail");
+    var present = ok("/reports/" + reportId(1));
+    var missing = ok("/reports/" + reportId(2));
+    assertThat(present.path("targetExists").asBoolean()).isTrue();
+    assertThat(missing.path("targetExists").asBoolean()).isFalse();
+    assertThat(missing.path("targetId").asText()).isEqualTo(mapId(9));
+    assertThat(present.path("detail").asText()).isEqualTo("<script>untrusted text</script>");
+    assertThat(get(http, "/admin/api/loco/reports?status=OPEN").statusCode()).isEqualTo(400);
+    assertThat(get(http, "/admin/api/loco/reports?targetType=INVALID").statusCode()).isEqualTo(400);
+    assertThat(snapshot()).isEqualTo(before);
+  }
+
+  @Test
+  void reportsReadDoesNotRevealOtherBusinessOrTargetExistence() throws Exception {
+    seedReports();
+    String name = "report" + UUID.randomUUID().toString().substring(0, 8);
+    var member = admins.createAccount(root, name, "Report reader", password);
+    admins.changePassword(member, password, password);
+    member = admins.authenticate(name, password);
+    var role = roles.create(root, name, "Reports", "READ_ONLY", Set.of("loco.reports"));
+    roles.assign(root, member.id(), Set.of(role.id()), member.authVersion());
+    var reader = login(name, password);
+    SqlQueryCounter.reset();
+    var result = get(reader, "/admin/api/loco/reports/" + reportId(1));
+    assertThat(result.statusCode()).isEqualTo(200);
+    assertThat(json.readTree(result.body()).path("targetExists").isNull()).isTrue();
+    assertThat(result.body()).doesNotContain("email", "profileImageUrl", "private description");
+    assertThat(
+            SqlQueryCounter.statements().stream().filter(s -> s.contains("FROM public.")).toList())
+        .hasSize(1)
+        .allMatch(
+            s ->
+                s.contains("FROM public.reports")
+                    && !s.contains("public.maps")
+                    && !s.contains("public.users"));
+    assertThat(get(reader, "/admin/api/loco/maps/" + mapId(1)).statusCode()).isEqualTo(403);
+    assertThat(get(reader, "/admin/api/loco/places").statusCode()).isEqualTo(403);
+    assertThat(get(reader, "/admin/api/core/history").statusCode()).isEqualTo(403);
+  }
+
   @Test
   void placeCursorAndForeignFiltersAreBounded() throws Exception {
     seedPlaces();

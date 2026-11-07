@@ -21,7 +21,13 @@ public enum LocoReadResource {
       "장소 조회 (비공개 포함)",
       "id,name,mapId,createdById,createdAt,updatedAt",
       "address,roadAddress,latitude,longitude,category,memo,tags",
-      Set.of("id", "mapId", "createdById", "search", "tag"));
+      Set.of("id", "mapId", "createdById", "search", "tag")),
+  REPORTS(
+      "reports",
+      "신고 조회 (비공개 대상 포함)",
+      "id,reporterId,targetType,targetId,reason,createdAt",
+      "detail",
+      Set.of("id", "reporterId", "targetId", "targetType"));
 
   final String table;
   final String label;

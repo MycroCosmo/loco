@@ -6,5 +6,6 @@ export const screens = [
   { key: 'loco.users', path: '/loco/users', label: '회원 조회' },
   { key: 'loco.maps', path: '/loco/maps', label: '지도방 조회 (비공개 포함)' },
   { key: 'loco.places', path: '/loco/places', label: '장소 조회 (비공개 포함)' },
+  { key: 'loco.reports', path: '/loco/reports', label: '신고 조회 (비공개 대상 포함)' },
 ]
 export function screen(key: string | null) { return screens.find(item => item.key === key) }

@@ -38,6 +38,7 @@ public class LocoReadRepository {
                         case USERS -> List.of("nickname");
                         case MAPS -> List.of("title");
                         case PLACES -> List.of("name", "address", "roadAddress");
+                        case REPORTS -> throw LocoReadFilter.invalid();
                       };
                   clauses.add(
                       "("
@@ -80,6 +81,37 @@ public class LocoReadRepository {
 
   Plan detailPlan(LocoReadResource resource, String id) {
     return new Plan(projection(resource, true) + " WHERE t.id=:id", Map.of("id", id));
+  }
+
+  Plan reportDetailPlan(String id, Set<LocoReadResource> readable) {
+    StringBuilder check = new StringBuilder("CASE");
+    for (var target :
+        List.of(LocoReadResource.USERS, LocoReadResource.MAPS, LocoReadResource.PLACES)) {
+      if (readable.contains(target)) {
+        String kind =
+            switch (target) {
+              case USERS -> "USER";
+              case MAPS -> "MAP";
+              case PLACES -> "PLACE";
+              default -> throw new IllegalArgumentException();
+            };
+        check
+            .append(" WHEN t.\"targetType\"='")
+            .append(kind)
+            .append("' THEN EXISTS(SELECT 1 FROM public.")
+            .append(target.table)
+            .append(" target WHERE target.id=t.\"targetId\")");
+      }
+    }
+    String expression =
+        readable.isEmpty() ? "NULL::boolean" : check.append(" ELSE NULL END").toString();
+    return new Plan(
+        projection(LocoReadResource.REPORTS, true)
+                .replace(
+                    " FROM public.reports t",
+                    ", " + expression + " AS \"targetExists\" FROM public.reports t")
+            + " WHERE t.id=:id",
+        Map.of("id", id));
   }
 
   private String projection(LocoReadResource resource, boolean detail) {

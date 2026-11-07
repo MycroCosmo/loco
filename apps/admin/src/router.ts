@@ -23,6 +23,7 @@ export const router = createRouter({ history: createWebHistory('/admin/'), route
   { path: '/loco/users', component: LocoReadView, props: { resource: 'users' }, meta: { permission: 'loco.users' } },
   { path: '/loco/maps', component: LocoReadView, props: { resource: 'maps' }, meta: { permission: 'loco.maps' } },
   { path: '/loco/places', component: LocoReadView, props: { resource: 'places' }, meta: { permission: 'loco.places' } },
+  { path: '/loco/reports', component: LocoReadView, props: { resource: 'reports' }, meta: { permission: 'loco.reports' } },
   { path: '/:pathMatch(.*)*', component: { render: () => h('h1', '없는 화면입니다') } },
 ] })
 router.beforeEach(async to => {

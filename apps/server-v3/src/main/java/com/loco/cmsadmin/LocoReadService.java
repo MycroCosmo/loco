@@ -31,7 +31,17 @@ public class LocoReadService {
 
   public Map<String, Object> detail(AdminIdentity actor, LocoReadResource resource, String id) {
     access.require(actor, resource.key(), Action.READ);
-    var rows = reads.read(reads.detailPlan(resource, LocoReadFilter.uuid(id)));
+    LocoReadFilter.uuid(id);
+    var plan = reads.detailPlan(resource, id);
+    if (resource == LocoReadResource.REPORTS) {
+      var readable = EnumSet.noneOf(LocoReadResource.class);
+      for (var target :
+          List.of(LocoReadResource.USERS, LocoReadResource.MAPS, LocoReadResource.PLACES))
+        if (access.explain(actor, actor.id(), target.key(), Action.READ).allowed())
+          readable.add(target);
+      plan = reads.reportDetailPlan(id, readable);
+    }
+    var rows = reads.read(plan);
     if (rows.isEmpty()) throw new AdminProblem(404, "Not found");
     return rows.getFirst();
   }
