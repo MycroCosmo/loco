@@ -44,7 +44,7 @@ fixture의 connection=close는 Node 관측 클라이언트의 `agent:false`에 �
 - form 1,001개 파라미터는 413 `too many parameters`. JSON charset ISO-8859-1은 415. 빈 JSON·배열은 파서 통과, null/숫자·깨진 JSON은 400. deflate JSON도 파싱된다.
 - 본문 파싱 오류는 Helmet/CORS보다 먼저 발생한다. 그래서 **보안/CORS 헤더가 없고 `X-Powered-By: Express`가 남는다**. 깨진 JSON 400·크기 초과413·charset415 모두 해당한다.
 
-생성 검증: JUnit 1/1 성공, 22.568초. 고정 fixture 재검증: **1/1 성공·실패/skip 0, 24.251초**(v2 이미지 캐시, 재시작/대기 0). 응답 분포는 200×11, 204×19, 206×1, 304×1, 400×8, 401×5, 404×21, 413×7, 415×1, 500×5다. 전체 회귀/build는 아직 실행하지 않았다.
+생성 검증: JUnit 1/1 성공, 22.568초. 고정 fixture 재검증: **1/1 성공·실패/skip 0, 24.251초**(v2 이미지 캐시, 재시작/대기 0). 응답 분포는 200×11, 204×19, 206×1, 304×1, 400×8, 401×5, 404×21, 413×7, 415×1, 500×5다. 이 관측 단계에서는 전체 회귀/build를 실행하지 않았으며, 구현 후 결과는 아래에 별도로 기록했다.
 
 ## 10-1 런타임 표시 헤더 — A 확정
 
@@ -57,7 +57,7 @@ fixture의 connection=close는 Node 관측 클라이언트의 `agent:false`에 �
 
 이전 점검표의 “JSON 크기 제한 없음”은 정정한다. 기존 JsonBodyFilter에 이미 10MiB와 인증 전 JSON 선검사가 있었고, 이번에는 이를 이동·확장해 form·압축·문자셋 및 응답 헤더를 보완했다. 라이브러리는 추가하지 않았다. form 호환은 고정된 원본 body-parser 1.20.4/qs 6.14.2와 배열·객체·반복·잘못된 percent/대괄호·깊이 32·파라미터 1,000/1,001 경계를 실제 로컬 HTTP로 교차 검사한다.
 
-검증: 설정 3건+전역 비교/재관측/form 91건, **94/94 성공·실패/skip 0, 알려진 차이 1, 68.198초**. 이후 불완전한 대괄호 등 9사례를 추가한 form 교차 검사 **1/1 성공(HTTP 38사례), 22.970초**. 전체 회귀는 후속 단계에서 별도로 기록한다.
+검증: 설정 3건+전역 비교/재관측/form 91건, **94/94 성공·실패/skip 0, 알려진 차이 1, 68.198초**. 이후 불완전한 대괄호 등 9사례를 추가한 form 교차 검사 **1/1 성공(HTTP 38사례), 22.970초**. 최종 전체 회귀/build는 **1,434건 중 성공1,433·실패0·HEIC skip1, 알려진 차이11, 1,037.162초**로 통과했다. 기존 검사 누락0·추가94건이며 원본은 `build/performance/globals-final/`에 있다.
 
 ```powershell
 .\gradlew.bat test --tests '*GlobalHttpSettingsTest' --rerun comparisonTest --tests '*GlobalHttp*Test' --tests '*ExtendedFormComparisonTest' --rerun --console=plain

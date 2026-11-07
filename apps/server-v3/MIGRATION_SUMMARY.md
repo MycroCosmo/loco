@@ -1,8 +1,8 @@
 # LOCO v2 → v3 이관 정리
 
-기준: 2026-11-06, 9번 묶음 완료 커밋 `8a139b7`. 0~9번 묶음은 NestJS API를 Spring으로 옮기는 **전체 로드맵 1단계**다. 아래의 **2단계**는 공간 조회·성능 실험, **3단계**는 nginx·다중 서버 실험을 뜻한다. 0번 묶음 내부의 1~5단계와 구별한다.
+기준: 2026-11-07, 9번 묶음과 PR 전 전역 HTTP 보완 완료(구현 커밋 `92911d8`). 0~9번 묶음은 NestJS API를 Spring으로 옮기는 **전체 로드맵 1단계**다. 아래의 **2단계**는 공간 조회·성능 실험, **3단계**는 nginx·다중 서버 실험을 뜻한다. 0번 묶음 내부의 1~5단계와 구별한다.
 
-업무 API 47개(method + path 기준), v3 전용 health 1개, 알림 발송과 토큰 정리를 구현했다. v2와 Flutter는 비교 기준이며 이번 정리에서는 운영 코드·스키마·설정을 바꾸지 않았다. 수동 앱 검증은 [FLUTTER_SMOKE_TEST.md](FLUTTER_SMOKE_TEST.md), PR 본문 초안은 [PR_DRAFT.md](PR_DRAFT.md)에 있다.
+업무 API 47개(method + path 기준), v3 전용 health 1개, 알림 발송과 토큰 정리를 구현했다. v2와 Flutter는 비교 기준으로 수정하지 않았다. PR 전 보완에서 v3 전역 HTTP 설정과 비교 검증을 추가했으며 DB 스키마는 유지했다. 수동 앱 검증은 [FLUTTER_SMOKE_TEST.md](FLUTTER_SMOKE_TEST.md), PR 본문 초안은 [PR_DRAFT.md](PR_DRAFT.md)에 있다.
 
 ## 1. 묶음별 대상 API
 
@@ -24,9 +24,9 @@
 
 ## 2. 테스트 수와 전체 회귀 시간 추이
 
-**9번 완료 시점 검증: 1,340건 = 성공 1,339 / 실패 0 / skip 1, 알려진 차이 10건, 전체 885.749초(약 886초).** 빠른 `test` 279건(성공 278·skip 1), `comparisonTest` 1,061건 모두 성공, Spotless/build 통과다. Windows Java 21·Gradle 8.14.6·Docker Desktop, v2 이미지·Prisma/libvips 캐시가 있는 실행의 wall time이다. 최신 실행의 v2 이미지 빌드 호출·초기 기동은 각각 1회, 재시작 17회다.
+**최종 검증: 1,434건 = 성공 1,433 / 실패 0 / skip 1, 알려진 차이 11건, 전체 1,037.162초(17분 17초).** 빠른 `test` 282건(성공 281·skip 1), `comparisonTest` 1,152건 모두 성공, Spotless/build 통과다. Windows Java 21·Gradle 8.14.6·Docker Desktop, v2 이미지·Prisma/libvips 캐시가 있는 실행의 wall time이다. v2 이미지 빌드 호출·초기 기동은 각각 1회, 재시작 17회다. 9번 완료 시점 대비 기존 테스트 누락 0·추가 94건이다.
 
-skip 1은 Windows HEIC 단독 코덱의 **v2·v3 공통 지원 제약**이다. HEIC 업로드의 HTTP 실패·파일 상태 비교는 필수 검사로 실행한다. 알려진 차이 10건은 skip과 별개이며 실제 관측·검사를 통과한 뒤 보고한다. OAuth는 v3 계약 테스트, 카카오·FCM·Google 인증은 로컬 대역 검증이며 실제 외부 서비스 성공을 뜻하지 않는다.
+skip 1은 Windows HEIC 단독 코덱의 **v2·v3 공통 지원 제약**이다. HEIC 업로드의 HTTP 실패·파일 상태 비교는 필수 검사로 실행한다. 알려진 차이 11건은 skip과 별개이며 실제 관측·검사를 통과한 뒤 보고한다. OAuth는 v3 계약 테스트, 카카오·FCM·Google 인증은 로컬 대역 검증이며 실제 외부 서비스 성공을 뜻하지 않는다.
 
 표의 테스트 수는 **해당 시점 누적 전체**다. 묶음 자체의 신규 테스트 수와 다르며 JUnit 1건이 여러 HTTP 요청·관측 사례를 포함할 수 있다. 테스트 범위가 늘었으므로 행 사이 시간 차이를 서버 성능 향상/퇴보로 해석하지 않는다.
 
@@ -45,8 +45,9 @@ skip 1은 Windows HEIC 단독 코덱의 **v2·v3 공통 지원 제약**이다. H
 | 8-A 기타 | 1145 / 1144 / 0 / 1 | 729.391 | [기타](FAVORITES_FEEDBACK_REPORTS_DESIGN.md), 빠른 230·비교 915 |
 | 8-B 검색 | 1286 / 1285 / 0 / 1 | 838.209 | [검색](KAKAO_SEARCH_DESIGN.md), 빠른 234·비교 1052 |
 | 9 알림·예약 최종 | 1340 / 1339 / 0 / 1 | 885.749 | [최종 검증·실패 재현 이력](NOTIFICATIONS_DESIGN.md), 빠른 279·비교 1061 |
+| PR 전 전역 HTTP 보완 | 1434 / 1433 / 0 / 1 | 1037.162 | [전역 HTTP 관측·비교](src/test/resources/globals/README.md), 빠른 282·비교 1152 |
 
-최신 수치의 원본은 로컬 `build/performance/notifications-verified/result.json`, `quota.json`, `test-manifest.txt`다. `build/`는 생성물이며 GitHub에는 포함하지 않는다. 영구 기록은 [TEST_PERFORMANCE.md](TEST_PERFORMANCE.md)와 각 단계 커밋 본문이다. 동시 이미지 처리에서는 계측 구간이 겹치므로 `categoriesSeconds`를 정확한 전체 시간 분해로 발표하지 않는다.
+최신 수치의 원본은 로컬 `build/performance/globals-final/result.json`, `quota.json`, `test-manifest.txt`다. `build/`는 생성물이며 GitHub에는 포함하지 않는다. 영구 기록은 [TEST_PERFORMANCE.md](TEST_PERFORMANCE.md)와 각 단계 커밋 본문이다. 동시 이미지 처리에서는 계측 구간이 겹치므로 `categoriesSeconds`를 정확한 전체 시간 분해로 발표하지 않는다.
 
 재검증 명령(저장소 루트에서 PowerShell, Java 21·Node/npm·Docker 필요):
 
@@ -59,7 +60,7 @@ cd apps/server-v3
 .\gradlew.bat build --rerun --console=plain
 ```
 
-기본 `test`도 v3 DB용 Docker를 사용할 수 있다. “빠른 테스트”는 Docker가 전혀 없다는 뜻이 아니라 **v2 앱을 띄우지 않는 그룹**이다. 이번 문서 정리에서는 위 전체 회귀를 다시 실행하지 않았다.
+기본 `test`도 v3 DB용 Docker를 사용할 수 있다. “빠른 테스트”는 Docker가 전혀 없다는 뜻이 아니라 **v2 앱을 띄우지 않는 그룹**이다. 최종 실행은 `scripts/measure-tests.ps1 -Label globals-final`로 두 그룹을 재실행하고 build까지 검증했다.
 
 ## 3. 주요 결정 색인
 
@@ -142,7 +143,7 @@ cd apps/server-v3
 | 알림 재시도·종료의 한계 | 토큰당 최대 5회, 소켓15초. backoff 조건에서 82초, Retry-After 최대60초 조건에서315초 계산. 연결/인증/DB 제외라 절대 상한 아님. N명 직렬 발송, 종료 drain30초·Compose70초, 메모리 큐 유실 복구 없음 | 2단계: 장애 중 워커 점유·다수 멤버 fanout·종료 관측. 내구성 큐/전체 deadline은 추가 결정 후보 | [알림](NOTIFICATIONS_DESIGN.md) |
 | 알림 수신자 필터 | v2 실제 자동 배치 2 SELECT→v3 JOIN 1 SELECT. 중복 토큰·탈퇴 토큰은 별도 필터하지 않음 | 이관 후 중복·탈퇴 필터의 의미/발송 수 검토 | [알림](NOTIFICATIONS_DESIGN.md) |
 | 예약 작업 다중 서버 중복 | 인스턴스마다 서울03시 실행, 현재 잠금 없음·on/off만 제공. v2를 병행하면 UTC03시 작업도 존재 | **3단계 실험**: PostgreSQL advisory lock 대 ShedLock. 전환 때 활성 scheduler 수 먼저 결정 | [알림](NOTIFICATIONS_DESIGN.md) |
-| 전체 테스트 약 886초·시나리오 창 61초 | 최종885.749초, v2재시작17회, 준비 인증 대기0ms·시나리오 내부 창 대기61013ms. 요청 제한 핸들러별 계산 유지 | 2단계/테스트 운영: 기타 비용 분리, 묶음별 작업·시드 준비 최적화 검토. 전체 범위/429/경합 케이스를 빼는 단축은 하지 않음 | [시간 기록](TEST_PERFORMANCE.md), [하네스](COMPARISON_TESTS.md) |
+| 전체 테스트 약 886초·시나리오 창 61초 | 9번 완료 시점885.749초, v2재시작17회, 준비 인증 대기0ms·시나리오 내부 창 대기61013ms. 요청 제한 핸들러별 계산 유지 | 2단계/테스트 운영: 기타 비용 분리, 묶음별 작업·시드 준비 최적화 검토. 전체 범위/429/경합 케이스를 빼는 단축은 하지 않음 | [시간 기록](TEST_PERFORMANCE.md), [하네스](COMPARISON_TESTS.md) |
 | Windows TCP 4227 | 중간 전체882.148초 실행에서 DB 검증 연결 BindException 1건. TCPIp4227·TIME_WAIT2083 관측. 대상31건35.538초 재실행과 최종전체885.749초 통과 | 환경/테스트 운영: JDBC 연결 생성·재사용·OS 이벤트 측정. 코드/OS 설정으로 해결했다고 주장하지 않으며 TIME_WAIT만으로 전체 포트 고갈을 단정하지 않음 | [알림 최종 검증](NOTIFICATIONS_DESIGN.md), [시간 기록](TEST_PERFORMANCE.md) |
 | RequestRateLimiter 단일 잠금 | 프로세스 내부 단일 synchronized, 핸들러/IP 기준 기본120/분·인증3~10/분 | **2단계**: 잠금 경합 측정; **3단계**: 서버별 카운터·분산 제한 정책 결정 | [README](README.md), [인증](AUTHENTICATION.md) |
 | getRemoteAddr·신뢰 프록시 | 현재 직접 연결 IP 사용, 임의 X-Forwarded-For를 신뢰하지 않음 | **3단계 nginx**: 신뢰할 프록시와 실제 IP 전달·위조 방지, 요청 제한 키 검증 | [README](README.md) |
@@ -157,9 +158,9 @@ cd apps/server-v3
 - 발송/cleanup 활성 인스턴스 수와 시간대를 확인한다. Firebase 설정 비활성 로그는 API 실패가 아니지만 발송 성공도 아니다. 실제 FCM·OAuth·카카오 및 Flutter 화면 검증은 별도 수동 항목이다.
 - [수동 체크리스트](FLUTTER_SMOKE_TEST.md)의 웹 동일 출처 연결·Android HTTP 조건도 이관 완료와 별도로 확인한다. 이번 정리는 배포나 PR 승인·머지를 의미하지 않는다.
 
-## 7. PR 전 전역 설정 대조 — 2026-11-07 구현·개별 검증
+## 7. PR 전 전역 설정 대조 — 2026-11-07 구현·전체 검증 완료
 
-기준은 [v2 main.ts](../server/src/main.ts)와 [app.module.ts](../server/src/app.module.ts)다. 기존 0~9번 검증이 전역 HTTP 헤더·파서 경계까지 모두 증명한 것은 아니었다. 원본 HTTP 79사례 [fixture](src/test/resources/globals/http-v2.json)와 v3를 비교하고 아래 누락을 보완했다. **10-1 A: X-Powered-By만 생략**, 다른 순서는 유지한다. 앞선 대조표의 “JSON 제한 없음”은 조사 누락이었다. 기존 JsonBodyFilter의 JSON 10MiB·인증 전 선검사를 확인했으며 이를 이동·확장했다. 관련 94건 성공(68.198초), form 경계 추가 교차 검사 1건 성공/HTTP38사례(22.970초); 전체 회귀/build는 후속 검증 단계다.
+기준은 [v2 main.ts](../server/src/main.ts)와 [app.module.ts](../server/src/app.module.ts)다. 기존 0~9번 검증이 전역 HTTP 헤더·파서 경계까지 모두 증명한 것은 아니었다. 원본 HTTP 79사례 [fixture](src/test/resources/globals/http-v2.json)와 v3를 비교하고 아래 누락을 보완했다. **10-1 A: X-Powered-By만 생략**, 다른 순서는 유지한다. 앞선 대조표의 “JSON 제한 없음”은 조사 누락이었다. 기존 JsonBodyFilter의 JSON 10MiB·인증 전 선검사를 확인했으며 이를 이동·확장했다. 관련 94건 성공(68.198초), form 경계 추가 교차 검사 1건 성공/HTTP38사례(22.970초); 전체 회귀/build도 1,434건 중 성공1,433·실패0·HEIC skip1, 알려진 차이11, 1,037.162초로 통과했다.
 
 | v2 전역 설정·순서 | 현재 v3 대응 | 대조 결과·남은 확인 |
 | --- | --- | --- |

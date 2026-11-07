@@ -300,3 +300,5 @@ Windows에서 `pwsh -File scripts/measure-tests.ps1 -Label after -RestartMode qu
 - 기타: 전체 Gradle wall time에서 위 구간을 뺀 나머지. 컴파일·환경 기동/종료·DB 상태 비교·Node 라이브러리 교차 검증·파일 fixture 준비·독립 코덱 probe·제한 대기 등을 포함한다. 요청별 처리 시간의 일반적인 성능 보장은 아니다.
 
 테스트용 `http://v2.harness.invalid`는 HTTP interceptor에서 현재 컨테이너 주소로 바뀐다. 재시작으로 호스트 포트가 달라져도 시나리오가 오래된 URL을 사용하지 않는다. 해당 별칭은 외부 DNS로 전송하지 않는다. v2 운영 소스·Dockerfile·요청 제한값을 수정하거나 IP를 바꾸지 않는다.
+
+전역 HTTP 보완 후 최종 전체는 **1,434건(성공1,433·실패0·HEIC skip1), 알려진 차이11, 1,037.162초**다. test282/비교1,152, Spotless/build 통과. 기존 1,340개 검사 식별자 누락0·추가94건, v2 재시작17회다. 원본은 `build/performance/globals-final/`, 측정 한계와 이력은 [TEST_PERFORMANCE.md](TEST_PERFORMANCE.md)에 있다.

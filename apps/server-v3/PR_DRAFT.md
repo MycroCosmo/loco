@@ -23,7 +23,7 @@ Flyway V1은 Prisma 스키마에서 생성한 SQL이며 UUID 문자열·TEXT ID�
 
 ## 검증
 
-9번 묶음 완료 기준 커밋 `8a139b7`에서 **전체 1,340건: 성공 1,339 / 실패 0 / skip 1**, 알려진 차이 10건, Spotless/build 통과. 빠른 `test`는 279건(278 성공·1 skip), v2 `comparisonTest`는 1,061건 모두 성공했다. Windows Java 21·Gradle 8.14.6·Docker Desktop, v2 이미지/도구 캐시 기준 전체 **885.749초**다. 이 수치는 9번 완료 기준이다. 전역 HTTP 보완의 개별 검증은 94/94 성공·68.198초, 후속 form 경계 1/1 성공·22.970초이며 전체 회귀/build는 다음 검증 단계에서 갱신한다.
+전역 HTTP 보완 구현 커밋 `92911d8`에서 **전체 1,434건: 성공 1,433 / 실패 0 / skip 1**, 알려진 차이 11건, Spotless/build 통과. 빠른 `test`는 282건(281 성공·1 skip), v2 `comparisonTest`는 1,152건 모두 성공했다. Windows Java 21·Gradle 8.14.6·Docker Desktop, v2 이미지/도구 캐시 기준 전체 **1,037.162초(17분 17초)**다. 9번 완료 시점 대비 기존 검사 누락 0·추가 94건, v2 재시작은 동일한 17회다. [측정 이력](TEST_PERFORMANCE.md)에 이전 전체 885.749초와 검증 범위 차이를 기록했다.
 
 skip은 Windows HEIC 단독 코덱의 v2·v3 공통 지원 제약 1건이다. 실제 HEIC 업로드의 HTTP·파일 결과는 필수 비교한다. AVIF·애니메이션 WebP는 libvips로 검증했다. 알려진 차이는 조용히 skip하는 항목이 아니다.
 

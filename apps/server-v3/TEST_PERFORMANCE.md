@@ -198,3 +198,17 @@ v2 빌드 호출/기동은 각 1회, 재시작은 9회다. 인증 6회·장소 4
 첫 전체는 시간 기준 보완 전 1,339건/실패 0/890.891초였다. 보완 후 `notifications-complete`는 1,340건 중 실패 1(882.148초): 기존 장소 수정의 HTTP/SQL 검사 뒤 새 DB 확인 연결에서 BindException, 같은 시각 Windows TCP 4227(최근 동일 원격 주소에 사용한 로컬 끝점의 재사용 제한)을 확인했다. 소스/OS 설정 변경 없이 해당 31건 재검증 성공 35.538초, 이후 위 최종 전체가 통과했다. 실패를 자동 retry/skip으로 숨기거나 성공 실행 시간에 합산하지 않았다. 연결 재사용 최적화는 이번에 적용하지 않았다.
 
 원본 결과·manifest·quota·로그는 `build/performance/notifications-verified/`, 실패 이력은 `notifications-complete/`에 보존한다. 동시 이미지 구간 중복 때문에 categoriesSeconds가 정확한 wall time 분해가 아닌 기존 한계는 유지한다. 실제 Firebase·FCM·Google OAuth 호출/서비스 계정 사용 없이 대역과 루프백만 사용했다.
+
+## PR 전 전역 HTTP 보완 완료 — 2026-11-07
+
+구현 커밋 `92911d8`에서 `scripts/measure-tests.ps1 -Label globals-final`로 두 테스트 작업을 재실행하고 Spotless/build를 통과했다. v2 이미지 캐시 기준 전체 wall time **1,037.162초(17분 17초)**다.
+
+| 구분 | 전체 | 성공 | 실패 | SKIPPED |
+| --- | ---: | ---: | ---: | ---: |
+| 빠른 테스트 | 282 | 281 | 0 | 1 (기존 HEIC 공통 제약) |
+| v2 비교·관측 | 1,152 | 1,152 | 0 | 0 |
+| 합계 | 1,434 | 1,433 | 0 | 1 |
+
+9번 최종 1,340개 검사 식별자 누락 0·추가 94건이다. 알려진 차이 11건(개선6·의도5·보류0)은 기존 10건에 승인된 X-Powered-By 생략 1건을 추가한 결과이며 skip과 별개다. v2 빌드 호출/최초 기동 각1, 재시작17, authWaitMillis=0, withinCaseWaitMillis=61,014다. 직전 885.749초보다 151.413초 늘었으나 대용량·압축 본문, 전체 헤더, 정적 파일, 원본 재관측과 form 파서 경계 검사가 추가됐으므로 API 성능 회귀율로 해석하지 않는다. 재시작 횟수는 같다.
+
+원본 결과·manifest·quota·로그는 `build/performance/globals-final/`에 보존한다. 동시 이미지 구간이 겹치는 categoriesSeconds의 한계는 기존과 같으며 전체 시간은 별도 Stopwatch 측정이다. 관련 부분 검증은 94/94 성공·68.198초, 후속 form 38 HTTP 사례를 포함한 JUnit 1/1 성공·22.970초였다. 이 시간을 전체 실행에 합산하지 않는다. 실제 외부 API·키와 Flutter 수동 실행은 사용하지 않았다.
