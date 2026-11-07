@@ -32,13 +32,17 @@ npm.cmd run test:e2e
 
 E2E 전에 Docker Desktop을 실행하고 `JAVA_HOME`을 설치된 Java 21 JDK 경로로 지정한다. 다른 개발 서버·DB는 필요 없다. `test:e2e`가 별도 테스트 호스트와 PostgreSQL/SeaweedFS 컨테이너를 준비하고, 동적 로컬 포트에서 실제 Spring이 제공하는 SPA를 연다. 테스트 후 호스트·컨테이너를 종료한다. 기존 Compose 볼륨은 건드리지 않는다.
 
-E2E 범위는 로그인·첫 비밀번호 변경, CSRF 실패, 세션 만료, 메뉴 revision 충돌, 파일 업로드/다운로드의 **5건**이다. CSRF 케이스는 한 요청의 헤더만 제거하고 실제 서버 오류 코드를 검사한다. 세션 만료는 테스트 전용 Clock을 전진시킨다. 테스트 제어 서버는 별도 loopback 포트·난수 토큰을 사용하며 클래스는 `src/test`에만 있다. 운영 API·JAR에는 테스트 제어 기능이 없다.
+E2E는 기존 로그인·첫 비밀번호 변경, CSRF 실패, 세션 만료, 메뉴 revision 충돌, 파일 업로드/다운로드 5건과 LOCO 4종 조회·일반 READ 경계 2건의 **7건**이다. LOCO 흐름은 이메일 마스킹·페이지·비공개·리뷰 집계·삭제된 신고 대상·관련 업무 권한·권한 회수 후 화면 데이터 제거를 검사한다. CSRF 케이스는 한 요청의 헤더만 제거하고 실제 서버 오류 코드를 검사한다. 세션 만료는 테스트 전용 Clock을 전진시킨다. 테스트 제어 서버는 별도 loopback 포트·난수 토큰을 사용하며 클래스는 `src/test`에만 있다. 운영 API·JAR에는 테스트 제어 기능이 없다.
 
 `npm run test:e2e`는 Gradle **allTests/check에 포함하지 않는다**. 별도로 서버 디렉터리에서 `gradlew.bat allTests build`를 실행해야 기존 LOCO 비교 11건의 알려진 차이까지 재검증된다. 호스트 또는 빌드 구성이 바뀌면 전체 서버 회귀를 수행한다.
 
 결과는 `test-results/summary.json`, 호스트 시작 로그는 `apps/server-v3/build/admin-e2e/host.log`다. trace·스크린샷·영상은 수집하지 않는다. 테스트용 난수 계정 정보는 무시되는 build 파일에 잠시 저장하고 종료 시 지운다. 실제 외부 키·AWS·FCM·OAuth·메일 서버를 사용하지 않는다. `@types/node`는 E2E 설정까지 검사하기 위한 개발 타입 선언이며 브라우저 번들에 포함되지 않는다.
 
 ## 사용자 흐름의 한계
+
+CMS 6단계의 `/admin/loco/users`, `/admin/loco/maps`, `/admin/loco/places`, `/admin/loco/reports`는 조회 전용이다. SYSTEM_ADMIN 또는 해당 `loco.* READ` 역할이 필요하고, 일반 역할은 READ_ONLY 템플릿에서 업무 키를 선택한다. 지도방·장소는 **비공개 포함**이며 화면과 역할 설명에 범위를 표시한다. 관련 업무로 가는 링크도 서버 explain 허용 후 표시하고, 직접 API 호출은 서버가 다시 검사한다. 이메일은 서버에서 마스킹하며 원문 이메일 검색·내보내기·신고 처리·정지는 없다. 상세는 목록의 버튼으로 열고, 관련 링크는 해당 업무의 ID 필터로 이동한다.
+
+검색은 생성 기간(입력은 한국 시각), ID·업무별 조건과 기본50/최대100건의 cursor 페이지다. 총 건수·임의 페이지 이동은 제공하지 않는다. 조건 변경은 첫 페이지, 새 데이터는 새로고침으로 확인한다. 리뷰·피드백 화면과 업무 이력 계약·파일 업무 연결은 이연했다. 결정·전체 SQL 기준은 [LOCO_ADMIN_DESIGN.md](../server-v3/LOCO_ADMIN_DESIGN.md)를 참고한다.
 
 - 403은 CMS `code`로 원인을 구분한다. CSRF 갱신 뒤에도 쓰기 요청은 사용자가 다시 눌러야 한다.
 - revision 충돌은 최신 트리를 읽고 이동 미리보기를 폐기한다. 새 revision으로 자동 저장하지 않는다.

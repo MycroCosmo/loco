@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { session } from '../composables/session'
-import { locoApi } from '../api/client'
+import { locoApi, ApiError } from '../api/client'
 import { useAction } from '../composables/action'
 import { locoScreens, locoRow, locoPage, locoQuery, type LocoResource } from './locoModel'
 const props = defineProps<{ resource: LocoResource }>()
@@ -19,8 +19,13 @@ async function load(cursor: string | null) {
   const current = generation, resource = props.resource
   const query = new URLSearchParams(applied)
   if (cursor) query.set('cursor', cursor)
-  const result = await locoApi.read(`/${resource}?${query}`, locoPage(resource))
-  if (current === generation) { page.value = result; detail.value = null; relations.value = [] }
+  try {
+    const result = await locoApi.read(`/${resource}?${query}`, locoPage(resource))
+    if (current === generation) { page.value = result; detail.value = null; relations.value = [] }
+  } catch (cause) {
+    if (current === generation && cause instanceof ApiError && [401,403].includes(cause.status)) { page.value = {items:[],nextCursor:null}; detail.value = null; relations.value = [] }
+    throw cause
+  }
 }
 watch(() => [props.resource, route.query.id], () => {
   generation++; filters.value = {}; from.value = ''; until.value = ''; size.value = 50
@@ -34,7 +39,10 @@ function next() { void run(async () => { const cursor = page.value.nextCursor; i
 function previous() { void run(async () => { await load(cursors.value.at(-2) ?? null); cursors.value.pop() }) }
 function show(id: string) { void run(async () => {
   const current = generation
-  const result = await locoApi.read(`/${props.resource}/${id}`, locoRow(props.resource, true))
+  detail.value = null; relations.value = []
+  let result: ReturnType<ReturnType<typeof locoRow>>
+  try { result = await locoApi.read(`/${props.resource}/${id}`, locoRow(props.resource, true)) }
+  catch (cause) { if (current === generation && cause instanceof ApiError && [401,403].includes(cause.status)) page.value = {items:[],nextCursor:null}; throw cause }
   const allowed = await Promise.all(result.relations.map(async relation => ({ relation, allowed: await session.allowed('loco.'+relation.resource, 'READ') })))
   if (current === generation) { detail.value = result; relations.value = allowed.filter(r => r.allowed).map(r => r.relation) }
 }) }

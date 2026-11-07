@@ -120,6 +120,7 @@ public class AdminUiBrowserHost {
         var clock = app.getBean(TestClock.class);
         var sql = app.getBean(JdbcTemplate.class);
         var admins = app.getBean(AdminService.class);
+        var roles = app.getBean(RoleService.class);
         var menus = app.getBean(MenuService.class);
         var stop = new CountDownLatch(1);
         var control = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
@@ -146,6 +147,44 @@ public class AdminUiBrowserHost {
                     admins.changePassword(initial, password, password);
                     var root = admins.authenticate("root", password);
                     admins.createAccount(root, "first", "First Admin", firstPassword);
+                    var viewer = admins.createAccount(root, "viewer", "조회 관리자", password);
+                    admins.changePassword(viewer, password, password);
+                    viewer = admins.authenticate("viewer", password);
+                    var viewRole =
+                        roles.create(
+                            root,
+                            "VIEWER",
+                            "지도방·신고 조회",
+                            "READ_ONLY",
+                            Set.of("loco.maps", "loco.reports"));
+                    roles.assign(root, viewer.id(), Set.of(viewRole.id()), viewer.authVersion());
+                    sql.execute("TRUNCATE users CASCADE");
+                    for (int i = 1; i <= 2; i++)
+                      sql.update(
+                          """
+                      INSERT INTO users(id,email,nickname,"createdAt","updatedAt") VALUES (?,?,'회원'||?,'2026-01-01','2026-01-01')
+                      """,
+                          "00000000-0000-4000-8000-00000000010" + i,
+                          "synthetic-" + i + "@example.test",
+                          i);
+                    sql.update(
+                        """
+                      INSERT INTO maps(id,"ownerId",title,description,visibility,"createdAt","updatedAt")
+                      VALUES ('00000000-0000-4000-8000-000000000201','00000000-0000-4000-8000-000000000101','비공개 방','private text','PRIVATE','2026-01-01','2026-01-01')
+                      """);
+                    sql.update(
+                        """
+                      INSERT INTO places(id,"mapId","createdById",name,address,latitude,longitude,memo,"createdAt","updatedAt")
+                      VALUES ('00000000-0000-4000-8000-000000000301','00000000-0000-4000-8000-000000000201','00000000-0000-4000-8000-000000000101',
+                      '장소 하나','주소',37.05,-0.00001,'<img src=x onerror="globalThis.__cmsInjected=true">','2026-01-01','2026-01-01')
+                      """);
+                    for (int i = 1; i <= 2; i++)
+                      sql.update(
+                          """
+                      INSERT INTO reports(id,"reporterId","targetType","targetId",reason,detail,"createdAt") VALUES (?,'00000000-0000-4000-8000-000000000101','MAP',?,'신고','신고 내용','2026-01-01')
+                      """,
+                          "00000000-0000-4000-8000-00000000040" + i,
+                          "00000000-0000-4000-8000-00000000020" + (i == 1 ? 1 : 9));
                     var a =
                         menus.create(
                             root,
@@ -185,6 +224,16 @@ public class AdminUiBrowserHost {
                   }
                   case "/expire" -> {
                     clock.advance(Duration.ofMinutes(30));
+                    result = Map.of("ok", true);
+                  }
+                  case "/revoke-viewer" -> {
+                    var root = admins.authenticate("root", password);
+                    var role =
+                        roles.list(root).stream()
+                            .filter(r -> r.code().equals("VIEWER"))
+                            .findFirst()
+                            .orElseThrow();
+                    roles.permissions(root, role.id(), Map.of(), role.version());
                     result = Map.of("ok", true);
                   }
                   case "/stop" -> {

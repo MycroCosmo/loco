@@ -60,6 +60,10 @@ class LocoReadIntegrationTest {
   @Autowired AdminService admins;
   @Autowired RoleService roles;
   @Autowired PermissionCatalog catalog;
+  @Autowired jakarta.persistence.EntityManager em;
+  @Autowired LocoReadRepository reads;
+  @Autowired com.loco.auth.TokenIssuer tokens;
+  @Autowired com.loco.users.UserRepository users;
   @Autowired TestClock clock;
   @LocalServerPort int port;
   AdminIdentity root;
@@ -373,6 +377,40 @@ class LocoReadIntegrationTest {
   }
 
   @Test
+  void newRowsDuringPaginationAppearOnRefreshWithoutRepeatingOlderRows() throws Exception {
+    var first = ok("/users?size=1");
+    String cursor = first.path("nextCursor").asText();
+    String added = UUID.randomUUID().toString();
+    var start = new java.util.concurrent.CountDownLatch(1);
+    try (var pool = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+      var insert =
+          pool.submit(
+              () -> {
+                start.await();
+                return sql.update(
+                    """
+            INSERT INTO users(id,email,nickname,"createdAt","updatedAt")
+            VALUES (?,?,'new member','2026-02-01','2026-02-01')
+            """,
+                    added,
+                    added + "@example.test");
+              });
+      var next =
+          pool.submit(
+              () -> {
+                start.await();
+                return ok("/users?size=1&cursor=" + encode(cursor));
+              });
+      start.countDown();
+      assertThat(insert.get(10, java.util.concurrent.TimeUnit.SECONDS)).isEqualTo(1);
+      var page = next.get(10, java.util.concurrent.TimeUnit.SECONDS);
+      assertThat(page.path("items").get(0).path("id").asText()).isEqualTo(user1);
+      assertThat(page.path("nextCursor").isNull()).isTrue();
+      assertThat(ok("/users?size=1").path("items").get(0).path("id").asText()).isEqualTo(added);
+    }
+  }
+
+  @Test
   void usersCursorSurvivesDeletionAndRejectsOtherFilters() throws Exception {
     var first = ok("/users?size=1");
     String cursor = first.path("nextCursor").asText();
@@ -424,6 +462,16 @@ class LocoReadIntegrationTest {
     assertThat(get(HttpClient.newHttpClient(), "/admin/api/loco/users").statusCode())
         .isEqualTo(401);
     assertThat(get(http, "/api/users/me").statusCode()).isEqualTo(401);
+    String jwt = tokens.pair(users.findById(user1).orElseThrow(), "unused").accessToken();
+    var response =
+        HttpClient.newHttpClient()
+            .send(
+                HttpRequest.newBuilder(uri("/admin/api/loco/users"))
+                    .header("Authorization", "Bearer " + jwt)
+                    .GET()
+                    .build(),
+                HttpResponse.BodyHandlers.ofString());
+    assertThat(response.statusCode()).isEqualTo(401);
   }
 
   @Test
@@ -470,18 +518,84 @@ class LocoReadIntegrationTest {
   }
 
   @Test
-  void everyCmsReadServiceMethodHasAnExplicitReadContract() {
-    assertThat(
-            Arrays.stream(LocoReadService.class.getDeclaredMethods())
-                .filter(m -> java.lang.reflect.Modifier.isPublic(m.getModifiers()))
-                .map(m -> m.getName() + Arrays.toString(m.getParameterTypes()))
-                .toList())
-        .hasSize(2);
-    assertThat(
-            LocoReadService.class
-                .getAnnotation(org.springframework.transaction.annotation.Transactional.class)
-                .readOnly())
-        .isTrue();
+  void everyCmsReadServiceMethodHasAnExplicitReadContract() throws Exception {
+    var found = new TreeSet<String>();
+    var resolver = new org.springframework.core.io.support.PathMatchingResourcePatternResolver();
+    for (var resource : resolver.getResources("classpath*:com/loco/cmsadmin/**/*.class")) {
+      String url = resource.getURL().toString();
+      if (url.contains("$")) continue;
+      var type =
+          Class.forName(
+              url.substring(url.indexOf("com/loco/cmsadmin/"))
+                  .replace('/', '.')
+                  .replace(".class", ""));
+      if (!type.isAnnotationPresent(org.springframework.stereotype.Service.class)
+          && !type.isAnnotationPresent(
+              org.springframework.transaction.annotation.Transactional.class)
+          && !type.getSimpleName().endsWith("Service")) continue;
+      for (var method : type.getDeclaredMethods())
+        if (java.lang.reflect.Modifier.isPublic(method.getModifiers()) && !method.isSynthetic()) {
+          found.add(
+              type.getName()
+                  + "#"
+                  + method.getName()
+                  + Arrays.toString(method.getParameterTypes()));
+          var tx =
+              method.getAnnotation(org.springframework.transaction.annotation.Transactional.class);
+          if (tx == null)
+            tx = type.getAnnotation(org.springframework.transaction.annotation.Transactional.class);
+          assertThat(tx).isNotNull();
+          assertThat(tx.readOnly()).isTrue();
+        }
+    }
+    assertThat(found)
+        .containsExactlyInAnyOrder(
+            "com.loco.cmsadmin.LocoReadService#list[class com.cms.core.account.AdminIdentity, class com.loco.cmsadmin.LocoReadResource, interface org.springframework.util.MultiValueMap]",
+            "com.loco.cmsadmin.LocoReadService#detail[class com.cms.core.account.AdminIdentity, class com.loco.cmsadmin.LocoReadResource, class java.lang.String]");
+  }
+
+  @Test
+  void actualPlansAtTenAndHundredThousandRows() throws Exception {
+    LocoReadPlanProbe.capture(sql, em, reads, json, path -> get(http, path));
+  }
+
+  @ParameterizedTest
+  @org.junit.jupiter.params.provider.EnumSource(LocoReadResource.class)
+  void oneBusinessSelectPerListAndDetailAndReadOnly(LocoReadResource resource) throws Exception {
+    seedPlaces();
+    seedReports();
+    var before = snapshot();
+    String id =
+        switch (resource) {
+          case USERS -> user1;
+          case MAPS -> mapId(1);
+          case PLACES -> placeId(1);
+          case REPORTS -> reportId(1);
+        };
+    for (String suffix : List.of("?size=1", "?size=100", "/" + id)) {
+      SqlQueryCounter.reset();
+      ok("/" + resource.table + suffix);
+      var statements = SqlQueryCounter.statements();
+      assertThat(statements)
+          .as(resource.table + suffix + " includes session and permission SQL")
+          .hasSize(3);
+      assertThat(statements.stream().filter(s -> s.contains("FROM public.")).count()).isEqualTo(1);
+      assertThat(statements).allMatch(s -> s.toLowerCase(Locale.ROOT).startsWith("select"));
+    }
+    assertThat(snapshot()).isEqualTo(before);
+  }
+
+  @Test
+  void maximumFilterBoundariesAndMaskingAreExplicit() throws Exception {
+    assertThat(ok("/users?size=100&search=" + "a".repeat(100)).path("items").size()).isZero();
+    assertThat(get(http, "/admin/api/loco/users?search=" + "a".repeat(101)).statusCode())
+        .isEqualTo(400);
+    assertThat(get(http, "/admin/api/loco/users?cursor=" + "a".repeat(513)).statusCode())
+        .isEqualTo(400);
+    assertThat(get(http, "/admin/api/loco/users?email=hidden").statusCode()).isEqualTo(400);
+    assertThat(ok("/users?search=" + encode("' OR 1=1 --")).path("items").size()).isZero();
+    assertThat(LocoReadRepository.mask("😀name@example.test")).isEqualTo("😀***@***");
+    assertThat(LocoReadRepository.mask("bad@@example.test")).isEqualTo("***");
   }
 
   @TestConfiguration(proxyBeanMethods = false)

@@ -184,7 +184,7 @@ V1에는 위 최신순 복합 인덱스가 없다. users.email UNIQUE, places(ma
 
 ## 7. 사용자 결정 목록
 
-**선택할 때 번호와 항목 이름을 함께 적는다. 아래 권장은 미승인이다.**
+**아래는 승인 전 선택지의 보존 기록이다. 현재 결정은 0절을 따른다.** 새 결정에 답할 때 번호와 항목 이름을 함께 적는다.
 
 | 번호·항목 이름 | A | B | C / 권장 근거 |
 |---|---|---|---|
@@ -199,16 +199,16 @@ V1에는 위 최신순 복합 인덱스가 없다. users.email UNIQUE, places(ma
 | **C-41 파일의 업무 권한 연결(C-18)** | **권장: 이번에는 보류, cms.files 현행 유지.** 실제 연결 없는 조회 범위와 일치 / 업무 권한으로 첨부 열람은 다음 묶음 | 연결 모델·포트·다운로드 권한까지 이번에 도입. 미래 작업 앞당김 / 쓰기·공유/삭제 정책까지 범위 확대, 현재 요구와 부합하지 않음 | 후속 재검토 조건과 ANY/ALL·미연결·우회 문제는 6절에 보존 |
 | **C-42 호스트 CMS HTTP 경계** | **권장: 범용 CMS controller 표시+경로/중복 선언 검사, CMS Advice 적용 범위 확장.** core 독립·명시적 경계 / 공통 기동 검사·오류 처리 변경과 전체 회귀 필요 | 호스트 관리자 HTTP 어댑터를 `com.loco` 밖 별도 package에 두고 명시 import·전용 Advice로 조립. 기존 앱 검사 코드 유지 / package 이름에 경계가 의존하고 CMS 처리 중복·별도 누락 검사 필요 | 두 안 모두 CMS chain 재사용, LOCO API 응답·권한·prefix 불변. 편의를 위해 `@ApiController`를 CMS에 붙이는 안은 제외 |
 
-## 8. 선택 후 구현·검증 순서 (이번에는 실행하지 않음)
+## 8. 승인된 구현·검증 순서
 
-1. 호스트 등록형 이력 계약과 구버전 core 동작 보존. 예약/중복/미등록/null/중첩/타입/한도·민감 표식, input 변경 후 deep copy, 실제 DB rollback, 서비스 목록 검사를 수행. core만 바뀌면 core test + root 빠른 test.
-2. C-34 선택에 따른 이력 권한/화면 연결. A는 기존 SYS 불변 확인, B는 목록·상세·커서·actor·삭제된 업무 대상·권한 회수·mixed history 격리 및 generic 대역 검증. 권한 분리를 앱 사용자 JWT로 검사하지 않는다.
+1. **C-33에 따라 이연**: 호스트 등록형 이력 계약은 다음 신고 처리 쓰기 묶음에서 구현한다. 예약/중복/미등록/null/중첩/타입/한도·민감 표식, deep copy, 실제 DB rollback 검증 계획과 2절 설계는 보존한다. 이번 조회 서비스에는 새 쓰기가 분류 없이 추가되면 실패하는 메서드 목록 검사를 둔다.
+2. C-34 A: 기존 SYSTEM_ADMIN 전용 이력 목록·상세를 유지하며 일반 업무 READ만으로 열람할 수 없음을 검사한다. 업무 이력 0건이므로 B의 mixed history 검증은 이번에 실행하지 않는다.
 3. C-42의 호스트 HTTP 경계를 먼저 고정한 뒤 `loco.*` 권한·조회 DTO/service/repository/API와 공통 목록 컴포넌트 연결. 회원→지도방→장소→신고→선택 시 리뷰/피드백 순서. 각 단계마다 정상/미인증/권한 없음/타 업무 READ/탈퇴·삭제·고아 대상/필터경계/개인정보 제외/공개·비공개·DB 불변을 검사.
 4. 페이지 첫/끝/동일시각·cursor 행 삭제·조건 변경·병렬 추가, ID SQL 바인딩·literal wildcard, 목록/상세 SQL 수를 고정. 현재 앱 응답과 CMS DTO가 다른 것은 관리 API 계약이며 LOCO 알려진 차이를 새로 만드는 일이 아님을 구분.
 5. 고정 데이터 SQL/EXPLAIN과 시간 기준 기록. C-40 B일 때만 필요한 migration을 별도 검토·커밋한다. core 독립 기동과 호스트 조립에 LOCO가 역참조되지 않는지 검증한다.
 6. 호스트/화면/보안 경계 변경이므로 최종 `allTests build`, Vitest, 별도 Chromium E2E. E2E는 기존5개에 일반 READ의 조회·금지 화면/직접 API, 권한 회수, 개인정보 마스킹·페이지를 소수 흐름으로 추가. CMS 업무 요청이 기존 public 데이터를 바꾸지 않는 것과 LOCO 알려진 차이11건 불변을 확인하고 결과·시간을 커밋 본문에 남긴다.
 
-이번 문서 검증은 코드/기존 결정과의 대조, 링크·Markdown·diff 범위 확인뿐이다. 새 API/화면/등록 API·성능 수치·EXPLAIN 결과는 아직 없으며, 기존 5-B 테스트 결과를 이번 설계의 실행 결과로 재사용하지 않는다.
+실제 실행 결과는 9~10절에 분리해 기록한다. 이력 등록 API는 이연했으며, 이전 5-B 결과를 이번 검증 결과로 재사용하지 않는다.
 
 ## 9. 구현 기록
 
@@ -231,3 +231,42 @@ JPA projection·입력/cursor 검증·CMS 권한 서비스·조회 컨트롤러�
 ### 신고 조회와 관련 업무 이동
 
 신고 목록/상세·대상 유형/ID/신고자/기간 필터, 삭제된 대상 표시를 추가했다. 타 업무 READ가 없으면 targetExists도 null이며 대상 테이블을 조회하지 않는다. 권한 있는 타입의 존재 확인만 상세 SQL 안에 포함하고 개인정보 JOIN은 하지 않는다. 관련 링크는 server explain 허용 후 표시하며 자유 본문은 Vue 텍스트로 렌더링한다. MANAGER 템플릿에서 READ만 지원하는 신규 업무 키를 선택하지 않도록 UI를 보완했다(템플릿 변경 시 선택 초기화). 좁은 READ/MANAGE 타입을 유지하며 타입 검사 오류를 수정했다. 누적 통합25+health12 = **37건 성공/실패0**, 23.520초. Vitest **23건 성공**, 0.216초, typecheck/build 통과. 리뷰·피드백·신고 처리/정지·이력 등록 확장은 미구현이다.
+
+### 조회 경계·SQL 수·브라우저 보강
+
+조회 통합 **32건 + core 101건 = 133건 성공/실패0**, 준비 포함 **101.901초**. `:test --tests com.loco.cmsadmin.LocoReadIntegrationTest`도 기존 dependsOn에 따라 core test를 실행한다. 최초 `test --tests ...`는 필터가 core에까지 적용되어 “대상 테스트 없음”으로 실패했으며, 루트 `:test` 명령으로 수정했다. 테스트를 제거하거나 운영 동작을 바꾸지 않았다.
+
+회원 cursor 행 삭제·동일 시각 ID 순서·끝 페이지, 페이지 요청과 새 행 추가 병행 후 새로고침, size1/100, 필터100/101문자·리터럴 SQL문자·잘못된 cursor, 4종 목록/상세 SQL 수를 고정했다. `cmsadmin` 서비스 공개 메서드의 완전한 시그니처를 읽기 목록과 대조하고 readOnly 여부를 확인해, 새 쓰기가 검사 없이 들어오는 것을 막는다. 쓰기 이력 계약 자체는 C-33 이연 그대로다.
+
+Chromium **7건 성공/실패0**, 브라우저11.2초·호스트 준비/종료 포함 **42.220초**. 업무 READ와 SYSTEM_ADMIN을 나눠 마스킹·관련 링크·비공개 조회·신고 고아 대상·403을 검사했다. 권한 회수 후 실패한 조회에서는 이전 표/상세도 지운다. 기존5건(로그인/첫 변경·CSRF·만료·트리 충돌·파일)도 유지했다. 최종 전체 회귀는 아래 별도 기록한다.
+
+## 10. SQL·EXPLAIN 실측 기준 (2026-11-08)
+
+원본: [explain-baseline.json](src/test/resources/cms-read/explain-baseline.json). `LocoReadPlanProbe`가 실제 repository의 SQL/바인딩으로 실행하며, 별도의 최적화 SQL로 바꾸지 않는다. 재실행 산출물은 `build/reports/cms-read/plans.json`에 생성하고 커밋된 기준 파일은 자동 갱신하지 않는다.
+
+- Windows Java21·Docker PostgreSQL **17.11**, `postgis/postgis:17-3.6`. 테스트 컨테이너 CPU/메모리 명시 제한 없음, shared_buffers **128MB**, work_mem **4MB**. 개발 Compose의 DB2CPU/4GB/shared_buffers1GB와 다른 조건이다.
+- 합성 users/maps/places/reports 각각1만·10만 행, reviews2천 행. ANALYZE 후 쿼리별 warmup1+측정10회, 총 **70시나리오**. 첫/깊은 페이지·정확ID·기간·상태·일반/희소검색·FK·태그·상세(업무별 지원 필터) 포함. cold cache·운영 부하·서비스 SLA 측정이 아니다.
+- 원본 JSON에는 `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)`의 실제/예상 행·loops·버퍼·sort/temp·계획/실행시간을 보존한다. 실행계획은 계측 오버헤드가 있다. `dbRead*`는 JPA 결과 매핑 포함, `http*`는 로컬 HTTP+세션/권한 포함이며 순수 DB 시간과 같지 않다.
+- **SYSTEM_ADMIN 전체 요청 SQL3 / 업무 SQL1**을 70시나리오 및 size1/100·상세 테스트로 고정했다. 일반 역할의 권한 조회 SQL은 역할 상태에 따라 다르므로 위 수치를 일반 역할 전체 SQL로 주장하지 않는다. 타 업무 READ 없는 신고 상세는 해당 대상 테이블을 읽지 않는다.
+
+10만 행의 대표 HTTP 시간(ms, 10회 중앙값/최대):
+
+| 업무 | 첫 목록 | 깊은 cursor | 상세 | 실행 계획 특징 |
+|---|---:|---:|---:|---|
+| 회원 | 35.12 / 37.53 | 23.90 / 25.91 | 6.64 / 10.09 | 목록 Seq Scan+Sort(+Gather Merge), 상세 users_pkey Index Scan |
+| 지도방 | 31.15 / 34.58 | 24.34 / 26.15 | 4.74 / 5.15 | 목록·ownerId 필터 Seq Scan+Sort, 상세 maps_pkey |
+| 장소 | 34.29 / 39.49 | 26.84 / 30.26 | 3.76 / 5.04 | mapId 필터 Bitmap Heap/Index Scan(places_mapId_latitude_longitude_idx), 상세 places_pkey·리뷰 복합키 집계 |
+| 신고 | 30.53 / 33.62 | 20.05 / 22.16 | 6.56 / 9.02 | reporterId 필터 Seq Scan+Sort, 상세 reports_pkey·허용 대상 PK 존재 검사 |
+
+일반 부분검색 중앙값: 회원88.24ms·지도방86.83ms·장소48.59ms. mapId 장소 필터5.37ms와 ownerId 지도방 필터10.81ms, reporterId 신고 필터10.17ms를 같은 원본에 기록했다. 조건부 대상 존재 subplan은 대상 유형에 따라 loops=0일 수 있어 계획에 보이는 모든 테이블을 매번 실행했다고 해석하지 않는다.
+
+C-40 A에 따라 인덱스·migration은 추가하지 않았다. 후속 실험 후보는 `(createdAt,id)` 및 업무 FK+생성순 인덱스와 부분검색이다. keyset은 cursor 행 삭제에 안정적이지만 현재 인덱스에서는 scan/sort를 없애지 못한다. 실행계획/밀리초 자체를 환경 불문 통과 기준으로 두지 않는다.
+
+재검증(서버 디렉터리, Java21/고정 Node/Docker 준비):
+
+```powershell
+./gradlew.bat :test --tests com.loco.cmsadmin.LocoReadIntegrationTest
+./gradlew.bat allTests build
+npm.cmd --prefix ../admin run test:unit
+npm.cmd --prefix ../admin run test:e2e
+```
