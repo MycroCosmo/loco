@@ -1,0 +1,304 @@
+# CMS(B) 핵심 모듈 설계안
+
+상태: **설계만 작성, 선택 대기. 구현·DDL·의존성 추가·설정 변경 없음.**
+
+작성일: 2026-11-07. 기준 main `9dc3c09`는 PR #2의 merge commit이며 이관 최종 `7f25789`를 부모로 보존한다. 이 main에서 `feature/cms-core`를 만들었다. 아래의 테이블명·패키지·경로·정책 수치는 제안이며, “권장”은 사용자 확정을 뜻하지 않는다.
+
+## 1. 근거와 확정 범위
+
+- [노션 설계 v0.2](https://app.notion.com/p/40c140eabf0e81dca76de00565fe725b): ADR 6·9·10·11·14, 권한 4장, CMS 메뉴 5장, 2026-11-04 CMS(B) 결정 변경 기록을 읽었다. 조회된 마지막 편집 시각은 2026-11-05다.
+- 현재 요청: 범용 core는 LOCO를 모르며 LOCO → core만 허용한다. JPA 단일, PostgreSQL JSONB 우선, 이미지 WebP/일반 파일 원본 객체 저장, 기존 앱 계약 보존. 이전 직장 코드·저장소는 열거나 입력·복제·재작성하지 않았다. 사용자가 설명한 문제만 독립 설계의 요구사항으로 사용했다.
+- [이관 요약](MIGRATION_SUMMARY.md), [비교 하네스](COMPARISON_TESTS.md), [이미지 설계](IMAGE_API_DESIGN.md), [사용자 API](USER_API_DESIGN.md)를 현재 구현의 기준으로 삼는다.
+
+| 항목 | 기존 근거 | 이번 문서에서의 취급 |
+| --- | --- | --- |
+| CMS 형태 | 2026-11-04 범용 core + LOCO 확장 확정 | 재논의하지 않음. C-1은 물리적 분리 방법만 결정 |
+| 인증 | 노션 ADR 6: 앱 JWT/관리자 세션 확정. 관리자 계정 분리는 ADR 7에서 제안 | C-4에 기존 세션 방향을 표시하고 계정 분리·초기 생성 구체화. 토큰은 비교 대안 |
+| 메뉴 | ADR 9: 고정 ID + parent_id 확정 | C-2 A가 기존 결정. 경로/클로저는 비용 비교용이며 변경은 별도 명시적 승인 필요 |
+| 이력·파일 | JSONB, WebP, MinIO→S3 방향 확정 | 수집·실패 경계·이전 범위를 C-6/C-8에서 결정 |
+| 관리자 화면 | 노션 기술 표 Vue 3/Nuxt 3 | 경험은 유지하되 지원 버전은 C-5에서 확인. Nuxt 3를 자동 채택하지 않음 |
+| 노션의 미래 SQL·V2~V6 번호 | BIGINT, map_members.role, 운영 정지 등 이관 전 목표 초안 | 현재 구현 사실이 아님. V1 외 실제 마이그레이션은 아직 없음. 번호·앱 권한 변경을 그대로 가져오지 않음 |
+| LOCO 파일 | 노션 초기 “1단계 MinIO”보다 이후 로컬 유지 결정이 최신 | 기존 /uploads는 유지. CMS 객체 저장소와 별도로 3단계 이전 계획에 연결 |
+
+기존 회귀 기준은 전체 1,434건(성공1,433·실패0·HEIC 공통 제약 skip1), 알려진 차이11, 1,037.162초다. **이 문서 작성 중 재실행한 결과가 아니라 main에 기록된 이전 검증**이다.
+
+## 2. 해결할 문제와 성공 조건
+
+| 사용자 문제 | 설계 대응 | 확인할 결과 |
+| --- | --- | --- |
+| 권한이 너무 세밀해 운영자·사용자 모두 어려움 | 역할 템플릿, 작은 동작 집합, 최종 권한 설명, 메뉴 위치와 권한 분리 | 운영자가 “누가 왜 접근 가능한가”를 한 화면에서 확인. 메뉴 이동으로 접근 권한이 바뀌지 않음 |
+| 부모를 바꾸면 PK가 바뀌어 재입력 | UUID 식별자와 위치(parent/sort) 분리, 이동은 UPDATE | 노드·하위 노드 ID, 연결 데이터·권한·이력 참조가 모두 유지 |
+| 데이터 접근 검사가 과도함 | Spring Data JPA 한 경로, 도메인 불변식과 DB 제약에 집중 | MyBatis/JDBC 업무 저장소·임의 범용 CRUD 검증 프레임워크 없음. 복잡 조회도 JPA native projection 허용 |
+| 이력 저장소 복잡도 | JSONB + 검색용 일반 컬럼, 승인된 필드만 기록 | 누가·언제·무엇을·전후 값 조회, 비밀번호/세션/토큰/파일 본문 미기록 |
+| 이미지와 일반 첨부의 저장 | WebP 변환과 객체 저장을 다른 책임으로 분리 | 이미지 결과 WebP, 일반 파일 체크섬 동일, 파일/DB 실패 보상 검사 |
+
+권한 문제의 확인된 원인은 **세밀한 고객별 설정을 이해·운영하기 어려웠다는 경험**이다. deny 우선순위·역할 상속 등이 실제 옛 코드의 원인이었다고 단정하지 않는다. 여기서는 그런 복잡도를 새로 도입하지 않는 방향을 제안한다.
+
+## 3. 범위와 의존 방향
+
+| 범위 | 포함 | 포함하지 않음 |
+| --- | --- | --- |
+| CMS core | 관리자 계정·인증, 메뉴 트리, 역할/권한 판정, 변경 이력, 파일 메타데이터와 저장 포트 | User/MapRoom/Place/Report 타입, 방장·회원 등급·신고 상태 정책, LOCO 테이블 FK |
+| LOCO 관리자 확장 | core 권한을 사용하는 회원·지도방·장소·리뷰·신고/피드백 관리, LOCO 메뉴/권한 등록, 관리 변경의 이력 payload 작성 | core 내부 Repository 직접 접근, 앱 회원을 관리자 principal로 재사용 |
+| 조립 앱/인프라 | 설정 주입, SecurityFilterChain 조립, Flyway 순서, S3 호환 어댑터·이미지 변환 구현 연결 | core에서 LOCO 서비스를 찾아 호출하는 서비스 로케이터 |
+| 이후 로드맵 | 대시보드 집계, 공지·알림 내역, 구독, 다중 서버 세션, Redis 캐시 | 이번 core MVP에 자동 포함하지 않음 |
+
+의존 방향: `LOCO 관리자 확장 → core 공개 서비스/포트`; `조립 앱 → 둘 모두`; `저장/변환 어댑터 → core 포트`. core의 생산 코드·테스트·기본 시드·마이그레이션에는 LOCO import, 테이블명, route, 메뉴명을 넣지 않는다. core 단독 테스트는 가상 업무 `sample.documents`로 수행한다.
+
+LOCO가 `loco.reports` 같은 불변 권한 키와 메뉴 정의를 등록한다. core는 이를 문자열 카탈로그로 저장할 뿐 의미를 해석하지 않는다. 메뉴의 routeKey도 미리 등록된 화면 키이며, 관리자가 임의 Java 클래스·SQL·외부 URL을 실행하도록 하지 않는다. 화면 컴포넌트는 LOCO UI가 routeKey로 연결한다.
+
+**JPA만 사용한다는 것은 객체 저장까지 JPA로 한다는 뜻이 아니다.** DB 업무 접근에 적용하며 S3/MinIO 통신은 저장 포트를 통한다. 테스트의 JDBC 스냅샷·실제 DB 경합 관측은 기존 검증 도구로 유지한다.
+
+## 4. 도메인 모델 초안
+
+모델은 C-2 A / C-3 B / C-4 A를 설명하기 위한 예시다. 기존 패턴대로 앱에서 생성한 UUID 문자열 ID와 TEXT 매핑, Clock 기반 JPA Auditing을 우선 재사용한다. 메뉴 PK를 부모·정렬·경로에서 만들지 않는다. 관계는 필요한 곳만 LAZY, 삭제 cascade는 기본 사용하지 않는다.
+
+| 모델 | 주요 필드·제약 | 책임·경계 |
+| --- | --- | --- |
+| AdminAccount | id, loginId(normalized unique), passwordHash, displayName, status, mustChangePassword, authVersion, createdAt/updatedAt | 앱 User와 별개. 비활성화/비밀번호 변경 시 기존 로그인 효력 차단. 계정의 역할만으로 앱 회원 자격을 얻지 않음 |
+| AdminRole | id, code(unique), name, systemProtected, version | 관리 가능한 역할. 보호된 최고관리자 역할의 권한을 임의 축소하지 않음 |
+| AdminAccountRole | accountId + roleId(unique) | 다중 역할은 허용 권한의 합집합. 명시적 deny/역할 상속/개인 예외는 초기 제외 제안 |
+| PermissionDefinition | key(unique), label, allowedActions | 코드가 제공하는 권한 카탈로그. LOCO 정의는 LOCO에서 등록, core 정의는 core에서 등록 |
+| RolePermission | roleId + permissionKey + action(unique) | C-3 B에서 사용. 메뉴 PK가 아닌 불변 업무 권한 키를 참조 |
+| MenuNode | id, parentId(nullable), sortOrder, title, type(GROUP/PAGE), routeKey, permissionKey, visible, version | parent FK, 자기 부모 금지. 메뉴명/URL 변경은 식별자와 별개. 그룹은 화면 진입 권한을 새로 부여하지 않음 |
+| MenuTreeRevision | id, revision | C-9-2 A 선택 시 트리 변경 직렬화와 낡은 편집 화면 감지용. core의 한 트리에서 시작 |
+| ChangeHistory | id, actorId(nullable), actorLabel, actorType, occurredAt, resourceType, resourceId, action, requestId, beforeData/afterData(JSONB), payloadVersion | 회원/지도방 FK 없음. 삭제 후에도 식별·표시 가능. actor는 서버 인증에서 얻고 요청 JSON을 신뢰하지 않음 |
+| StoredFile | id, storageKey(unique), backend, originalName, detectedMediaType, byteSize, sha256, state, createdBy, createdAt | URL/파일명과 식별자 분리. 비공개 객체, 권한 통과 뒤 다운로드. 일반 파일은 바이트 불변 |
+| LOCO 전용 모델(별도) | 신고 처리 상태/담당자/경합 버전, 운영 조치 사유 등 | 현재 테이블에 이미 있다고 가정하지 않음. 실제 조치 정책·마이그레이션은 C-9-5 이후 별도 설계 |
+
+이력은 엔티티 전체를 JSON 직렬화하지 않는다. 허용 필드 DTO의 before/after만 넣어 LAZY 그래프·순환 참조·민감값 유출을 막는다. 검색은 `(occurredAt,id)`, `(resourceType,resourceId,occurredAt)` 등의 후보 인덱스를 실제 쿼리로 검증하고 JSONB 전체 GIN은 필요가 측정될 때 검토한다. DB 관리자까지 막는 불변 원장이나 위변조 방지를 보장하지 않는다.
+
+## 5. 핵심 동작 초안
+
+### 5.1 메뉴 이동·정렬과 권한
+
+1. 요청은 대상 id, 새 parentId, beforeSiblingId(없으면 마지막), 기대 treeRevision을 보낸다. UI 배열 인덱스나 경로를 PK로 보내지 않는다.
+2. 트리 변경 보호 구간 안에서 대상/부모 존재, 자기 자신·자손 아래 이동 금지, 형제의 새 부모 일치, revision을 확인한다. 교차 이동 A→B / B→A도 순환을 만들 수 있으므로 사전 SELECT 검사만으로 끝내지 않는다(C-9-2).
+3. 대상 parentId와 필요한 양쪽 형제 sortOrder를 갱신한다. 자손 PK·연결 데이터·RolePermission은 건드리지 않는다. 형제 정렬은 연속 정수 재배치 제안, 큰 형제 집합일 때 비용 측정 후 간격/순위 방식 검토.
+4. 트리 revision 갱신과 변경 이력을 같은 트랜잭션에 넣는다. 낡은 화면은 409와 새 트리 재조회 안내를 제공하며 사용자 입력을 조용히 덮어쓰지 않는다.
+
+초기 전체 메뉴 수를 근거 없이 대규모로 가정하지 않는다. 전체 projection 1 SELECT 후 메모리 조립은 N개 노드 O(N)이며 부모마다 LAZY 순회하는 N+1을 피한다. 특정 서브트리가 필요하면 JPA native recursive CTE로 조회할 수 있다. CTE의 cycle 탐지는 읽기 안전장치이지 동시 쓰기 정합성을 대신하지 않는다. [PostgreSQL 17 WITH/재귀 조회](https://www.postgresql.org/docs/17/queries-with.html).
+
+권장 C-3 B는 **권한 상속 없음**이다. 자식 PAGE 접근이 허용되면 상위 GROUP을 탐색 경로로만 표시한다. 메뉴 숨김은 API 거부를 뜻하지 않고, 메뉴 이동·그룹 이름 변경은 권한을 추가하지 않는다. 화면에는 “역할 X가 자료 Y의 관리 권한을 부여함”을 표시한다. 이동 미리보기는 이전/이후 위치와 “권한 변화 없음”을 보여준다.
+
+자식이 있는 메뉴 삭제는 초기 거절, 연결된 데이터는 별도 업무 API로 관리한다. 메뉴 삭제로 업무 데이터/권한/이력이 삭제되지 않는다. PAGE를 지워도 권한 카탈로그 자체가 없어지지 않음을 UI에 알린다. 메뉴를 숨기는 동작을 계정 정지처럼 사용하지 않는다.
+
+### 5.2 인증과 권한 변경
+
+권장 C-4 A는 별도 관리자 계정 + 서버 세션이다. 세션에는 관리자 ID와 인증 버전 등 최소 정보만 넣고, 매 요청 계정 활성 상태·최신 역할/권한을 DB에서 확인한다. **세션을 쓰는 것만으로 권한 변경이 즉시 반영되는 것은 아니다.** 최초에는 캐시를 두지 않아 회수 커밋 후 시작한 다음 요청부터 반영한다. 이미 실행 중인 요청까지 취소하는 보장은 없으며 고위험 쓰기는 트랜잭션 안에서 권한을 다시 확인하는 계약을 정한다.
+
+HttpOnly/Secure(운영 HTTPS)/SameSite cookie, 로그인 시 session ID 교체, 로그아웃 무효화, CSRF 보호를 관리자에 적용한다. 로그인도 CSRF 토큰 흐름에 포함한다. SPA의 CSRF 토큰 수신·로그인 후 토큰 재발급을 테스트한다. 앱 JWT 체인은 기존 stateless·CSRF off 그대로다. 관리자 세션 cookie로 앱 인증이 되거나 LOCO JWT로 관리자 권한이 생기지 않아야 한다.
+
+초기 관리자는 공개 가입 API나 Git 시드 비밀번호 대신 일회성 CLI/bootstrap 작업을 제안한다. 외부 주입/비표시 입력 비밀값으로 생성, DB 잠금/고유 제약으로 동시 실행 중 하나만 성공, 기존 관리자 존재 시 거절, 강제 비밀번호 변경, 성공 후 bootstrap 비활성화. 재시작마다 계정을 다시 만들거나 비밀번호를 덮어쓰지 않는다. 마지막 활성 최고관리자 삭제/강등/비활성화는 경합까지 막는다.
+
+### 5.3 변경 이력의 트랜잭션
+
+권장 C-6 A는 서비스가 업무 변경과 이력을 **같은 DB 트랜잭션**에서 기록한다. 성공 커밋만 성공 이력을 남기고 이력 insert 실패면 업무 변경도 롤백한다. actor·requestId는 요청 경계에서 값 객체로 전달하며 core는 LOCO SecurityContext 타입에 의존하지 않는다. bulk/native UPDATE는 변경 행 수/변경 전 snapshot을 명시적으로 다룬다.
+
+로그인 실패·권한 거부·롤백된 시도는 성공 변경 이력이 아니다. 별도 보안 로그에 최소 정보로 기록하고 비밀번호·세션 ID·JWT·객체 저장소 서명 URL을 남기지 않는다. 비동기로 나중에 이력만 저장하면 종료/큐 포화로 유실될 수 있으므로 노션의 “비동기 이력”은 후속 실험으로 남긴다. 분리 시 outbox/재처리/중복 키를 함께 설계한다.
+
+### 5.4 파일과 기존 /uploads
+
+core에는 `ObjectStorage`의 put/read/delete와 `ImageTransformer` 계약만 둔다. 업로드는 권한·CSRF·크기/실제 형식 확인 → 이미지 변환(일반 파일은 원본) → 서버 생성 불변 object key 저장 → 메타데이터/업무 연결/이력 DB 커밋 순서다. 객체 저장은 DB 트랜잭션과 원자적이지 않다. DB 실패 시 **이 요청이 만든 key만** 보상 삭제하며, 보상 실패/프로세스 종료 고아는 식별 가능한 상태와 재정리 대상으로 남긴다.
+
+삭제는 DB 연결 해제와 DELETE_PENDING 표식을 먼저 커밋하고 실제 객체 삭제를 재시도할 수 있게 한다. 존재하지 않는 객체의 삭제는 성공으로 처리한다. 업로드 후 미연결 파일의 정리 유예시간, 재시도 횟수/주기는 구현 전에 수치 검증한다. 같은 객체를 여러 업무에 연결하려면 참조 집계 정책을 별도로 정해야 하며 초기에는 소유 업무 연결 한 곳을 제안한다.
+
+기존 `LocalImageStorage`에는 프로필/지도방/장소 크롭, /uploads URL, HEIC v2 호환 실패 같은 LOCO 정책이 섞여 있다. core가 이 클래스를 참조하면 분리 목표를 어긴다. 변환 포트 어댑터는 조립 쪽에 두고 기존 libvips 동작을 연결할 수 있지만 core에서 LOCO를 import하지 않는다. 공통 구현을 추출할 경우 별도 호환 리팩터링 커밋과 코덱/HTTP 회귀가 선행돼야 한다. 지금 추출하지 않는다.
+
+3단계 LOCO 이전은 별도 작업: 기존 파일→객체 복사·체크섬/개수 확인 → `/uploads/...` URL을 보존하는 조회 어댑터 또는 승인된 URL 전환 → 읽기 검증 → 쓰기 주체 전환 → 롤백 기간 뒤 로컬 정리. 단순 endpoint 변경만으로 현재 상대 URL·공개 헤더·파일 정리 계약이 보존되지 않는다. CMS 추가 시 기존 공유 볼륨/파일을 삭제하거나 LOCO image_urls를 교체하지 않는다.
+
+## 6. 화면·API 목록 초안
+
+동일 프로세스 권장안의 경로 예시다. 화면 `/admin`, core API `/admin/api/core`, LOCO 관리 API `/admin/api/loco`로 구별하며 기존 앱 `/api/**`를 재사용하지 않는다. 경로가 분리돼도 서버 권한 검사는 필수다. 인증 실패401, 권한/CSRF403, 낡은 편집409, 입력400 등 CMS 계약은 새로 고정하며 LOCO의 v2 오류 문구에 종속시키지 않는다.
+
+| 화면/흐름 | API 초안(method + core prefix 뒤 경로) | 핵심 검사 |
+| --- | --- | --- |
+| 로그인·로그아웃 | GET `/auth/csrf`, POST `/auth/login`, POST `/auth/logout`, GET `/auth/me` | 세션/CSRF, 실패 메시지로 계정 존재 노출 방지, 로그인 시도 제한 |
+| 내 계정 | PUT `/auth/password` | 기존 비밀번호 검증, 인증 버전 변경, 다른 세션 효력 회수 |
+| 관리자 계정 목록·등록·수정 | GET/POST `/accounts`, GET/PUT `/accounts/{id}`, PUT `/accounts/{id}/roles`, PUT `/accounts/{id}/status` | 최고관리자 보호, 역할 부여 권한, version. 물리 삭제보다 비활성화 우선 |
+| 역할·권한 매트릭스 | GET/POST `/roles`, GET/PUT/DELETE `/roles/{id}`, GET `/permissions`, PUT `/roles/{id}/permissions` | 시스템 역할/사용 중 역할 삭제 제한, 미등록 키 거절, READ/MANAGE 관계 설명 |
+| 내 탐색 메뉴 | GET `/navigation` | 현재 역할 기준 트리, 접근 가능한 자식의 조상 GROUP 포함 |
+| 메뉴 편집·이동 미리보기 | GET/POST `/menus`, PUT/DELETE `/menus/{id}`, POST `/menus/{id}/move-preview`, PUT `/menus/{id}/position` | 미리보기는 잠금 예약이 아님. 저장 시 재검사, subtree ID 보존·순환·revision |
+| 변경 이력 검색·상세 diff | GET `/history`, GET `/history/{id}` | actor/대상/기간 cursor, 별도 열람 권한, 민감 필드 제외. 임의 수정/삭제 API 없음 |
+| 파일 업로드·다운로드·삭제 | POST `/files`, GET `/files/{id}`, GET `/files/{id}/content`, DELETE `/files/{id}` | 비공개 객체, 업무/소유 연결 권한, 일반 파일 attachment, 경로조작/파일명 정제 |
+
+파일 GET은 “로그인한 관리자면 모두 다운로드”가 아니다. core 파일 권한과 소유 영역 검사를 통과해야 하며 LOCO 업무별 접근 확인은 LOCO가 수행한 뒤 core 서비스를 호출한다. 사용자가 보낸 resourceType만으로 권한을 인정하지 않는다.
+
+| LOCO 전용 화면 후보 | LOCO 관리 API 초안 | 아직 필요한 업무 계약 |
+| --- | --- | --- |
+| 회원 조회·상태 관리 | GET `/users`, GET `/users/{id}`; 이후 PUT `/users/{id}/status` | 정지와 탈퇴 구분, 토큰 회수, 앱 응답 변화 |
+| 지도방 조회·운영 조치 | GET `/maps`, GET `/maps/{id}`; 이후 POST `/maps/{id}/moderation` | 방장의 재공개 가능 여부, 상태 필드, 사유·복구 |
+| 장소·리뷰 관리 | GET `/places`, GET `/places/{id}/reviews`; 이후 업무별 moderation | 관리 삭제의 이미지·집계·리뷰 처리와 기존 작성자 정책 분리 |
+| 신고·피드백 | GET `/reports`, GET `/feedback`; 이후 PUT `/reports/{id}/resolution` | 신고 상태 전이, 두 관리자 동시 처리, 낙관적 버전 |
+| 통계·공지·알림 내역 | 후속 로드맵 | 핵심 모듈로 넣지 않음. 집계 비용/알림 저장 정책 별도 |
+
+목록은 검색·빈 상태·로딩·재시도·페이지 이동을 제공하고, 메뉴 이동은 드래그뿐 아니라 키보드/부모 선택·위아래 버튼으로도 가능하게 한다. 역할 저장 전 바뀌는 권한 요약, 409 발생 시 입력 보존과 재조회, 401 시 재로그인 안내, 403 시 부족한 권한 설명을 제공한다. 본인에게 없는 권한의 내부 상세를 불필요하게 노출하지 않는다.
+
+## 7. 기존 LOCO 계약 보호와 테스트 전략
+
+### 현재 코드에서 확인한 통합 지점
+
+| 현재 코드 | CMS 추가 시 필요한 경계 | 회귀 기준 |
+| --- | --- | --- |
+| [SecurityConfig](src/main/java/com/loco/config/SecurityConfig.java): 모든 요청 permitAll, stateless, JWT 필터 | CMS 전용 matcher/우선순위·세션·CSRF, 기존 앱 체인은 유지. 적용 체인이 없는 경로가 생기지 않게 검사 | JWT/세션 상호 인증 불가, 기존401/404·CSRF off 유지 |
+| [GlobalHttpFilter](src/main/java/com/loco/web/GlobalHttpFilter.java): 전역 parser→Helmet→CORS, OPTIONS 조기 종료 | CMS 경로는 별도 HTTP 정책으로 분기. 단순 SecurityFilterChain 추가만으로 이 서블릿 필터를 우회할 수 없음 | 앱/없는 경로/uploads의 기존 fixture 불변. CMS CSRF 헤더·cookie·UI CSP 별도 검사 |
+| [ApiWebConfig](src/main/java/com/loco/config/ApiWebConfig.java): com.loco 컨트롤러의 ApiController 선언 강제, JwtPrincipal/회원 DB 조회 | core를 다른 패키지로 두는 것에만 의존하지 않고 CMS/LOCO 컨트롤러 종류를 명시적으로 구분. 별도 CMS 선언 누락 검사 | 앱의 기존 선언 검사 약화 금지, CMS 선언 누락은 기동 실패. 관리자 요청에서 앱 users 조회 없음 |
+| [RateLimitInterceptor](src/main/java/com/loco/security/RateLimitInterceptor.java): ApiController 대상 | CMS 인증 시도 제한은 별도 정책·키 공간. 앱 핸들러 quota 재사용 안 함 | 기존429 필수 검사·카카오 외부 호출0회 유지 |
+| [LocoApplication](src/main/java/com/loco/LocoApplication.java): com.loco 기본 스캔 | core의 config/entity/repository를 명시적으로 등록. 패키지 이동만으로 자동 발견된다고 가정하지 않음 | core 단독 기동, 조립 기동 각각 검증 |
+| [FlywayBaselineIntegrationTest](src/test/java/com/loco/migration/FlywayBaselineIntegrationTest.java): target(1) | V1 checksum·생성 SQL 고정 | Prisma 비교 유지. CMS 전체 마이그레이션은 별도 검사 |
+| [DatabaseSnapshot](src/test/java/com/loco/compat/DatabaseSnapshot.java): public 테이블 자동 수집 | CMS 별도 schema 제안. public에 넣는 안이면 업무 테이블 집합을 명시적으로 분리하고 누락 검사를 추가 | v2 비교 범위를 줄이거나 CMS와 함께 새로 생긴 업무 컬럼을 조용히 제외하지 않음 |
+
+### 구현 이후 실행할 검증(이번에는 미실행)
+
+| 그룹 | 사례·통과 조건 |
+| --- | --- |
+| 의존 경계 | core만 컴파일/기동/마이그레이션, com.loco 의존0, core 테스트에 LOCO fixture0. 의도적으로 금지 import를 넣은 규칙 테스트도 실패하는지 확인 |
+| 메뉴 정합성 | 다단계 자식 있는 노드 이동 전후 ID·연결·권한 유지, 루트/빈 그룹/다른 부모/형제 재정렬, 자기/자손 이동 거절, 없는 부모/낡은 revision409, 양쪽 변경·이력 롤백 |
+| 실제 DB 경합 | Testcontainers PostgreSQL17에서 A→B/B→A, 같은 형제 동시 정렬, 이동 대 삭제, 마지막 최고관리자 동시 강등. barrier 기반 실제 요청, 순환0·유실0·활성 최고관리자 최소1 |
+| 권한 | 최고관리자/운영자/조회자/역할없음/비활성, 다중 역할 합집합, 숨긴 메뉴 API 직접 호출, 메뉴 이동 권한 불변, 회수 커밋 후 다음 요청403. 소유자 조건은 LOCO에서 별도 검사 |
+| 인증·웹 | 세션고정 방지, 로그아웃/정지/비밀번호 변경 후 회수, 만료, bootstrap 동시 실행/재실행, CSRF 누락·불일치·로그인 후 교체, CORS·cookie·CSP. 앱JWT와 세션 경계 상호 검사 |
+| 이력 | actor 위조 거절, before/after와 실제 DB 일치, 업무/이력 중 한쪽 실패 시 둘 다 롤백, bulk UPDATE 경로 포함, 민감값0, 삭제 후 열람, payloadVersion 호환 |
+| 저장소 | MinIO 컨테이너 대역, WebP signature/치수·일반 파일 SHA-256, MIME 위장/크기/경로·다른 관리자 접근 거절, 저장 실패/DB 실패/보상 삭제 실패/재정리, 재시도 중복 삭제 안전성 |
+| JPA·쿼리 | 트리·권한 목록 N+1 없음, 10/100/1,000 메뉴에서 SELECT 수/응답 크기 측정. 신규 SQL 수는 실제 구현 후 고정하며 목표 수를 실측으로 표기하지 않음 |
+| DB 통합 | 빈 DB와 main V1 DB 각각 업그레이드, 기존 업무 행/스키마 유지, CMS migration 재실행 idempotency, history 위치/버전 충돌, 두 앱 동시 기동. 공유 schema C-7 A 선택 시 비교 범위 변경 자체도 검사 |
+| 화면 | E2E 로그인→메뉴 이동→역할 부여/회수→이력 조회, 파일 업/다운로드, 키보드 이동·권한 없음·409 복구. 화면 숨김만으로 통과시키지 않음 |
+| LOCO 전체 회귀 | 기존 test/comparisonTest/build, 1,434개 식별자 누락0·기존 알려진 차이11 동일. CMS 켠 상태의 앱 API와 CMS 권한 변경 전후에도 앱 응답·DB 상태 불변 |
+
+기존 비교는 v2와 v3의 LOCO 계약 검사다. CMS 자체에 가짜 v2 기대값을 만들지 않고 신규 계약 테스트로 분리한다. C-7 B/C의 CMS 스키마는 별도 snapshot으로 검사해 public 비교 밖의 변경도 확인한다. CMS 테스트와 LOCO 테스트의 DB 초기화·세션·객체 namespace를 격리한다. 프로파일로 CMS를 꺼서 기존 회귀만 통과시키는 것으로 통합 검증을 대체하지 않는다.
+
+## 8. 결정할 항목 — 선택지·장단점
+
+아래 권장 조합은 제안이다. **번호·항목 이름·선택지**가 없는 답은 어느 결정인지 확인한 뒤 반영한다. 신규 라이브러리 버전·운영 수치는 구현 승인을 받은 뒤 선택된 안 범위에서 검증하며, 설계를 바꾸는 선택은 다시 질문한다.
+
+### C-1 모듈 분리 방식
+
+| 선택 | 장점 | 단점 |
+| --- | --- | --- |
+| **A. Gradle 멀티 모듈(권장)** | core JAR에 LOCO가 compile dependency로 들어오지 않게 제한, 단독 테스트/재사용 경계가 분명 | settings·리소스·테스트 classpath·Docker 빌드 입력 정리 필요 |
+| B. 단일 모듈 패키지 + ArchUnit | 기존 build/배포 경로 유지, 가장 작은 초기 변경 | 분리 보장은 테스트 실행에 의존, 재사용 시 나중에 추출 필요 |
+
+A도 처음부터 모든 LOCO 기능을 작은 모듈로 쪼개지 않는다. 현재 `apps/server-v3` root를 실행 앱으로 유지하고 `modules/cms-core` 하나를 library subproject로 추가하는 초안이다. core 내부는 account/menu/permission/history/file 패키지, LOCO 전용은 기존 앱 안 `cmsloco` 등 별도 영역으로 둔다. Gradle 경계 외 공개 API/역방향 의존 검사는 A에서도 유용하나 ArchUnit 추가 버전은 구현 시 확정한다. [Gradle 멀티 프로젝트](https://docs.gradle.org/current/userguide/multi_project_builds.html), [ArchUnit 의존 규칙](https://www.archunit.org/userguide/html/000_Index.html).
+
+### C-2 메뉴 트리 표현
+
+| 선택 | 이동·정렬·조회 | 장점 / 단점 |
+| --- | --- | --- |
+| **A. 인접 리스트 parent_id(기존 확정·유지 권장)** | 위치 변경은 대상 parent 1행 + 필요한 형제 K행; 자손은 안 바꿈. 전체 트리 N행 또는 recursive CTE | 작은 쓰기·쉬운 JPA / 조상·자손 조회와 동시 순환 방지는 별도 필요 |
+| B. 경로 열거(materialized path) | subtree S개의 경로를 갱신, 형제 sort는 별도; prefix 조회 | 하위 검색 편리 / 이동 시 후손 재기록·경로 인덱스/인코딩 고려 |
+| C. 클로저 테이블 | 노드와 별도로 ancestor/descendant/depth 저장. 이동 시 조상×서브트리 관계 재작성 | 조상/자손 조회 쉬움 / 관계 행 증가, 이동·삭제 정합성 복잡 |
+
+세 방식 모두 **ID는 독립 UUID**로 두면 문제2를 해결한다. parent_id 자체가 PK 불변을 자동 보장하는 것이 아니라 “이동 시 ID를 재생성하지 않는 서비스·제약·테스트”가 핵심이다. 순서 값도 ID에 넣지 않는다.
+
+### C-3 권한 모델
+
+| 선택 | 장점 | 단점·한계 |
+| --- | --- | --- |
+| A. 단순 고정 RBAC(최고관리자/운영자/조회자) | 설명·설정 가장 쉬움, 역할 화면 작음 | 신고만 처리하는 운영자 등 범위 분리가 어렵고 역할 추가 시 코드 변경 가능 |
+| **B. 역할 + 업무 메뉴의 READ/MANAGE 두 동작(권장)** | 메뉴별 접근을 조정하되 CRUD 세분화 억제, 템플릿으로 시작 가능 | 역할 수×업무 수의 설정 부담은 남음. 작성자/소유 범위는 표현 못 함 |
+| C. ABAC/정책식·개인 예외 포함 | 대상 소유·조직·상태 등 표현력 높음 | 판정 설명·디버깅·운영 복잡도가 커 문제1 반복 가능 |
+
+B는 노션의 메뉴 단위 RBAC를 좁힌 안이다. UI 메뉴에는 permissionKey를 연결하되 실제 권한은 불변 업무 키에 부여한다. MANAGE는 READ를 포함, 역할 합집합, deny/트리 상속 없음, 역할 템플릿 제공을 함께 제안한다. core 계정/역할 관리와 이력 열람을 하나의 “LOCO 운영자” 권한으로 묶지 않는다. 업무 상태·작성자 조건은 LOCO 도메인의 별도 판정이며 CMS 권한을 앱 API의 기존 canAccess보다 우선시키는 변경은 이번에 하지 않는다.
+
+### C-4 관리자 인증·계정·초기 생성
+
+| 선택 | 장점 | 단점·한계 |
+| --- | --- | --- |
+| **A. 별도 AdminAccount + 서버 세션 + 일회성 CLI(권장, 기존 세션 방향)** | 앱 JWT와 자격 증명/권한 경계 분리, DB 재확인으로 회수 이해 쉬움, 공개 bootstrap 없음 | CSRF·cookie·세션 수명 관리 필요. 처음 메모리 세션은 재기동 시 로그아웃, 다중 서버는 Spring Session 등 후속 필요 |
+| B. 별도 AdminAccount + 관리자 전용 토큰 + CLI | 외부 관리자 클라이언트 확장 쉬움 | issuer/audience/서명키 분리·refresh/회수 장치 필요, 즉시 회수에 DB 조회가 다시 필요. 기존 세션 결정 변경 |
+| C. 앱 회원에 관리자 역할 추가 + 세션 | 계정 중복 적고 가입 흐름 재사용 | 앱 탈퇴/OAuth/비밀번호 정책과 관리 권한이 결합, core가 LOCO 회원에 의존하기 쉬워 이번 전제와 맞지 않음 |
+
+A의 초기 수명은 idle 30분, 절대 8시간, 로그인 5회/분(IP와 정규화 계정 각각) 제안이며 확정값은 아니다. 제한은 성공 시 필요한 카운터만 정리하고 존재 여부를 노출하지 않는다. 3단계에서 프록시 신뢰·Redis 세션/요청 제한으로 이어진다. MFA/SSO는 초기 범위 밖이며 인터넷에 관리자 UI를 공개하기 전 접근 제한·MFA 정책을 별도 확인한다. [Spring Security 체인 분리](https://docs.spring.io/spring-security/reference/servlet/configuration/java.html).
+
+### C-5 관리자 화면 기술
+
+| 선택 | 장점 | 단점 |
+| --- | --- | --- |
+| **A. Vue 3 + 지원 중인 Nuxt + TypeScript(권장)** | 사용자 Vue/Nuxt3 TS 경험, 파일 라우팅·레이아웃, 메뉴/권한 화면 구성에 익숙 | Nuxt3 경험에서 현재 버전으로 적응 필요, 관리자 SEO가 필요 없어 SSR은 초기 이점이 작음 |
+| B. React + Vite + TypeScript | React 경험 활용, SPA 빌드 단순 | 라우터/상태/폼 조합을 추가 선택해야 함, Nuxt 경험 재사용은 적음 |
+| C. Thymeleaf 서버 렌더링 | 배포 한 개, 세션/CSRF와 자연스럽게 연결, 별도 Node 서버 불필요 | 트리 드래그·권한 매트릭스 등 상호작용에 별도 JS가 늘어남, 프런트 재사용 어려움 |
+
+현 저장소 apps에는 mobile/server/server-v3만 있고 관리자 프런트는 없다. A/B는 `apps/admin` 후보, C는 서버 templates/static 후보다. A의 초기 실행은 SSR 없는 관리자 SPA를 제안하고, 개발 서버 프록시로 `/admin/api`를 Spring에 전달해 브라우저 동일 출처를 유지한다. 배포도 정적 앱과 API를 같은 origin 아래 제공하는 구성을 제안한다. 인증 로직을 Nuxt 서버에 중복 구현하지 않는다.
+
+2026-11-07 확인한 [Nuxt 공식 로드맵](https://github.com/nuxt/nuxt/blob/main/docs/5.community/6.roadmap.md)은 Nuxt3 지원 종료를 2026-07-31로 명시한다. A를 선택해도 Nuxt3에 고정하지 않고 지원 중인 안정 메이저/Node 조합을 구현 시 검증·고정한다. 이 문서는 Nuxt/Node 업그레이드를 실행하지 않는다.
+
+### C-6 변경 이력 수집
+
+| 선택 | 장점 | 단점 |
+| --- | --- | --- |
+| **A. 서비스에서 명시 기록 + 같은 트랜잭션(권장)** | actor·업무 의미·허용 필드·전후 값 명확, JPA native/bulk 경로도 기록 가능 | 호출 누락 위험이 있어 서비스 계약 테스트와 변경 경로 목록 필요 |
+| B. JPA 엔티티 리스너 | 일반 persist/update에서 반복 코드 감소 | bulk/native UPDATE를 포괄하지 못함, before 값/actor/여러 엔티티를 묶는 업무 의미 처리 어려움 |
+| C. DB 트리거 | 앱 밖 SQL 변경도 행 단위 포착 | DB 세션 actor 전달/초기화, 민감값 제한·도메인 action·유지보수 복잡. JPA 단일 요구에서 DB 동작이 분산됨 |
+
+JPA Auditing의 createdAt/updatedAt은 변경 이력의 before/after·행위자를 대신하지 않는다. A의 유실 없는 성공 이력과 트랜잭션 비용을 먼저 측정하고, 비동기 분리 요구가 생기면 outbox 비용과 함께 비교한다.
+
+### C-7 DB 배치·Flyway 버전 관리
+
+| 선택 | 장점 | 단점 |
+| --- | --- | --- |
+| A. 같은 DB/public + cms_ 접두사, 기존 history 하나 | 설정·트랜잭션 가장 단순 | public 자동 비교에 CMS가 섞임, 이름 충돌·비교 하네스 분리 필요 |
+| **B. 같은 DB/별도 cms schema + 기존 public history 하나(권장)** | LOCO public 경계 유지, 같은 로컬 트랜잭션, migration 순서 한 곳 | 배포 앱이 버전 순서를 조정해야 하므로 core 마이그레이션의 독립 출시에는 제약 |
+| C. 같은 DB/별도 cms schema + CMS 전용 Flyway/history | core migration 번호 독립, 다른 앱으로 재사용하기 쉬움 | 두 migration 실행·검증·실패 복구·시작 순서를 조립 앱이 관리, 기본 Boot 자동 설정만으로 끝나지 않음 |
+
+B는 기존 V1과 public.flyway_schema_history를 그대로 두고 **다음 사용 가능한 버전**으로 cms 생성/테이블을 추가한다. core는 LOCO와 무관한 migration 리소스를 소유하고 버전 배정/위치 조립은 호스트 앱 책임이다. 이름 충돌 방지, 배포 후 파일 불변이 필요하다. C는 core 쪽 V1이 가능하지만 location·history를 분리해 LOCO V1과 섞이지 않게 한다. **어느 쪽도 기존 baselineOnMigrate를 켜서 CMS 생성 버전을 건너뛰지 않는다.**
+
+schema 분리는 보안/장애 격리나 별도 DB와 같지 않다. DB 계정의 권한 부여는 별도이며 같은 DB 자원을 공유한다. 기존 public 엔티티에는 전역 default_schema를 cms로 바꾸지 않고 CMS 엔티티/SQL에 schema를 명시한다. core 테이블은 public 업무 테이블을 참조하지 않는다. [Flyway history 위치·버전 상태](https://documentation.red-gate.com/flyway/flyway-concepts/migrations/flyway-schema-history-table).
+
+### C-8 파일 저장소 추상화·LOCO 이전 범위
+
+| 선택 | 장점 | 단점 |
+| --- | --- | --- |
+| **A. CMS만 객체 저장 포트 + 로컬 MinIO/운영 S3, LOCO /uploads 유지(권장)** | 새 CMS 요구 충족, 기존 앱 응답·파일 비교 유지, 3단계 이전과 분리 가능 | 한동안 객체/로컬 두 저장 방식 운영 |
+| B. 지금 LOCO까지 공통 저장 포트로 옮기고 객체 저장 전환 | 단일 저장 방식, 다중 서버 준비 빠름 | 파일 이관·URL·헤더·보상 삭제·권한 재검증이 커짐, 이번 core 설계 범위 확대 |
+
+A는 core가 S3 SDK 타입을 노출하지 않는 계약, 조립 인프라에서 S3 호환 구현과 libvips 어댑터 제공을 뜻한다. MinIO와 S3의 endpoint·자격 증명뿐 아니라 path style/서명/오류/권한 차이도 계약 테스트 대상으로 둔다. 저장소 SDK·이미지 버전·컨테이너 리소스는 구현 전 확정하고 비밀은 외부 설정, 예제는 키만 둔다. S3 비용이나 라이선스 검토가 완료됐다는 뜻은 아니다.
+
+### C-9 추가 결정 항목
+
+각 하위 번호도 독립 선택이다. 아래 항목은 코드에서 확인한 통합 위험과 앞선 선택의 빈칸을 채운다.
+
+| 번호·항목 이름 | A안 | B안 | 권장·근거 |
+| --- | --- | --- | --- | --- |
+| **C-9-1 실행·HTTP 경계** | 한 Spring 프로세스, `/admin/**` 별도 세션/HTTP 정책. 배포 하나·동일 DB 트랜잭션 쉬움 / 필터 적용 범위 회귀 필요 | 별도 CMS 서버. 앱 필터와 운영 분리 / 배포·설정·LOCO 관리 서비스 재사용 비용 증가 | A. Gradle 모듈 분리와 프로세스 분리는 다른 결정. 기존 앱 parser/Helmet/CORS를 전역으로 바꾸지 않고 CMS만 독립 정책 |
+| **C-9-2 트리 동시 변경 보호** | 한 트리 메타 행을 JPA 비관적 락으로 잠그고 revision 검사. 이해·순환 방지 쉬움 / 메뉴 변경끼리 직렬 대기 | 트리 메타 @Version CAS로 전체 트랜잭션 충돌409. 잠금 대기 감소 / 모든 변경 경로가 공통 version을 갱신해야 하고 경합 시 실패 증가 | A. 관리자 메뉴 변경은 드문 작업. 각 노드의 @Version만으로 교차 이동을 막는다고 주장하지 않음 |
+| **C-9-3 CMS 파일 초기 정책** | 비공개, 이미지 JPEG/PNG/WebP/AVIF→WebP만 저장(원본 미보관), 일반 PDF/TXT/CSV 원본 attachment, 각10MiB. 저장·공격면 작음 / 원본 재편집·다른 형식 미지원 | 이미지 원본+WebP, 더 넓은 문서 형식. 재가공·업무 호환 유리 / 저장량·보안 검사·삭제/이력 복잡 | A. HEIC는 현재 코덱 공통 제약으로 CMS에서 명시적415 제안(LOCO의 호환 실패는 그대로). 허용 MIME·내용 검증은 악성코드 검사 대체가 아니며 공용 배포 전 검사 요구를 재확인 |
+| **C-9-4 이력 보존·수집 범위** | 변경 성공과 필요한 최소 actor/대상/허용 전후 값만, 자동 삭제 없이 시작. 조사 근거 보존 / 계속 증가하므로 운영 전 보존 기간 재결정 필요 | 같은 최소 수집 + 보존180일·정기 삭제. 용량 통제 / 180일은 현재 업무 근거 없는 제안이며 과거 조사 정보 소실 | A. 비밀번호·토큰·파일 본문·불필요한 IP/민감정보 제외는 두 안 공통. 법정 보존을 충족한다는 판단은 하지 않음 |
+| **C-9-5 첫 LOCO 확장 범위** | core 완료 뒤 회원/지도방/장소/리뷰/신고·피드백 조회부터 연결. 권한·UI 경계 검증, 기존 앱 정책 유지 / 운영 조치 기능은 다음 묶음 | 신고 처리·회원 정지·강제 비공개 쓰기까지 포함. 운영 가치 빠름 / 현재 없는 상태·앱 API 반응·경합 계약을 먼저 결정해야 함 | A. B를 고르면 core와 분리된 LOCO 업무 설계/마이그레이션 승인 후 구현. 기존 비교 fixture를 맞추려고 새 운영 상태를 숨기지 않음 |
+
+C-9-3의 초기 파일 크기·형식, C-4의 세션/로그인 수명·횟수는 같은 선택에 포함된 **제안값**이다. 원하는 값이 다르면 항목 이름과 변경값을 함께 답하면 된다. 대용량 presigned 업로드·비동기 변환은 기존 3단계 이후 백로그로 유지한다.
+
+## 9. 선택 후 구현 순서 제안
+
+1. C-1/C-7 경계·core 단독 기동·migration 테스트. 현재 V1/기존 회귀 유지 확인.
+2. 관리자 계정·초기 생성·세션/CSRF·앱 JWT와의 교차 인증 차단. 이력 기반도 함께 준비.
+3. 역할/권한·메뉴 트리, 이동/정렬/순환·마지막 관리자 경합·권한 설명 화면.
+4. 이력 조회와 실패 롤백, 비밀값 배제 검증. 성공 변경 누락 경로 점검.
+5. 파일 포트·MinIO·변환 어댑터·보상 정리, UI 통합. 실제 외부 키 사용 없는 테스트.
+6. 선택된 LOCO 전용 관리 메뉴 연결, 기존 앱 전체 비교와 CMS 활성 상태 통합 회귀.
+
+각 구현 단계는 별도 커밋·검증 수치·시간 기록을 남기는 방식으로 제안한다. **현재는 1번도 시작하지 않는다.** 선택 후에도 새 업무 결정이 생기면 번호를 추가하고 답을 기다린다.
+
+## 10. 이번 설계 작업 검증·한계
+
+- main merge commit의 두 부모와 이관 최종 커밋 포함을 확인한 뒤 main에서 분기했다.
+- 노션 결정·현재 보안/HTTP/파일/마이그레이션/DB 비교 코드를 읽고 설계 근거와 추정을 구분했다.
+- 변경 대상은 이 문서 한 개다. 생산 코드, SQL, build, Compose, Flutter, v2, 기존 fixture는 수정하지 않았다.
+- 문서의 로컬 링크 11개 정상, C-1~C-8 및 C-9 하위 5개 선택 항목 존재를 확인했다. 커밋 전 staged diff 공백·변경 파일 범위도 확인한다. 문서만 변경하므로 JUnit/전체 회귀/build는 재실행하지 않는다.
+- CMS 기능·성능·외부 저장소 연결은 아직 검증된 구현이 아니다. 메뉴 1,000개 테스트 등은 계획이며 실측 결과로 보고하지 않는다.
+
+복사용 선택 양식(값은 비워 둠):
+
+```text
+C-1 모듈 분리 방식:
+C-2 메뉴 트리 표현:
+C-3 권한 모델:
+C-4 관리자 인증·계정·초기 생성:
+C-5 관리자 화면 기술:
+C-6 변경 이력 수집:
+C-7 DB 배치·Flyway 버전 관리:
+C-8 파일 저장소 추상화·LOCO 이전 범위:
+C-9-1 실행·HTTP 경계:
+C-9-2 트리 동시 변경 보호:
+C-9-3 CMS 파일 초기 정책:
+C-9-4 이력 보존·수집 범위:
+C-9-5 첫 LOCO 확장 범위:
+```
