@@ -456,6 +456,52 @@ class AdminSecurityIntegrationTest {
 
   record CliResult(int exit, String output) {}
 
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+  void cliRejectsMissingOrPartialSchemaWithoutChangingDatabase(boolean partial) throws Exception {
+    String name = "bootstrap_" + UUID.randomUUID().toString().replace("-", "");
+    jdbc.execute("CREATE DATABASE " + name);
+    String url = db.getJdbcUrl().replace("/" + db.getDatabaseName(), "/" + name);
+    try (var connection =
+            java.sql.DriverManager.getConnection(url, db.getUsername(), db.getPassword());
+        var statement = connection.createStatement()) {
+      if (partial) {
+        statement.execute("CREATE SCHEMA cms");
+        statement.execute("CREATE TABLE cms.admin_account (id text PRIMARY KEY)");
+      }
+      String before = databaseObjects(connection);
+      var result =
+          cli(List.of("--login-id=initial", "--display-name=Initial"), password, false, url);
+      assertThat(databaseObjects(connection))
+          .as("CLI must not create schemas, tables or Flyway history")
+          .isEqualTo(before);
+      assertThat(result.exit).isEqualTo(1);
+      assertThat(result.output).contains("Start the deployed application").doesNotContain(password);
+    }
+  }
+
+  private String databaseObjects(java.sql.Connection connection) throws Exception {
+    try (var query = connection.createStatement();
+        var result =
+            query.executeQuery(
+                """
+          SELECT json_build_object(
+            'schemas', (SELECT json_agg(nspname ORDER BY nspname) FROM pg_namespace
+              WHERE nspname NOT LIKE 'pg_%' AND nspname <> 'information_schema'),
+            'relations', (SELECT json_agg(row_to_json(r) ORDER BY r.schema,r.name) FROM
+              (SELECT n.nspname AS schema,c.relname AS name,c.relkind AS kind
+               FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+               WHERE n.nspname NOT LIKE 'pg_%' AND n.nspname <> 'information_schema') r),
+            'columns', (SELECT json_agg(row_to_json(c) ORDER BY table_schema,table_name,ordinal_position)
+              FROM (SELECT table_schema,table_name,column_name,ordinal_position,data_type,is_nullable,column_default
+                FROM information_schema.columns WHERE table_schema NOT LIKE 'pg_%'
+                  AND table_schema <> 'information_schema') c))::text
+          """)) {
+      result.next();
+      return result.getString(1);
+    }
+  }
+
   @Test
   void cliCanCreateUsingEnvironmentSecretWithoutPrintingIt() throws Exception {
     jdbc.execute("TRUNCATE cms.change_history,cms.admin_account_role,cms.admin_account");
@@ -512,6 +558,11 @@ class AdminSecurityIntegrationTest {
   }
 
   CliResult cli(List<String> args, String secret, boolean env) throws Exception {
+    return cli(args, secret, env, db.getJdbcUrl());
+  }
+
+  CliResult cli(List<String> args, String secret, boolean env, String databaseUrl)
+      throws Exception {
     var command =
         new ArrayList<>(
             List.of(
@@ -521,7 +572,7 @@ class AdminSecurityIntegrationTest {
                 AdminBootstrap.class.getName()));
     command.addAll(args);
     var builder = new ProcessBuilder(command).redirectErrorStream(true);
-    builder.environment().put("DB_URL", db.getJdbcUrl());
+    builder.environment().put("DB_URL", databaseUrl);
     builder.environment().put("DB_USERNAME", db.getUsername());
     builder.environment().put("DB_PASSWORD", db.getPassword());
     builder.environment().remove("CMS_BOOTSTRAP_PASSWORD");

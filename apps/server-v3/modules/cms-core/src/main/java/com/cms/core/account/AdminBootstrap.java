@@ -53,9 +53,9 @@ public final class AdminBootstrap {
               "--spring.jpa.show-sql=false",
               "--logging.level.org.hibernate.SQL=OFF",
               "--logging.level.org.hibernate.orm.jdbc.bind=OFF",
-              "--spring.flyway.locations=classpath:db/migration,classpath:db/cms",
-              "--spring.flyway.default-schema=public",
-              "--spring.flyway.baseline-on-migrate=false",
+              "--spring.flyway.enabled=false",
+              "--spring.sql.init.mode=never",
+              "--spring.jpa.hibernate.ddl-auto=validate",
               "--spring.datasource.url=${DB_URL}",
               "--spring.datasource.username=${DB_USERNAME}",
               "--spring.datasource.password=${DB_PASSWORD}")) {
@@ -65,7 +65,8 @@ public final class AdminBootstrap {
       return 0;
     } catch (Exception exception) {
       error.println(
-          "Administrator bootstrap failed. Check input, database access and whether bootstrap was already completed.");
+          "Administrator bootstrap failed. Check input, database access and whether bootstrap was already completed. "
+              + "Start the deployed application first to apply required CMS schema migrations; this CLI never migrates.");
       return 1;
     }
   }
