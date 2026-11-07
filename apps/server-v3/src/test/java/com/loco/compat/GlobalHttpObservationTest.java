@@ -14,6 +14,9 @@ class GlobalHttpObservationTest extends CompatibilityTestBase {
   @Test
   void observesOriginalBootstrapWithoutChangingV2Middleware() throws Exception {
     environment().reset("places/seed.sql");
+    environment().reserveV2Requests("GET", "/api/users/me", 20);
+    environment().reserveV2Requests("PUT", "/api/users/me", 10);
+    environment().reserveV2Requests("POST", "/api/feedback", 10);
     String script;
     try (var stream = getClass().getResourceAsStream("/globals/observe-v2.cjs")) {
       script = new String(stream.readAllBytes(), StandardCharsets.UTF_8);

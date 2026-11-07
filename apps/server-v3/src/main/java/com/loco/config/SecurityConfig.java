@@ -53,6 +53,7 @@ public class SecurityConfig {
   SecurityFilterChain securityFilterChain(
       HttpSecurity http, JwtDecoder decoder, ObjectMapper mapper) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
+        .headers(AbstractHttpConfigurer::disable)
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .requestCache(AbstractHttpConfigurer::disable)

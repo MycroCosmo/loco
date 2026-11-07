@@ -47,6 +47,8 @@ services:
     mem_limit: 1536m
     environment:
       PORT: 8081
+      HOST: ${HOST:-0.0.0.0}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
       FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT:-}
       FCM_BASE_URL: ${FCM_BASE_URL:-https://fcm.googleapis.com}
       FCM_TIMEOUT_MS: ${FCM_TIMEOUT_MS:-15000}
@@ -106,7 +108,8 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_SECURE: ${SMTP_SECURE:-false}
       PORT: 3000
-      HOST: 0.0.0.0
+      HOST: ${HOST:-0.0.0.0}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
       DATABASE_URL: postgresql://db:5432/loco?schema=public
       DB_USERNAME: ${DB_USERNAME:?Set DB_USERNAME in the root .env}
       DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in the root .env}

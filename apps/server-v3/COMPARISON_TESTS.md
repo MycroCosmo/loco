@@ -7,6 +7,10 @@ v2는 계정 상태 회귀 수정이 포함된 저장소 소스를 그대로 빌
 
 ## 실행과 결과 읽기
 
+PR 전 전역 HTTP 검사도 비교 작업에 포함한다. `GlobalHttpObservationTest`는 원본 v2 79 HTTP사례를 재관측하고, `GlobalHttpComparisonTest`는 fixture의 상태·본문·전체 헤더 집합과 실제 v3를 비교한다. 정상/오류·Origin·OPTIONS·10MiB 경계·정적 HEAD/Range/304, 실제 form API의 DB 상태와 인증 전 큰 본문 거절을 검사한다. `GlobalHttpSettingsTest`는 빠른 그룹에서 HOST 실제 바인딩·설정 Origin을 검사하고, `ExtendedFormComparisonTest`는 원본 parser의 38개 form 경계를 교차 검증한다. HTTP사례 수와 JUnit 테스트 수를 구별한다.
+
+가변 헤더를 모두 지우는 방식이 아니다. [전역 HTTP 규칙](src/test/resources/globals/README.md)에 값 제외·형식/존재 검증, 전송 방식 제외, 본문 길이 자체 검사, 문구 예외를 명시한다. `http.runtime-header`는 10-1 A로 승인된 의도된 차이이며 실제 검사 후 보고한다. 기존 10건과 합해 11건이고 보류는 없다.
+
 저장소 루트에서 PowerShell로 실행한다. Java 21, Node/npm, 실행 중인 Docker가 필요하다.
 
 ~~~powershell

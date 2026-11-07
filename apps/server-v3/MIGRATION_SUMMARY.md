@@ -24,7 +24,7 @@
 
 ## 2. 테스트 수와 전체 회귀 시간 추이
 
-**최종 검증: 1,340건 = 성공 1,339 / 실패 0 / skip 1, 알려진 차이 10건, 전체 885.749초(약 886초).** 빠른 `test` 279건(성공 278·skip 1), `comparisonTest` 1,061건 모두 성공, Spotless/build 통과다. Windows Java 21·Gradle 8.14.6·Docker Desktop, v2 이미지·Prisma/libvips 캐시가 있는 실행의 wall time이다. 최신 실행의 v2 이미지 빌드 호출·초기 기동은 각각 1회, 재시작 17회다.
+**9번 완료 시점 검증: 1,340건 = 성공 1,339 / 실패 0 / skip 1, 알려진 차이 10건, 전체 885.749초(약 886초).** 빠른 `test` 279건(성공 278·skip 1), `comparisonTest` 1,061건 모두 성공, Spotless/build 통과다. Windows Java 21·Gradle 8.14.6·Docker Desktop, v2 이미지·Prisma/libvips 캐시가 있는 실행의 wall time이다. 최신 실행의 v2 이미지 빌드 호출·초기 기동은 각각 1회, 재시작 17회다.
 
 skip 1은 Windows HEIC 단독 코덱의 **v2·v3 공통 지원 제약**이다. HEIC 업로드의 HTTP 실패·파일 상태 비교는 필수 검사로 실행한다. 알려진 차이 10건은 skip과 별개이며 실제 관측·검사를 통과한 뒤 보고한다. OAuth는 v3 계약 테스트, 카카오·FCM·Google 인증은 로컬 대역 검증이며 실제 외부 서비스 성공을 뜻하지 않는다.
 
@@ -95,10 +95,11 @@ cd apps/server-v3
 | 9-4 대역·완료 / 9-5 예약 | v2 SDK 경계 fail-closed·v3 전송 대역·완료 barrier. 서울 03:00(설정 가능), 분산 잠금 없음·scheduler on/off | [알림](NOTIFICATIONS_DESIGN.md) |
 | 9-6 무효 토큰 / 9-7 전송 정책 | userId AND 발송 당시 fcmToken 조건부 제거. 소켓 15초·일시 오류 최대 4회 재시도와 backoff를 로컬 검증 | [알림](NOTIFICATIONS_DESIGN.md) |
 | 9-8 cleanup 경계 / 9-9 설정 오류 | 두 삭제의 독립 커밋 유지. Firebase 없음/잘못된 값은 시작 로그와 함께 발송 비활성화, API 시작 유지 | [알림](NOTIFICATIONS_DESIGN.md) |
+| 10-1 런타임 표시 헤더 | A: 조기 파서 오류의 X-Powered-By: Express만 생략하고 의도된 차이 등록. 파서→Helmet→CORS 순서와 조기 오류의 CORS 부재는 v2 유지 | [전역 HTTP](src/test/resources/globals/README.md) |
 
-## 4. 알려진 차이 전체 10건
+## 4. 알려진 차이 전체 11건
 
-**개선 6건 + 의도 4건 = 10건, 보류 0건.** 아래 ID는 하네스 보고서의 식별자다. 과거 `maps.firebase-delivery`, `places.firebase-delivery` 두 보류는 9번에서 해소했다. 실제 단말 수신 미검증과 보류 구현은 다른 개념이다. 공통으로 유지한 v2 문제는 아래 10건에 추가하지 않고 5절 후보로 관리한다.
+**개선 6건 + 의도 5건 = 11건, 보류 0건.** 9번까지 10건에 10-1 A의 런타임 헤더 차이 1건을 추가했다. 아래 ID는 하네스 보고서의 식별자다. 과거 `maps.firebase-delivery`, `places.firebase-delivery` 두 보류는 9번에서 해소했다. 실제 단말 수신 미검증과 보류 구현은 다른 개념이다. 공통으로 유지한 v2 문제는 이 목록에 추가하지 않고 5절 후보로 관리한다.
 
 | ID | 분류 | v2 → v3 관측/계약 | 출처 |
 | --- | --- | --- | --- |
@@ -112,6 +113,7 @@ cd apps/server-v3
 | `kakao.failure-message` | 의도 | 외부 상태·본문 또는 런타임 실패 문구 → 고정 500 메시지. 비밀·외부 본문 노출 제한 | [검색](KAKAO_SEARCH_DESIGN.md) |
 | `kakao.socket-timeout` | 의도 | 무활동 6.2초 뒤 정상 200 가능 → 기본 5초 무활동에서 500 | [검색](KAKAO_SEARCH_DESIGN.md) |
 | `tokens.cleanup-timezone` | 의도 | TZ 미지정 UTC 컨테이너 03:00=한국 12:00 → Asia/Seoul 03:00 | [알림](NOTIFICATIONS_DESIGN.md) |
+| `http.runtime-header` | 의도 | 조기 파서 오류의 X-Powered-By: Express → 헤더 생략. 나머지 파서→Helmet→CORS 순서 유지 | [10-1 A](src/test/resources/globals/README.md) |
 
 ## 5. 이관 후 개선 후보·2/3단계 실험 통합
 
@@ -119,6 +121,7 @@ cd apps/server-v3
 
 | 항목 | 근거·수치 / 남은 검증 | 관련 단계·후속 작업 | 출처 |
 | --- | --- | --- | --- |
+| 조기 파서 오류의 브라우저 CORS | JSON/form 파서400/413/415가 Helmet/CORS보다 먼저 반환된다. 허용 Origin이어도 CORS 헤더가 없어 Flutter 웹에서는 실제 상태/본문 대신 CORS 오류로 보임 | 이관 후 개선 후보: 오류에도 CORS를 적용할지 별도 결정. 이번에는 v2 순서 유지 | [전역 HTTP 관측·비교](src/test/resources/globals/README.md) |
 | 마커 셀 누락 | JS toFixed와 PostgreSQL ROUND 불일치. 37.05의 precision1, -0.00001의 precision1/2/3에서 누락. 줌 11 또는 6/9/11 집계 조회에서 드러남; 낮은 줌 개별 조회와 불일치 | 2단계: 좌표 키·집계 기준 통일 후보. 기존 동작/fixture를 의도적으로 변경하는 별도 결정 필요 | [장소](PLACE_API_DESIGN.md), [마커](MARKER_API_DESIGN.md) |
 | 마커 집계 경합·부분 커밋 | 장소 쓰기와 SELECT·셀 반영이 같은 트랜잭션이 아님. 중간 실패·오래된 count=99 조회 관측. 실제 경쟁 발생률은 미측정 | 2단계: 일관성 경계·동시 저장 재현 및 집계 전략 비교 | [장소](PLACE_API_DESIGN.md), [마커](MARKER_API_DESIGN.md) |
 | 마커 갱신 SQL 비용 | 좌표당 precision 3개×(SELECT+UPSERT/DELETE)=6 SQL. 이동은 이전/새 좌표=12 SQL. HTTP 전체 예산은 생성 10/11, 수정 no-op 9·일반 10·이동 16, 삭제 10 | 2단계: 재집계 SQL/DB 시간 분리, 중복 셀 갱신 비용 측정. 현재 예산을 먼저 기준선으로 유지 | [장소](PLACE_API_DESIGN.md), [생성 SQL 검사](src/test/java/com/loco/places/PlaceCreateComparisonTest.java) |
@@ -154,24 +157,24 @@ cd apps/server-v3
 - 발송/cleanup 활성 인스턴스 수와 시간대를 확인한다. Firebase 설정 비활성 로그는 API 실패가 아니지만 발송 성공도 아니다. 실제 FCM·OAuth·카카오 및 Flutter 화면 검증은 별도 수동 항목이다.
 - [수동 체크리스트](FLUTTER_SMOKE_TEST.md)의 웹 동일 출처 연결·Android HTTP 조건도 이관 완료와 별도로 확인한다. 이번 정리는 배포나 PR 승인·머지를 의미하지 않는다.
 
-## 7. PR 전 전역 설정 대조 — 2026-11-07 진행 중
+## 7. PR 전 전역 설정 대조 — 2026-11-07 구현·개별 검증
 
-기준은 [v2 main.ts](../server/src/main.ts)와 [app.module.ts](../server/src/app.module.ts)다. 기존 0~9번 검증이 전역 HTTP 헤더·파서 경계까지 모두 증명한 것은 아니었다. 현재는 원본 v2의 HTTP 79사례를 [fixture](src/test/resources/globals/http-v2.json)로 고정하고 재관측 1 JUnit/1 성공(24.251초)을 확인했다. **아래 누락은 아직 v3에 수정하지 않았다.** 10-1 런타임 표시 헤더 결정 후 전체 비교·회귀/build와 최신 수치를 반영한다. 기존 10건 차이 목록에도 아직 새 차이를 추가하지 않았다.
+기준은 [v2 main.ts](../server/src/main.ts)와 [app.module.ts](../server/src/app.module.ts)다. 기존 0~9번 검증이 전역 HTTP 헤더·파서 경계까지 모두 증명한 것은 아니었다. 원본 HTTP 79사례 [fixture](src/test/resources/globals/http-v2.json)와 v3를 비교하고 아래 누락을 보완했다. **10-1 A: X-Powered-By만 생략**, 다른 순서는 유지한다. 앞선 대조표의 “JSON 제한 없음”은 조사 누락이었다. 기존 JsonBodyFilter의 JSON 10MiB·인증 전 선검사를 확인했으며 이를 이동·확장했다. 관련 94건 성공(68.198초), form 경계 추가 교차 검사 1건 성공/HTTP38사례(22.970초); 전체 회귀/build는 후속 검증 단계다.
 
 | v2 전역 설정·순서 | 현재 v3 대응 | 대조 결과·남은 확인 |
 | --- | --- | --- |
-| dotenv/config와 PORT/HOST | application.yml의 `.env` import·PORT, Compose PORT8081 | 로컬 환경 주입은 있음. v3의 포트8081은 동시 실행을 위한 기존 결정. v2 HOST 재지정에 대응하는 server.address 설정은 없음; 기본 전체 주소 바인딩과 호스트 재지정은 구분해 보완 필요 |
-| express.json limit10mb, strict JSON·기본 inflate | Jackson MVC 변환, multipart 제한만 있음 | **누락**: JSON 10MiB 초과·UTF-8 바이트·chunked·압축 해제 후 제한, 파서 오류가 인증/보안/CORS보다 먼저 발생하는 경계 |
-| express.urlencoded limit10mb, extended=true | MVC 기본 변환/컨테이너 form 처리 | **누락**: 동일 본문 제한과 form 해석 경계. 1,001개 파라미터413도 관측. multipart의 파일10MiB 제한과 별도 정책 |
-| helmet() 기본값 | Spring Security 기본 헤더 | **누락/불일치**: CSP·COOP·CORP·Origin-Agent-Cluster·Referrer-Policy 등, X-Frame-Options SAMEORIGIN, HTTP에서도 HSTS. 기본 Spring 헤더를 켜는 것만으로 같아지지 않음 |
-| enableCors(ALLOWED_ORIGINS) | API용 CORS 구성 없음 | **누락**: trim/빈 항목 제거·빈 설정 시 localhost8080/3000, 허용 Origin 반사·Vary, 고정 methods/headers, OPTIONS204. 미허용 Origin에 서버403을 반환하면 v2와 다름. 두 `.env.example`에 키만 추가, 아직 Compose/운영 연결 전 |
-| 파서→Helmet→CORS 순서 | 본문 변환은 MVC 단계, 기본 Security는 그보다 앞 | **누락**: 조기 파서400/413/415에는 Helmet/CORS가 없음. `X-Powered-By: Express` 재현 여부만 [10-1 결정 대기](src/test/resources/globals/README.md) |
-| useStaticAssets /uploads, 실제 파일의 ACAO *·CORP cross-origin | UploadWebConfig의 ResourceHandler와 path interceptor | 기본 정적 제공 구현. **보완 필요**: 없는 파일에도 interceptor가 두 헤더를 붙이는 차이, Cache-Control/ETag/Last-Modified·HEAD·Range·조건부304 전체 헤더 비교. 원본 관측은 확보 |
+| dotenv/config와 PORT/HOST | `.env` import·PORT·HOST→server.address·Compose 양쪽 전달 | HOST=127.0.0.1의 실제 Tomcat 바인딩 검사. 기본0.0.0.0, v3포트8081은 기존 동시 실행 결정 |
+| express.json limit10mb, strict JSON·inflate | RequestBodyParser | 기존 JSON 제한을 보존하고 UTF-8 다중 바이트·chunked·gzip/deflate 해제 후 10MiB 및 charset 오류를 보완·비교. 10MiB는 통과, +1은413 |
+| express.urlencoded limit10mb, extended=true | RequestBodyParser+ExtendedForm | form10MiB·1,000개 파라미터·깊이32, 반복/배열/객체 해석을 원본 parser와 비교. 실제 API의 정상/오류 응답·DB 비교. multipart 파일 제한과 별개 |
+| helmet() 기본값 | GlobalHttpFilter 고정 헤더, Spring 기본 헤더 중복 비활성화 | CSP·COOP·CORP·Origin-Agent-Cluster·Referrer-Policy·SAMEORIGIN·HTTP HSTS 포함 전체 응답 헤더 비교 |
+| enableCors(ALLOWED_ORIGINS) | GlobalHttpFilter, application.yml·Compose 연결 | trim·빈 목록 기본8080/3000, 반사·Vary, 고정 methods/headers, OPTIONS204. 미허용 Origin 비차단, credentials 헤더 없음. 예제 파일에는 키만 저장 |
+| 파서→Helmet→CORS 순서 | 단일 전역 필터가 순서를 명시 | 조기400/413/415는 Helmet/CORS/인증/한도 전에 종료. X-Powered-By만 [10-1 A](src/test/resources/globals/README.md)로 생략 |
+| useStaticAssets /uploads, 실제 파일의 ACAO *·CORP cross-origin | UploadWebConfig 실제 resource 발견 후 헤더 적용 | 없는 파일404의 일반 헤더·본문, Cache-Control/ETag/Last-Modified·HEAD·Range206·조건부304 비교. 파일 본문은 스트리밍 유지. 관측한 파일 경로 범위의 계약 검사 |
 | setGlobalPrefix api | ApiWebConfig의 MVC `/api` prefix | API와 루트 `/uploads` 분리 구현. prefix 밖404는 기존 검사 및 새 관측에 포함. context-path로 되돌리지 않음 |
-| ValidationPipe whitelist/transform/forbidNonWhitelisted | 입력별 v2 호환 검증과 ApiExceptionHandler | 기존 DTO/알 수 없는 속성·400/500 본문 비교 구현. URL-encoded 파서 이후 입력 변환과 깨진 JSON의 조기 처리 순서는 추가 비교 필요 |
-| APP_GUARD ThrottlerGuard, 120/60000ms | RequestRateLimiter·order(-100) RateLimitInterceptor | 핸들러/IP·401 전 한도·429 필수 비교 구현. CORS preflight와 조기 파서 실패는 Guard까지 오지 않음을 새 비교에서 고정해야 함 |
+| ValidationPipe whitelist/transform/forbidNonWhitelisted | 입력별 검증·ApiExceptionHandler | form 이후 검증과 조기 JSON 처리 순서까지 비교. 깨진 JSON의 문구만 명시적 예외, 상태·JSON 구조는 동일 |
+| APP_GUARD ThrottlerGuard, 120/60000ms | RequestRateLimiter·order(-100) RateLimitInterceptor | 기존429 필수 검사 유지. preflight와 조기 파서 실패는 인증/한도에 도달하지 않고 보호 경로의 큰 본문도401보다413이 먼저 반환됨 |
 | trust proxy 미설정, 직접 연결 IP | getRemoteAddr, 별도 forwarded-header 구성 없음 | 직접 연결 기준 유지. 임의 X-Forwarded-For를 신뢰하도록 바꾸지 않음. 3단계 nginx 신뢰 프록시 백로그 유지 |
 | ScheduleModule+TokenCleanupService | 스케줄러·명시적 시간대·on/off | 구현됨. UTC컨테이너03시→서울03시는 기존 알려진 차이, 분산 잠금 없음은 백로그 |
 | Prisma/Auth/Users/Maps/Places/Favorites/Feedback/Reports/Upload/Notifications 모듈 | JPA·해당 API·저장소·FCM 전송 및 호출 지점 | 0~9번 구현 범위와 대응. Firebase 없음/잘못된 값 비활성화·알림 실행기는 기존 결정. HTTP 전역 누락과 분리 |
 
-관측 상세·가변 헤더 제외 목록·생성/재검증 명령은 [전역 HTTP fixture 설명](src/test/resources/globals/README.md)에 있다. 이 표는 소스와 관측으로 발견한 누락을 공개하는 점검표이며, 아직 “전역 설정 이관 완료” 판정이 아니다.
+관측 상세·가변/전송 헤더 제외 목록·자기 본문 길이와 validator 검사·재검증 명령은 [전역 HTTP fixture 설명](src/test/resources/globals/README.md)에 있다. 실제 Flutter 브라우저 수동 실행은 별도 체크리스트이며 HTTP 자동 비교 통과와 구별한다.

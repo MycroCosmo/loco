@@ -1,5 +1,6 @@
 server:
   port: ${PORT:8081}
+  address: ${HOST:0.0.0.0}
   tomcat:
     max-swallow-size: -1
 
@@ -55,6 +56,8 @@ management:
         exclude: '*'
 
 loco:
+  http:
+    allowed-origins: ${ALLOWED_ORIGINS:}
   cleanup:
     enabled: ${TOKEN_CLEANUP_ENABLED:true}
     cron: ${TOKEN_CLEANUP_CRON:0 0 3 * * *}

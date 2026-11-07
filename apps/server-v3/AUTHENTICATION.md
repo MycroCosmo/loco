@@ -126,8 +126,8 @@ RequestRateLimiter는 메서드·접속 IP별 요청 시각을 보관한다. 각
 RateLimitInterceptor는 회원 확인보다 먼저 실행한다. 성공 구간에는 X-RateLimit-Limit/Remaining/Reset, 차단에는 Retry-After와 `{"statusCode":429,"message":"ThrottlerException: Too Many Requests"}`를 반환한다.
 접속 IP는 request.remoteAddr다. 신뢰 프록시 설정을 추가하지 않았으므로 임의 X-Forwarded-For 값으로 제한을 우회할 수 없다.
 
-JsonBodyFilter → JWT 필터 → MVC 경로 선택 → 요청 제한 → 보호 경로 회원 확인 → DTO 검증 → 메서드 권한 → API 순서다.
-JsonBodyFilter는 Express처럼 JSON 구문 오류·원시 값·뒤따르는 JSON을 먼저 거절하고, 정상 본문을 MVC에서 다시 읽을 수 있게 보관한다. v2 main.ts의 10MB 한도를 적용해 보관 크기도 제한한다. 따라서 깨진 JSON과 크기 초과는 요청 제한 횟수를 소모하지 않는다.
+GlobalHttpFilter 안의 RequestBodyParser → Helmet 호환 헤더 → CORS/OPTIONS → JWT 필터 → MVC 경로 선택 → 요청 제한 → 보호 경로 회원 확인 → DTO 검증 → 메서드 권한 → API 순서다.
+기존 JsonBodyFilter의 JSON 선검사·10MiB 제한을 RequestBodyParser로 옮기고 URL-encoded form·문자셋·gzip/deflate 해제 후 크기 제한을 보완했다. JSON 구문 오류·원시 값·뒤따르는 JSON과 form 파라미터 1,000개 초과는 인증·요청 제한 전에 거절한다. 정상 본문은 MVC에서 다시 읽을 수 있게 보관한다. 조기 파서 오류에는 Helmet/CORS가 없으며, 10-1 A로 X-Powered-By만 생략한다. [전역 HTTP 비교](src/test/resources/globals/README.md).
 RequestRateLimiterTest는 가상 시계로 개별 요청 만료·차단 해제·IP/메서드 분리·동시성을 확인한다. RateLimitCasesTest는 실제 v2/v3의 모든 인증 API 한도와 HTTP 응답을 비교한다.
 HarnessRateLimitTime은 테스트 사이 제한 시계만 이동하는 도구다. 운영 제한기나 JWT 시계를 끄거나 조작하지 않는다. C 방식의 컨테이너 재시작 범위는 COMPARISON_TESTS.md를 참고한다.
 

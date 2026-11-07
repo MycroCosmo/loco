@@ -55,11 +55,28 @@ Mailpit UI: [http://localhost:8025](http://localhost:8025). v3는 [Compose](../.
 
 문제 확인은 `docker compose -p loco-v3-smoke logs --tail 80 v3`로 하되 로그를 공유하기 전에 개인정보·토큰을 가린다. Firebase 설정이 비어 있을 때 발송 비활성 로그는 정상이다. 기존 DB를 사용하려고 baselineOnMigrate=true를 임의로 추가하지 않는다.
 
-## 3. 웹 앱: 같은 출처로 연결
+## 3. 웹 앱: CORS로 직접 연결 또는 같은 출처 프록시
 
 `API_BASE_URL`은 `/api`를 포함하고 `SERVER_URL`은 포함하지 않는다. 두 값 모두 `--dart-define`이 Flutter `.env`보다 우선한다. 둘 중 하나라도 기존 3000으로 남으면 API와 이미지가 서로 다른 서버로 갈 수 있다.
 
-현재 [SecurityConfig](src/main/java/com/loco/config/SecurityConfig.java)·[ApiWebConfig](src/main/java/com/loco/config/ApiWebConfig.java)에 다른 출처를 허용하는 CORS 설정이 없다. `localhost:5173` 웹에서 `localhost:8081`로 곧바로 호출하는 구성을 정상 절차로 가정하지 않는다. 운영 코드를 바꾸지 않고 **임시 nginx가 웹·API·업로드를 localhost:18081 한 출처로 전달**하게 한다. 이 프록시는 수동 확인용이며 3단계 운영 nginx 구현이 아니다.
+PR 전 보완으로 [GlobalHttpFilter](src/main/java/com/loco/web/GlobalHttpFilter.java)에 v2 호환 CORS를 구현했다. 직접 연결하려면 루트 `.env`에 `ALLOWED_ORIGINS=http://localhost:5173`을 명시하고 `docker compose -p loco-v3-smoke up -d --build v3`로 적용한다. 기본 허용값은 8080/3000이라 5173은 명시해야 한다. HOST는 Compose에서 기본 0.0.0.0을 유지한다.
+
+```powershell
+cd apps/mobile
+if (-not (Test-Path .env)) { New-Item -ItemType File .env | Out-Null }
+flutter pub get
+flutter run -d chrome --web-port 5173 `
+  --dart-define=API_BASE_URL=http://localhost:8081/api `
+  --dart-define=SERVER_URL=http://localhost:8081
+```
+
+- [ ] 앱 origin은 localhost:5173, API·이미지는 localhost:8081이며 3000으로 요청하지 않는다.
+- [ ] 일반 로그인/401/Validation400/404 응답을 앱이 읽을 수 있다. 미허용 Origin은 서버가403을 내는 것이 아니라 브라우저가 응답 읽기를 막는다.
+- [ ] 깨진 JSON·10MiB 초과·미지원 charset의 조기400/413/415는 **허용 Origin이어도 CORS 헤더가 없다**. 앱에서 실제 상태 대신 CORS 오류로 보이는 것은 현재 유지한 v2 동작이며 개선 후보다.
+
+### 선택: 동일 출처 프록시
+
+직접 연결 대신 아래 임시 nginx로 웹·API·업로드를 localhost:18081 한 출처로 전달할 수 있다. 이 프록시는 수동 확인용이며 3단계 운영 nginx 구현이 아니다. 같은 출처 요청은 위 CORS 읽기 제한과 별개이므로 어느 경로로 검증했는지 기록한다.
 
 ### 터미널 A: Flutter 개발 서버
 

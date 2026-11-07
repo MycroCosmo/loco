@@ -94,19 +94,21 @@ public class ApiExceptionHandler {
     HttpRequestMethodNotSupportedException.class
   })
   ResponseEntity<?> notFound(HttpServletRequest request) {
+    return ResponseEntity.status(404).body(notFoundBody(request));
+  }
+
+  public static Map<String, Object> notFoundBody(HttpServletRequest request) {
     String path = request.getRequestURI();
     if (request.getQueryString() != null) {
       path += "?" + request.getQueryString();
     }
-    return ResponseEntity.status(404)
-        .body(
-            Map.of(
-                "statusCode",
-                404,
-                "error",
-                "Not Found",
-                "message",
-                "Cannot " + request.getMethod() + " " + path));
+    return Map.of(
+        "statusCode",
+        404,
+        "error",
+        "Not Found",
+        "message",
+        "Cannot " + request.getMethod() + " " + path);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)

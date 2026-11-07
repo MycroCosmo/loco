@@ -1,5 +1,8 @@
 # LOCO v3 — Spring 기반과 v2 인증·오류 호환
 
+PR 전 전역 HTTP 보완: JSON/form 10MiB, form 파라미터 1,000개·중첩 깊이 32, Helmet 기본 헤더와 CORS를 v2 순서대로 적용한다. `ALLOWED_ORIGINS`는 쉼표로 나눈 정확한 Origin 목록이며 비어 있으면 `http://localhost:8080,http://localhost:3000`이다. localhost:5173 웹 개발 서버는 해당 Origin을 명시하고 Compose v3를 재생성한다. 미허용 Origin 자체를 서버 403으로 막지 않으며, CORS는 인증을 대신하지 않는다.
+`HOST`는 `server.address`에 연결되며 기본은 0.0.0.0이다. Compose에서 컨테이너 포트를 공개할 때는 이 기본값을 유지한다. `X-Powered-By`만 생략하는 10-1 A 결정과 전체 헤더 비교 방법은 [전역 HTTP fixture 설명](src/test/resources/globals/README.md)에 있다.
+
 Java 포맷은 Spotless 8.1.0 + google-java-format 1.28.0으로 고정한다. Java 21·Gradle 8.14.6에서 실행하며, `./gradlew spotlessApply`로 `src`의 운영·테스트 Java 전체를 정리한다. `./gradlew spotlessCheck`가 검사하고 `check`·`build`에서도 포맷 위반은 실패한다. 빌드가 소스를 자동 수정하지는 않는다.
 포매터 실행에는 Gradle 자체도 JDK 21로 실행해야 한다. 최소 실행 조건과 단일 스타일을 기준으로 선택했다: [Spotless 8.1.0 요구사항](https://raw.githubusercontent.com/diffplug/spotless/gradle/8.1.0/plugin-gradle/README.md), [google-java-format 1.28.0 실행 조건](https://raw.githubusercontent.com/google/google-java-format/v1.28.0/README.md).
 
@@ -440,6 +443,8 @@ Nest의 모든 `class-validator` 규칙을 자동 변환하는 기능은 아니�
 - Prisma 스키마와 실제 DB의 차이 비교, 클라이언트에서 처리하는 UUID·updatedAt.
 
 ## 다음 단계
+
+- 조기 파서 오류(400/413/415)는 v2의 파서→Helmet→CORS 순서 때문에 CORS 헤더가 없다. Flutter 웹의 다른 출처 요청에서는 JavaScript가 실제 상태/본문을 읽지 못하고 CORS 오류로 보인다. 이번에는 유지하며, 파서 오류에도 CORS를 적용할지는 이관 후 개선 후보로 남긴다.
 
 Prisma 기반 비교 테스트는 `v2-comparison` 태그로 분리했으며 `comparisonTest`·`allTests`·`check`에서 계속 필수로 검증한다.
 요청 제한의 IP 기준(`getRemoteAddr`)은 3단계 nginx 도입 시 `X-Forwarded-For`와 신뢰 프록시 처리가 필요하다.
