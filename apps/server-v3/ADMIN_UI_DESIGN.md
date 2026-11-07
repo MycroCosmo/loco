@@ -294,3 +294,10 @@ E2E는 격리된 테스트 DB·로컬 SeaweedFS·합성 관리자만 쓴다. 실
 - AccountsView/RolesView/AccessView는 계정 생성·상태·역할 배정, 역할 생성/이름/권한/삭제와 템플릿 복사, 서버 explain의 접근 근거를 제공한다. ConfirmDialog는 native dialog의 키보드 초점 제한과 닫은 뒤 초점 복귀를 사용한다.
 - AdminScreens는 호스트의 화면 등록이고 screens.ts와 키 일치 테스트를 둔다. NavigationTree는 서버가 필터링한 업무 메뉴만 표시하며 고정 관리 도구는 explain/서버 systemAdmin 값에 따른다.
 - 검증: core 역할17+이력44=61건 성공/실패0/건너뜀0, 42.917초. 최초 신규 메서드 분류 누락 실패는 읽기 분류 추가 후 재검증했다. Vitest9건 성공(0.280초), typecheck/build 성공. 호스트 화면 키 계약 테스트는 마지막 전체 회귀에서 함께 실행한다.
+
+### 4단계: 메뉴·이력·파일 화면
+
+- MenusView는 버튼/부모/형제 앞 위치로 이동 요청을 만들고 서버 preview 확인 뒤 적용한다. STALE_REVISION은 최신 트리를 읽고 preview를 폐기하며 사용자 재확인 없이는 재전송하지 않는다. UUID를 새로 만들지 않는다. READ에는 편집 UI를 보이지 않는다.
+- HistoryView는 대상·행위자·Asia/Seoul 기간을 서버 UTC/cursor로 연결한다. 전후 JSON은 텍스트로만 렌더링한다. FilesView는 ACTIVE 목록·상세·업로드·다운로드·삭제를 연결하고 응답 유실에 따른 중복 가능성을 안내한다.
+- 확인 대화상자의 제목/설명 ID는 인스턴스마다 독립적이다. 파일 본문과 비밀번호는 로그·브라우저 영속 저장소에 넣지 않는다.
+- 검증: Vitest14건 성공/실패0, 0.290초, typecheck/build 성공(Vite0.196초). 실제 브라우저의 서버 미리보기·경합·파일 전송은 다음 최종 검증에서 수행한다.

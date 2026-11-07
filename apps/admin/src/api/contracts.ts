@@ -73,3 +73,22 @@ export function roleTemplate(value: unknown) {
   const v = object(value)
   return { code: text(v.code), action: action(v.action) }
 }
+export function movePreview(value: unknown) {
+  const v = object(value)
+  return { id: text(v.id), oldParentId: nullableText(v.oldParentId), newParentId: nullableText(v.newParentId),
+    beforeSiblingId: nullableText(v.beforeSiblingId), revision: number(v.revision), permissionsChanged: boolean(v.permissionsChanged), message: text(v.message) }
+}
+export function storedFile(value: unknown) {
+  const v = object(value)
+  return { id:text(v.id), originalName:text(v.originalName), mediaType:text(v.mediaType), byteSize:number(v.byteSize),
+    sha256:text(v.sha256), createdBy:text(v.createdBy), createdAt:text(v.createdAt) }
+}
+export function historyEntry(value: unknown) {
+  const v = object(value)
+  return { id:text(v.id), actorId:text(v.actorId), action:text(v.action), resourceType:text(v.resourceType), resourceId:text(v.resourceId),
+    occurredAt:text(v.occurredAt), before:v.before===null?null:object(v.before), after:v.after===null?null:object(v.after), payloadVersion:number(v.payloadVersion) }
+}
+export function historyPage(value: unknown) {
+  const v = object(value)
+  return {items:list(historyEntry)(v.items), nextCursor:nullableText(v.nextCursor)}
+}

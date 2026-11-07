@@ -5,6 +5,9 @@ import PasswordView from './views/PasswordView.vue'
 import AccessView from './views/AccessView.vue'
 import AccountsView from './views/AccountsView.vue'
 import RolesView from './views/RolesView.vue'
+import MenusView from './views/MenusView.vue'
+import FilesView from './views/FilesView.vue'
+import HistoryView from './views/HistoryView.vue'
 import { session } from './composables/session'
 
 export const router = createRouter({ history: createWebHistory('/admin/'), routes: [
@@ -13,6 +16,9 @@ export const router = createRouter({ history: createWebHistory('/admin/'), route
   { path: '/access', component: AccessView },
   { path: '/accounts', component: AccountsView, meta: { permission: 'cms.accounts' } },
   { path: '/roles', component: RolesView, meta: { permission: 'cms.roles' } },
+  { path: '/menus', component: MenusView, meta: { permission: 'cms.menus' } },
+  { path: '/files', component: FilesView, meta: { permission: 'cms.files' } },
+  { path: '/history', component: HistoryView, meta: { systemOnly: true } },
   { path: '/:pathMatch(.*)*', component: { render: () => h('h1', '없는 화면입니다') } },
 ] })
 router.beforeEach(async to => {
@@ -20,6 +26,7 @@ router.beforeEach(async to => {
   const user = session.state.user
   if (!user && to.path !== '/login') return '/login'
   if (user?.mustChangePassword && to.path !== '/password' && to.path !== '/login') return '/password'
+  if (user && to.meta.systemOnly && !user.systemAdmin) return '/access?denied=1'
   if (user && typeof to.meta.permission === 'string') {
     try { if (!await session.allowed(to.meta.permission, 'READ')) return '/access?denied=1' }
     catch { return '/access?unavailable=1' }
