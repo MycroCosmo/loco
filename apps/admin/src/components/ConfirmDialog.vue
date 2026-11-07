@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch, useId } from 'vue'
-const props = defineProps<{ open: boolean; title: string; busy: boolean; error?: string }>()
+const props = defineProps<{ open: boolean; title: string; busy: boolean; error?: string; opener?: HTMLElement | null }>()
 const emit = defineEmits<{ confirm: []; cancel: [] }>()
 const dialog = ref<HTMLDialogElement>()
 const id = useId()
 let previous: HTMLElement | null = null
-watch(() => props.open, async open => {
+watch([() => props.open, () => props.busy], async ([open,busy]) => {
   await nextTick()
   if (open) {
-    previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    dialog.value?.showModal()
+    if (!dialog.value?.open) {
+      previous = props.opener ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null)
+      dialog.value?.showModal()
+    }
+    if (!busy) dialog.value?.querySelector<HTMLButtonElement>('button[autofocus]')?.focus()
   } else { dialog.value?.close(); previous?.focus() }
 }, { immediate: true })
 onBeforeUnmount(() => { dialog.value?.close(); previous?.focus() })

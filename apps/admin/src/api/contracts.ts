@@ -85,7 +85,7 @@ export function storedFile(value: unknown) {
 }
 export function historyEntry(value: unknown) {
   const v = object(value)
-  return { id:text(v.id), actorId:text(v.actorId), action:text(v.action), resourceType:text(v.resourceType), resourceId:text(v.resourceId),
+  return { id:text(v.id), actorId:nullableText(v.actorId), action:text(v.action), resourceType:text(v.resourceType), resourceId:text(v.resourceId),
     occurredAt:text(v.occurredAt), before:v.before===null?null:object(v.before), after:v.after===null?null:object(v.after), payloadVersion:number(v.payloadVersion) }
 }
 export function historyPage(value: unknown) {

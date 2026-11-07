@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { api, ApiError } from '../api/client'
 import { tree, movePreview, type Tree } from '../api/contracts'
 import { useAction } from '../composables/action'
@@ -11,6 +11,7 @@ const model=ref<Tree>({revision:0,nodes:[]}), canManage=ref(false), selectedId=r
 const parent=ref(''), before=ref(''), title=ref(''), routeKey=ref('cms.files'), visible=ref(true)
 const createTitle=ref(''), createType=ref('GROUP'), createParent=ref(''), createScreen=ref('cms.files')
 const preview=ref<ReturnType<typeof movePreview>|null>(null), deleting=ref(false)
+const opener=shallowRef<HTMLElement|null>(null)
 const {busy,error,notice,run}=useAction()
 const selected=computed(()=>model.value.nodes.find(n=>n.id===selectedId.value))
 const rows=computed(()=>outline(model.value.nodes))
@@ -41,6 +42,7 @@ function save() {void run(()=>mutate(async()=>{
   notice.value='메뉴를 변경했습니다.'
 }))}
 async function prepare() {
+  opener.value=document.activeElement instanceof HTMLElement?document.activeElement:null
   await mutate(async()=>{ preview.value=await api.send(`/menus/${selectedId.value}/move-preview`,'POST',{
     parentId:parent.value||null,beforeSiblingId:before.value||null,revision:model.value.revision},movePreview) },false)
 }
@@ -77,6 +79,6 @@ function label(id:string|null) {return id?model.value.nodes.find(n=>n.id===id)?.
     <label for="create-parent">생성 부모</label><select id="create-parent" v-model="createParent" :disabled="busy"><option value="">루트</option><option v-for="r in rows.filter(r=>r.node.type==='GROUP')" :key="r.node.id" :value="r.node.id">{{ r.node.title }}</option></select>
     <template v-if="createType==='PAGE'"><label for="create-screen">등록 화면</label><select id="create-screen" v-model="createScreen" :disabled="busy"><option v-for="s in screens" :key="s.key" :value="s.key">{{ s.label }}</option></select></template><button :disabled="busy">메뉴 생성</button>
   </form></section>
-  <ConfirmDialog :open="preview!==null" title="메뉴 이동 미리보기" :busy="busy" :error="error" @cancel="preview=null" @confirm="move"><p>{{ label(preview?.oldParentId??null) }} → {{ label(preview?.newParentId??null) }}</p><p>{{ preview?.message }}</p><p>ID를 재생성하지 않습니다. 다른 관리자가 변경하면 최신 위치를 다시 확인해야 합니다.</p></ConfirmDialog>
+  <ConfirmDialog :open="preview!==null" title="메뉴 이동 미리보기" :busy="busy" :error="error" :opener="opener" @cancel="preview=null" @confirm="move"><p>{{ label(preview?.oldParentId??null) }} → {{ label(preview?.newParentId??null) }}</p><p>{{ preview?.message }}</p><p>ID를 재생성하지 않습니다. 다른 관리자가 변경하면 최신 위치를 다시 확인해야 합니다.</p></ConfirmDialog>
   <ConfirmDialog :open="deleting" title="메뉴 삭제" :busy="busy" :error="error" @cancel="deleting=false" @confirm="remove"><p>{{ selected?.title }} 메뉴를 삭제합니다. 하위 메뉴가 있으면 삭제할 수 없습니다.</p></ConfirmDialog>
 </template>

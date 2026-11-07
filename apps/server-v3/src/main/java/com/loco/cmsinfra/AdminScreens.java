@@ -11,7 +11,7 @@ public class AdminScreens {
       List.of("cms.accounts", "cms.roles", "cms.menus", "cms.files");
 
   @Bean
-  PermissionCatalog.Contribution adminScreens() {
+  PermissionCatalog.Contribution adminScreenContribution() {
     return new PermissionCatalog.Contribution() {
       public Collection<PermissionCatalog.Definition> permissions() {
         return List.of();

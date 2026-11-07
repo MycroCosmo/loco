@@ -172,6 +172,15 @@ tasks.register('allTests') {
     dependsOn tasks.named('test'), tasks.named('comparisonTest')
 }
 
+// Browser E2E is explicitly separate from allTests and check.
+tasks.register('adminE2eHost', JavaExec) {
+    dependsOn 'testClasses', 'prepareVips'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.loco.cmsinfra.AdminUiBrowserHost'
+    systemProperty 'loco.vips.executable', vipsExecutable
+    systemProperty 'cms.e2e.runtime', layout.buildDirectory.file('admin-e2e/runtime.json').get().asFile.absolutePath
+}
+
 tasks.named('check') { dependsOn tasks.named('comparisonTest'), ':cms-core:check' }
 
 tasks.register('codecTest', Test) {

@@ -1,5 +1,7 @@
 # LOCO v3 — Spring 기반과 v2 인증·오류 호환
 
+CMS 5-B부터 호스트 JAR에 관리자 SPA를 포함하므로 Gradle의 리소스 처리·테스트·빌드에도 **Node 24.22.2 / npm 11.19.1**이 필요하다(Java 21 유지). Windows에서는 이 디렉터리에서 `. ../admin/prepare-node.ps1`을 먼저 실행한다. 시스템 Node와 v2의 Node 20은 변경하지 않는다. Docker 빌드는 고정 Node를 자체 준비한다. 관리자 화면 실행과 별도 Chromium E2E 명령은 [관리자 README](../admin/README.md)를 참고한다.
+
 PR 전 전역 HTTP 보완: JSON/form 10MiB, form 파라미터 1,000개·중첩 깊이 32, Helmet 기본 헤더와 CORS를 v2 순서대로 적용한다. `ALLOWED_ORIGINS`는 쉼표로 나눈 정확한 Origin 목록이며 비어 있으면 `http://localhost:8080,http://localhost:3000`이다. localhost:5173 웹 개발 서버는 해당 Origin을 명시하고 Compose v3를 재생성한다. 미허용 Origin 자체를 서버 403으로 막지 않으며, CORS는 인증을 대신하지 않는다.
 `HOST`는 `server.address`에 연결되며 기본은 0.0.0.0이다. Compose에서 컨테이너 포트를 공개할 때는 이 기본값을 유지한다. `X-Powered-By`만 생략하는 10-1 A 결정과 전체 헤더 비교 방법은 [전역 HTTP fixture 설명](src/test/resources/globals/README.md)에 있다.
 
@@ -547,7 +549,7 @@ TransactionTemplate의 커밋 경계, multipart 지연 파싱, 네이티브 프�
 
 ## CMS 파일 백엔드 (5-A)
 
-로컬 저장소는 SeaweedFS S3 게이트웨이이며 SDK·이미지 변환은 호스트에만 있다. core는 저장/변환 포트와 JPA 상태·이력을 관리한다. [C-15~23 결정과 검증](CMS_CORE_DESIGN.md#20-c-23-c-확정--파일-선등록조건부-상태-전이)을 참고한다. 관리자 SPA는 후속 5-B다.
+로컬 저장소는 SeaweedFS S3 게이트웨이이며 SDK·이미지 변환은 호스트에만 있다. core는 저장/변환 포트와 JPA 상태·이력을 관리한다. [C-15~23 결정과 검증](CMS_CORE_DESIGN.md#20-c-23-c-확정--파일-선등록조건부-상태-전이)을 참고한다. 관리자 SPA의 개발·운영·별도 E2E 명령은 [apps/admin README](../admin/README.md), C-24~32와 화면 계약은 [ADMIN_UI_DESIGN.md](ADMIN_UI_DESIGN.md)에 있다.
 
 저장소를 포함해 실행하려면 저장소 루트 `.env`에 기존 DB/JWT 설정과 **로컬용으로 새로 만든** `CMS_STORAGE_ACCESS_KEY`, `CMS_STORAGE_SECRET_KEY`를 지정한다. 실제 AWS 키를 사용하지 않는다. 예제 파일은 키 이름만 제공한다. 루트에서 `docker compose up -d --build --wait`를 실행하면 storage health 이후 v3가 V5를 적용하고 비공개 버킷을 준비한다. storage는 digest 고정·CPU1/1GiB, 전용 `cms-objects` 볼륨을 사용한다. 기존 DB·LOCO 업로드 볼륨은 유지한다. `docker compose down -v`로 기존 데이터를 지우지 않는다.
 

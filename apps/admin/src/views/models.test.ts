@@ -2,6 +2,7 @@ import { expect, it } from 'vitest'
 import { adjacentPosition, excludedParents, outline } from './menuModel'
 import { historyFilters } from './historyModel'
 import type { MenuNode } from '../api/contracts'
+import { historyEntry } from '../api/contracts'
 
 const nodes:MenuNode[]=[
   {id:'A',parentId:null,sortOrder:0,title:'A',type:'GROUP',routeKey:null,permissionKey:null,visible:true},
@@ -32,4 +33,9 @@ it('converts explicitly Korean time to UTC and omits blank filters',()=>{
 })
 it('rejects equal or reversed history time bounds',()=>{
   expect(()=>historyFilters({resourceType:'',resourceId:'',actorId:'',from:'2026-11-08T10:00',until:'2026-11-08T10:00'})).toThrow()
+})
+it('accepts bootstrap history with a nullable actor and before snapshot',()=>{
+  const record=historyEntry({id:'history',actorId:null,action:'CREATE',resourceType:'admin-account',resourceId:'admin',occurredAt:'2026-11-08T00:00:00Z',before:null,after:{loginId:'root'},payloadVersion:1})
+  expect(record.actorId).toBeNull()
+  expect(record.after).toEqual({loginId:'root'})
 })

@@ -21,8 +21,10 @@ export function message(error: unknown): string {
 }
 export function createClient(transport: typeof fetch, cookie: () => string) {
   const reads = new Map<string, Promise<Response>>()
+  let generation = 0
   let failure: (error: ApiError) => Promise<void> = async () => {}
   async function response(path: string, method = 'GET', body?: unknown): Promise<Response> {
+    const current = generation
     const headers = new Headers()
     const form = body instanceof FormData
     if (body !== undefined && !form) headers.set('Content-Type', 'application/json')
@@ -34,7 +36,7 @@ export function createClient(transport: typeof fetch, cookie: () => string) {
       request = send()
       if (method === 'GET') {
         reads.set(path, request)
-        void request.finally(() => reads.delete(path)).catch(() => {})
+        void request.finally(() => { if (reads.get(path) === request) reads.delete(path) }).catch(() => {})
       }
     }
     const result = (await request).clone()
@@ -43,12 +45,13 @@ export function createClient(transport: typeof fetch, cookie: () => string) {
       try { raw = object(await result.json()) } catch { /* Proxy errors may have no JSON body. */ }
       const error = new ApiError(result.status, typeof raw.code === 'string' ? raw.code : 'HTTP_ERROR',
         typeof raw.message === 'string' ? raw.message : `요청 실패 (${result.status})`)
-      await failure(error)
+      if (current === generation) await failure(error)
       throw error
     }
     return result
   }
   return {
+    invalidateSession() { generation++; reads.clear() },
     onFailure(handler: typeof failure) { failure = handler },
     async read<T>(path: string, parse: (value: unknown) => T) { return parse(await (await response(path)).json()) },
     async send<T>(path: string, method: string, body: unknown, parse: (value: unknown) => T) {

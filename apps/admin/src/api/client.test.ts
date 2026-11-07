@@ -3,6 +3,18 @@ import { createClient, csrfCookie, ApiError, nothing } from './client'
 import { identity, list, text } from './contracts'
 
 describe('CMS HTTP boundary', () => {
+  it('does not invalidate a new session when an old request returns 401 late', async () => {
+    let resolveResponse: (value: Response) => void = () => {}
+    const response = new Promise<Response>(resolve => { resolveResponse = resolve })
+    const client = createClient(() => response, () => '')
+    const failure = vi.fn(async (_error: ApiError) => {})
+    client.onFailure(failure)
+    const old = client.read('/auth/me', identity)
+    client.invalidateSession()
+    resolveResponse(Response.json({code:'SESSION_EXPIRED',message:'Unauthorized'},{status:401}))
+    await expect(old).rejects.toMatchObject({code:'SESSION_EXPIRED'})
+    expect(failure).not.toHaveBeenCalled()
+  })
   it('uses the current CSRF cookie for each write and does not set a multipart boundary', async () => {
     let cookie = 'CMSSESSION=hidden; XSRF-TOKEN=first'
     const transport = vi.fn<typeof fetch>().mockImplementation(async () => new Response(null, {status: 204}))

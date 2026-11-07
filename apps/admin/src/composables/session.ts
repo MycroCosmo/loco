@@ -12,13 +12,14 @@ let loading: Promise<void> | undefined
 let csrfRefresh: Promise<void> | undefined
 let navigate: (path: string) => void = () => {}
 function clear() {
+  api.invalidateSession()
   state.user = null; state.navigation = { revision: 0, nodes: [] }; state.epoch++
   invalidateGrants(); loading = undefined
 }
 async function refresh() {
   if (loading) return loading
   const epoch = state.epoch
-  loading = (async () => {
+  const pending = (async () => {
     const user = await api.read('/auth/me', identity)
     if (epoch !== state.epoch) return
     state.user = user
@@ -26,8 +27,9 @@ async function refresh() {
       const navigation = await api.read('/navigation', tree)
       if (epoch === state.epoch) state.navigation = navigation
     }
-  })().finally(() => { loading = undefined; state.ready = true })
-  return loading
+  })().finally(() => { if (loading === pending) loading = undefined; if (epoch === state.epoch) state.ready = true })
+  loading = pending
+  return pending
 }
 async function allowed(key: string, action: 'READ' | 'MANAGE') {
   const token = `${key}:${action}`
@@ -42,7 +44,7 @@ async function allowed(key: string, action: 'READ' | 'MANAGE') {
       if (current) grants.set(token, result.allowed)
       return current && result.allowed
     })
-    .finally(() => pendingGrants.delete(token))
+    .finally(() => { if (pendingGrants.get(token) === request) pendingGrants.delete(token) })
   pendingGrants.set(token, request)
   return request
 }

@@ -1,6 +1,6 @@
 # CMS 5-B 관리자 화면 설계
 
-상태: **C-24~C-32 승인, 7절 순서로 구현 중.** 2026-11-08, CMS 5-A 완료 커밋 `0309bf0` 기준으로 설계했다.
+상태: **C-24~C-32 구현·전체 회귀·별도 Chromium E2E 완료. 5-B 종료, 6단계 미착수.** 2026-11-08, CMS 5-A 완료 커밋 `0309bf0` 기준으로 설계했다.
 
 이 문서는 화면을 기존 서버 계약에 연결하고 구현 근거를 보존한다. 상위 결정은 [CMS_CORE_DESIGN.md](CMS_CORE_DESIGN.md)의 C-1~C-23을 따른다. 6절의 대안은 검토 기록이며 최종 선택은 다음 표다.
 
@@ -24,7 +24,9 @@ C-30은 서버가 아는 거절 원인을 UI가 추측하지 않도록 해 “�
 - 최소 의존성 기준안: Vue·vue-router, 플랫폼 `fetch`·`FormData`·`Intl`, 필요한 Vite/TypeScript 도구. Axios·날짜 라이브러리·범용 폼 프레임워크를 기본 추가하지 않는다.
 - 오류·로딩·빈 결과·키보드 조작·작은 화면 레이아웃을 각 화면에 포함한다. 화면 숨김과 비활성 버튼은 사용성일 뿐 **보안 경계는 서버의 인증·권한 검사**다.
 
-## 2. 현재 서버 계약과 구현 전 간극
+## 2. 설계 당시 서버 계약과 구현 전 간극 (0309bf0)
+
+아래 표는 최초 설계 시점의 상태다. 역할 배정 조회(C-31), 화면 등록(C-29), 공개 shell(C-28)은 9절의 구현에서 해결했다. 당시 발견한 이유를 보존하기 위해 표는 과거 기준으로 남긴다.
 
 근거: [AdminController](modules/cms-core/src/main/java/com/cms/core/web/AdminController.java), [GovernanceController](modules/cms-core/src/main/java/com/cms/core/web/GovernanceController.java), [PermissionCatalog](modules/cms-core/src/main/java/com/cms/core/permission/PermissionCatalog.java), [AdminWebConfiguration](modules/cms-core/src/main/java/com/cms/core/web/AdminWebConfiguration.java), [AdminSessionFilter](modules/cms-core/src/main/java/com/cms/core/web/AdminSessionFilter.java), [HistoryController](modules/cms-core/src/main/java/com/cms/core/web/HistoryController.java), [FileController](modules/cms-core/src/main/java/com/cms/core/web/FileController.java).
 
@@ -152,6 +154,8 @@ Spring 제공안에서는 `dist`를 호스트 JAR의 전용 정적 디렉터리�
 
 선택 후 `apps/admin/package.json` exact 버전(범위 기호 없음), `package-lock.json`, Node 버전 파일·CI 버전·packageManager npm 버전을 함께 관리하고 CI는 `npm ci`를 사용한다. 선언된 peer/engine 범위는 후보끼리 맞지만 실제 설치·Windows/Linux typecheck·build로 확인해야 한다. 선택하지 않은 UI/상태/드래그 패키지는 설치하지 않는다. v2의 Node 20·기존 lockfile·루트 저장소 구조는 그대로 둔다. Vite 빌드는 타입 검사와 별개이므로 `vue-tsc`를 필수 검사로 둔다.
 
+구현 확정값은 [package.json](../admin/package.json)과 lockfile이 기준이다. TypeScript는 실제 호환 검증 후 **6.0.3**으로 조정했고(9절 근거), E2E 설정 검사에 개발 전용 `@types/node 24.19.2`를 추가했다. Windows 및 Linux Docker에서 typecheck/build를 검증한다. 현재 저장소 CI는 v2 계정 회귀용 Node 20이며 변경하지 않았다. 향후 관리자/v3 CI를 등록할 때 `.node-version`의 24.22.2와 npm 11.19.1을 사용한다.
+
 ## 6. 결정할 항목
 
 아래는 승인 전 비교 기록이다. 최종 선택은 문서 상단의 승인 표를 따른다(C-30은 권장 A 대신 B 채택). 이후 선택 답변도 **번호와 항목 이름**을 함께 적는다.
@@ -269,9 +273,9 @@ E2E는 격리된 테스트 DB·로컬 SeaweedFS·합성 관리자만 쓴다. 실
 
 테스트 범위는 기존 사용자 기준을 따른다. core만 변경하면 core test + root 빠른 test. 호스트 앱·공통 설정·빌드 구성이 바뀌면 전체 allTests이며 머지 전에도 전체 회귀를 실행한다. 이번 5-B 구현은 호스트 경계/빌드 변경이 예상되므로 완료 검증에 allTests·build와 선택한 프런트 검사를 포함한다. LOCO 알려진 차이 11건은 UI 때문에 추가·삭제하지 않는다. 실행 시간은 실제 수행한 범위별로 측정하고 커밋 본문에 남긴다.
 
-## 8. 이번 설계의 확인 범위
+## 8. 최초 설계 때의 확인 범위
 
-현행 컨트롤러·권한·세션·정적 핸들러와 문서의 API/권한을 대조했다. 패키지 버전은 공식 배포 메타데이터에서 조회했다. 문서의 상대 링크·차이 공백 검사를 수행한다. 구현·의존성 설치·브라우저 검증·Gradle 회귀는 수행하지 않는다. 패키지 설치 호환성과 실제 화면 동작은 선택 후 검증할 항목이다.
+설계 당시 컨트롤러·권한·세션·정적 핸들러와 문서의 API/권한을 대조했다. 패키지 버전은 공식 배포 메타데이터에서 조회했다. 문서의 상대 링크·차이 공백을 검사했으며, 그 시점에는 구현·의존성 설치·브라우저 검증·Gradle 회귀를 수행하지 않았다. 승인 후 실제 설치 호환성과 화면 동작을 검증한 결과는 9절에 기록한다.
 
 ## 9. 구현 기록
 
@@ -301,3 +305,25 @@ E2E는 격리된 테스트 DB·로컬 SeaweedFS·합성 관리자만 쓴다. 실
 - HistoryView는 대상·행위자·Asia/Seoul 기간을 서버 UTC/cursor로 연결한다. 전후 JSON은 텍스트로만 렌더링한다. FilesView는 ACTIVE 목록·상세·업로드·다운로드·삭제를 연결하고 응답 유실에 따른 중복 가능성을 안내한다.
 - 확인 대화상자의 제목/설명 ID는 인스턴스마다 독립적이다. 파일 본문과 비밀번호는 로그·브라우저 영속 저장소에 넣지 않는다.
 - 검증: Vitest14건 성공/실패0, 0.290초, typecheck/build 성공(Vite0.196초). 실제 브라우저의 서버 미리보기·경합·파일 전송은 다음 최종 검증에서 수행한다.
+
+### 5단계: 실제 호스트·브라우저·배포 검증
+
+- `apps/admin/e2e/core.spec.ts`는 승인한 핵심 5개 흐름만 Chromium에서 실행한다. `playwright.config.ts`는 worker 1·재시도 0이며 비밀번호/쿠키가 들어갈 수 있는 trace·영상·스크린샷을 수집하지 않는다. `scripts/e2e.mjs`는 별도 Gradle 호스트와 임시 컨테이너의 시작·종료를 맡는다. 실행법은 [관리자 README](../admin/README.md)에 있다.
+- `AdminUiBrowserHost`는 test 소스에만 두고 실제 Spring·PostgreSQL·SeaweedFS를 조립한다. 테스트 Clock과 별도 loopback 제어 서버로 만료·fixture 초기화를 재현한다. 난수 계정/제어 정보는 ignored build 파일에 잠시 쓰고 종료 시 지운다. 운영 API/JAR에는 제어 endpoint를 넣지 않는다.
+- 브라우저 실행에서 호스트 화면 등록 빈의 이름 충돌을 발견해 메서드 이름으로 해소했다. 대화상자는 비동기 preview 완료 후 취소 버튼에 초점을 주고 Escape 시 원래 이동 버튼으로 복귀한다. 초기 bootstrap 이력의 null 행위자는 “행위자 미지정”으로 표시하며, 이전 세션의 늦은 401은 새 로그인 상태를 무효화하지 않도록 회귀 검사를 추가했다.
+- Linux 운영 이미지의 JAR에서 `admin-ui/index.html`과 JS/CSS를 확인했다. E2E 호스트 클래스·테스트·임시 계정 파일은 포함되지 않는다. Node는 빌드 단계에만 필요하다. v2·Flutter 소스는 변경하지 않았다.
+- 자동 브라우저 범위는 Chromium 핵심 흐름이다. 전체 화면 조합·다른 브라우저·스크린 리더의 수동 사용성 검증까지 완료했다는 의미는 아니다. 개발 프록시 설정과 운영 shell 경계를 구분하며, E2E는 실제 Spring 정적 배포를 검증한다.
+
+최종 검증(2026-11-08, Windows Java 21, v2 이미지 캐시):
+
+| 범위 | 전체 / 성공 / 실패 / 건너뜀 | 실행 시간 |
+|---|---|---|
+| Gradle `allTests build` + Spotless | 1,567 / 1,566 / 0 / 1 | 1,190.011초 (19분 50초, 전체 wall time) |
+| 위 실행의 core test | 101 / 101 / 0 / 0 | 위 전체 시간에 포함 |
+| 위 실행의 root 빠른 test | 314 / 313 / 0 / 1 | HEIC 공통 제약 1건, 위 전체 시간에 포함 |
+| 위 실행의 v2 comparisonTest | 1,152 / 1,152 / 0 / 0 | 위 전체 시간에 포함 |
+| Vitest | 16 / 16 / 0 / 0 | 0.343초 (Vitest 출력 기준) |
+| 별도 Chromium E2E | 5 / 5 / 0 / 0 | 테스트 8.5초 / 호스트·컨테이너 시작·종료 포함 36.323초 |
+| Linux Docker 운영 이미지 | typecheck·SPA build·bootJar 성공 | 45.251초 (캐시 사용) |
+
+LOCO 알려진 차이는 **11건(개선 6·의도 5·보류 0)**으로 불변이며, 건너뜀과 별도 집계다. v2 환경은 빌드 1·기동 1·동일 컨테이너 재시작 17회·인증 대기 0ms였다. 서버 결과는 `build/test-results/{test,comparisonTest}`와 `modules/cms-core/build/test-results/test`, 비교 요약은 `build/reports/compatibility/summary.json`, 브라우저 결과는 `apps/admin/test-results/summary.json`에서 확인한다. E2E는 Gradle allTests에 포함하지 않았다.
