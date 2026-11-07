@@ -8,13 +8,21 @@ import org.springframework.context.annotation.*;
 @Configuration(proxyBeanMethods = false)
 public class AdminScreens {
   public static final List<String> KEYS =
-      List.of("cms.accounts", "cms.roles", "cms.menus", "cms.files");
+      List.of("cms.accounts", "cms.roles", "cms.menus", "cms.files", "loco.users");
 
   @Bean
   PermissionCatalog.Contribution adminScreenContribution() {
     return new PermissionCatalog.Contribution() {
       public Collection<PermissionCatalog.Definition> permissions() {
-        return List.of();
+        return Arrays.stream(com.loco.cmsadmin.LocoReadResource.values())
+            .map(
+                resource ->
+                    new PermissionCatalog.Definition(
+                        resource.key(),
+                        resource.label(),
+                        Set.of(com.cms.core.permission.Action.READ),
+                        false))
+            .toList();
       }
 
       public Collection<PermissionCatalog.Screen> screens() {

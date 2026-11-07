@@ -8,6 +8,7 @@ import RolesView from './views/RolesView.vue'
 import MenusView from './views/MenusView.vue'
 import FilesView from './views/FilesView.vue'
 import HistoryView from './views/HistoryView.vue'
+import LocoReadView from './views/LocoReadView.vue'
 import { session } from './composables/session'
 
 export const router = createRouter({ history: createWebHistory('/admin/'), routes: [
@@ -19,6 +20,7 @@ export const router = createRouter({ history: createWebHistory('/admin/'), route
   { path: '/menus', component: MenusView, meta: { permission: 'cms.menus' } },
   { path: '/files', component: FilesView, meta: { permission: 'cms.files' } },
   { path: '/history', component: HistoryView, meta: { systemOnly: true } },
+  { path: '/loco/users', component: LocoReadView, props: { resource: 'users' }, meta: { permission: 'loco.users' } },
   { path: '/:pathMatch(.*)*', component: { render: () => h('h1', '없는 화면입니다') } },
 ] })
 router.beforeEach(async to => {

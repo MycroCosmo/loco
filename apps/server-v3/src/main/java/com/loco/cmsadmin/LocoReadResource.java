@@ -1,0 +1,43 @@
+package com.loco.cmsadmin;
+
+import com.cms.core.account.AdminProblem;
+import java.util.*;
+
+public enum LocoReadResource {
+  USERS(
+      "users",
+      "회원 조회",
+      "id,nickname,email,provider,deletedAt,createdAt,updatedAt",
+      "",
+      Set.of("id", "search", "provider", "status"));
+
+  final String table;
+  final String label;
+  final String columns;
+  final String detailColumns;
+  final Set<String> filters;
+
+  LocoReadResource(
+      String table, String label, String columns, String detailColumns, Set<String> filters) {
+    this.table = table;
+    this.label = label;
+    this.columns = columns;
+    this.detailColumns = detailColumns;
+    this.filters = filters;
+  }
+
+  public String key() {
+    return "loco." + table;
+  }
+
+  public String label() {
+    return label;
+  }
+
+  public static LocoReadResource path(String path) {
+    return Arrays.stream(values())
+        .filter(r -> r.table.equals(path))
+        .findFirst()
+        .orElseThrow(() -> new AdminProblem(404, "Not found"));
+  }
+}

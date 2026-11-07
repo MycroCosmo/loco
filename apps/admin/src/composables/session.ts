@@ -1,5 +1,5 @@
 import { reactive, readonly } from 'vue'
-import { api, message, nothing } from '../api/client'
+import { api, locoApi, message, nothing } from '../api/client'
 import { identity, explanation, tree, type Identity, type Tree } from '../api/contracts'
 
 const state = reactive<{user: Identity | null; ready: boolean; notice: string; epoch: number; navigation: Tree}>({
@@ -13,6 +13,7 @@ let csrfRefresh: Promise<void> | undefined
 let navigate: (path: string) => void = () => {}
 function clear() {
   api.invalidateSession()
+  locoApi.invalidateSession()
   state.user = null; state.navigation = { revision: 0, nodes: [] }; state.epoch++
   invalidateGrants(); loading = undefined
 }
@@ -48,7 +49,7 @@ async function allowed(key: string, action: 'READ' | 'MANAGE') {
   pendingGrants.set(token, request)
   return request
 }
-api.onFailure(async error => {
+for (const client of [api, locoApi]) client.onFailure(async error => {
   if (error.status === 401 && (state.user !== null || error.code === 'SESSION_EXPIRED')) {
     clear(); state.notice = message(error); navigate('/login')
   } else if (error.code === 'PASSWORD_CHANGE_REQUIRED') navigate('/password')

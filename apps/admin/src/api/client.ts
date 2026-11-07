@@ -19,7 +19,7 @@ export function message(error: unknown): string {
   }
   return labels[error.code] ?? error.message
 }
-export function createClient(transport: typeof fetch, cookie: () => string) {
+export function createClient(transport: typeof fetch, cookie: () => string, base: '/admin/api/core' | '/admin/api/loco' = '/admin/api/core') {
   const reads = new Map<string, Promise<Response>>()
   let generation = 0
   let failure: (error: ApiError) => Promise<void> = async () => {}
@@ -29,7 +29,7 @@ export function createClient(transport: typeof fetch, cookie: () => string) {
     const form = body instanceof FormData
     if (body !== undefined && !form) headers.set('Content-Type', 'application/json')
     if (!['GET', 'HEAD'].includes(method)) headers.set('X-XSRF-TOKEN', csrfCookie(cookie()))
-    const send = () => transport('/admin/api/core' + path, { method, credentials: 'same-origin', headers,
+    const send = () => transport(base + path, { method, credentials: 'same-origin', headers,
       body: body === undefined ? undefined : form ? body : JSON.stringify(body) })
     let request = method === 'GET' ? reads.get(path) : undefined
     if (!request) {
@@ -63,4 +63,5 @@ export function createClient(transport: typeof fetch, cookie: () => string) {
   }
 }
 export const api = createClient((...args) => fetch(...args), () => document.cookie)
+export const locoApi = createClient((...args) => fetch(...args), () => document.cookie, '/admin/api/loco')
 export const nothing = (_value: unknown): void => {}

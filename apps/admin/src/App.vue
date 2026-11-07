@@ -27,5 +27,5 @@ watch(() => session.state.user, async user => {
     <nav v-if="session.state.navigation.nodes.length" aria-label="업무 메뉴"><NavigationTree :nodes="session.state.navigation.nodes" :parent="null" /></nav>
   </template>
   <p role="status">{{ session.state.notice }}</p><p role="alert">{{ error }}</p>
-  <main id="main" tabindex="-1"><RouterView :key="session.state.epoch" /></main>
+  <main id="main" tabindex="-1"><RouterView :key="session.state.epoch+':'+$route.path" /></main>
 </template>
