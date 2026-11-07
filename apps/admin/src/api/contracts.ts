@@ -1,0 +1,51 @@
+export function object(value: unknown): Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error('서버 응답 형식이 올바르지 않습니다.')
+  return Object.fromEntries(Object.entries(value))
+}
+export function text(value: unknown): string {
+  if (typeof value !== 'string') throw new Error('문자열 응답이 필요합니다.')
+  return value
+}
+export function number(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error('숫자 응답이 필요합니다.')
+  return value
+}
+export function boolean(value: unknown): boolean {
+  if (typeof value !== 'boolean') throw new Error('참/거짓 응답이 필요합니다.')
+  return value
+}
+export function nullableText(value: unknown): string | null { return value === null ? null : text(value) }
+export function list<T>(parse: (value: unknown) => T) {
+  return (value: unknown): T[] => {
+    if (!Array.isArray(value)) throw new Error('목록 응답이 필요합니다.')
+    return value.map(parse)
+  }
+}
+export function identity(value: unknown) {
+  const v = object(value)
+  return { id: text(v.id), loginId: text(v.loginId), displayName: text(v.displayName),
+    active: boolean(v.active), authVersion: number(v.authVersion),
+    mustChangePassword: boolean(v.mustChangePassword), systemAdmin: boolean(v.systemAdmin) }
+}
+export type Identity = ReturnType<typeof identity>
+export function explanation(value: unknown) {
+  const v = object(value)
+  return { accountId: text(v.accountId), permissionKey: text(v.permissionKey), action: text(v.action),
+    allowed: boolean(v.allowed), reason: text(v.reason), grants: list(value => {
+      const g = object(value)
+      return { roleId: text(g.roleId), roleCode: text(g.roleCode), grantedAction: text(g.grantedAction), impliesRead: boolean(g.impliesRead) }
+    })(v.grants) }
+}
+export function menuNode(value: unknown) {
+  const v = object(value)
+  const type = text(v.type)
+  if (type !== 'GROUP' && type !== 'PAGE') throw new Error('알 수 없는 메뉴 유형입니다.')
+  return { id: text(v.id), parentId: nullableText(v.parentId), sortOrder: number(v.sortOrder),
+    title: text(v.title), type, routeKey: nullableText(v.routeKey), permissionKey: nullableText(v.permissionKey), visible: boolean(v.visible) }
+}
+export function tree(value: unknown) {
+  const v = object(value)
+  return { revision: number(v.revision), nodes: list(menuNode)(v.nodes) }
+}
+export type Tree = ReturnType<typeof tree>
+export type MenuNode = ReturnType<typeof menuNode>

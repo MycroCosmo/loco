@@ -56,15 +56,13 @@ public class AdminSessionFilter extends OncePerRequestFilter {
                       "/admin/api/core/auth/csrf",
                       "/admin/api/core/auth/login")
                   .contains(path)) {
-            response.setStatus(403);
-            response.setContentType("application/json");
-            response
-                .getWriter()
-                .write("{\"statusCode\":403,\"message\":\"Password change required\"}");
+            AdminAdvice.write(
+                response, 403, "Password change required", "PASSWORD_CHANGE_REQUIRED");
             return;
           }
         }
       } catch (AdminProblem | IllegalStateException exception) {
+        request.setAttribute("cms.session.expired", true);
         if (session != null)
           try {
             session.invalidate();

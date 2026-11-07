@@ -29,21 +29,20 @@ public class PermissionService {
 
   public AdminIdentity systemAdmin(AdminIdentity identity) {
     var current = admins.current(identity);
-    if (!current.systemAdmin() || current.mustChangePassword())
-      throw new AdminProblem(403, "Forbidden");
+    if (current.mustChangePassword()) throw AdminProblem.passwordRequired();
+    if (!current.systemAdmin()) throw AdminProblem.forbidden();
     return current;
   }
 
   public Explanation explain(AdminIdentity caller, String accountId, String key, Action action) {
     var current = admins.current(caller);
-    if (current.mustChangePassword()) throw new AdminProblem(403, "Password change required");
+    if (current.mustChangePassword()) throw AdminProblem.passwordRequired();
     if (!current.id().equals(accountId)) systemAdmin(current);
     return evaluate(accountId, key, action);
   }
 
   public void require(AdminIdentity caller, String key, Action action) {
-    if (!explain(caller, caller.id(), key, action).allowed())
-      throw new AdminProblem(403, "Forbidden");
+    if (!explain(caller, caller.id(), key, action).allowed()) throw AdminProblem.forbidden();
   }
 
   private Explanation evaluate(String id, String key, Action action) {

@@ -281,3 +281,9 @@ E2E는 격리된 테스트 DB·로컬 SeaweedFS·합성 관리자만 쓴다. 실
 - `AdminPublicResources`는 core가 호스트의 공개 UI 리소스를 판단하는 확장점이다. GET/HEAD만 허용하고 `/admin/api`는 이 확장점으로 공개할 수 없다. 호스트 `AdminUiConfiguration`은 등록 화면·해시 asset만 제공하며 없는 API에 index.html을 반환하지 않는다.
 - 초기 후보 TypeScript 7.0.2는 `vue-tsc 3.3.14`가 요구하는 `typescript/lib/tsc`를 export하지 않아 `ERR_PACKAGE_PATH_NOT_EXPORTED`로 실패했다. 안정 JavaScript compiler API를 제공하는 **TypeScript 6.0.3**으로 exact 고정해 typecheck/build 통과. 새 의존성·검사 우회는 추가하지 않았다. [공식 Vue 도구의 TS7 지원 논의](https://github.com/vuejs/language-tools/issues/5381).
 - 최초 설계 당시의 “미구현·미검증” 기록(8절)과 이후 구현 결과를 구분한다.
+
+### 2단계: 로그인·세션·오류 코드
+
+- CMS 전용 AdminAdvice/필터/권한 서비스에서 오류 code를 보낸다. CSRF_INVALID는 CsrfException, PERMISSION_DENIED는 권한 검사, STALE_REVISION은 트리 revision 검사에서 지정한다. LOCO 응답 처리는 변경하지 않았다.
+- `client.ts`는 요청마다 현재 CSRF 쿠키를 읽고 GET 중복 요청을 합친다. 실패한 쓰기는 자동 재시도하지 않는다. `contracts.ts`는 unknown 응답을 검사한다. `session.ts`는 앱 단일 세션 상태와 권한 요청을 관리하고 만료 때 데이터를 폐기한다. 로그인/비밀번호 변경 화면은 비밀번호를 영속 저장하지 않는다.
+- 검증: core 인증 통합 24건 성공/실패0/건너뜀0, Gradle60.045초. Vitest9건 성공/실패0, 0.320초. typecheck/build 성공. E2E는 최종 단계에서 실제 호스트로 검증한다.

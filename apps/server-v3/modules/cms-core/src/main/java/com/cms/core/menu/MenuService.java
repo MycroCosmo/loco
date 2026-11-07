@@ -191,7 +191,7 @@ public class MenuService {
   private void revision(MenuTreeRevision meta, Long expected) {
     if (expected == null) throw new AdminProblem(400, "Tree revision required");
     if (meta.revision != expected)
-      throw new AdminProblem(409, "Stale tree revision; reload the tree");
+      throw new AdminProblem(409, "Stale tree revision; reload the tree", "STALE_REVISION");
   }
 
   private Map<String, MenuNode> all() {

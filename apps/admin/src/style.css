@@ -1,0 +1,15 @@
+:root { font-family: system-ui, sans-serif; color: #172d36; background: #f4f6f7; line-height: 1.55; }
+* { box-sizing: border-box; }
+body { margin: 0; } header { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; padding: 1rem 2rem; background: #173b46; color: white; }
+header a { color: white; } main { max-width: 1100px; margin: 1.5rem auto; padding: 1.5rem; background: white; border-radius: .5rem; }
+h1 { font-size: 1.6rem; } h2 { font-size: 1.2rem; } a { color: #135d73; } button, input, select, textarea { font: inherit; }
+input:not([type=checkbox]), select, textarea { display: block; width: min(100%, 34rem); padding: .6rem; border: 1px solid #68828b; border-radius: .25rem; margin: .25rem 0 .85rem; }
+label { font-weight: 600; } button { padding: .5rem .85rem; border: 1px solid #135d73; border-radius: .3rem; background: #edf5f7; color: #173b46; cursor: pointer; margin: .25rem; }
+button:disabled { opacity: .55; cursor: default; } :focus-visible { outline: 3px solid #ba6515; outline-offset: 3px; }
+[role=alert] { color: #a02121; white-space: pre-wrap; } [role=status] { white-space: pre-wrap; }
+nav { padding: .75rem 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap; } nav a.router-link-active { font-weight: bold; }
+.table-scroll { overflow-x: auto; } table { border-collapse: collapse; width: 100%; } th, td { text-align: left; padding: .6rem; border-bottom: 1px solid #d6dfe2; vertical-align: top; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f4f6f7; padding: 1rem; } .actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+fieldset { border: 1px solid #bacbd0; margin: 1rem 0; } dialog { max-width: min(95vw, 42rem); border: 1px solid #68828b; border-radius: .5rem; } dialog::backdrop { background: #0007; }
+.skip { position: absolute; left: -10000px; } .skip:focus { left: 1rem; top: 1rem; background: white; padding: 1rem; z-index: 10; }
+@media(max-width: 600px) { main { margin: .5rem; padding: 1rem; } header { padding: 1rem; } }

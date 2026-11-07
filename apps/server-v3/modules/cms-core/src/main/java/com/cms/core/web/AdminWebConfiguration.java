@@ -105,10 +105,24 @@ public class AdminWebConfiguration {
                 errors
                     .authenticationEntryPoint(
                         (request, response, error) ->
-                            AdminAdvice.write(response, 401, "Unauthorized"))
+                            AdminAdvice.write(
+                                response,
+                                401,
+                                "Unauthorized",
+                                request.getRequestedSessionId() != null
+                                        || Boolean.TRUE.equals(
+                                            request.getAttribute("cms.session.expired"))
+                                    ? "SESSION_EXPIRED"
+                                    : "AUTHENTICATION_REQUIRED"))
                     .accessDeniedHandler(
                         (request, response, error) ->
-                            AdminAdvice.write(response, 403, "Forbidden")))
+                            AdminAdvice.write(
+                                response,
+                                403,
+                                "Forbidden",
+                                error instanceof CsrfException
+                                    ? "CSRF_INVALID"
+                                    : "PERMISSION_DENIED")))
         .addFilterAfter(
             new AdminSessionFilter(admins, clock, resources), SecurityContextHolderFilter.class);
     return http.build();

@@ -105,6 +105,27 @@ class AdminSecurityIntegrationTest {
   }
 
   @Test
+  void permissionAndRevisionErrorsCarryDifferentCmsCodes() throws Exception {
+    var root = readyAdmin();
+    var member = admins.createAccount(root, "reader", "Reader", password);
+    admins.changePassword(member, password, changed);
+    var denied = login("reader", changed);
+    mvc.perform(get("/admin/api/core/files").session(denied))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("PERMISSION_DENIED"));
+    var permitted = login("root", changed);
+    mvc.perform(
+            post("/admin/api/core/menus")
+                .session(permitted)
+                .with(csrf())
+                .contentType("application/json")
+                .content(
+                    "{\"title\":\"stale\",\"type\":\"GROUP\",\"visible\":true,\"revision\":-1}"))
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.code").value("STALE_REVISION"));
+  }
+
+  @Test
   void bootstrapIsOneShotAndHistoryDoesNotContainSecrets() {
     assertThatThrownBy(() -> admins.bootstrap("second", "Second", password))
         .isInstanceOf(AdminProblem.class);
@@ -194,7 +215,8 @@ class AdminSecurityIntegrationTest {
   @Test
   void loginAndChangingRequestsRequireCsrf() throws Exception {
     mvc.perform(post(AUTH + "/login").contentType("application/json").content("{}"))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("CSRF_INVALID"));
     var session = login("root", password);
     mvc.perform(post(AUTH + "/logout").session(session)).andExpect(status().isForbidden());
     mvc.perform(
@@ -216,7 +238,9 @@ class AdminSecurityIntegrationTest {
   void idleExpiresExactlyAtThirtyMinutes() throws Exception {
     var session = login("root", password);
     clock.advance(Duration.ofMinutes(30));
-    mvc.perform(get(AUTH + "/me").session(session)).andExpect(status().isUnauthorized());
+    mvc.perform(get(AUTH + "/me").session(session))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.code").value("SESSION_EXPIRED"));
     assertThat(session.isInvalid()).isTrue();
   }
 
@@ -252,7 +276,9 @@ class AdminSecurityIntegrationTest {
   void passwordChangeInvalidatesEverySessionAndClearsInitialRequirement() throws Exception {
     var first = login("root", password);
     var second = login("root", password);
-    mvc.perform(get("/admin/api/core/accounts").session(first)).andExpect(status().isForbidden());
+    mvc.perform(get("/admin/api/core/accounts").session(first))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("PASSWORD_CHANGE_REQUIRED"));
     mvc.perform(
             put(AUTH + "/password")
                 .session(first)

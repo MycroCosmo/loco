@@ -15,13 +15,12 @@ import org.springframework.web.bind.annotation.*;
 public class AdminAdvice {
   @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
   ResponseEntity<?> multipart() {
-    return ResponseEntity.badRequest()
-        .body(Map.of("statusCode", 400, "message", "Invalid multipart request"));
+    return ResponseEntity.badRequest().body(body(400, "Invalid multipart request"));
   }
 
   @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
   ResponseEntity<?> fileSize() {
-    return ResponseEntity.status(413).body(Map.of("statusCode", 413, "message", "File too large"));
+    return ResponseEntity.status(413).body(body(413, "File too large"));
   }
 
   @ExceptionHandler({
@@ -29,29 +28,28 @@ public class AdminAdvice {
     org.springframework.web.bind.MissingServletRequestParameterException.class
   })
   ResponseEntity<?> parameter() {
-    return ResponseEntity.badRequest().body(Map.of("statusCode", 400, "message", "Invalid input"));
+    return ResponseEntity.badRequest().body(body(400, "Invalid input"));
   }
 
   @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
   ResponseEntity<?> integrity() {
-    return ResponseEntity.status(409)
-        .body(Map.of("statusCode", 409, "message", "Resource conflict"));
+    return ResponseEntity.status(409).body(body(409, "Resource conflict"));
   }
 
   @ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException.class)
   ResponseEntity<?> conflict() {
-    return ResponseEntity.status(409).body(Map.of("statusCode", 409, "message", "Stale version"));
+    return ResponseEntity.status(409).body(body(409, "Stale version"));
   }
 
   @ExceptionHandler(AdminProblem.class)
   ResponseEntity<?> problem(AdminProblem problem) {
     return ResponseEntity.status(problem.status())
-        .body(Map.of("statusCode", problem.status(), "message", problem.getMessage()));
+        .body(body(problem.status(), problem.getMessage(), problem.code()));
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   ResponseEntity<?> input() {
-    return ResponseEntity.badRequest().body(Map.of("statusCode", 400, "message", "Invalid input"));
+    return ResponseEntity.badRequest().body(body(400, "Invalid input"));
   }
 
   @ExceptionHandler(Exception.class)
@@ -59,13 +57,22 @@ public class AdminAdvice {
     // Exception messages may contain SQL parameters or request secrets. Record the type only.
     org.slf4j.LoggerFactory.getLogger(AdminAdvice.class)
         .error("CMS request failed: {}", exception.getClass().getName());
-    return ResponseEntity.internalServerError()
-        .body(Map.of("statusCode", 500, "message", "Internal server error"));
+    return ResponseEntity.internalServerError().body(body(500, "Internal server error"));
   }
 
-  static void write(HttpServletResponse response, int status, String message) throws IOException {
+  private static Map<String, Object> body(int status, String message) {
+    return body(status, message, AdminProblem.defaultCode(status));
+  }
+
+  private static Map<String, Object> body(int status, String message, String code) {
+    return Map.of("statusCode", status, "message", message, "code", code);
+  }
+
+  static void write(HttpServletResponse response, int status, String message, String code)
+      throws IOException {
     response.setStatus(status);
     response.setContentType("application/json");
-    response.getWriter().write("{\"statusCode\":" + status + ",\"message\":\"" + message + "\"}");
+    new com.fasterxml.jackson.databind.ObjectMapper()
+        .writeValue(response.getWriter(), body(status, message, code));
   }
 }
