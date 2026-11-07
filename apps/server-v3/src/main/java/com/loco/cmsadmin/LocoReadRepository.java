@@ -33,8 +33,18 @@ public class LocoReadRepository {
                         "t.\"deletedAt\" IS " + (value.equals("ACTIVE") ? "NULL" : "NOT NULL"));
                 }
                 case "search" -> {
-                  String field = resource == LocoReadResource.USERS ? "nickname" : "title";
-                  clauses.add("t." + field + " ILIKE :search ESCAPE '\\'");
+                  List<String> fields =
+                      switch (resource) {
+                        case USERS -> List.of("nickname");
+                        case MAPS -> List.of("title");
+                        case PLACES -> List.of("name", "address", "roadAddress");
+                      };
+                  clauses.add(
+                      "("
+                          + fields.stream()
+                              .map(field -> "t.\"" + field + "\" ILIKE :search ESCAPE '\\'")
+                              .collect(java.util.stream.Collectors.joining(" OR "))
+                          + ")");
                   params.put(
                       key,
                       "%"
@@ -80,6 +90,10 @@ public class LocoReadRepository {
         Arrays.stream(columns.split(","))
             .map(c -> "t.\"" + c + "\" AS \"" + c + "\"")
             .collect(java.util.stream.Collectors.joining(","));
+    if (detail && resource == LocoReadResource.PLACES)
+      fields +=
+          ", (SELECT count(*) FROM public.place_reviews r WHERE r.\"placeId\"=t.id) AS \"reviewCount\","
+              + " coalesce((SELECT avg(r.rating) FROM public.place_reviews r WHERE r.\"placeId\"=t.id),0)::float8 AS \"averageRating\"";
     return "SELECT " + fields + " FROM public." + resource.table + " t";
   }
 

@@ -1,9 +1,12 @@
-import { object, text, nullableText, list } from '../api/contracts'
+import { object, text, nullableText, list, number } from '../api/contracts'
 import { displayTime, historyFilters } from './historyModel'
 
-export type LocoResource = 'users' | 'maps'
+export type LocoResource = 'users' | 'maps' | 'places'
 type Filter = { key: string; label: string; options?: readonly string[] }
 export const locoScreens: Record<LocoResource, { title: string; note: string; filters: readonly Filter[] }> = {
+  places: { title: '장소 조회', note: '비공개 포함: loco.places READ는 모든 지도방의 장소를 조회합니다. 이미지 URL·전화번호는 제외합니다.',
+    filters: [{ key: 'id', label: '장소 ID' }, { key: 'mapId', label: '지도방 ID' }, { key: 'createdById', label: '작성자 ID' },
+      { key: 'search', label: '이름·주소 포함' }, { key: 'tag', label: '태그 정확 일치' }] },
   maps: { title: '지도방 조회', note: '비공개 포함: loco.maps READ는 모든 지도방을 조회합니다. 초대 코드·이미지 URL은 제외합니다.',
     filters: [{ key: 'id', label: '지도방 ID' }, { key: 'ownerId', label: '방장 ID' }, { key: 'search', label: '제목 포함' },
       { key: 'visibility', label: '공개 여부', options: ['PUBLIC', 'PRIVATE'] }, { key: 'tag', label: '태그 정확 일치' }] },
@@ -25,6 +28,15 @@ export function locoRow(resource: LocoResource, detail = false) {
       add('제목', v.title); add('방장 ID', v.ownerId); add('공개 여부', v.visibility)
       add('태그', v.tags === null ? null : list(text)(v.tags).join(', '))
       if (detail) add('설명', v.description)
+    }
+    if (resource === 'places') {
+      add('이름', v.name); add('지도방 ID', v.mapId); add('작성자 ID', v.createdById)
+      if (detail) {
+        add('주소', v.address); add('도로명 주소', v.roadAddress); add('분류', v.category); add('메모', v.memo)
+        add('위도', String(number(v.latitude))); add('경도', String(number(v.longitude)))
+        add('태그', v.tags === null ? null : list(text)(v.tags).join(', '))
+        add('리뷰 수', String(number(v.reviewCount))); add('평균 평점', String(number(v.averageRating)))
+      }
     }
     add('생성 시각 (한국)', displayTime(text(v.createdAt)))
     if (v.updatedAt !== undefined) add('수정 시각 (한국)', displayTime(text(v.updatedAt)))

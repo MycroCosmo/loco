@@ -109,6 +109,74 @@ class LocoReadIntegrationTest {
     return "00000000-0000-4000-8000-00000000020" + i;
   }
 
+  String placeId(int i) {
+    return "00000000-0000-4000-8000-00000000030" + i;
+  }
+
+  void seedPlaces() {
+    for (int i = 1; i <= 2; i++)
+      sql.update(
+          """
+      INSERT INTO places(id,"mapId","createdById",name,address,"roadAddress",latitude,longitude,phone,memo,tags,"imageUrls","createdAt","updatedAt")
+      VALUES (?,?,?,'Place '||?,'주소 100%_',NULL,37.05,-0.00001,'hidden-phone','memo',ARRAY['tag'],ARRAY['/uploads/hidden.webp'],'2026-01-01','2026-01-01')
+      """,
+          placeId(i), mapId(i), user1, i);
+    for (int i = 1; i <= 2; i++)
+      sql.update(
+          """
+      INSERT INTO place_reviews(id,"placeId","userId",rating,content,"createdAt","updatedAt") VALUES (?,?,?,?,'review','2026-01-01','2026-01-01')
+      """,
+          UUID.randomUUID().toString(),
+          placeId(1),
+          i == 1 ? user1 : user2,
+          i == 1 ? 2 : 5);
+  }
+
+  @Test
+  void placesReadPrivateAndAggregateWithoutMutations() throws Exception {
+    seedPlaces();
+    var before = snapshot();
+    assertThat(
+            ok("/places?mapId=" + mapId(1) + "&createdById=" + user1 + "&tag=tag")
+                .path("items")
+                .size())
+        .isEqualTo(1);
+    assertThat(ok("/places?search=" + encode("100%_")).path("items").size()).isEqualTo(2);
+    assertThat(ok("/places?tag=ta").path("items").size()).isZero();
+    SqlQueryCounter.reset();
+    var detail = ok("/places/" + placeId(1));
+    assertThat(detail.path("reviewCount").asInt()).isEqualTo(2);
+    assertThat(detail.path("averageRating").asDouble()).isEqualTo(3.5);
+    assertThat(detail.path("latitude").asDouble()).isEqualTo(37.05);
+    assertThat(detail.path("longitude").asDouble()).isEqualTo(-0.00001);
+    assertThat(detail.toString()).doesNotContain("hidden-phone", "imageUrls", "/uploads/", "email");
+    assertThat(
+            SqlQueryCounter.statements().stream()
+                .filter(s -> s.contains("FROM public.places"))
+                .count())
+        .isEqualTo(1);
+    assertThat(ok("/places/" + placeId(2)).path("averageRating").asDouble()).isZero();
+    assertThat(snapshot()).isEqualTo(before);
+    assertThat(catalog.definition("loco.places").label()).contains("비공개 포함");
+  }
+
+  @Test
+  void placeCursorAndForeignFiltersAreBounded() throws Exception {
+    seedPlaces();
+    var first = ok("/places?size=1");
+    assertThat(first.path("items").get(0).path("id").asText()).isEqualTo(placeId(2));
+    sql.update("DELETE FROM places WHERE id=?", placeId(2));
+    assertThat(
+            ok("/places?size=1&cursor=" + encode(first.path("nextCursor").asText()))
+                .path("items")
+                .get(0)
+                .path("id")
+                .asText())
+        .isEqualTo(placeId(1));
+    assertThat(get(http, "/admin/api/loco/places?mapId=invalid").statusCode()).isEqualTo(400);
+    assertThat(get(http, "/admin/api/loco/places?visibility=PRIVATE").statusCode()).isEqualTo(400);
+  }
+
   @Test
   void mapsIncludePrivateButNeverInviteCodeOrImages() throws Exception {
     var before = snapshot();

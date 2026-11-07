@@ -2,6 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { locoPage, locoQuery, locoRow } from './locoModel'
 
 describe('LOCO read contracts', () => {
+  it('validates place aggregates and excludes image and phone fields', () => {
+    const place = { id: 'p1', name: 'P', mapId: 'm1', createdById: 'u1', address: 'A', roadAddress: null, category: null, memo: null, latitude: 37.05, longitude: -0.00001, tags: [], reviewCount: 2, averageRating: 3.5, phone: 'hidden', imageUrls: ['hidden'], createdAt: '2026-01-01T00:00:00Z' }
+    expect(locoRow('places', true)(place).fields.find(f => f.label === '평균 평점')?.value).toBe('3.5')
+    expect(JSON.stringify(locoRow('places', true)(place))).not.toContain('hidden')
+    expect(() => locoRow('places', true)({ ...place, averageRating: '3.5' })).toThrow()
+  })
   it('shows private maps and descriptions only in detail, without invitation data', () => {
     const map = { id: 'm1', title: 'Private', ownerId: 'u1', visibility: 'PRIVATE', tags: ['a'], createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z', description: 'text', inviteCode: 'hidden' }
     expect(locoRow('maps')(map).fields.some(f => f.label === '설명')).toBe(false)

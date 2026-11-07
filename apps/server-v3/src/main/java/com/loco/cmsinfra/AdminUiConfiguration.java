@@ -25,7 +25,8 @@ public class AdminUiConfiguration {
           "/admin/history",
           "/admin/files",
           "/admin/loco/users",
-          "/admin/loco/maps");
+          "/admin/loco/maps",
+          "/admin/loco/places");
 
   @Bean
   AdminPublicResources adminUiPublicResources() {
