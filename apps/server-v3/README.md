@@ -561,4 +561,16 @@ Compose는 endpoint `http://storage:8333`, region `us-east-1`, bucket `cms-files
 
 집중 재검증은 `./gradlew :cms-core:test :test --tests '*CmsFilesIntegrationTest' --tests '*StorageTransportTest' --tests '*CmsImageTransformerTest'`로 실행한다. 전체 범위는 `./gradlew allTests build`다(Windows는 `gradlew.bat`). 실제 AWS 접속 없이 로컬 SeaweedFS와 루프백 장애 대역으로 확인한다. 대조 비용 보고서는 `build/reports/cms-storage/reconciliation.txt`, 전체 결과는 Gradle HTML 보고서에서 확인한다.
 
-5-A 최종 전체 검증: **1,563건 중 성공1,562·실패0·HEIC 공통 제약 건너뜀1**, 알려진 차이11건 불변, **1,145.692초**(v2 이미지 캐시). core99·root312·비교1,152건, allTests/build/Spotless 통과. DB gate의 두 순서 모두 ACTIVE 객체 누락0이며 Linux Compose 이미지5종 흐름도 통과했다. 초기 SeaweedFS 준비 시점 문제와 수정 근거는 설계20절에 기록했다. **5-B 화면과6단계는 미착수**다.
+5-A 당시 최종 전체 검증: **1,563건 중 성공1,562·실패0·HEIC 공통 제약 건너뜀1**, 알려진 차이11건 불변, **1,145.692초**(v2 이미지 캐시). core99·root312·비교1,152건, allTests/build/Spotless 통과. DB gate의 두 순서 모두 ACTIVE 객체 누락0이며 Linux Compose 이미지5종 흐름도 통과했다. 초기 SeaweedFS 준비 시점 문제와 수정 근거는 설계20절에 기록했다. 이후5-B 화면 결과는 ADMIN_UI_DESIGN, 6단계 결과는 아래 LOCO_ADMIN_DESIGN을 따른다.
+
+## CMS LOCO 조회 (6단계)
+
+회원·지도방·장소·신고의 관리자 목록/상세를 `/admin/api/loco/{users|maps|places|reports}` 및 `/{id}`로 제공한다. 관리자 세션과 해당 `loco.* READ`가 필요하며 SYSTEM_ADMIN은 모두 허용한다. 지도방·장소 READ는 **비공개 포함**, 역할 설명에 범위를 표시한다. 앱 JWT는 관리자 API 인증 수단이 아니다.
+
+화면은 `/admin/loco/users`, `/admin/loco/maps`, `/admin/loco/places`, `/admin/loco/reports`다. [화면 실행 방법](../admin/README.md), [승인된 결정·구현·검증](LOCO_ADMIN_DESIGN.md), [1만/10만 건 실제 SQL·EXPLAIN](src/test/resources/cms-read/explain-baseline.json)을 참고한다. 이메일 서버 마스킹, size50/max100 cursor, 업무별 검색을 지원하며 토큰·초대 코드·이미지 URL을 제공하지 않는다. 대상 업무 READ가 없는 신고 조회에서는 대상 존재 여부도 숨긴다.
+
+전용 JPA projection은 기존 public 스키마를 읽고 앱 서비스·마커 재집계를 호출하지 않는다. SYSTEM_ADMIN 기준 목록/상세 업무 SQL1·전체 SQL3을 고정했다. 최신순 목록은 현재 인덱스에서 scan/sort가 남으며 인덱스 추가는 후속 실험이다. public 데이터·변경 이력 불변, core의 LOCO 역참조 없음, CMS/앱 HTTP 선언 혼용 금지를 검사한다.
+
+C-33 호스트 이력 계약은 다음 신고 처리 쓰기 묶음으로 이연(설계2절 보존). 이력 조회는 SYSTEM_ADMIN 유지, 리뷰·피드백 조회·신고 처리/정지·CMS 파일 업무 연결은 이번 범위 밖이다. 최종 회귀는 `gradlew.bat allTests build`, 프런트는 고정 Node 준비 후 `npm.cmd --prefix ../admin run test:unit` 및 별도 `test:e2e`다.
+
+6단계 최종 검증: 서버 총1,600건(성공1,599·실패0·기존 HEIC skip1), 알려진 차이11건(개선6·의도5·보류0) 불변. `allTests build`·Spotless1,001.813초(v2 이미지 캐시, 직전 실제 통과한 core101건 UP-TO-DATE 재사용), Vitest23건0.170초, Chromium E2E7건 준비/종료 포함34.789초. 상세 실행 범위와 근거는 [설계11절](LOCO_ADMIN_DESIGN.md#11-최종-검증완료-2026-11-08)에 있다.

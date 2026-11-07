@@ -1,6 +1,6 @@
 # CMS 6단계 — 호스트 이력 계약과 LOCO 조회 화면 설계
 
-상태: **C-33~C-42 확정, 이력 계약을 제외한 6단계 구현 중.** 2026-11-08, CMS 5-B 완료 `9877ad8` 기준. 최종 승인 표가 과거 제안보다 우선한다.
+상태: **C-33~C-42 확정, 이력 계약을 제외한 6단계 구현·검증 완료.** 2026-11-08, CMS 5-B 완료 `9877ad8` 기준. 최종 승인 표가 과거 제안보다 우선한다.
 
 상위 근거: [CMS_CORE_DESIGN.md](CMS_CORE_DESIGN.md)의 C-9-5 A, C-14 A와 18절 백로그, C-18 C / [ADMIN_UI_DESIGN.md](ADMIN_UI_DESIGN.md)의 C-24~C-32. 승인 전 운영 코드·프런트·의존성·DB를 바꾸지 않는다.
 
@@ -203,7 +203,7 @@ V1에는 위 최신순 복합 인덱스가 없다. users.email UNIQUE, places(ma
 
 1. **C-33에 따라 이연**: 호스트 등록형 이력 계약은 다음 신고 처리 쓰기 묶음에서 구현한다. 예약/중복/미등록/null/중첩/타입/한도·민감 표식, deep copy, 실제 DB rollback 검증 계획과 2절 설계는 보존한다. 이번 조회 서비스에는 새 쓰기가 분류 없이 추가되면 실패하는 메서드 목록 검사를 둔다.
 2. C-34 A: 기존 SYSTEM_ADMIN 전용 이력 목록·상세를 유지하며 일반 업무 READ만으로 열람할 수 없음을 검사한다. 업무 이력 0건이므로 B의 mixed history 검증은 이번에 실행하지 않는다.
-3. C-42의 호스트 HTTP 경계를 먼저 고정한 뒤 `loco.*` 권한·조회 DTO/service/repository/API와 공통 목록 컴포넌트 연결. 회원→지도방→장소→신고→선택 시 리뷰/피드백 순서. 각 단계마다 정상/미인증/권한 없음/타 업무 READ/탈퇴·삭제·고아 대상/필터경계/개인정보 제외/공개·비공개·DB 불변을 검사.
+3. C-42의 호스트 HTTP 경계를 먼저 고정한 뒤 `loco.*` 권한·조회 DTO/service/repository/API와 공통 목록 컴포넌트 연결. 회원→지도방→장소→신고 순서. 리뷰/피드백은 C-35 B로 이연. 각 단계마다 정상/미인증/권한 없음/타 업무 READ/탈퇴·삭제·고아 대상/필터경계/개인정보 제외/공개·비공개·DB 불변을 검사.
 4. 페이지 첫/끝/동일시각·cursor 행 삭제·조건 변경·병렬 추가, ID SQL 바인딩·literal wildcard, 목록/상세 SQL 수를 고정. 현재 앱 응답과 CMS DTO가 다른 것은 관리 API 계약이며 LOCO 알려진 차이를 새로 만드는 일이 아님을 구분.
 5. 고정 데이터 SQL/EXPLAIN과 시간 기준 기록. C-40 B일 때만 필요한 migration을 별도 검토·커밋한다. core 독립 기동과 호스트 조립에 LOCO가 역참조되지 않는지 검증한다.
 6. 호스트/화면/보안 경계 변경이므로 최종 `allTests build`, Vitest, 별도 Chromium E2E. E2E는 기존5개에 일반 READ의 조회·금지 화면/직접 API, 권한 회수, 개인정보 마스킹·페이지를 소수 흐름으로 추가. CMS 업무 요청이 기존 public 데이터를 바꾸지 않는 것과 LOCO 알려진 차이11건 불변을 확인하고 결과·시간을 커밋 본문에 남긴다.
@@ -270,3 +270,22 @@ C-40 A에 따라 인덱스·migration은 추가하지 않았다. 후속 실험 �
 npm.cmd --prefix ../admin run test:unit
 npm.cmd --prefix ../admin run test:e2e
 ```
+
+## 11. 최종 검증·완료 (2026-11-08)
+
+| 범위 | 총 건수 | 성공 | 실패 | 건너뜀 | 시간·실행 조건 |
+|---|---:|---:|---:|---:|---|
+| core test | 101 | 101 | 0 | 0 | 직전 targeted 실행에서 실제 수행, 최종 allTests에서는 UP-TO-DATE 재사용 |
+| root test | 347 | 346 | 0 | 1 | 최종 전체 실행, HEIC 기존 공통 제약1 |
+| v2 comparisonTest | 1,152 | 1,152 | 0 | 0 | v2 이미지 캐시, 새 CMS 조회는 v2와 비교하지 않음 |
+| 서버 합계·allTests build·Spotless | **1,600** | **1,599** | **0** | **1** | 명령 wall time **1,001.813초** |
+| Vitest | 23 | 23 | 0 | 0 | **0.170초**, 3파일 |
+| Chromium E2E(별도) | 7 | 7 | 0 | 0 | 브라우저 **10.2초**, 호스트 준비·종료 포함 **34.789초** |
+
+core 실제 실행은 9절의 core101+조회32 검증101.901초에 포함된다. 위 allTests 시간에 캐시된 core 실행 시간을 더해 실제 전체 wall time인 것처럼 표시하지 않는다. 이전5-B의1,190.011초와 실행/캐시 조건이 달라 이번 수치를 성능 개선으로 해석하지 않는다. v2 build1회(캐시)·start1회·restart17회, 인증 대기0ms. 테스트별 JUnit time 합계와 Gradle 준비·종료를 포함한 wall time은 구분한다.
+
+알려진 차이 **11건 불변: 개선6·의도5·보류0**. `http.runtime-header`, `kakao.failure-message`, `kakao.socket-timeout`, `maps.concurrent-public-join`, `maps.concurrent-code-join`, `maps.invite-code-generator`, `notifications.token-replacement`, `tokens.cleanup-timezone`, `images.concurrent-limit`, `images.concurrent-delete`, `images.concurrent-upload-delete`. 개선 차이는 통과한 검증이며 실패/건너뜀에 더하지 않는다.
+
+판정 근거는 core/root/comparison JUnit XML과 `build/reports/compatibility/summary.json`, `build/cms-six-all-time.json`, `build/cms-six-unit-final.log`, `build/cms-six-e2e-final.log`다. 운영 JAR의 SPA·조회 클래스 포함 및 브라우저 제어/측정 테스트 코드 제외도 확인했다. 문서 상대 링크·`git diff --check` 통과. v2·Flutter·Flyway migration·기존 HistoryPayload 변경 없음. 실제 외부 API/키 미사용. core는 LOCO 타입과 S3 SDK를 컴파일/실행 classpath에서 참조할 수 없는 기존 경계 검사를 유지했다.
+
+C-33 등록 계약과 C-34 열람 분리는 다음 신고 처리 쓰기 묶음에서 재검토한다. 리뷰·피드백 조회(C-35), 업무 파일 연결(C-41)은 이연 상태다. 업무 쓰기/정지/신고 처리, 인덱스 추가, 다른 브라우저·스크린 리더 수동 검증은 이번 완료 범위에 포함하지 않는다. **6단계에서 멈춘다.**
