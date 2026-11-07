@@ -47,6 +47,8 @@ services:
     mem_limit: 1536m
     environment:
       PORT: 8081
+      # Local HTTP only. Deployments must retain the application's Secure=true default.
+      CMS_COOKIE_SECURE: ${CMS_COOKIE_SECURE:-false}
       HOST: ${HOST:-0.0.0.0}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
       FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT:-}

@@ -286,7 +286,7 @@ A는 core가 S3 SDK 타입을 노출하지 않는 계약, 조립 인프라에서
 
 C-9-3의 초기 파일 크기·형식과 C-4의 세션/로그인 수명·횟수는 사용자 승인됐다. 변경할 때는 항목 이름과 변경값을 함께 기록한다. 대용량 presigned 업로드·비동기 변환은 기존 3단계 이후 백로그로 유지한다.
 
-## 9. 승인된 구현 순서 — 이번에는 1단계에서 중단
+## 9. 승인된 구현 순서 — 이번에는 2단계에서 중단
 
 1. C-1/C-7 경계·core 단독 기동·migration 테스트. 현재 V1/기존 회귀 유지 확인.
 2. 관리자 계정·초기 생성·세션/CSRF·앱 JWT와의 교차 인증 차단. 이력 기반도 함께 준비.
@@ -364,3 +364,91 @@ C-9-5 첫 LOCO 확장 범위:
 기존 1,434개 식별자 누락0·추가7. 알려진 차이의 ID·분류 변경0(개선6·의도5·보류0), v2 빌드/최초 기동 각1·재시작17, 인증 대기0ms·시나리오 창 대기61,014ms다. 결과·manifest·quota·로그는 `build/performance/cms-foundation-final/`에 보존한다. 실행 JAR에 core library와 기존 V1이 포함되고 테스트 호스트는 포함되지 않는 것을 확인했다. core JAR에는 설정 클래스와 V2만 있고 LOCO 클래스/V1/테스트 클래스는 없다.
 
 새 기능·실험 성능의 측정이 아니라 회귀 실행 시간이다. 기존 측정의 동시 이미지 구간 중복 한계도 유지한다. v2·Flutter·V1·기존 비교 fixture는 변경하지 않았다. 노션 결정 변경 표에 승인된 13개 항목을 기록했다. **여기서 1단계를 마치며, 관리자 인증·메뉴·프런트·MinIO 구현은 다음 승인까지 진행하지 않는다.**
+
+## 12. 2단계 결정 변경 기록 (2026-11-07)
+
+선택지 문자보다 사용자가 명시한 기술 이름을 기준으로 확정했다. 노션 결정 변경 표에도 같은 내용을 반영했다.
+
+| 번호·항목 | 확정 | 근거·제약 |
+| --- | --- | --- |
+| C-10 관리자 비밀번호 해시 | Argon2id, DelegatingPasswordEncoder 기본 `{argon2id}` | 신규 관리자 계정은 BCrypt의 72바이트 제한을 피한다. LOCO 회원 BCrypt는 그대로 유지한다. 접두사는 향후 알고리즘 변경을 위한 것이며 다른 알고리즘 수용은 지금 추가하지 않는다. |
+| C-10 의존성 추가 예외 | `org.bouncycastle:bcprov-jdk18on:1.86` | Spring Argon2PasswordEncoder 실행에 필요해 승인된 신규 의존성이다. Spring/웹/JPA/Security/Flyway는 기존 Boot BOM을 그대로 사용한다. |
+| C-10 계산 파라미터 | 메모리 19MiB(19456KiB), 반복 2, 병렬도 1, salt16B, 출력32B | [OWASP 최소 권장값](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html). 해시 지연은 아래 실측으로 기록하며 하드웨어가 다른 운영 환경의 처리량으로 일반화하지 않는다. |
+| C-11 SPA CSRF 전달 | JS 읽기 가능한 `XSRF-TOKEN` + `X-XSRF-TOKEN`, CookieCsrfTokenRepository | `/admin` 경로에만 적용한다. 로그인·로그아웃 시 새 토큰을 발행한다. 세션 cookie는 `CMSSESSION`, HttpOnly·SameSite=Strict·운영 Secure. LOCO CSRF는 기존대로 꺼 둔다. |
+| 초기 관리자 비밀번호 입력 | `CMS_BOOTSTRAP_PASSWORD` 환경변수 또는 표준 입력, 대화형 콘솔은 비표시 입력 | CLI에서 `--password`를 포함한 미지원 인자는 Spring 시작 전에 거절하고 값을 출력하지 않는다. 비밀번호를 셸 명령 문자열에 직접 쓰지 않는다. |
+
+참고: [Spring Security 6.5 비밀번호 저장](https://docs.spring.io/spring-security/reference/6.5/features/authentication/password-storage.html), [SPA CSRF](https://docs.spring.io/spring-security/reference/6.5/servlet/exploits/csrf.html), [BouncyCastle 배포](https://www.bouncycastle.org/).
+
+## 13. 2단계 구현·사용 방법
+
+### 저장 경계와 파일 역할
+
+- `V3__admin_accounts_and_history.sql`: `cms.admin_account`, 최소 `admin_role`/`admin_account_role`, 일회성 생성 상태, `change_history` JSONB를 추가한다. V1/V2는 변경하지 않고 public Flyway history를 계속 사용한다. role은 SYSTEM_ADMIN 초기 생성에 필요한 부분만이며 메뉴·업무 권한 관리 API는 3단계다.
+- `AdminAccount`/저장소: 앱에서 생성하는 UUID 문자열 ID, 정규화 로그인 ID 고유 제약, 인증 버전과 강제 비밀번호 변경 상태를 저장한다. 암호 해시를 응답에 내보내지 않는다.
+- `AdministrationState`: 한 행의 비관적 락으로 초기 생성과 마지막 활성 최고관리자 검사를 직렬화한다. 초기 생성 완료는 DB에 남으므로 재시작으로 초기화되지 않는다.
+- `AdminService`: 계정 생성·상태 변경·비밀번호 변경과 성공 이력을 같은 트랜잭션에서 처리한다. 역할 부여·강등·전체 계정 수정은 다음 단계 범위다. 고위험 계정 변경은 트랜잭션 안에서 행 잠금 후 수행자의 현재 권한을 다시 확인한다.
+- `HistoryWriter`/`ChangeHistory`: 반드시 기존 트랜잭션 안에서 호출한다. 허용된 loginId/displayName/active/mustChangePassword/역할 코드만 전후 JSONB로 기록한다. 비밀번호·해시·세션·CSRF·JWT는 기록하지 않는다. 비밀번호 변경은 값이 아닌 변경 이벤트만 남긴다. 이력 저장 실패 시 계정 변경도 롤백된다.
+- `CoreAuditingConfiguration`: 기존 LOCO의 UTC Clock·밀리초 DateTimeProvider를 동일하게 core로 옮겨 core 단독 기동에도 사용한다. 기존 LOCO의 날짜 처리 의미를 바꾸지 않는다.
+- `AdminWebConfiguration`/`AdminController`/`AdminSessionFilter`: 관리자 전용 SecurityFilterChain, 세션 인증 저장, 세션 ID 교체, CSRF cookie 교체, 만료·활성 상태·인증 버전 확인을 담당한다. LOCO JWT 필터는 관리자 체인에서 실행되지 않는다. `GlobalHttpFilter`는 정확한 `/admin` 및 하위 경로만 제외하며 `/administrator`는 제외하지 않는다.
+- `LoginAttempts`: IP(getRemoteAddr)와 정규화 계정 각각 1분 창 5회. 성공도 한 번의 시도로 센다. 잘못된 비밀번호·없는 계정·비활성 계정은 같은 401 응답과 Argon2 검증 경로를 사용한다. 카운터는 메모리이며 만료 창은 정리한다. 재기동·다중 서버 간 공유/프록시 신뢰 설정은 후속 단계다.
+- `AdminBootstrap`: 비웹 일회성 Java 실행 경로다. 비밀번호를 요청 DTO의 자동 toString이나 CLI 로그에 포함하지 않는다. 성공 시 최초 로그인 비밀번호 변경이 필수다.
+
+세션은 idle 30분, 절대 8시간 경계에서 만료한다. 매 관리자 요청에서 활성 상태와 authVersion을 조회하므로 비활성화 또는 비밀번호 변경 커밋 다음 요청부터 기존 세션을 차단한다. 이미 진행 중인 요청을 취소하는 보장은 없다. 비밀번호 변경 후 현재 세션도 종료하고 다시 로그인한다. 서버 재시작 시 메모리 세션은 사라진다.
+
+Cookie 방식의 CSRF 토큰 재발급은 새 cookie/header 쌍 사용을 뜻한다. 별도의 서버측 CSRF 토큰 저장소를 도입한 것은 아니다. SPA 계약은 JSON 응답에 CSRF 값을 넣지 않고 cookie를 읽어 header로 전송하며, 요청 attribute handler는 raw header 값을 검증한다. 로그인도 CSRF 검사를 통과해야 한다. cookie 경로가 `/admin`이므로 후속 SPA도 개발/운영 모두 `/admin/` 아래에 제공한다(Vite/router base 포함). 다른 경로의 문서에서는 이 cookie를 JavaScript로 읽을 수 없다. SPA 자체는 이번 단계에 만들지 않는다.
+
+### 현재 제공 API
+
+| 메서드·경로 (`/admin/api/core` 기준) | 동작 |
+| --- | --- |
+| GET `/auth/csrf` | 204, CSRF cookie와 익명 세션 준비 |
+| POST `/auth/login` | `{loginId,password}`, 세션 ID·CSRF 교체 |
+| GET `/auth/me` | 현재 관리자 신원, 초기 비밀번호 변경 필요 여부 |
+| POST `/auth/logout` | 세션 무효화, 새 CSRF cookie, 204 |
+| PUT `/auth/password` | `{currentPassword,newPassword}`, 변경 후 모든 기존 세션 효력 회수, 204 |
+| GET/POST `/accounts` | 현재 최고관리자만 조회/등록. 등록 입력 `{loginId,displayName,password}`; 새 계정에는 아직 역할을 부여하지 않음 |
+| PUT `/accounts/{id}/status` | `{active}`, 마지막 활성 최고관리자 비활성화 거절 |
+
+초기 비밀번호 변경 전에는 me/password/logout/csrf/login 외 관리자 경로를 거절한다. 계정 생성·상태 변경 권한은 SYSTEM_ADMIN이며 READ/MANAGE 카탈로그·역할 편집은 다음 단계에 구현한다. 유효하지 않은 입력 400, 인증 실패 401, 권한/CSRF 실패 403, 중복/마지막 최고관리자 충돌 409, 제한 429를 사용한다. CMS 오류를 LOCO Nest 호환 오류 형식에 결합하지 않는다.
+
+### 로컬 실행과 초기 생성
+
+Java 21, PostgreSQL, `DB_URL`/`DB_USERNAME`/`DB_PASSWORD` 환경변수를 준비한다. 일반 앱 실행에는 기존 JWT 설정도 필요하다. `.env.example`에는 키만 있고 실제 값은 넣지 않았다. CLI는 비웹 core 호스트만 시작하므로 LOCO JWT/Firebase 설정이 필요 없다.
+
+```powershell
+# apps/server-v3에서 실행. DB 환경변수는 이미 별도로 주입되어 있어야 한다.
+.\gradlew.bat bootJar
+java -jar build/libs/loco-server-v3-0.0.1-SNAPSHOT.jar cms-bootstrap --login-id=admin --display-name=Administrator
+# 콘솔에서 비표시로 비밀번호 입력. 명령줄 --password 옵션은 없다.
+```
+
+CI 등에서는 비밀 저장소가 `CMS_BOOTSTRAP_PASSWORD`를 해당 일회성 프로세스에만 주입하거나 stdin으로 전달한다. 일반 앱/Compose 서비스에 bootstrap 비밀번호를 상시 주입하지 않는다. root `.env`를 쓸 경우 datasource 값은 CLI 프로세스 환경에도 설정해야 한다. 최초 생성 후 bootstrap 재실행은 실패하며 기존 비밀번호를 덮어쓰지 않는다.
+
+운영 기본값은 `CMS_COOKIE_SECURE=true`다. 로컬 HTTP 실행만 `CMS_COOKIE_SECURE=false`로 명시하고 개발 Compose에는 이 로컬 기본값을 넣었다. 운영에서는 HTTPS와 Secure=true를 사용한다. SPA는 동일 출처 `/admin/api`로 호출하고, 쿠키의 XSRF-TOKEN을 읽어 변경 요청의 X-XSRF-TOKEN에 담는다. 로그인·로그아웃 이후 cookie 값을 다시 읽어야 한다. 관리자는 LOCO 앱 API에 접근하려면 별도의 LOCO JWT가 필요하다.
+
+### 검증
+
+- core 테스트: Argon2 파라미터/72바이트 초과 검증, 해시 시간, 실제 PostgreSQL의 bootstrap 경합·한 번만 생성·이력 롤백, CLI 프로세스 입력/출력, CSRF/세션 고정/만료/비활성 계정/인증 버전/제한/최고관리자 보호.
+- 실제 Tomcat: cookie의 HttpOnly/Strict/Secure 속성을 HTTP 응답으로 검사한다. MockMvc의 servlet cookie 표현 차이에 의존하지 않는다.
+- LOCO 조립 테스트: 유효한 앱 JWT는 앱 보호 API에서 성공하지만 관리자 API에서는 401, 유효 관리자 세션을 강제로 앱 경로에 보내도 401. 관리자에 v2 parser/Helmet/CORS가 적용되지 않고 비슷한 이름의 경로는 기존 동작을 유지한다.
+- core 독립 기동은 최신 V3까지 검증한다. 기존 V2 이관 테스트 target(2), Prisma V1 비교 target(1)은 목적에 맞게 고정해 둔다.
+
+```powershell
+.\gradlew.bat :cms-core:test --rerun --console=plain
+.\gradlew.bat :test --tests '*HealthIntegrationTest' --rerun --console=plain
+.\scripts\measure-tests.ps1 -Label cms-auth-final
+```
+
+Argon2id 해시 실측: Windows 11 / Java 21.0.5, 동일 프로세스 준비 실행 3회 후 단일 스레드 10회. 19MiB·t=2·p=1 기준 최소 22.217ms / 중앙값 24.180ms / 최대 25.173ms. 비밀번호·해시는 출력하지 않고 소요 시간만 테스트 XML에 남겼다. 운영 Linux의 처리량이나 동시 부하 결과를 뜻하지 않는다. 최종 테스트 건수·전체 실행 시간은 회귀 완료 후 기록한다. 이번 작업은 2단계에서 멈추며 메뉴·권한 모델·SPA·MinIO는 구현하지 않는다.
+
+### 2단계 최종 결과 (2026-11-07)
+
+`measure-tests.ps1 -Label cms-auth-final`: **전체 1,468건 / 성공 1,467 / 실패 0 / 기존 HEIC 공통 제약 skip 1**, **980.358초(16분 20초)**. v2 이미지 캐시 사용, v2 재시작 17회. root 빠른 테스트 290건(성공289·skip1), core26건 전부 성공, v2 비교1,152건 전부 성공. Spotless 검사와 root/core build도 성공했다.
+
+기존 stage1 manifest 1,441개는 **누락 0, 신규 27개**다. 기존 알려진 차이 **11건(개선6·의도5·보류0)**의 case/kind/reason을 이전 결과와 대조해 모두 동일함을 확인했다. 전체 시간은 stage1 1,037.621초에서 이번 980.358초였으나, 최적화 작업이나 동일 부하 반복 측정이 아니므로 성능 개선으로 해석하지 않는다. 실행 결과·로그·manifest는 `build/performance/cms-auth-final/`에 있다.
+
+검증 중 기존 Flyway-only V2 테스트가 최신 core의 JPA 설정을 함께 가져와 `jpaMappingContext` 없이 시작하려다 3건 실패했다. V2 검사는 production Flyway location/target(2) 검증에 한정하고, 최신 core 기동은 별도 통합 테스트에서 검증하도록 경계를 분리했다. V2→V3 public schema/history 보존 검사를 추가한 집중 실행 4/4 성공 후 위 전체 회귀를 다시 실행했다. V1/V2 SQL은 수정하지 않았다.
+
+실행 JAR에 core와 BouncyCastle 1.86이 포함된 것을 확인했고, 실제 bootJar의 `cms-bootstrap --unsupported`는 DB/웹 시작 전 종료코드1로 거절했다. 비밀번호의 stdin/환경변수 입력과 미출력은 별도 Java 프로세스 통합 테스트로 검증했다. v2·Flutter·기존 비교 fixture는 변경하지 않았다.
+
+**2단계 완료. 다음 사용자 확인 전에는 3단계(메뉴·역할/업무 권한)로 진행하지 않는다.**

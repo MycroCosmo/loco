@@ -2,7 +2,6 @@ package com.loco.migration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.cms.core.CmsCoreConfiguration;
 import java.util.Map;
 import java.util.UUID;
 import org.flywaydb.core.Flyway;
@@ -32,7 +31,7 @@ class CmsMigrationIntegrationTest {
     host()
         .run(
             context -> {
-              assertThat(context).hasNotFailed().hasSingleBean(CmsCoreConfiguration.class);
+              assertThat(context).hasNotFailed();
               var flyway = context.getBean(Flyway.class);
               assertThat(flyway.info().applied())
                   .extracting(info -> info.getVersion().getVersion())
@@ -96,6 +95,38 @@ class CmsMigrationIntegrationTest {
             });
   }
 
+  @Test
+  void upgradingV2AddsOnlyCmsTablesAndPreservesPublicHistory() throws Exception {
+    baseline();
+    host().run(context -> assertThat(context).hasNotFailed());
+    String columns = publicColumns();
+    String history =
+        sql("SELECT json_agg(h ORDER BY installed_rank)::text FROM public.flyway_schema_history h");
+    host()
+        .withPropertyValues("spring.flyway.target=3")
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              var flyway = context.getBean(Flyway.class);
+              assertThat(flyway.info().applied())
+                  .extracting(info -> info.getVersion().getVersion())
+                  .containsExactly("1", "2", "3");
+              assertThat(publicColumns()).isEqualTo(columns);
+              assertThat(
+                      sql(
+                          "SELECT json_agg(h ORDER BY installed_rank)::text FROM public.flyway_schema_history h WHERE version IN ('1','2')"))
+                  .isEqualTo(history);
+              assertThat(
+                      sql(
+                          "SELECT count(*) FROM information_schema.tables WHERE table_schema='cms'"))
+                  .isEqualTo("5");
+              assertThat(sql("SELECT count(*) FROM cms.admin_account")).isEqualTo("0");
+              assertThat(sql("SELECT bootstrap_completed FROM cms.administration_state WHERE id=1"))
+                  .isEqualTo("f");
+              assertThat(flyway.migrate().migrationsExecuted).isZero();
+            });
+  }
+
   private void baseline() {
     Flyway.configure()
         .dataSource(database.getJdbcUrl(), database.getUsername(), database.getPassword())
@@ -109,7 +140,6 @@ class CmsMigrationIntegrationTest {
     return new ApplicationContextRunner()
         .withConfiguration(
             AutoConfigurations.of(DataSourceAutoConfiguration.class, FlywayAutoConfiguration.class))
-        .withUserConfiguration(CmsCoreConfiguration.class)
         .withInitializer(
             context -> {
               try {

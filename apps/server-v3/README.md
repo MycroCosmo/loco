@@ -375,7 +375,7 @@ URL 보호 목록을 별도로 관리하는 (a)는 경로가 중복되고, 모�
 
 `/api`는 context path에서 **MVC path prefix**로 바꿨다. 컨트롤러는 `/health`처럼 내부 경로만 선언한다.
 앱 컨트롤러에만 prefix가 적용되고 `/api` 밖의 없는 경로도 Spring에서 JSON 404를 처리한다.
-현재는 앱 API만 있는 단일 stateless 필터 체인이다. 관리자 세션을 추가할 때는 별도 체인과 CSRF 정책, 컨트롤러 선언 검사를 함께 설계한다.
+LOCO 앱 API는 기존 stateless·CSRF off 체인을 유지한다. `/admin/**`는 CMS 전용 세션·CSRF 체인으로 분리했으며 앱 JWT와 관리자 세션을 서로 인증 수단으로 인정하지 않는다. 관리자 초기 생성·쿠키 설정·검증 명령은 [CMS 설계 12~13절](CMS_CORE_DESIGN.md#12-2단계-결정-변경-기록-2026-11-07)에 있다. 로컬 HTTP만 `CMS_COOKIE_SECURE=false`, 운영 HTTPS는 기본 Secure=true를 사용한다.
 
 JWT는 비밀 문자열을 Base64 디코딩하지 않고 UTF-8 바이트로 사용한다. 이는 v2의 문자열 secret과 같다.
 HS256만 허용하고 만료(`exp`)·사용 시작(`nbf`) 허용 오차는 0초다. v2처럼 `sub`가 있어야 하며 `iss`·`aud`를 새로 요구하지 않는다.

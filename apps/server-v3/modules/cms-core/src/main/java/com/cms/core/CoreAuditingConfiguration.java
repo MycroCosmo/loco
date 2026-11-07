@@ -1,4 +1,4 @@
-package com.loco.config;
+package com.cms.core;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @Configuration(proxyBeanMethods = false)
 @EnableJpaAuditing(dateTimeProviderRef = "auditTime")
-public class JpaAuditingConfig {
+public class CoreAuditingConfiguration {
   @Bean
   Clock clock() {
     return Clock.systemUTC();

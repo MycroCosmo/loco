@@ -27,7 +27,6 @@ import org.testcontainers.utility.DockerImageName;
     properties = {
       "spring.flyway.default-schema=public",
       "spring.flyway.locations=classpath:db/cms",
-      "spring.flyway.target=2",
       "spring.flyway.baseline-on-migrate=false",
       "spring.jpa.hibernate.ddl-auto=none"
     })
@@ -55,8 +54,8 @@ class CoreStandaloneIntegrationTest {
   void bootsAndMigratesWithoutLocoOrItsConfiguration() throws Exception {
     assertThat(core).isNotNull();
     assertThat(entities.isOpen()).isTrue();
-    assertThat(flyway.info().applied()).hasSize(1);
-    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("2");
+    assertThat(flyway.info().applied()).hasSize(2);
+    assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("3");
     assertThat(flyway.migrate().migrationsExecuted).isZero();
     try (var connection = dataSource.getConnection();
         var sql = connection.createStatement();
