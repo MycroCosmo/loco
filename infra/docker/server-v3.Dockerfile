@@ -19,8 +19,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 COPY --from=vips-build /opt/vips /opt/vips
 ENV PATH="/opt/vips/bin:${PATH}" LD_LIBRARY_PATH="/opt/vips/lib"
 
+FROM node:24.22.2-bookworm-slim AS admin-node
+
 FROM eclipse-temurin:21-jdk-jammy AS build
+COPY --from=admin-node /usr/local/bin/node /usr/local/bin/node
+COPY --from=admin-node /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && test "$(npm --version)" = '11.19.1'
 WORKDIR /workspace/apps/server-v3
+COPY apps/admin/ /workspace/apps/admin/
 COPY apps/server/package-lock.json /workspace/apps/server/package-lock.json
 COPY apps/server/prisma/schema.prisma /workspace/apps/server/prisma/schema.prisma
 COPY apps/server-v3/ ./

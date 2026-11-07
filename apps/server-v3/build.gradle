@@ -68,6 +68,30 @@ tasks.register('preparePrisma', Exec) {
 }
 
 def windowsHost = System.getProperty('os.name').toLowerCase().contains('windows')
+
+def adminDirectory = file('../admin')
+def adminNodeHome = providers.environmentVariable('ADMIN_NODE_HOME')
+def adminNpm = windowsHost ? ['cmd.exe', '/d', '/c', 'npm.cmd'] : ['npm']
+tasks.register('adminInstall', Exec) {
+    workingDir adminDirectory
+    if (adminNodeHome.isPresent()) environment 'PATH', adminNodeHome.get() + File.pathSeparator + System.getenv('PATH')
+    inputs.files('../admin/package.json', '../admin/package-lock.json', '../admin/.npmrc')
+    outputs.dir('../admin/node_modules')
+    commandLine adminNpm + ['ci']
+}
+tasks.register('adminBuild', Exec) {
+    dependsOn 'adminInstall'
+    workingDir adminDirectory
+    if (adminNodeHome.isPresent()) environment 'PATH', adminNodeHome.get() + File.pathSeparator + System.getenv('PATH')
+    inputs.dir('../admin/src')
+    inputs.files('../admin/index.html', '../admin/vite.config.ts', '../admin/tsconfig.json', '../admin/package-lock.json')
+    outputs.dir('../admin/dist')
+    commandLine adminNpm + ['run', 'build']
+}
+tasks.named('processResources') {
+    dependsOn 'adminBuild'
+    from('../admin/dist') { into 'admin-ui' }
+}
 def vipsExecutable = providers.environmentVariable('VIPS_EXECUTABLE').getOrElse(windowsHost
         ? layout.buildDirectory.file('vips/vips-dev-8.15/bin/vips.exe').get().asFile.absolutePath : 'vips')
 tasks.register('prepareVips', Exec) {

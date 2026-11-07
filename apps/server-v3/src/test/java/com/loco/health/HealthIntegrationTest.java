@@ -53,6 +53,30 @@ class HealthIntegrationTest {
   @Autowired TestRestTemplate client;
 
   @Test
+  void adminShellAndHashedAssetsArePublicButApisAreNot() {
+    for (String page : com.loco.cmsinfra.AdminUiConfiguration.PAGES) {
+      var shell = client.getForEntity(url(page), String.class);
+      assertThat(shell.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(shell.getBody()).contains("<div id=\"app\">");
+      assertThat(shell.getHeaders().getCacheControl()).contains("no-cache");
+    }
+    var html = client.getForObject(url("/admin/login"), String.class);
+    var matcher =
+        java.util.regex.Pattern.compile("src=\"(/admin/assets/[^\"]+\\.js)\"").matcher(html);
+    assertThat(matcher.find()).isTrue();
+    var asset = client.getForEntity(url(matcher.group(1)), String.class);
+    assertThat(asset.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(asset.getHeaders().getCacheControl()).contains("immutable");
+    assertThat(client.getForEntity(url("/admin/assets/missing.js"), String.class).getStatusCode())
+        .isEqualTo(HttpStatus.NOT_FOUND);
+    for (String api : java.util.List.of("/admin/api/core/accounts", "/admin/api/core/missing")) {
+      var response = client.getForEntity(url(api), String.class);
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+      assertThat(response.getBody()).doesNotContain("<html");
+    }
+  }
+
+  @Test
   void validAppJwtCannotAuthenticateAdministrator(
       @Autowired com.loco.auth.TokenIssuer tokens, @Autowired com.loco.users.UserRepository users)
       throws Exception {

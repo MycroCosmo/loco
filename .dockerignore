@@ -4,6 +4,8 @@
 !apps/server/**
 !apps/server-v3/
 !apps/server-v3/**
+!apps/admin/
+!apps/admin/**
 !infra/
 !infra/docker/
 !infra/docker/**

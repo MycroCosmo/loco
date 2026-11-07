@@ -74,8 +74,10 @@ public class AdminWebConfiguration {
       AdminService admins,
       Clock clock,
       CookieCsrfTokenRepository csrf,
-      HttpSessionSecurityContextRepository contexts)
+      HttpSessionSecurityContextRepository contexts,
+      org.springframework.beans.factory.ObjectProvider<AdminPublicResources> publicResources)
       throws Exception {
+    var resources = publicResources.getIfAvailable(() -> request -> false);
     var handler = new CsrfTokenRequestAttributeHandler();
     handler.setCsrfRequestAttributeName(null);
     http.securityMatcher("/admin", "/admin/**")
@@ -88,7 +90,9 @@ public class AdminWebConfiguration {
         .logout(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers(
+                auth.requestMatchers(request -> AdminPublicResources.permitted(resources, request))
+                    .permitAll()
+                    .requestMatchers(
                         org.springframework.http.HttpMethod.GET, "/admin/api/core/auth/csrf")
                     .permitAll()
                     .requestMatchers(
@@ -105,7 +109,8 @@ public class AdminWebConfiguration {
                     .accessDeniedHandler(
                         (request, response, error) ->
                             AdminAdvice.write(response, 403, "Forbidden")))
-        .addFilterAfter(new AdminSessionFilter(admins, clock), SecurityContextHolderFilter.class);
+        .addFilterAfter(
+            new AdminSessionFilter(admins, clock, resources), SecurityContextHolderFilter.class);
     return http.build();
   }
 }

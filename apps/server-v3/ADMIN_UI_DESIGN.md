@@ -1,8 +1,19 @@
 # CMS 5-B 관리자 화면 설계
 
-상태: **설계 검토 대기. 구현하지 않음.** 2026-11-08, CMS 5-A 완료 커밋 `0309bf0` 기준.
+상태: **C-24~C-32 승인, 7절 순서로 구현 중.** 2026-11-08, CMS 5-A 완료 커밋 `0309bf0` 기준으로 설계했다.
 
-이 문서는 화면을 기존 서버 계약에 연결하고, 구현 전에 정해야 할 항목을 모은다. 상위 결정은 [CMS_CORE_DESIGN.md](CMS_CORE_DESIGN.md)의 C-1~C-23을 따른다. 아래 C-24~C-32는 **제안이며 아직 채택되지 않았다**. 이번 변경은 이 문서 하나이며 `apps/admin`, 패키지, 서버 설정은 만들거나 바꾸지 않는다.
+이 문서는 화면을 기존 서버 계약에 연결하고 구현 근거를 보존한다. 상위 결정은 [CMS_CORE_DESIGN.md](CMS_CORE_DESIGN.md)의 C-1~C-23을 따른다. 6절의 대안은 검토 기록이며 최종 선택은 다음 표다.
+
+| 결정 | 승인 내용 |
+|---|---|
+| C-24 A / C-25 A / C-26 A | 기본 HTML·공통 Vue, 앱 수준 단일 composable·요청 중복 억제, 버튼 이동·부모/위치 선택·서버 미리보기 |
+| C-27 A | Vitest + 핵심 Chromium E2E. E2E는 Gradle allTests에 넣지 않고 별도 실행. 로그인·첫 변경, CSRF 실패, 세션 만료, 트리 revision 충돌, 파일 업로드/다운로드만 자동 브라우저 흐름으로 고정 |
+| C-28 A / C-29 A | Spring이 SPA 제공, shell 공개·API 보호. 고정 관리 도구+서버 편집 메뉴 |
+| C-30 B | CMS 응답 code: SESSION_EXPIRED, PASSWORD_CHANGE_REQUIRED, CSRF_INVALID, PERMISSION_DENIED, STALE_REVISION. CSRF 예외와 access.require에서 원인을 구분. LOCO 응답 불변 |
+| C-31 A | SYSTEM_ADMIN 전용 역할 배정 조회. 일관된 roleIds/authVersion |
+| C-32 A | Node 24.22.2 / npm 11.19.1 exact 고정 |
+
+C-30은 서버가 아는 거절 원인을 UI가 추측하지 않도록 해 “왜 막혔는지 알 수 없음”을 줄인다. [노션 결정 변경 기록](https://app.notion.com/p/40c140eabf0e81dca76de00565fe725b)에 같은 승인을 반영했다. 최종 allTests와 별도 E2E 후 5-B에서 멈춘다.
 
 ## 1. 범위와 경계
 
@@ -143,7 +154,7 @@ Spring 제공안에서는 `dist`를 호스트 JAR의 전용 정적 디렉터리�
 
 ## 6. 결정할 항목
 
-아래 권장은 백엔드 우선·최소 의존성 기준이며 승인 전 구현하지 않는다. 답변은 **번호와 항목 이름**을 함께 적는다.
+아래는 승인 전 비교 기록이다. 최종 선택은 문서 상단의 승인 표를 따른다(C-30은 권장 A 대신 B 채택). 이후 선택 답변도 **번호와 항목 이름**을 함께 적는다.
 
 ### C-24 UI 컴포넌트 라이브러리
 
@@ -233,7 +244,7 @@ A의 제안 응답은 `{accountId,roleIds,authVersion}`이며 한 일관된 읽�
 
 ## 7. 선택 후 구현·검증 계획
 
-아래는 다음 작업 계획이며 이번에 실행하지 않는다.
+다음 순서로 구현하며 E2E는 allTests에 포함하지 않고 별도 명령으로 실행한다.
 
 1. C-24~C-32 결정 기록 후 최소 `apps/admin` 구성과 typecheck/build, 개발 프록시를 만든다. C-28에 따른 공개 shell·보호 API 경계를 먼저 검증한다.
 2. 로그인·첫 비밀번호 변경·로그아웃, 공통 요청 처리와 오류 흐름을 만든다. 기존 계정/역할/파일 비밀값을 프런트 로그나 캡처에 남기지 않는다.
@@ -261,3 +272,12 @@ E2E는 격리된 테스트 DB·로컬 SeaweedFS·합성 관리자만 쓴다. 실
 ## 8. 이번 설계의 확인 범위
 
 현행 컨트롤러·권한·세션·정적 핸들러와 문서의 API/권한을 대조했다. 패키지 버전은 공식 배포 메타데이터에서 조회했다. 문서의 상대 링크·차이 공백 검사를 수행한다. 구현·의존성 설치·브라우저 검증·Gradle 회귀는 수행하지 않는다. 패키지 설치 호환성과 실제 화면 동작은 선택 후 검증할 항목이다.
+
+## 9. 구현 기록
+
+### 1단계: 빌드·정적 경계
+
+- `apps/admin`은 Vue/Vite/TypeScript만으로 시작한다. Node 24.22.2/npm 11.19.1은 `prepare-node.ps1`의 프로젝트 전용 경로와 Docker 빌드에서 고정한다. 시스템 Node와 v2 설정은 바꾸지 않는다.
+- `AdminPublicResources`는 core가 호스트의 공개 UI 리소스를 판단하는 확장점이다. GET/HEAD만 허용하고 `/admin/api`는 이 확장점으로 공개할 수 없다. 호스트 `AdminUiConfiguration`은 등록 화면·해시 asset만 제공하며 없는 API에 index.html을 반환하지 않는다.
+- 초기 후보 TypeScript 7.0.2는 `vue-tsc 3.3.14`가 요구하는 `typescript/lib/tsc`를 export하지 않아 `ERR_PACKAGE_PATH_NOT_EXPORTED`로 실패했다. 안정 JavaScript compiler API를 제공하는 **TypeScript 6.0.3**으로 exact 고정해 typecheck/build 통과. 새 의존성·검사 우회는 추가하지 않았다. [공식 Vue 도구의 TS7 지원 논의](https://github.com/vuejs/language-tools/issues/5381).
+- 최초 설계 당시의 “미구현·미검증” 기록(8절)과 이후 구현 결과를 구분한다.

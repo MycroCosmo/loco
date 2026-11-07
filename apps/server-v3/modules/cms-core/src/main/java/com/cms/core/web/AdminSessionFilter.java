@@ -13,10 +13,12 @@ public class AdminSessionFilter extends OncePerRequestFilter {
   static final String START = "cms.session.started", LAST = "cms.session.last";
   private final AdminService admins;
   private final Clock clock;
+  private final AdminPublicResources resources;
 
-  public AdminSessionFilter(AdminService admins, Clock clock) {
+  public AdminSessionFilter(AdminService admins, Clock clock, AdminPublicResources resources) {
     this.admins = admins;
     this.clock = clock;
+    this.resources = resources;
   }
 
   @Override
@@ -46,6 +48,7 @@ public class AdminSessionFilter extends OncePerRequestFilter {
           session.setAttribute(LAST, now);
           String path = request.getRequestURI().substring(request.getContextPath().length());
           if (fresh.mustChangePassword()
+              && !AdminPublicResources.permitted(resources, request)
               && !java.util.Set.of(
                       "/admin/api/core/auth/me",
                       "/admin/api/core/auth/password",
