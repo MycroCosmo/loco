@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
-@RestControllerAdvice(basePackages = "com.cms.core")
+@RestControllerAdvice(basePackages = "com.cms.core", annotations = CmsController.class)
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class AdminAdvice {
   @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
