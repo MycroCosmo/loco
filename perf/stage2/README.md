@@ -1,4 +1,36 @@
-# P0 로컬 측정
+# 성능 2단계 측정 도구
+
+## P1 재현 추가
+
+P0 명령·결과는 아래에 그대로 보존한다. P1은 `$env:PERF_STAGE='p1'`을 먼저 설정한다. `run.mjs`, 결과 요약/압축, artifact 검사가 `loco-perf-p1` 프로젝트·별도 볼륨·`apps/server-v3/build/perf-stage2-p1` 출력으로 분리되며 이미지도 `loco-perf-p1:local`이어야 한다. P0 태그·볼륨·결과를 덮어쓰지 않는다. P1측정 중에도 JVM 옵션을 추가하지 않는다.
+
+```powershell
+$env:PERF_STAGE='p1'
+docker build -f perf/stage2/Dockerfile -t loco-perf-p1:local .
+node perf/stage2/run.mjs up
+node perf/stage2/run.mjs seed S skew
+node perf/stage2/run.mjs boundary
+node perf/stage2/run.mjs seed M skew
+node perf/stage2/run.mjs verify-seed
+# 60초 탐색의 통과/실패 구간만 찾는다. 이 결과만 최대 지속 처리량이라 부르지 않는다.
+node perf/stage2/p1-capacity.mjs
+# NAME은 새 이름, RATE는 탐색에서 실제 확인한 정수 도착률이다.
+node perf/stage2/run.mjs probe capacity-5 5 10 60
+node perf/stage2/run.mjs diagnostic
+# 예열120초·본 측정300초×5. 확정 RATE와 실행 이름은 P1_RESULTS.md를 따른다.
+node perf/stage2/run.mjs measure primary RATE 10 hot80 5
+node perf/stage2/run.mjs measure regression 50 1 hot80 5
+node perf/stage2/run.mjs probe full-stress 50 100 120
+node perf/stage2/run.mjs snapshot
+node perf/stage2/run.mjs stop
+node perf/stage2/summarize.mjs
+```
+
+`probe`는60/120/300초를 지원하고 p95≤200ms·HTTP/업무오류0·dropped0을 검사한다. 실패도 실행 코드·요약·앱 로그·DB 불변 검사와 함께 남긴다. `measure`의 예열에는 지연 budget을 적용하지 않지만 오류·dropped는 허용하지 않는다. 본 측정은 모두 budget을 적용한다. 부하 hash는 P0와 같은 배열 순서 정규화를 유지하되 표시 항목·좌표·count 전체를 검사하고, E-12의 순서 자체는 별도 실제 HTTP 경계 테스트가 엄격하게 검증한다.
+
+`p1-capacity.mjs`는 1·2·4…req/s로 첫 실패를 찾고 정수 이분 탐색으로 바로 아래 후보를 정한다. 예상된 k6 threshold 실패만 보존 후 진행하며, HTTP200의 업무 값 불일치·DB 변경·수집 실패는 중단한다. 탐색 전120초 예열하고, HTTP오류·dropped로 포화된 경우에만 같은 설정의 앱을 재시작·재예열한다. 지연 threshold만 실패하면 실행을 보존하고 다음 도착률로 진행한다. 후보는5회 본 측정과 바로 위 도착률300초 확인을 거쳐야 한다.
+
+`P1_RESULTS.md`는 정합성·도착률 탐색·A5·회귀·OOM 스트레스를 한곳에서 검토하기 위한 결과 문서다. 기존 P0의 넓은 범위 실패를 성공값으로 대체하지 않는다.
 
 운영 절대 수치가 아닌 **동일 노트북 상대 비교**를 위한 도구다. P0에는 개선안 B가 없다. 앱/DB/발생기는 각각 CPU 2, 메모리 1.5/4/2GiB, DB shared_buffers 1GiB다. 외부 통신·호스트 포트가 없는 내부 Docker 네트워크를 사용하며 기존 개발 볼륨은 건드리지 않는다. 데이터 초기화는 이름이 `loco_perf`인 이 프로젝트 DB만 허용한다.
 

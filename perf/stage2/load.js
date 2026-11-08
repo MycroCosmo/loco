@@ -10,7 +10,7 @@ const wall=new Trend('request_wall_ms',true), success=new Counter('business_succ
 export const options={
   scenarios:{load:{executor:'constant-arrival-rate',rate:config.rate,timeUnit:'1s',duration:`${config.seconds}s`,preAllocatedVUs:100,maxVUs:100,gracefulStop:'10s'}},
   systemTags:['status','method','name','scenario','expected_response'],
-  thresholds:{checks:['rate==1'],http_req_failed:['rate==0'],dropped_iterations:['count==0']},
+  thresholds:{checks:['rate==1'],http_req_failed:['rate==0'],dropped_iterations:['count==0'],...(config.budgetMs?{http_req_duration:[`p(95)<=${config.budgetMs}`]}:{})},
   summaryTrendStats:['avg','min','med','p(95)','p(99)','max'],
 };
 function canonical(value) {

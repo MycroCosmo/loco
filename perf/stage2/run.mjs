@@ -5,17 +5,19 @@ import {spawnSync,spawn} from 'node:child_process';
 import {randomBytes,createHmac} from 'node:crypto';
 import http from 'node:http';
 import assert from 'node:assert/strict';
-import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measurementSpec} from './data.mjs';
+import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measurementSpec,stageSettings} from './data.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
-const output=path.join(root,'apps/server-v3/build/perf-stage2');
+const settings=stageSettings();
+const project=settings.project;
+const output=path.join(root,settings.output);
 const privateDir=path.join(output,'private');
 fs.mkdirSync(privateDir,{recursive:true}); fs.mkdirSync(path.join(output,'runtime'),{recursive:true});
 const secretsFile=path.join(privateDir,'secrets.json');
 if(!fs.existsSync(secretsFile)) fs.writeFileSync(secretsFile,JSON.stringify({db:randomBytes(24).toString('hex'),jwt:randomBytes(48).toString('hex'),password:randomBytes(24).toString('hex'),nextPassword:randomBytes(24).toString('hex')}));
 const secrets=JSON.parse(fs.readFileSync(secretsFile));
-const env={...process.env,PERF_DB_PASSWORD:secrets.db,PERF_JWT_SECRET:secrets.jwt};
-const compose=['compose','-p','loco-perf-p0','-f','perf/stage2/compose.yml'];
+const env={...process.env,PERF_DB_PASSWORD:secrets.db,PERF_JWT_SECRET:secrets.jwt,PERF_OUTPUT_DIR:output.replaceAll('\\','/'),PERF_APP_IMAGE:`${project}:local`};
+const compose=['compose','-p',project,'-f','perf/stage2/compose.yml'];
 const write=(name,value)=>fs.writeFileSync(path.join(output,name),JSON.stringify(value,null,2));
 function command(executable,args,input) {
   const r=spawnSync(executable,args,{cwd:root,env,input,encoding:'utf8',maxBuffer:64*1024*1024,windowsHide:true});
@@ -35,7 +37,7 @@ if(fs.existsSync(path.join(privateDir,'credentials.json'))) credentials={...JSON
 const saveCredentials=()=>fs.writeFileSync(path.join(privateDir,'credentials.json'),JSON.stringify(credentials));
 saveCredentials();
 let cookies=new Map();
-let appContainer='loco-perf-p0-perf-app-1';
+let appContainer=`${project}-perf-app-1`;
 async function request(url,method='GET',body,admin=false) {
   const headers=admin?{Cookie:[...cookies].map(([k,v])=>k+'='+v).join('; '),'X-XSRF-TOKEN':decodeURIComponent(cookies.get('XSRF-TOKEN')||'')}:{Authorization:'Bearer '+credentials.jwt};
   if(body) headers['Content-Type']='application/json';
@@ -78,10 +80,10 @@ function environment() {
   assert.equal(power.ac,1,'AC connection required'); assert.equal(power.overlay.toLowerCase(),'ded574b5-45a0-4f42-8737-46345c09c238','Best performance overlay required');
   const docker=JSON.parse(command('docker',['info','--format','{{json .}}']));
   const containers=command('docker',['ps','--format','json']).split('\n').filter(Boolean).map(s=>JSON.parse(s));
-  return {at:new Date().toISOString(),power,docker:{version:docker.ServerVersion,cpus:docker.NCPU,memory:docker.MemTotal,os:docker.OperatingSystem},hybridCoreCaveat:'i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures',background:containers.filter(c=>!c.Names.startsWith('loco-perf-p0')).map(c=>({alias:'background-'+hash(c.ID).slice(0,8)}))};
+  return {at:new Date().toISOString(),power,docker:{version:docker.ServerVersion,cpus:docker.NCPU,memory:docker.MemTotal,os:docker.OperatingSystem},hybridCoreCaveat:'i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures',background:containers.filter(c=>!c.Names.startsWith(project)).map(c=>({alias:'background-'+hash(c.ID).slice(0,8)}))};
 }
 function snapshot(name) {
-  write(name,{environment:environment(),git:command('git',['rev-parse','HEAD']),dirty:command('git',['status','--porcelain']),jarSha256:hash(fs.readFileSync(path.join(root,'apps/server-v3/build/libs/loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar'))),runtime:JSON.parse(fs.readFileSync(path.join(output,'runtime/runtime.json'))),data:fingerprint(),images:query('SELECT extname FROM pg_extension'),containers:JSON.parse(command('docker',['inspect',...dc('ps','-q').split(/\s+/)])).map(c=>({id:c.Id,name:c.Name,image:c.Image,cpu:c.HostConfig.NanoCpus,memory:c.HostConfig.Memory,oomKilled:c.State.OOMKilled,network:Object.keys(c.NetworkSettings.Networks)}))});
+  write(name,{environment:environment(),git:command('git',['rev-parse','HEAD']),dirty:command('git',['status','--porcelain']),jarSha256:hash(fs.readFileSync(path.join(root,'apps/server-v3/build/libs/loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar'))),runtime:JSON.parse(fs.readFileSync(path.join(output,'runtime/runtime.json'))),sqlTrackingAtSnapshot:sql('SHOW pg_stat_statements.track;'),data:fingerprint(),images:query('SELECT extname FROM pg_extension'),containers:JSON.parse(command('docker',['inspect',...dc('ps','-q').split(/\s+/)])).map(c=>({id:c.Id,name:c.Name,image:c.Image,cpu:c.HostConfig.NanoCpus,memory:c.HostConfig.Memory,oomKilled:c.State.OOMKilled,network:Object.keys(c.NetworkSettings.Networks)}))});
 }
 const socketHost=command('docker',['context','inspect','--format','{{.Endpoints.docker.Host}}']);
 const socketPath=socketHost.replace('npipe:////./pipe/','\\\\.\\pipe\\');
@@ -101,7 +103,7 @@ async function observe(stream,signal) {
         const s=await dockerGet(`/containers/${c.Id}/stats?stream=false&one-shot=true`),p=previous.get(c.Id);
         previous.set(c.Id,s);
         const cpu=p?(s.cpu_stats.cpu_usage.total_usage-p.cpu_stats.cpu_usage.total_usage)/(s.cpu_stats.system_cpu_usage-p.cpu_stats.system_cpu_usage)*(s.cpu_stats.online_cpus||32):null;
-        return {name:c.Names[0].startsWith('/loco-perf-p0')?c.Names[0]:'background-'+hash(c.Id).slice(0,8),cpuCores:cpu,rss:s.memory_stats.stats?.anon??s.memory_stats.stats?.rss,memory:s.memory_stats.usage,workingSet:s.memory_stats.usage-(s.memory_stats.stats?.inactive_file||0),limit:s.memory_stats.limit,throttle:s.cpu_stats.throttling_data,io:s.blkio_stats,network:s.networks,pids:s.pids_stats.current};
+        return {name:c.Names[0].startsWith('/'+project)?c.Names[0]:'background-'+hash(c.Id).slice(0,8),cpuCores:cpu,rss:s.memory_stats.stats?.anon??s.memory_stats.stats?.rss,memory:s.memory_stats.usage,workingSet:s.memory_stats.usage-(s.memory_stats.stats?.inactive_file||0),limit:s.memory_stats.limit,throttle:s.cpu_stats.throttling_data,io:s.blkio_stats,network:s.networks,pids:s.pids_stats.current};
       }));
       stream.write(JSON.stringify({at:new Date().toISOString(),stats})+'\n');
     } catch(e) {stream.write(JSON.stringify({at:new Date().toISOString(),error:e.message})+'\n');}
@@ -119,7 +121,7 @@ async function runLoad(config) {
   const host=spawn('pwsh',['-NoProfile','-File','perf/stage2/host-sample.ps1','-OutputFile',path.join(folder,'host.jsonl'),'-Seconds',String(config.seconds+30)],{cwd:root,stdio:['ignore',hostLog,hostLog],windowsHide:true});
   const samples=fs.createWriteStream(path.join(folder,'resources.jsonl'));
   const abort=new AbortController(), observing=observe(samples,abort.signal);
-  const child=spawn('docker',[...compose,'run','--rm','-T','--name','loco-perf-p0-load','-e',`CONFIG=/results/${config.run}/config.json`,'load','run','--quiet','--no-usage-report','--out',`json=/results/${config.run}/raw.json.gz`,'/scripts/load.js'],{cwd:root,env,stdio:['ignore',log,log],windowsHide:true});
+  const child=spawn('docker',[...compose,'run','--rm','-T','--name',`${project}-load`,'-e',`CONFIG=/results/${config.run}/config.json`,'load','run','--quiet','--no-usage-report','--out',`json=/results/${config.run}/raw.json.gz`,'/scripts/load.js'],{cwd:root,env,stdio:['ignore',log,log],windowsHide:true});
   const start=Date.now();
   const progress=setInterval(()=>console.log(`${config.run}: ${Math.round((Date.now()-start)/1000)}/${config.seconds}s`),60000);
   const code=await new Promise((resolve,reject)=>{child.on('exit',resolve);child.on('error',reject);});
@@ -163,14 +165,14 @@ async function diagnostic(cases,name) {
     const url=new URL(c.path,'http://local'),q=url.searchParams,map=url.pathname.split('/')[3];
     for(const s of statements) {
       let values;
-      if(s.query.startsWith('SELECT id,name,latitude,longitude FROM places WHERE')) values=[map,+q.get('swLat'),+q.get('neLat'),+q.get('swLng'),+q.get('neLng'),301];
+      if(s.query.startsWith('SELECT id,name,latitude,longitude')) values=[map,+q.get('swLat'),+q.get('neLat'),+q.get('swLng'),+q.get('neLng'),...(settings.stage==='p0'?[301]:[])];
       if(s.query.startsWith('SELECT * FROM place_marker_cells WHERE')) values=[map,3,+q.get('swLat'),+q.get('neLat'),+q.get('swLng'),+q.get('neLng')];
       if(s.query.startsWith('SELECT count FROM place_marker_cells')) values=[map,3,q.get('cellLatKey'),q.get('cellLngKey')];
       if(s.query.startsWith('SELECT id FROM places WHERE')) values=[map,3,q.get('cellLatKey'),3,q.get('cellLngKey'),21];
       if(s.query.includes('WHERE p.id IN (')) values=r.body.items.map(item=>item.id);
       if(s.query.includes('WHERE p."mapId"=') && q.has('groupKey')) {
         const [lat,lng]=q.get('groupKey').split(':').map(Number);
-        values=[map,lat-0.0000005,lat+0.0000005,lng-0.0000005,lng+0.0000005];
+        values=settings.stage==='p0'?[map,lat-0.0000005,lat+0.0000005,lng-0.0000005,lng+0.0000005]:[map,lat,lng];
       }
       if(values) {
         const bound=bindObservedSql(s.query,values);
@@ -215,10 +217,12 @@ if(action==='up') {
     const created=await request(`/api/maps/${map}/places`,'POST',{name:'boundary',address:'synthetic',latitude:lat,longitude:0});assert.equal(created.status,201);
     const levels=[];
     for(const level of [5,6,9,11]) {const r=await request(`/api/maps/${map}/places/markers?level=${level}&swLat=${lat-0.001}&neLat=${lat+0.001}&swLng=-0.001&neLng=0.001`);levels.push({level,body:r.body});}
-    assert.equal(levels[0].body.length,1);assert.equal(levels[3].body.length,0,'P0 preserves the observed missing-cell bug');
+    assert.equal(levels[0].body.length,1);
+    if(settings.stage==='p0')assert.equal(levels[3].body.length,0,'P0 preserves the observed missing-cell bug');
+    else for(const result of levels)assert.equal(result.body.length,1,'P1 must preserve the place at every level');
     observations.push({latitude:lat,levels});await request('/api/places/'+created.body.id,'DELETE');
   }
-  write('boundary-http.json',observations);console.log('R real HTTP: both known omission coordinates reproduced');
+  write('boundary-http.json',observations);console.log(settings.stage==='p0'?'R real HTTP: both known omission coordinates reproduced':'R real HTTP: both omission coordinates present at every level');
 } else if(action==='verify-seed') {
   const rows=query(`SELECT id,latitude,longitude,ARRAY[ROUND(latitude::numeric,1)::text,ROUND(latitude::numeric,2)::text,ROUND(latitude::numeric,3)::text] AS latkeys,ARRAY[ROUND(longitude::numeric,1)::text,ROUND(longitude::numeric,2)::text,ROUND(longitude::numeric,3)::text] AS lngkeys FROM places`);
   for(const row of rows)for(let p=1;p<=3;p++) {
@@ -232,6 +236,9 @@ if(action==='up') {
   const cases=await markerCases(1,1000);
   for(const rate of [1,5,10,25,50,100]) await runLoad({run:`pilot-${rate}`,rate,seconds:60,hot80:true,cases});
 } else if(action==='diagnostic') {
+  const name=args[0]||'marker-diagnostics';
+  assert.match(name,/^[a-z0-9-]+$/);
+  assert.ok(!fs.existsSync(path.join(output,name+'.json')),'Do not overwrite existing diagnostics');
   const cases=await markerCases(1,1000);
   const row=query(`SELECT latitude,longitude FROM places WHERE "mapId"=${sqlString(key('map',1))} ORDER BY id LIMIT 1`)[0];
   for(const [api,param,precision] of [['marker-group','groupKey',6],['marker-cluster','cellKey',3]]) {
@@ -239,7 +246,7 @@ if(action==='up') {
     const path=`/api/maps/${key('map',1)}/places/${api}?${coordinates}&precision=3`;
     const r=await request(path);cases.push({name:api,path,hash:hash(canonical(r.body))});
   }
-  await diagnostic([cases[0],cases[1],...cases.slice(-2)],'marker-diagnostics.json');
+  await diagnostic([cases[0],cases[1],...cases.slice(-2)],name+'.json');
   console.log('Marker SQL and EXPLAIN captured outside measurement');
 } else if(action==='measure') {
   const [name,rateText='50',viewportText='1',requestMix='hot80',repeatsText='1']=args;
@@ -254,10 +261,26 @@ if(action==='up') {
   for(let i=1;i<=spec.repeats;i++) {
     const config={rate:spec.rate,hot80:spec.mix==='hot80',cases};
     await runLoad({...config,run:`${name}-${i}-warmup`,seconds:120});
-    await runLoad({...config,run:`${name}-${i}`,seconds:300});
+    await runLoad({...config,run:`${name}-${i}`,seconds:300,...(settings.stage==='p1'?{budgetMs:200}:{})});
     assert.deepEqual(fingerprint(),before,'Read workload must not change business data');
     environment();
   }
+} else if(action==='probe'||action==='warmup') {
+  const [name,rate='1',viewport='10',seconds='60']=args;
+  const spec=measurementSpec(name,rate,viewport,'hot80',1);
+  assert.ok(['60','120','300'].includes(seconds));
+  const cases=await markerCases(spec.viewport,1000),before=fingerprint();
+  snapshot(name+'-manifest.json');
+  try {await runLoad({run:name,rate:spec.rate,seconds:Number(seconds),hot80:true,cases,...(action==='probe'?{budgetMs:200}:{})});}
+  finally {
+    assert.deepEqual(fingerprint(),before,'Read workload must not change business data');
+    write(name+'-db-check.json',{unchanged:true});
+    const logs=spawnSync('docker',['logs',appContainer],{encoding:'utf8',maxBuffer:64*1024*1024,windowsHide:true});
+    assert.equal(logs.status,0,'App log capture failed');
+    fs.writeFileSync(path.join(output,name+'-app.log'),logs.stdout+'\n'+logs.stderr);
+  }
+} else if(action==='restart') {
+  console.log(dc('restart','perf-app'));await ready();
 } else if(action==='cms'||action==='cms-probe') {
   const dataset=JSON.parse(fs.readFileSync(path.join(output,'dataset.json')));
   const prefix=`cms-${dataset.size}-${dataset.processing}`;
@@ -265,8 +288,8 @@ if(action==='up') {
   if(fs.existsSync(planFile))fs.unlinkSync(planFile);
   // Restart outside measured intervals to collect real generated CMS SQL/EXPLAIN.
   dc('stop','perf-app');
-  dc('run','-d','--name','loco-perf-p0-plan','--use-aliases','perf-app','--capture-plans');
-  appContainer='loco-perf-p0-plan';
+  dc('run','-d','--name',`${project}-plan`,'--use-aliases','perf-app','--capture-plans');
+  appContainer=`${project}-plan`;
   await ready(); await bootstrap();
   let plans;
   for(let i=0;i<120;i++) {
@@ -289,18 +312,18 @@ if(action==='up') {
   await runLoad({run:'cms',rate:10,seconds:300,cases,hot80:false,cms:true});
   assert.deepEqual(fingerprint(),before);
   }
-  command('docker',['stop','loco-perf-p0-plan']);command('docker',['rm','loco-perf-p0-plan']);dc('start','perf-app');appContainer='loco-perf-p0-perf-app-1';await ready();
+  command('docker',['stop',`${project}-plan`]);command('docker',['rm',`${project}-plan`]);dc('start','perf-app');appContainer=`${project}-perf-app-1`;await ready();
 } else if(action==='profile') {
   dc('stop','perf-app');
   const jfr='-XX:StartFlightRecording=delay=140s,duration=60s,filename=/results/diagnostic.jfr,settings=profile,jdk.InitialEnvironmentVariable#enabled=false,jdk.InitialSystemProperty#enabled=false';
-  dc('run','-d','--name','loco-perf-p0-jfr','--use-aliases','-e','JAVA_TOOL_OPTIONS='+jfr,'perf-app');
-  appContainer='loco-perf-p0-jfr';await ready();
+  dc('run','-d','--name',`${project}-jfr`,'--use-aliases','-e','JAVA_TOOL_OPTIONS='+jfr,'perf-app');
+  appContainer=`${project}-jfr`;await ready();
   const cases=await markerCases(1,1000);
   await runLoad({run:'profile-warmup',rate:50,seconds:120,hot80:true,cases});
   await runLoad({run:'profile-diagnostic',rate:50,seconds:90,hot80:true,cases});
   assert.ok(fs.statSync(path.join(output,'runtime/diagnostic.jfr')).size>0);
-  command('docker',['stop','loco-perf-p0-jfr']);command('docker',['rm','loco-perf-p0-jfr']);
-  dc('start','perf-app');appContainer='loco-perf-p0-perf-app-1';await ready();
+  command('docker',['stop',`${project}-jfr`]);command('docker',['rm',`${project}-jfr`]);
+  dc('start','perf-app');appContainer=`${project}-perf-app-1`;await ready();
 } else if(action==='snapshot') snapshot(args[0]||'environment-final.json');
 else if(action==='stop') console.log(dc('stop'));
-else throw Error('Use up | seed S/M/CMS skew/uniform | boundary | pilot | measure NAME RATE VIEWPORT hot80/uniform REPEATS | cms | snapshot | stop');
+else throw Error('Use up | seed S/M/CMS skew/uniform | boundary | pilot | probe/warmup NAME RATE VIEWPORT SECONDS | measure NAME RATE VIEWPORT hot80/uniform REPEATS | cms | restart | snapshot | stop');

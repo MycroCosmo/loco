@@ -40,14 +40,14 @@ public class MarkerQueryRepository {
     if (level < 6) {
       var rows =
           rows(
-              "SELECT id,name,latitude,longitude FROM places WHERE \"mapId\"=:map AND latitude>=:minLat AND latitude<=:maxLat AND longitude>=:minLng AND longitude<=:maxLng ORDER BY \"createdAt\" DESC,id DESC LIMIT 301",
+              "SELECT id,name,latitude,longitude,ROUND(latitude::numeric,6)::text AS \"latKey\",ROUND(longitude::numeric,6)::text AS \"lngKey\" FROM places WHERE \"mapId\"=:map AND latitude>=:minLat AND latitude<=:maxLat AND longitude>=:minLng AND longitude<=:maxLng ORDER BY \"createdAt\" DESC,id DESC LIMIT 301",
               params);
       if (rows.size() <= 300) return individual(rows);
     }
     params.put("precision", level >= 11 ? 1 : level >= 9 ? 2 : 3);
     return cells(
         rows(
-            "SELECT * FROM place_marker_cells WHERE \"mapId\"=:map AND precision=:precision AND \"maxLat\">=:minLat AND \"minLat\"<=:maxLat AND \"maxLng\">=:minLng AND \"minLng\"<=:maxLng ORDER BY count DESC",
+            "SELECT * FROM place_marker_cells WHERE \"mapId\"=:map AND precision=:precision AND \"maxLat\">=:minLat AND \"minLat\"<=:maxLat AND \"maxLng\">=:minLng AND \"minLng\"<=:maxLng ORDER BY count DESC,\"cellLatKey\" COLLATE \"C\" ASC,\"cellLngKey\" COLLATE \"C\" ASC",
             params));
   }
 
@@ -55,21 +55,10 @@ public class MarkerQueryRepository {
     readable(id, user);
     var keys = input.group();
     double lat = MarkerInputs.number(keys[0]), lng = MarkerInputs.number(keys[1]);
-    var params =
-        Map.<String, Object>of(
-            "map",
-            id,
-            "minLat",
-            PrismaFloats.input(lat - 0.0000005),
-            "maxLat",
-            PrismaFloats.input(lat + 0.0000005),
-            "minLng",
-            PrismaFloats.input(lng - 0.0000005),
-            "maxLng",
-            PrismaFloats.input(lng + 0.0000005));
+    var params = Map.<String, Object>of("map", id, "lat", lat, "lng", lng);
     return rows(
             PlaceQueryRepository.PROJECTION
-                + " WHERE p.\"mapId\"=:map AND p.latitude>=:minLat AND p.latitude<:maxLat AND p.longitude>=:minLng AND p.longitude<:maxLng ORDER BY p.\"createdAt\" DESC,p.id DESC",
+                + " WHERE p.\"mapId\"=:map AND ROUND(p.latitude::numeric,6)=ROUND(CAST(:lat AS float8)::numeric,6) AND ROUND(p.longitude::numeric,6)=ROUND(CAST(:lng AS float8)::numeric,6) ORDER BY p.\"createdAt\" DESC,p.id DESC",
             params)
         .stream()
         .map(t -> PlaceResponses.read(t, "list"))
@@ -79,6 +68,11 @@ public class MarkerQueryRepository {
   public Map<String, Object> cluster(String id, String user, MarkerInputs input, int precision) {
     readable(id, user);
     var keys = input.cell();
+    // Old negative-zero URLs refer to the same zero cell; nonzero stale keys require refetching
+    // markers.
+    for (int i = 0; i < keys.length; i++)
+      if (MarkerInputs.number(keys[i]) == 0)
+        keys[i] = java.math.BigDecimal.ZERO.setScale(precision).toPlainString();
     var params =
         Map.<String, Object>of("map", id, "precision", precision, "lat", keys[0], "lng", keys[1]);
     int limit = input.limit();
@@ -135,10 +129,7 @@ public class MarkerQueryRepository {
   private static List<Map<String, Object>> individual(List<Tuple> rows) {
     var groups = new LinkedHashMap<String, List<Tuple>>();
     for (var row : rows) {
-      String key =
-          CoordinateKeys.fixed(number(row, "latitude"), 6)
-              + ":"
-              + CoordinateKeys.fixed(number(row, "longitude"), 6);
+      String key = text(row, "latKey") + ":" + text(row, "lngKey");
       groups.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
     }
     var result = new ArrayList<Map<String, Object>>();

@@ -18,7 +18,7 @@ services:
       timeout: 2s
       retries: 30
   perf-app:
-    image: loco-perf-p0:local
+    image: ${PERF_APP_IMAGE:-loco-perf-p0:local}
     cpus: 2
     mem_limit: 1536m
     environment:
@@ -29,7 +29,7 @@ services:
       DB_PASSWORD: ${PERF_DB_PASSWORD:?ephemeral password required}
       JWT_SECRET: ${PERF_JWT_SECRET:?ephemeral secret required}
     volumes:
-      - ../../apps/server-v3/build/perf-stage2/runtime:/results
+      - ${PERF_OUTPUT_DIR:-../../apps/server-v3/build/perf-stage2}/runtime:/results
     depends_on:
       perf-db: {condition: service_healthy}
     healthcheck:
@@ -45,7 +45,7 @@ services:
     user: '0:0'
     volumes:
       - ./:/scripts:ro
-      - ../../apps/server-v3/build/perf-stage2:/results
+      - ${PERF_OUTPUT_DIR:-../../apps/server-v3/build/perf-stage2}:/results
 networks:
   default:
     internal: true

@@ -8,6 +8,10 @@ export const key = (kind, i) => {
 export const hash = value => createHash('sha256').update(value).digest('hex');
 export const sqlKey = (kind, expr) => `md5('${seed}/${kind}/'||(${expr})::text)::uuid::text`;
 export const sqlString = value => `'${String(value).replaceAll("'", "''")}'`;
+export function stageSettings(stage = process.env.PERF_STAGE || 'p0') {
+  if (!['p0','p1'].includes(stage)) throw Error('Unknown performance stage');
+  return {stage, project:`loco-perf-${stage}`, output:`apps/server-v3/build/perf-stage2${stage==='p0'?'':'-'+stage}`};
+}
 export function measurementSpec(name,rate,viewport,mix,repeats) {
   if(!/^[a-z0-9-]+$/.test(name||''))throw Error('Invalid run name');
   rate=Number(rate);viewport=Number(viewport);repeats=Number(repeats);
@@ -21,6 +25,13 @@ export function bindObservedSql(query, parameters) {
   // pg_stat_statements normalizes the projection's literal COALESCE(...,0) too.
   const zero=query.match(/,\$(\d+)\)::float8 AS "averageRating"/);
   if(zero)values[Number(zero[1])-1]=0;
+  // P1's coordinate precision is a literal, not a JDBC parameter.
+  for(const match of query.matchAll(/ROUND\((?:[a-z.]+::numeric|CAST\(\$\d+ AS float8\)::numeric),\$(\d+)\)/g)) {
+    const index=Number(match[1])-1;
+    if(values[index]===undefined)values[index]=6;
+  }
+  const limit=query.match(/LIMIT \$(\d+)\s*$/);
+  if(limit && query.startsWith('SELECT id,name,latitude,longitude,'))values[Number(limit[1])-1]=301;
   return query.replace(/\$(\d+)/g,(_,i)=>{
     const value=values[Number(i)-1];
     if(value===undefined)throw Error('Missing observed SQL binding $'+i);

@@ -100,6 +100,8 @@ cd apps/server-v3
 
 ## 4. 알려진 차이 전체 11건
 
+이 절은 **이관 완료 시점의11건**을 보존한다. 후속 성능 P1에서는 `markers.pg-coordinate-rule`(E-5: PG ROUND·0 정규화), `markers.deterministic-overflow`(E-12: 셀 키 동률 정렬) 개선2건을 추가한다. 현재 합계는13건(개선8·의도5·보류0)이며, 원본 v2 fixture와 이관 당시 수치는 덮어쓰지 않는다. [성능 설계 P1 계약](PERF_STAGE2_DESIGN.md#p1-좌표전환-계약), [P1 결과](../../perf/stage2/P1_RESULTS.md)에서 후속 검증을 구분한다.
+
 **개선 6건 + 의도 5건 = 11건, 보류 0건.** 9번까지 10건에 10-1 A의 런타임 헤더 차이 1건을 추가했다. 아래 ID는 하네스 보고서의 식별자다. 과거 `maps.firebase-delivery`, `places.firebase-delivery` 두 보류는 9번에서 해소했다. 실제 단말 수신 미검증과 보류 구현은 다른 개념이다. 공통으로 유지한 v2 문제는 이 목록에 추가하지 않고 5절 후보로 관리한다.
 
 | ID | 분류 | v2 → v3 관측/계약 | 출처 |

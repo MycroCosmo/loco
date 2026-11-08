@@ -86,19 +86,14 @@ final class MarkerInputs {
     if (key != null && !key.isEmpty()) {
 
       parts = key.split(":", -1);
-    } else parts = new String[] {fixed(floating("lat")), fixed(floating("lng"))};
+    } else
+      parts = new String[] {Double.toString(floating("lat")), Double.toString(floating("lng"))};
     return coordinates(parts);
   }
 
   String[] cell() {
 
     return coordinates(new String[] {raw("cellLatKey"), raw("cellLngKey")});
-  }
-
-  private static String fixed(double v) {
-    return Double.isFinite(v) && Math.abs(v) < 1e21
-        ? CoordinateKeys.fixed(v, 6)
-        : Double.toString(v);
   }
 
   private static String[] coordinates(String[] parts) {

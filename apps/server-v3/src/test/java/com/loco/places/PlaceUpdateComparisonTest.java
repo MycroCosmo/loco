@@ -79,11 +79,11 @@ class PlaceUpdateComparisonTest extends CompatibilityTestBase {
     }
     try (var left = environment().connect(SharedHarness.Side.V2);
         var right = environment().connect(SharedHarness.Side.V3)) {
-      DatabaseSnapshot.compare(
+      PlaceWriteSupport.compareCoordinateBoundary(
           DatabaseSnapshot.capture(left, rules),
           DatabaseSnapshot.capture(right, rules),
           before.seedIds(),
-          rules);
+          expected);
     }
   }
 }

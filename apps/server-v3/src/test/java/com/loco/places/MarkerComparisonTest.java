@@ -44,10 +44,12 @@ class MarkerComparisonTest extends MarkerTestSupport {
   }
 
   @Test
-  void realWritesPreserveTheKnownMissingCells() throws Exception {
+  void realWritesPreserveV2EvidenceAndReportTheApprovedCoordinateImprovement() throws Exception {
     seed("basic");
     var fixtures = fixture("rounding");
     int offset = 0;
+    var observedV2 = new ArrayList<JsonNode>();
+    var observedV3 = new ArrayList<JsonNode>();
     for (String lat : List.of("37.05", "-0.00001")) {
       for (var side : SharedHarness.Side.values()) {
         var created =
@@ -75,8 +77,45 @@ class MarkerComparisonTest extends MarkerTestSupport {
             }
         }
       }
-      for (int i = 0; i < 6; i++) compare(fixtures.get(offset++), "basic");
+      JsonNode expectedMarkers = fixtures.get(offset).get("body");
+      for (int i = 0; i < 6; i++) {
+        var row = fixtures.get(offset++);
+        String url = row.path("path").asText();
+        var left =
+            request(v2Url(), url, HttpMethod.GET, PlaceWriteSupport.token(environment()), null);
+        var right =
+            request(v3Url(), url, HttpMethod.GET, PlaceWriteSupport.token(environment()), null);
+        assertThat(left.getStatusCode().value()).isEqualTo(200);
+        assertThat(right.getStatusCode().value()).isEqualTo(200);
+        JsonComparison.compare(row.get("body"), left.getBody(), Map.of());
+        if (i < 4) JsonComparison.compare(expectedMarkers, right.getBody(), Map.of());
+        else {
+          boolean stale = url.contains("cellLatKey=37.0&");
+          assertThat(right.getBody().path("count").asInt()).isEqualTo(stale ? 0 : 1);
+          assertThat(right.getBody().path("items").size()).isEqualTo(stale ? 0 : 1);
+          assertThat(right.getBody().path("hasMore").asBoolean()).isFalse();
+          if (!stale)
+            assertThat(right.getBody().path("items").get(0).path("id").asText())
+                .isEqualTo(PlaceObservationTest.place(lat.equals("37.05") ? 80 : 81));
+        }
+        observedV2.add(left.getBody());
+        observedV3.add(right.getBody());
+      }
     }
+    environment()
+        .knownDifferences
+        .add(
+            Map.of(
+                "case",
+                "markers.pg-coordinate-rule",
+                "kind",
+                "improved",
+                "decision",
+                "E-5 A: PostgreSQL numeric ROUND and normalized zero for stored keys and six-digit groups",
+                "v2",
+                observedV2,
+                "v3",
+                observedV3));
   }
 
   void compare(JsonNode row, String scenario) throws Exception {

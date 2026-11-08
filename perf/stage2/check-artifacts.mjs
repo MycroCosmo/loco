@@ -1,3 +1,5 @@
+import {stageSettings} from './data.mjs';
+const {output}=stageSettings();
 import {spawnSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -19,6 +21,6 @@ const perfFiles=spawnSync(jar,['tf',perf],{encoding:'utf8',windowsHide:true});
 assert.equal(normalFiles.status,0);assert.equal(perfFiles.status,0);
 assert.doesNotMatch(normalFiles.stdout,/loco-perf-local-only|PerfReadPlans|application-perf.yml/);
 assert.match(perfFiles.stdout,/loco-perf-local-only/);assert.match(perfFiles.stdout,/PerfReadPlans/);
-fs.mkdirSync('apps/server-v3/build/perf-stage2',{recursive:true});
-fs.writeFileSync('apps/server-v3/build/perf-stage2/artifact-checks.json',JSON.stringify({checks:4,results,normalJarExcludesPerf:true},null,2));
+fs.mkdirSync(output,{recursive:true});
+fs.writeFileSync(path.join(output,'artifact-checks.json'),JSON.stringify({checks:4,results,normalJarExcludesPerf:true},null,2));
 console.log('Packaged artifact checks: 4 passed; rejected before datasource/Flyway');

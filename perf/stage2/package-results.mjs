@@ -2,12 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {gunzipSync} from 'node:zlib';
-import {hash} from './data.mjs';
+import {hash,stageSettings} from './data.mjs';
 import assert from 'node:assert/strict';
 
-const base='apps/server-v3/build/perf-stage2';
+const {output:base,project,stage}=stageSettings();
 const destination=process.argv[2];
-assert.match(destination||'',/^p0-[a-z0-9-]+$/);
+assert.match(destination||'',/^p[01]-[a-z0-9-]+$/);
+assert.ok(destination.startsWith(stage+'-'),'Bundle name must match PERF_STAGE');
 const staging=`apps/server-v3/build/${destination}`;
 assert.ok(!fs.existsSync(staging),'Use a new bundle name; never overwrite prior evidence');
 fs.mkdirSync(staging,{recursive:true});
@@ -25,7 +26,7 @@ function visit(relative='') {
     if(entry.name==='resources.jsonl') {
       buffer=Buffer.from(buffer.toString('utf8').trim().split('\n').filter(Boolean).map(line=>{
         const sample=JSON.parse(line);
-        for(const item of sample.stats||[])if(!item.name.startsWith('/loco-perf-p0')&&!item.name.startsWith('background-'))item.name='background-'+hash(item.name).slice(0,8);
+        for(const item of sample.stats||[])if(!item.name.startsWith('/'+project)&&!item.name.startsWith('background-'))item.name='background-'+hash(item.name).slice(0,8);
         return JSON.stringify(sample);
       }).join('\n')+'\n');
     } else if(entry.name.endsWith('.json')) {

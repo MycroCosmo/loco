@@ -1,8 +1,9 @@
+import {stageSettings} from './data.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {createGunzip} from 'node:zlib';
 import readline from 'node:readline';
-const base='apps/server-v3/build/perf-stage2';
+const {output:base,project}=stageSettings();
 const quantile=(values,p)=>{if(!values.length)return null;const v=[...values].sort((a,b)=>a-b),k=(v.length-1)*p,l=Math.floor(k);return v[l]+(v[Math.ceil(k)]-v[l])*(k-l);};
 const stats=v=>({n:v.length,mean:v.length?v.reduce((n,x)=>n+x,0)/v.length:null,p50:quantile(v,.5),p95:quantile(v,.95),p99:quantile(v,.99),max:v.length?Math.max(...v):null});
 const output=[];
@@ -18,11 +19,11 @@ for(const directory of fs.readdirSync(base,{withFileTypes:true}).filter(d=>d.isD
     const sample=JSON.parse(line);if(previous)gaps.push((Date.parse(sample.at)-previous)/1000);previous=Date.parse(sample.at);
     if(sample.error)collectorErrors.push({at:sample.at,error:sample.error});
     // Docker can return a zeroed final sample while an ephemeral container exits.
-    const individual=(sample.stats||[]).filter(s=>s.name.startsWith('/loco-perf-p0')&&s.limit>0);
-    const background=(sample.stats||[]).filter(s=>!s.name.startsWith('/loco-perf-p0'));
+    const individual=(sample.stats||[]).filter(s=>s.name.startsWith('/'+project)&&s.limit>0);
+    const background=(sample.stats||[]).filter(s=>!s.name.startsWith('/'+project));
     if(background.length)individual.push({name:'background',cpuCores:background.reduce((n,s)=>n+(s.cpuCores||0),0),workingSet:background.reduce((n,s)=>n+(s.workingSet||0),0)});
     for(const item of individual) {
-      const name=item.name.startsWith('/loco-perf-p0')?item.name:'background';
+      const name=item.name.startsWith('/'+project)?item.name:'background';
       const r=resources[name]??={cpu:[],workingSet:[],firstThrottle:null,lastThrottle:null};
       if(item.cpuCores!==null&&Number.isFinite(item.cpuCores))r.cpu.push(item.cpuCores);
       if(item.workingSet)r.workingSet.push(item.workingSet);

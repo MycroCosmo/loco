@@ -21,33 +21,34 @@ public class MarkerCells {
 
   public void refresh(String mapId, double latitude, double longitude) {
     for (int precision = 1; precision <= 3; precision++)
-      refreshCell(
-          mapId,
-          precision,
-          CoordinateKeys.fixed(latitude, precision),
-          CoordinateKeys.fixed(longitude, precision));
+      refreshCell(mapId, precision, latitude, longitude);
   }
 
-  private void refreshCell(String mapId, int precision, String lat, String lng) {
+  private void refreshCell(String mapId, int precision, double latitude, double longitude) {
     // SELECT와 쓰기도 분리한다. v2의 동시 갱신/부분 커밋 제약을 이관 중 유지한다.
     var cell =
         (Tuple)
             em.createNativeQuery(
                     """
-      SELECT AVG(latitude)::float8 AS latitude, AVG(longitude)::float8 AS longitude,
+      SELECT ROUND(CAST(:latitude AS float8)::numeric,:p)::text AS "cellLatKey",
+      ROUND(CAST(:longitude AS float8)::numeric,:p)::text AS "cellLngKey",
+      AVG(latitude)::float8 AS latitude, AVG(longitude)::float8 AS longitude,
       MIN(latitude) AS "minLat", MAX(latitude) AS "maxLat", MIN(longitude) AS "minLng", MAX(longitude) AS "maxLng",
       COUNT(*)::int AS count,
       COUNT(DISTINCT CONCAT(ROUND(latitude::numeric,6)::text,':',ROUND(longitude::numeric,6)::text))::int AS "exactKeyCount",
       MIN(CONCAT(ROUND(latitude::numeric,6)::text,':',ROUND(longitude::numeric,6)::text)) AS "groupKey",
       MIN(id) AS "placeId", MIN(name) AS "placeName"
-      FROM places WHERE "mapId"=:map AND ROUND(latitude::numeric,:p)::text=:lat AND ROUND(longitude::numeric,:p)::text=:lng
+      FROM places WHERE "mapId"=:map
+      AND ROUND(latitude::numeric,:p)=ROUND(CAST(:latitude AS float8)::numeric,:p)
+      AND ROUND(longitude::numeric,:p)=ROUND(CAST(:longitude AS float8)::numeric,:p)
       """,
                     Tuple.class)
                 .setParameter("map", mapId)
                 .setParameter("p", precision)
-                .setParameter("lat", lat)
-                .setParameter("lng", lng)
+                .setParameter("latitude", latitude)
+                .setParameter("longitude", longitude)
                 .getSingleResult();
+    String lat = cell.get("cellLatKey").toString(), lng = cell.get("cellLngKey").toString();
     int count = ((Number) cell.get("count")).intValue();
     transaction.executeWithoutResult(
         status -> {
