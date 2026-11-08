@@ -80,11 +80,36 @@ public class ApiWebConfig implements WebMvcConfigurer {
   @Bean
   SmartInitializingSingleton verifyApiDeclarations(
       @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping mappings) {
-    return () -> mappings.getHandlerMethods().values().forEach(ApiWebConfig::verifyDeclaration);
+    return () ->
+        mappings
+            .getHandlerMethods()
+            .forEach(
+                (mapping, method) -> {
+                  verifyDeclaration(method);
+                  if (AnnotatedElementUtils.hasAnnotation(
+                          method.getBeanType(), com.cms.core.web.CmsController.class)
+                      && (mapping.getPatternValues().isEmpty()
+                          || mapping.getPatternValues().stream()
+                              .anyMatch(path -> !path.startsWith("/admin/api/")))) {
+                    throw new IllegalStateException(
+                        "CMS controllers must stay inside /admin/api/: " + method);
+                  }
+                });
   }
 
   public static void verifyDeclaration(HandlerMethod method) {
     Class<?> type = method.getBeanType();
+    if (AnnotatedElementUtils.hasAnnotation(type, com.cms.core.web.CmsController.class)) {
+      if (isApi(method)
+          || AnnotatedElementUtils.hasAnnotation(type, PublicApi.class)
+          || AnnotatedElementUtils.hasAnnotation(type, AuthenticatedApi.class)
+          || AnnotatedElementUtils.hasAnnotation(method.getMethod(), PublicApi.class)
+          || AnnotatedElementUtils.hasAnnotation(method.getMethod(), AuthenticatedApi.class)) {
+        throw new IllegalStateException(
+            "CMS and app API declarations cannot be combined: " + method);
+      }
+      return;
+    }
     if (!type.getPackageName().startsWith("com.loco")
         || !AnnotatedElementUtils.hasAnnotation(type, Controller.class)) {
       return;

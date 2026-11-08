@@ -1,5 +1,7 @@
 # 2번 묶음: 사용자 API 설계와 호환 기준
 
+> 저장소 계획 갱신: 아래 MinIO 선택지는 이관 당시의 검토 이력이다. CMS C-20 C에서 현재 로컬 객체 저장소는 SeaweedFS(S3 호환)로 변경했다([CMS 설계19절](CMS_CORE_DESIGN.md)). LOCO /uploads는 기존 로컬 방식을 유지하며, CMS 변경이 LOCO 파일 이전을 뜻하지 않는다.
+
 대상은 GET/PUT/DELETE `/api/users/me`, POST `/api/users/me/profile-image`, PUT `/api/users/me/fcm-token`이다.
 v2 기준은 원격 main `3d7ae28`이다. 현재 feature 브랜치의 users·upload 소스가 이 기준과 같음을 확인했다.
 Flutter·v2 코드는 변경하지 않는다. 선택 결과는 아래 7절에 정리했다. GET/PUT me, FCM, 탈퇴, 이미지 업로드를 구현했으며 [B 변환기 검증](CODEC_COMPATIBILITY.md)을 적용했다.

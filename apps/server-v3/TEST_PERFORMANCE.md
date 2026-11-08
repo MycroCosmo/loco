@@ -212,3 +212,20 @@ v2 빌드 호출/기동은 각 1회, 재시작은 9회다. 인증 6회·장소 4
 9번 최종 1,340개 검사 식별자 누락 0·추가 94건이다. 알려진 차이 11건(개선6·의도5·보류0)은 기존 10건에 승인된 X-Powered-By 생략 1건을 추가한 결과이며 skip과 별개다. v2 빌드 호출/최초 기동 각1, 재시작17, authWaitMillis=0, withinCaseWaitMillis=61,014다. 직전 885.749초보다 151.413초 늘었으나 대용량·압축 본문, 전체 헤더, 정적 파일, 원본 재관측과 form 파서 경계 검사가 추가됐으므로 API 성능 회귀율로 해석하지 않는다. 재시작 횟수는 같다.
 
 원본 결과·manifest·quota·로그는 `build/performance/globals-final/`에 보존한다. 동시 이미지 구간이 겹치는 categoriesSeconds의 한계는 기존과 같으며 전체 시간은 별도 Stopwatch 측정이다. 관련 부분 검증은 94/94 성공·68.198초, 후속 form 38 HTTP 사례를 포함한 JUnit 1/1 성공·22.970초였다. 이 시간을 전체 실행에 합산하지 않는다. 실제 외부 API·키와 Flutter 수동 실행은 사용하지 않았다.
+
+## CMS 기반 1단계 — 2026-11-07
+
+`measure-tests.ps1 -Label cms-foundation-final`로 기존 전체 회귀와 새 core 테스트, 두 프로젝트의 Spotless/build를 실행했다. v2 이미지 캐시 기준 wall time **1,037.621초(17분18초)**다.
+
+| 작업 | 전체 | 성공 | 실패 | SKIPPED |
+| --- | ---: | ---: | ---: | ---: |
+| root test | 286 | 285 | 0 | 1 (기존 HEIC 공통 제약) |
+| cms-core:test | 3 | 3 | 0 | 0 |
+| comparisonTest | 1,152 | 1,152 | 0 | 0 |
+| 합계 | 1,441 | 1,440 | 0 | 1 |
+
+직전 `globals-final`의 1,434개 식별자 누락0·추가7이다. 알려진 차이11의 ID/분류 변경0(개선6·의도5·보류0), v2 빌드/기동 각1·재시작17, authWaitMillis=0, withinCaseWaitMillis=61,014다. 측정 스크립트에 core XML 집계를 추가해 독립 모듈 테스트도 합계/manifest에 포함했다. 원본은 `build/performance/cms-foundation-final/`이다.
+
+직전1,037.162초와 이번1,037.621초의 차이는 +0.459초이며 단회 실행이고 범위가 달라 성능 개선/회귀의 근거로 쓰지 않는다. categoriesSeconds는 기존 동시 이미지 중복 한계를 유지하고 core 독립 기동 등은 other에 포함된다. 별도 core 실행 시간으로 분해했다고 주장하지 않는다.
+
+집중 검증은 13/13 성공·실패/skip0·35.869초(새7+기존health6). 실제 금지 의존을 주입한 별도 Gradle 음성 검사도 기대한 메시지로 거절됐다. 개발 중 독립 Boot 시작 설정 오류1건과 수정 과정은 [CMS 설계 11절](CMS_CORE_DESIGN.md)에 남겼다. 최종 결과에서 해당 실패를 숨기기 위해 테스트를 제거하거나 자동 재시도하지 않았다.

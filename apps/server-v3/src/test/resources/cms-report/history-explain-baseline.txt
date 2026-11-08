@@ -1,0 +1,11 @@
+rows=10000 (5000 core/5000 business), PostgreSQL17, ANALYZE, warm local query
+SELECT h.* FROM cms.change_history h WHERE h.resource_type IN (?) ORDER BY h.occurred_at DESC, h.id DESC fetch first ? rows only
+bindings=[loco.report,101]
+Limit  (cost=0.29..28.63 rows=101 width=268) (actual time=0.013..0.043 rows=101 loops=1)
+  Buffers: shared hit=23
+  ->  Index Scan Backward using change_history_time on change_history h  (cost=0.29..1403.29 rows=5000 width=268) (actual time=0.012..0.037 rows=101 loops=1)
+        Filter: (resource_type = 'loco.report'::text)
+        Rows Removed by Filter: 102
+        Buffers: shared hit=23
+Planning Time: 0.078 ms
+Execution Time: 0.053 ms

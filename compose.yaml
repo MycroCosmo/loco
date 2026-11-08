@@ -1,6 +1,25 @@
 name: loco-v3
 
 services:
+  storage:
+    image: chrislusf/seaweedfs:4.52@sha256:57877e32bb90073b37dc109b438ba66e84fd5ed9ced5f5c04f56444ef243ce59
+    cpus: 1
+    mem_limit: 1g
+    command: ["server", "-dir=/data", "-ip=127.0.0.1", "-ip.bind=0.0.0.0", "-s3", "-s3.port.iceberg=0", "-s3.port.lance=0", "-master.telemetry=false"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${CMS_STORAGE_ACCESS_KEY:?Set CMS_STORAGE_ACCESS_KEY in the root .env}
+      AWS_SECRET_ACCESS_KEY: ${CMS_STORAGE_SECRET_KEY:?Set CMS_STORAGE_SECRET_KEY in the root .env}
+    volumes:
+      - cms-objects:/data
+    ports:
+      - "127.0.0.1:8333:8333"
+    healthcheck:
+      # An open S3 port is insufficient before the filer joins the internal lock ring.
+      test: ["CMD-SHELL", "echo cluster.ps | timeout 4 weed shell -connectTimeout=2s -master=127.0.0.1:9333 -filer=127.0.0.1:8888 2>/dev/null | grep -q 'filers 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 15s
   db:
     image: postgis/postgis:17-3.6
     cpus: 2
@@ -47,6 +66,15 @@ services:
     mem_limit: 1536m
     environment:
       PORT: 8081
+      # Local HTTP only. Deployments must retain the application's Secure=true default.
+      CMS_COOKIE_SECURE: ${CMS_COOKIE_SECURE:-false}
+      CMS_STORAGE_ENABLED: "true"
+      CMS_STORAGE_ENDPOINT: http://storage:8333
+      CMS_STORAGE_REGION: ${CMS_STORAGE_REGION:-us-east-1}
+      CMS_STORAGE_BUCKET: ${CMS_STORAGE_BUCKET:-cms-files}
+      CMS_STORAGE_ACCESS_KEY: ${CMS_STORAGE_ACCESS_KEY:?Set CMS_STORAGE_ACCESS_KEY in the root .env}
+      CMS_STORAGE_SECRET_KEY: ${CMS_STORAGE_SECRET_KEY:?Set CMS_STORAGE_SECRET_KEY in the root .env}
+      CMS_STORAGE_CREATE_BUCKET: "true"
       HOST: ${HOST:-0.0.0.0}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
       FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT:-}
@@ -81,6 +109,8 @@ services:
       db:
         condition: service_healthy
       mailpit:
+        condition: service_healthy
+      storage:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "--output", "/dev/null", "http://127.0.0.1:8081/api/health"]
@@ -129,5 +159,6 @@ services:
       start_period: 20s
 
 volumes:
+  cms-objects:
   postgres-data:
   v2-uploads:

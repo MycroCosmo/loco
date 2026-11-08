@@ -1,0 +1,17 @@
+[ {
+  "success" : 20,
+  "scenario" : "initial-insert",
+  "lostWrites" : 0,
+  "rounds" : 20,
+  "seconds" : 1.340214201,
+  "conflict" : 20,
+  "extraHistory" : 0
+}, {
+  "success" : 20,
+  "scenario" : "terminal-transition",
+  "lostWrites" : 0,
+  "rounds" : 20,
+  "seconds" : 1.257317299,
+  "conflict" : 20,
+  "extraHistory" : 0
+} ]

@@ -25,6 +25,7 @@ repositories {
 }
 
 dependencies {
+    implementation project(':cms-core')
     implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
@@ -35,6 +36,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.apache.httpcomponents.client5:httpclient5'
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.52.0'
+    // C-15: S3 SDK and transport belong only to the assembly host.
+    implementation platform('software.amazon.awssdk:bom:2.57.11')
+    implementation('software.amazon.awssdk:s3') {
+        exclude group: 'software.amazon.awssdk', module: 'netty-nio-client'
+    }
+    implementation 'software.amazon.awssdk:apache5-client'
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.flywaydb:flyway-database-postgresql'
     runtimeOnly 'org.postgresql:postgresql'
@@ -61,6 +68,30 @@ tasks.register('preparePrisma', Exec) {
 }
 
 def windowsHost = System.getProperty('os.name').toLowerCase().contains('windows')
+
+def adminDirectory = file('../admin')
+def adminNodeHome = providers.environmentVariable('ADMIN_NODE_HOME')
+def adminNpm = windowsHost ? ['cmd.exe', '/d', '/c', 'npm.cmd'] : ['npm']
+tasks.register('adminInstall', Exec) {
+    workingDir adminDirectory
+    if (adminNodeHome.isPresent()) environment 'PATH', adminNodeHome.get() + File.pathSeparator + System.getenv('PATH')
+    inputs.files('../admin/package.json', '../admin/package-lock.json', '../admin/.npmrc')
+    outputs.dir('../admin/node_modules')
+    commandLine adminNpm + ['ci']
+}
+tasks.register('adminBuild', Exec) {
+    dependsOn 'adminInstall'
+    workingDir adminDirectory
+    if (adminNodeHome.isPresent()) environment 'PATH', adminNodeHome.get() + File.pathSeparator + System.getenv('PATH')
+    inputs.dir('../admin/src')
+    inputs.files('../admin/index.html', '../admin/vite.config.ts', '../admin/tsconfig.json', '../admin/package-lock.json')
+    outputs.dir('../admin/dist')
+    commandLine adminNpm + ['run', 'build']
+}
+tasks.named('processResources') {
+    dependsOn 'adminBuild'
+    from('../admin/dist') { into 'admin-ui' }
+}
 def vipsExecutable = providers.environmentVariable('VIPS_EXECUTABLE').getOrElse(windowsHost
         ? layout.buildDirectory.file('vips/vips-dev-8.15/bin/vips.exe').get().asFile.absolutePath : 'vips')
 tasks.register('prepareVips', Exec) {
@@ -88,6 +119,7 @@ tasks.withType(Test).configureEach {
 }
 
 tasks.named('test', Test) {
+    dependsOn ':cms-core:test'
     description = '단위·v3 단독 테스트 (v2 및 Prisma CLI 실행 없음)'
     useJUnitPlatform { excludeTags 'v2-comparison' }
     systemProperty 'compat.v2.enabled', 'false'
@@ -140,7 +172,16 @@ tasks.register('allTests') {
     dependsOn tasks.named('test'), tasks.named('comparisonTest')
 }
 
-tasks.named('check') { dependsOn tasks.named('comparisonTest') }
+// Browser E2E is explicitly separate from allTests and check.
+tasks.register('adminE2eHost', JavaExec) {
+    dependsOn 'testClasses', 'prepareVips'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.loco.cmsinfra.AdminUiBrowserHost'
+    systemProperty 'loco.vips.executable', vipsExecutable
+    systemProperty 'cms.e2e.runtime', layout.buildDirectory.file('admin-e2e/runtime.json').get().asFile.absolutePath
+}
+
+tasks.named('check') { dependsOn tasks.named('comparisonTest'), ':cms-core:check' }
 
 tasks.register('codecTest', Test) {
     description = 'Java 21 이미지 코덱 호환성 검증 (DB·v2 서버 기동 없음)'

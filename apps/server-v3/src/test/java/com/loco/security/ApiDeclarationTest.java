@@ -65,6 +65,54 @@ class ApiDeclarationTest {
   @EnableWebMvc
   static class Mvc {}
 
+  @Test
+  void cmsDeclarationStartsOnlyInsideItsBoundary() {
+    context.withBean(ValidCms.class).run(app -> assertThat(app).hasNotFailed());
+    context
+        .withBean(EscapedCms.class)
+        .run(
+            app ->
+                assertThat(app.getStartupFailure())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("inside /admin/api/"));
+    context
+        .withBean(MixedCms.class)
+        .run(
+            app ->
+                assertThat(app.getStartupFailure())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("cannot be combined"));
+  }
+
+  @TestComponent
+  @com.cms.core.web.CmsController
+  static class ValidCms {
+    @GetMapping("/admin/api/loco/probe")
+    public String get() {
+      return "ok";
+    }
+  }
+
+  @TestComponent
+  @com.cms.core.web.CmsController
+  static class EscapedCms {
+    @GetMapping("/api/escaped")
+    public String get() {
+      return "bad";
+    }
+  }
+
+  @TestComponent
+  @com.cms.core.web.CmsController
+  @ApiController
+  @PublicApi
+  static class MixedCms {
+    @GetMapping("/admin/api/loco/mixed")
+    public String get() {
+      return "bad";
+    }
+  }
+
   @TestComponent
   @ApiController
   static class MissingAccess {

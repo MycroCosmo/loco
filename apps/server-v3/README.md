@@ -1,5 +1,7 @@
 # LOCO v3 — Spring 기반과 v2 인증·오류 호환
 
+CMS 5-B부터 호스트 JAR에 관리자 SPA를 포함하므로 Gradle의 리소스 처리·테스트·빌드에도 **Node 24.22.2 / npm 11.19.1**이 필요하다(Java 21 유지). Windows에서는 이 디렉터리에서 `. ../admin/prepare-node.ps1`을 먼저 실행한다. 시스템 Node와 v2의 Node 20은 변경하지 않는다. Docker 빌드는 고정 Node를 자체 준비한다. 관리자 화면 실행과 별도 Chromium E2E 명령은 [관리자 README](../admin/README.md)를 참고한다.
+
 PR 전 전역 HTTP 보완: JSON/form 10MiB, form 파라미터 1,000개·중첩 깊이 32, Helmet 기본 헤더와 CORS를 v2 순서대로 적용한다. `ALLOWED_ORIGINS`는 쉼표로 나눈 정확한 Origin 목록이며 비어 있으면 `http://localhost:8080,http://localhost:3000`이다. localhost:5173 웹 개발 서버는 해당 Origin을 명시하고 Compose v3를 재생성한다. 미허용 Origin 자체를 서버 403으로 막지 않으며, CORS는 인증을 대신하지 않는다.
 `HOST`는 `server.address`에 연결되며 기본은 0.0.0.0이다. Compose에서 컨테이너 포트를 공개할 때는 이 기본값을 유지한다. `X-Powered-By`만 생략하는 10-1 A 결정과 전체 헤더 비교 방법은 [전역 HTTP fixture 설명](src/test/resources/globals/README.md)에 있다.
 
@@ -238,7 +240,7 @@ $env:DATABASE_URL = $null
 ## Docker Compose로 v2·v3 함께 실행
 
 아래 명령은 **저장소 루트**에서 실행한다. Docker가 켜져 있고 호스트의 3000·8081·8025·1025 포트가 비어 있어야 한다.
-첫 실행에는 `.env.example`을 `.env`로 복사하고 `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` 값을 채운다. 기존 `.env`는 덮어쓰지 않는다.
+첫 실행에는 `.env.example`을 `.env`로 복사하고 `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `CMS_STORAGE_ACCESS_KEY`, `CMS_STORAGE_SECRET_KEY`를 로컬용 값으로 채운다. 저장소 키는 실제 AWS 키가 아니다. 기존 `.env`는 덮어쓰지 않는다.
 JWT 비밀 값은 UTF-8 기준 최소 32바이트의 충분히 긴 무작위 값으로 설정하며 v2·v3에 같은 값이 주입된다.
 Nimbus의 HS256 키 길이 요구 사항 때문에 v3는 비어 있거나 32바이트 미만인 값으로 시작하지 않는다. 짧은 기존 개발 키가 있다면 두 앱을 함께 변경하고 토큰을 다시 발급한다.
 `.env`에서 `$` 등 치환될 수 있는 문자를 값에 포함할 때는 작은따옴표로 감싼다.
@@ -375,7 +377,7 @@ URL 보호 목록을 별도로 관리하는 (a)는 경로가 중복되고, 모�
 
 `/api`는 context path에서 **MVC path prefix**로 바꿨다. 컨트롤러는 `/health`처럼 내부 경로만 선언한다.
 앱 컨트롤러에만 prefix가 적용되고 `/api` 밖의 없는 경로도 Spring에서 JSON 404를 처리한다.
-현재는 앱 API만 있는 단일 stateless 필터 체인이다. 관리자 세션을 추가할 때는 별도 체인과 CSRF 정책, 컨트롤러 선언 검사를 함께 설계한다.
+LOCO 앱 API는 기존 stateless·CSRF off 체인을 유지한다. `/admin/**`는 CMS 전용 세션·CSRF 체인으로 분리했으며 앱 JWT와 관리자 세션을 서로 인증 수단으로 인정하지 않는다. 관리자 초기 생성·쿠키 설정·검증 명령은 [CMS 설계 12~13절](CMS_CORE_DESIGN.md#12-2단계-결정-변경-기록-2026-11-07)에 있다. 로컬 HTTP만 `CMS_COOKIE_SECURE=false`, 운영 HTTPS는 기본 Secure=true를 사용한다.
 
 JWT는 비밀 문자열을 Base64 디코딩하지 않고 UTF-8 바이트로 사용한다. 이는 v2의 문자열 secret과 같다.
 HS256만 허용하고 만료(`exp`)·사용 시작(`nbf`) 허용 오차는 0초다. v2처럼 `sub`가 있어야 하며 `iss`·`aud`를 새로 요구하지 않는다.
@@ -540,3 +542,47 @@ TransactionTemplate의 커밋 경계, multipart 지연 파싱, 네이티브 프�
 
 `MarkerCells`는 장소 쓰기와 별개로 SELECT 후 각 셀을 커밋한다. 키 생성(`CoordinateKeys`)과 PostgreSQL ROUND가 다른 기존 제약도 보존한다. `PrismaFloats`는 Prisma 5의 Float 입출력 변환을 맞추며 Node는 테스트 oracle에서만 사용한다.
 입력/응답 fixture와 DB·부분 실패·알림 계약은 `src/test/java/com/loco/places`에 있다. `PlaceWriteSupport`는 UUID/시각 형식 검사와 비-ID 기준의 DB 행 대응을 공유한다.
+
+## CMS 역할·메뉴 기반
+
+관리자 보안 관리는 SYSTEM_ADMIN만, 업무 권한은 READ/MANAGE 합집합이다. 코드 템플릿을 복사해 역할을 만들며 기존 역할로 자동 전파하지 않는다. 메뉴 이동은 UUID를 유지하고 트리 메타 행 잠금+revision으로 동시 순환을 막는다. API·실제 DB 경합 수치·검증 명령은 [CMS 설계 16절](CMS_CORE_DESIGN.md#16-3단계-확정구현-기록)을 참고한다. CLI는 기존 스키마 검증만 하며 V4 적용은 배포 앱 기동 시 수행한다.
+
+## CMS 파일 백엔드 (5-A)
+
+로컬 저장소는 SeaweedFS S3 게이트웨이이며 SDK·이미지 변환은 호스트에만 있다. core는 저장/변환 포트와 JPA 상태·이력을 관리한다. [C-15~23 결정과 검증](CMS_CORE_DESIGN.md#20-c-23-c-확정--파일-선등록조건부-상태-전이)을 참고한다. 관리자 SPA의 개발·운영·별도 E2E 명령은 [apps/admin README](../admin/README.md), C-24~32와 화면 계약은 [ADMIN_UI_DESIGN.md](ADMIN_UI_DESIGN.md)에 있다.
+
+저장소를 포함해 실행하려면 저장소 루트 `.env`에 기존 DB/JWT 설정과 **로컬용으로 새로 만든** `CMS_STORAGE_ACCESS_KEY`, `CMS_STORAGE_SECRET_KEY`를 지정한다. 실제 AWS 키를 사용하지 않는다. 예제 파일은 키 이름만 제공한다. 루트에서 `docker compose up -d --build --wait`를 실행하면 storage health 이후 v3가 V5를 적용하고 비공개 버킷을 준비한다. storage는 digest 고정·CPU1/1GiB, 전용 `cms-objects` 볼륨을 사용한다. 기존 DB·LOCO 업로드 볼륨은 유지한다. `docker compose down -v`로 기존 데이터를 지우지 않는다.
+
+Compose는 endpoint `http://storage:8333`, region `us-east-1`, bucket `cms-files`를 기본 사용한다. 호스트에서 직접 앱을 실행할 때만 `CMS_STORAGE_ENABLED=true`, `CMS_STORAGE_ENDPOINT=http://localhost:8333`, region/bucket/접속 키를 설정한다. 초기 로컬 버킷 준비는 `CMS_STORAGE_CREATE_BUCKET=true`로 켠다. 이 플래그는 관리자 bootstrap CLI를 통한 DB migration과 무관하다. CLI는 여전히 스키마 검증만 한다. 운영 버킷은 별도 준비하고 기본 create=false를 유지한다.
+
+파일 API prefix는 `/admin/api/core/files`다. GET 목록(`page=0&size=50`), GET `/{id}` 상세, GET `/{id}/content` 스트리밍 다운로드, POST multipart `file` 한 개, DELETE `/{id}`를 제공한다. 관리자 세션과 변경 요청 CSRF가 필요하다. `cms.files` READ는 모든 ACTIVE 파일 조회·다운로드, MANAGE는 업로드·삭제도 허용하며 SYSTEM_ADMIN은 모두 허용한다. 업로더 소유 제한은 없다. 다운로드는 attachment·no-store·nosniff이며 객체 URL이나 서명 URL은 노출하지 않는다.
+
+업로드는 UPLOADING 선커밋→변환/PUT→조건부 ACTIVE+이력 커밋이다. 실패·오래된 업로드는 FAILED/ABANDONED, 삭제는 DELETE_PENDING을 거쳐 정리한다. 대조는10분마다 수행하며 생성10분 미만은 보존한다. ACTIVE 객체는 대조로 삭제하지 않는다. 응답 유실 후 재업로드는 중복 파일을 만들 수 있다(C-19 B). 파일은 각10MiB 이하, 이미지 JPEG/PNG/WebP/AVIF는 WebP만 저장하고 PDF/TXT/CSV는 원본을 저장한다. 일반 파일 검사는 악성코드 검사나 PDF의 안전성 보증이 아니다.
+
+집중 재검증은 `./gradlew :cms-core:test :test --tests '*CmsFilesIntegrationTest' --tests '*StorageTransportTest' --tests '*CmsImageTransformerTest'`로 실행한다. 전체 범위는 `./gradlew allTests build`다(Windows는 `gradlew.bat`). 실제 AWS 접속 없이 로컬 SeaweedFS와 루프백 장애 대역으로 확인한다. 대조 비용 보고서는 `build/reports/cms-storage/reconciliation.txt`, 전체 결과는 Gradle HTML 보고서에서 확인한다.
+
+5-A 당시 최종 전체 검증: **1,563건 중 성공1,562·실패0·HEIC 공통 제약 건너뜀1**, 알려진 차이11건 불변, **1,145.692초**(v2 이미지 캐시). core99·root312·비교1,152건, allTests/build/Spotless 통과. DB gate의 두 순서 모두 ACTIVE 객체 누락0이며 Linux Compose 이미지5종 흐름도 통과했다. 초기 SeaweedFS 준비 시점 문제와 수정 근거는 설계20절에 기록했다. 이후5-B 화면 결과는 ADMIN_UI_DESIGN, 6단계 결과는 아래 LOCO_ADMIN_DESIGN을 따른다.
+
+## CMS LOCO 조회 (6단계)
+
+회원·지도방·장소·신고의 관리자 목록/상세를 `/admin/api/loco/{users|maps|places|reports}` 및 `/{id}`로 제공한다. 관리자 세션과 해당 `loco.* READ`가 필요하며 SYSTEM_ADMIN은 모두 허용한다. 지도방·장소 READ는 **비공개 포함**, 역할 설명에 범위를 표시한다. 앱 JWT는 관리자 API 인증 수단이 아니다.
+
+화면은 `/admin/loco/users`, `/admin/loco/maps`, `/admin/loco/places`, `/admin/loco/reports`다. [화면 실행 방법](../admin/README.md), [승인된 결정·구현·검증](LOCO_ADMIN_DESIGN.md), [1만/10만 건 실제 SQL·EXPLAIN](src/test/resources/cms-read/explain-baseline.json)을 참고한다. 이메일 서버 마스킹, size50/max100 cursor, 업무별 검색을 지원하며 토큰·초대 코드·이미지 URL을 제공하지 않는다. 대상 업무 READ가 없는 신고 조회에서는 대상 존재 여부도 숨긴다.
+
+전용 JPA projection은 기존 public 스키마를 읽고 앱 서비스·마커 재집계를 호출하지 않는다. SYSTEM_ADMIN 기준 목록/상세 업무 SQL1·전체 SQL3을 고정했다. 최신순 목록은 현재 인덱스에서 scan/sort가 남으며 인덱스 추가는 후속 실험이다. public 데이터·변경 이력 불변, core의 LOCO 역참조 없음, CMS/앱 HTTP 선언 혼용 금지를 검사한다.
+
+C-33/C-34의 6단계 당시 이연 기록과 설계2절은 보존한다. 후속 신고 처리에서 flat typed 호스트 이력 계약을 구현하고 업무 이력 열람을 분리했다(아래 참고). 리뷰·피드백 조회·회원 정지·CMS 파일 업무 연결은 이연 상태다. 최종 회귀는 `gradlew.bat allTests build`, 프런트는 고정 Node 준비 후 `npm.cmd --prefix ../admin run test:unit` 및 별도 `test:e2e`다.
+
+6단계 최종 검증: 서버 총1,600건(성공1,599·실패0·기존 HEIC skip1), 알려진 차이11건(개선6·의도5·보류0) 불변. `allTests build`·Spotless1,001.813초(v2 이미지 캐시, 직전 실제 통과한 core101건 UP-TO-DATE 재사용), Vitest23건0.170초, Chromium E2E7건 준비/종료 포함34.789초. 상세 실행 범위와 근거는 [설계11절](LOCO_ADMIN_DESIGN.md#11-최종-검증완료-2026-11-08)에 있다.
+
+## CMS 신고 처리 (마지막 묶음)
+
+`PUT /admin/api/loco/reports/{id}/processing`은 관리자 세션·CSRF·`loco.reports MANAGE`가 필요하다. `expectedStatus`, `nextStatus`, `note`만 받으며 처리자와 시각은 서버가 정한다. 접수→검토중→완료/기각 단방향이고 종결 메모는 필수다. 종결 후 메모 편집·재개, 회원 정지·강제 비공개·앱 알림은 없다.
+
+V6는 호스트 소유 `cms.loco_report_processing`만 추가한다. `public.reports`는 그대로이며 행이 없으면 접수로 조회한다. 첫 쓰기는 INSERT…ON CONFLICT 후 현재 상태 조건부 UPDATE, 성공 이력까지 같은 트랜잭션이다. 메모 원문은 현재 처리 행만, 이력은 status/hasNote/handledBy/handledAt만 저장한다. FK 없는 논리 참조로 원본이 삭제되어도 이력을 보존한다. migration은 앱 기동만 담당하고 bootstrap CLI는 계속 스키마 검증만 수행한다.
+
+`GET /admin/api/core/history/resources`는 현재 허용된 리소스만 반환한다. 신고 READ는 `loco.report` 이력을 읽고 core 4종은 SYSTEM_ADMIN만 읽는다. 역할 MANAGE는 명시 배정하며 기존 역할에 자동 전파하지 않는다. 화면은 409 시 초안을 버리고 최신 상태를 다시 읽으며 자동 쓰기 재전송을 하지 않는다.
+
+[승인 C-43~49·검증](REPORT_PROCESSING_DESIGN.md), [신고 SQL/EXPLAIN 기준](src/test/resources/cms-report/read-plans-baseline.json), [PR 본문 초안](CMS_PR_DRAFT.md)을 참고한다. LOCO 기존 앱 API와 v2 비교 fixture는 변경하지 않았다.
+
+최종 서버1,642건: 성공1,641·실패0·기존 HEIC skip1, 알려진 차이11건(개선6·의도5·보류0). `allTests build`/Spotless1,054.991초(v2 이미지 캐시; core125는 직전 통과 후 재사용, root365·비교1,152 재실행). Vitest26건 runner0.206초, Chromium9건 준비·종료 포함38.724초. PR은 초안 파일만 작성했으며 생성·머지는 하지 않았다.

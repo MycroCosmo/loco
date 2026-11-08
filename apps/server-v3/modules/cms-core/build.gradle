@@ -1,0 +1,53 @@
+plugins {
+    id 'java-library'
+    id 'com.diffplug.spotless'
+}
+
+group = 'com.cms'
+version = rootProject.version
+
+java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+// Spring MVC and Spring Data need parameter names in this plain java-library module.
+tasks.withType(JavaCompile).configureEach { options.compilerArgs.add('-parameters') }
+repositories { mavenCentral() }
+
+spotless { java { googleJavaFormat('1.28.0') } }
+
+dependencies {
+    implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.flywaydb:flyway-core'
+    // C-10: Spring's Argon2 implementation requires this explicitly approved provider.
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.86'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// C-1: this library must remain usable without any host project, including in tests.
+configurations.configureEach {
+    withDependencies { dependencies ->
+        if (dependencies.any { it instanceof ProjectDependency }) {
+            throw new GradleException('cms-core must not depend on a host project')
+        }
+    }
+}
+
+tasks.named('test', Test) {
+    useJUnitPlatform()
+    maxParallelForks = 1
+    doFirst {
+        systemProperty 'cms.compile.classpath',
+                sourceSets.main.output.classesDirs.asPath + File.pathSeparator + configurations.compileClasspath.asPath
+        systemProperty 'cms.runtime.classpath', sourceSets.main.runtimeClasspath.asPath
+    }
+    testLogging { events 'failed', 'skipped' }
+}
