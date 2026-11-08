@@ -314,16 +314,35 @@ if(action==='up') {
   }
   command('docker',['stop',`${project}-plan`]);command('docker',['rm',`${project}-plan`]);dc('start','perf-app');appContainer=`${project}-perf-app-1`;await ready();
 } else if(action==='profile') {
+  const [name='profile',rate='50',viewport='1']=args;
+  const spec=measurementSpec(name,rate,viewport,'hot80',1);
+  const recording=name==='profile'?'diagnostic.jfr':name+'.jfr';
+  assert.ok(!fs.existsSync(path.join(output,'runtime',recording)),'Do not overwrite a JFR recording');
   dc('stop','perf-app');
-  const jfr='-XX:StartFlightRecording=delay=140s,duration=60s,filename=/results/diagnostic.jfr,settings=profile,jdk.InitialEnvironmentVariable#enabled=false,jdk.InitialSystemProperty#enabled=false';
+  const jfr=`-XX:StartFlightRecording=delay=140s,duration=60s,filename=/results/${recording},settings=profile,jdk.InitialEnvironmentVariable#enabled=false,jdk.InitialSystemProperty#enabled=false`;
   dc('run','-d','--name',`${project}-jfr`,'--use-aliases','-e','JAVA_TOOL_OPTIONS='+jfr,'perf-app');
-  appContainer=`${project}-jfr`;await ready();
-  const cases=await markerCases(1,1000);
-  await runLoad({run:'profile-warmup',rate:50,seconds:120,hot80:true,cases});
-  await runLoad({run:'profile-diagnostic',rate:50,seconds:90,hot80:true,cases});
-  assert.ok(fs.statSync(path.join(output,'runtime/diagnostic.jfr')).size>0);
+  appContainer=`${project}-jfr`;
+  try {
+  await ready();snapshot(`${name}-manifest.json`);
+  const cases=await markerCases(spec.viewport,1000),before=fingerprint();
+  for(const [suffix,seconds] of [['warmup',120],['diagnostic',90]]) {
+    const run=`${name}-${suffix}`;
+    try {await runLoad({run,rate:spec.rate,seconds,hot80:true,cases});}
+    catch(error) {
+      const result=JSON.parse(fs.readFileSync(path.join(output,run,'execution.json')));
+      if(result.exitCode!==99)throw error;
+      console.log(`${run}: threshold failure retained for diagnosis, never a baseline pass`);
+    }
+  }
+  assert.ok(fs.statSync(path.join(output,'runtime',recording)).size>0);
+  assert.deepEqual(fingerprint(),before);
+  write(`${name}-db-check.json`,{unchanged:true});
+  } finally {
+  const logs=spawnSync('docker',['logs',appContainer],{encoding:'utf8',maxBuffer:64*1024*1024,windowsHide:true});
+  fs.writeFileSync(path.join(output,`${name}-app.log`),logs.stdout+'\n'+logs.stderr);
   command('docker',['stop',`${project}-jfr`]);command('docker',['rm',`${project}-jfr`]);
   dc('start','perf-app');appContainer=`${project}-perf-app-1`;await ready();
+  }
 } else if(action==='snapshot') snapshot(args[0]||'environment-final.json');
 else if(action==='stop') console.log(dc('stop'));
 else throw Error('Use up | seed S/M/CMS skew/uniform | boundary | pilot | probe/warmup NAME RATE VIEWPORT SECONDS | measure NAME RATE VIEWPORT hot80/uniform REPEATS | cms | restart | snapshot | stop');
