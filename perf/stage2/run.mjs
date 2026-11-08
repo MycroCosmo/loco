@@ -265,7 +265,7 @@ if(action==='up') {
   if(fs.existsSync(planFile))fs.unlinkSync(planFile);
   // Restart outside measured intervals to collect real generated CMS SQL/EXPLAIN.
   dc('stop','perf-app');
-  dc('run','-d','--name','loco-perf-p0-plan','--service-ports','perf-app','--capture-plans');
+  dc('run','-d','--name','loco-perf-p0-plan','--use-aliases','perf-app','--capture-plans');
   appContainer='loco-perf-p0-plan';
   await ready(); await bootstrap();
   let plans;
@@ -293,7 +293,7 @@ if(action==='up') {
 } else if(action==='profile') {
   dc('stop','perf-app');
   const jfr='-XX:StartFlightRecording=delay=140s,duration=60s,filename=/results/diagnostic.jfr,settings=profile,jdk.InitialEnvironmentVariable#enabled=false,jdk.InitialSystemProperty#enabled=false';
-  dc('run','-d','--name','loco-perf-p0-jfr','-e','JAVA_TOOL_OPTIONS='+jfr,'perf-app');
+  dc('run','-d','--name','loco-perf-p0-jfr','--use-aliases','-e','JAVA_TOOL_OPTIONS='+jfr,'perf-app');
   appContainer='loco-perf-p0-jfr';await ready();
   const cases=await markerCases(1,1000);
   await runLoad({run:'profile-warmup',rate:50,seconds:120,hot80:true,cases});

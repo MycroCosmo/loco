@@ -17,7 +17,8 @@ for(const directory of fs.readdirSync(base,{withFileTypes:true}).filter(d=>d.isD
   for(const line of fs.readFileSync(path.join(base,directory,'resources.jsonl'),'utf8').trim().split('\n').filter(Boolean)) {
     const sample=JSON.parse(line);if(previous)gaps.push((Date.parse(sample.at)-previous)/1000);previous=Date.parse(sample.at);
     if(sample.error)collectorErrors.push({at:sample.at,error:sample.error});
-    const individual=(sample.stats||[]).filter(s=>s.name.startsWith('/loco-perf-p0'));
+    // Docker can return a zeroed final sample while an ephemeral container exits.
+    const individual=(sample.stats||[]).filter(s=>s.name.startsWith('/loco-perf-p0')&&s.limit>0);
     const background=(sample.stats||[]).filter(s=>!s.name.startsWith('/loco-perf-p0'));
     if(background.length)individual.push({name:'background',cpuCores:background.reduce((n,s)=>n+(s.cpuCores||0),0),workingSet:background.reduce((n,s)=>n+(s.workingSet||0),0)});
     for(const item of individual) {
@@ -25,7 +26,7 @@ for(const directory of fs.readdirSync(base,{withFileTypes:true}).filter(d=>d.isD
       const r=resources[name]??={cpu:[],workingSet:[],firstThrottle:null,lastThrottle:null};
       if(item.cpuCores!==null&&Number.isFinite(item.cpuCores))r.cpu.push(item.cpuCores);
       if(item.workingSet)r.workingSet.push(item.workingSet);
-      r.firstThrottle??=item.throttle;r.lastThrottle=item.throttle;
+      if(item.throttle?.periods>0) {r.firstThrottle??=item.throttle;r.lastThrottle=item.throttle;}
     }
   }
   const metrics=summary.metrics;
