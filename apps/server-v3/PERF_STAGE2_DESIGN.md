@@ -1,0 +1,204 @@
+# 2단계 성능 실험 설계 — 정합성부터 검증하는 공간 조회·쓰기 비교
+
+상태: **설계만 작성, E-1~E-11 선택 대기. 구현·migration·데이터 생성·부하 실행·AWS 생성 없음.** 기준은 CMS merge commit `1e5ce3bde801e2c2cdea1b14828932f30fcb185c`(2026-11-08), 브랜치는 `feature/perf-stage2`다. 아래 권장안·숫자는 승인 전 제안이며 측정 결과가 아니다. 사용자는 답변에 **번호와 항목 이름**을 함께 쓴다.
+
+이 문서는 전체 로드맵의 2단계다. 이관 묶음 번호나 CMS 구현 단계와 구별한다. 운영 코드·v2·Flutter·CMS core와 기존 V1~V6를 이번 설계에서 바꾸지 않는다. 별도 실험 채택과 main 반영도 구분한다.
+
+## 1. 출발 근거와 WWHO 기록 규칙
+
+- [이관 백로그](MIGRATION_SUMMARY.md#5-이관-후-개선-후보23단계-실험-통합), [마커 SQL·경계](MARKER_API_DESIGN.md), [장소 쓰기](PLACE_API_DESIGN.md), [이미지 성능 계획](IMAGE_API_DESIGN.md#7-승인-후-비교-실험-계획).
+- [CMS 조회 기준](LOCO_ADMIN_DESIGN.md#10-sqlexplain-실측-기준-2026-11-08), [신고 처리 후 SQL 기준](REPORT_PROCESSING_DESIGN.md#11-단계별-구현-기록), [회귀 시간 기록](TEST_PERFORMANCE.md).
+- [노션 결정 기록](https://app.notion.com/p/40c140eabf0e81dca76de00565fe725b)의 2026-11-02 정의를 따른다. **WWHO = What · Why · How · Opinion**이다. Outcome으로 바꾸지 않는다. How에 절차·실제 결과·실패한 실행까지 넣고 Opinion에 채택/기각/보류와 한계를 쓴다. 실험 전 Opinion은 예상 판단 기준일 뿐 결과가 아니다.
+- 성능 대조군은 **같은 Java v3의 기준 구현 A와 대안 B**다. v2는 응답·DB 의미의 비교 기준이며 Nest와 Java의 속도 차이를 락·PostGIS 효과로 발표하지 않는다.
+- 같은 데이터와 의미의 A/B 비교, 정합성 검사, 장애/경합 재현, 성능 대표 실행을 나눈다. 강제 DB gate나 EXPLAIN ANALYZE가 포함된 시간을 일반 응답 시간으로 합치지 않는다.
+
+## 2. 기존 기준값 — 지금 있는 수치와 없는 수치
+
+| 영역 | 저장된 관측 | 의미와 한계 / 원본 |
+|---|---|---|
+| 마커 누락 | 37.05/경도0: precision1 셀 없음·level11 조회 누락. -0.00001/경도0: precision1/2/3 셀 없음·level6/9/11 누락. level<6도301개 이상이면 셀 fallback | 실제 v2 POST로 재현. 단순 SQL seed로 셀을 미리 만들면 버그가 가려진다. [마커4절](MARKER_API_DESIGN.md#4-실수-변환과-누락-좌표)과 문서 내 관측 참조 |
+| 마커 갱신 | 좌표당3정밀도×(집계SELECT+UPSERT/DELETE)=6SQL, 좌표 이동12SQL. 인증 포함 생성10/11, 수정no-op9·일반10·이동16, 삭제10 | SQL 수와 커밋 경계의 기준. 처리량/p95는 미측정. [장소5절](PLACE_API_DESIGN.md#5-마커-셀-재집계와-커밋-경계)·[MarkerCells](src/main/java/com/loco/places/MarkerCells.java) |
+| 마커 조회 SQL | 인증 포함 markers3/fallback4, group3, cluster3/4/5; 비공개 비방장 멤버 +1 | SQL 감소가 DB 작업 감소를 보장하지 않는다. [마커7절](MARKER_API_DESIGN.md#7-검증-기록) |
+| 마커 계획 | 작은 seed는 places7행·대상방4장소. 다른 방에1만 행 추가 후 places 좌표 B-tree/셀 인덱스 사용. cluster ROUND는 mapId만 Index Cond, 나머지는 Filter | 대상 방에1만 장소가 있는 실험이 아니다. p50/p95/p99/RPS/CPU/메모리 부하 기준 없음. [v2 plan](src/test/resources/markers/explain-v2.json), [v3 plan](src/test/resources/markers/explain-v3.json) |
+| 이미지 | POST/정상DELETE 각각SQL4. 삭제2요청 합8, 같은URL 중복삭제9. 정상 I/O 정합성22건에서 깨진URL/고아/성공URL유실0 | N=2/4/8/16·초기0~3장 재현. 락과 상대 성능은 **미측정**. 업로드당 libvips 프로세스3회·PNG 중간 파일. [이미지10절](IMAGE_API_DESIGN.md#10-구현-검증) |
+| CMS6 조회 | 10만 행 HTTP 10회 중앙값/최대(ms): 회원 첫목록35.12/37.53, 지도방31.15/34.58, 장소34.29/39.49, 신고30.53/33.62. SYSTEM_ADMIN 전체SQL3/업무1 | 컨테이너 CPU/RAM 제한 없음, PostgreSQL17.11·shared_buffers128MB·work_mem4MB, warmup1+10회. p95/p99/SLA 아님. [원본70시나리오](src/test/resources/cms-read/explain-baseline.json) |
+| CMS 신고 처리 후 | 10만 신고+5만 처리행: JPA read 중앙값(ms) 첫목록52.250/접수52.867/검토중46.239, 상세0.634. 목록 Seq Scan+Hash Join+Sort, 상세 두 PK Index Scan. HTTP SQL3/업무1 | CMS6의 처리행 없는 HTTP 수치와 직접 전후 비교 금지. [20시나리오](src/test/resources/cms-report/read-plans-baseline.json). 혼합1만 이력 계획은 [별도 기준](src/test/resources/cms-report/history-explain-baseline.txt), 실행0.053ms도 단회 plan 관측 |
+| Redis | 없음 | 의존성·실행 서비스·캐시 적중률·무효화 정책 모두 아직 없음. 속도 향상을 가정하지 않는다 |
+| 회귀 도구 | 이관9번885.749초·시나리오 창61.013초, TCP4227 실패1회. 최신 CMS 최종allTests/build1,054.991초, 총1,642건·성공1,641·HEIC skip1·알려진차이11 | 서버 응답시간이 아니라 테스트 운영 비용이다. 최신 core125는 직전 통과 후 캐시 재사용. [CMS 최종](REPORT_PROCESSING_DESIGN.md#4-최종-전체-검증-2026-11-08) |
+
+CMS 기준의 DB 설정은 개발 Compose(DB2CPU/4GiB/shared_buffers1GiB)와 다르다. 과거 중앙값과 새 부하 p95를 바로 나눠 개선율을 계산하지 않는다. **모든 채택 판정은 새 환경에서 다시 얻은 A/B 기준**으로 한다. 실행계획의 cost/ms·scan 방식은 관측값이지 환경 불문 테스트 assertion이 아니다.
+
+## 3. 실험 후보·권장 우선순위와 WWHO 가설
+
+권장 순서: **P0 기준선 → P1 누락 정합성 → P2 갱신 SQL → P3 PostGIS → P4 이미지 락 → P5 Redis**. P2에서 쓰기 의미 변경 승인이 없으면 보류하고 P3로 간다. 각 효과는 직전 단계가 아닌 같은 부모 기준의 A/B에서 먼저 분리하고, 통합 효과는 마지막에 별도 측정한다. CMS 조회는 P0 대조군이며 인덱스 실험 확대는 E-11이다.
+
+### P0. 재현 가능한 기준선과 CMS 대조군
+
+- **What:** merge 기준 v3의 실제 HTTP·SQL·자원 기준을 고정한다. CMS users/maps/places/reports 첫/깊은cursor/상세·검색과 신고 상태 필터도 포함한다.
+- **Why:** 기존 SQL/EXPLAIN은 원인을 찾는 출발점이지만 부하 측정이 아니다. CMS의 scan/sort는 공간 기능과 무관한 DB 부하 대조군이 된다.
+- **How:** §4~6의 seed·배포 JAR·풀·컨테이너 자원을 고정해 같은 A를 반복한다. 인증/권한 포함 경로를 측정한다. CMS의 실제 세션/CSRF 로그인은 준비 단계, 첫 비밀번호 변경·권한 회수/401/403는 별도 기능 검사다.
+- **Opinion 기준:** 같은 조건에서 p95 반복 변동 폭이 중앙값의10%를 넘으면 환경부터 조사하고 개선안의 승자를 정하지 않는다. 기존 의미·행 수·SQL 예산 검사를 통과하고 요청 발생/처리/오류 수를 설명할 수 있어야 다음 실험으로 간다.
+
+### P1. 마커 셀 누락 정합성 (속도 개선보다 먼저)
+
+- **What:** 쓰기 셀 키, 집계 WHERE, cluster 역조회가 같은 좌표 규칙을 사용하도록 하는 안을 비교한다(E-5). 기존 셀의 재생성 계획도 포함한다.
+- **Why:** 빠르게 반환해도 장소가 사라지는 응답은 성공이 아니다. 캐시는 누락을 오래 유지하고 PostGIS는 반올림 정책을 자동으로 통일하지 않는다.
+- **How:** 실제 POST/PUT/DELETE를 통해37.05·-0.00001·±0·각 half-step 바로 전/정확값/직후·반구간·음수·좌표 범위 끝을 검증한다. level5/6/9/11, places300/301, cells699/700/701, group/cluster 포함. DB의 원본 places를 독립적으로 분류한 기대 집합과 모든 precision 셀 count/그룹·items를 대조한다. 기존버그 fixture는 v2 재현용으로 보존하고 v3 수정 기대값을 따로 둔다.
+- **기준/성공:** §2의 누락이 기준. 승인된 좌표 규칙에서 누락/중복/잘못된 셀0, 단일 쓰기 완료 뒤 파생 count·경계·고유키 일치, 기존 전체 데이터 재생성 후 같은 결과. 오래된 v2 cellKey를 앱에서 전달하는 전환 경우도 검증한다. **동시 재집계 정합성은 별도 E-6 범위**이며 이 검사 통과로 해결했다고 주장하지 않는다.
+- **측정/Opinion:** 공통 p50/p95/p99·성공RPS·SQL·CPU/RAM을 기록하되 정합성 성공에는 속도 향상을 요구하지 않는다. 성능 회귀10% 초과는 원인을 별도 보고한다. 결과가 바뀌는 범위를 알려진 개선 차이로 등록한 후 채택 판단한다.
+
+### P2. 마커 셀 갱신 SQL 감소와 커밋 경계
+
+- **What:** 3정밀도 집계 및 upsert/delete 왕복을 합칠 수 있는지 비교한다. 1) 정밀도별 집계+DML 결합, 2) 3정밀도/이전·새 좌표 affected-cell 집합 처리. 같은 셀 중복 갱신 제거는 따로 측정한다.
+- **Why:** 좌표당6·이동12SQL이 같은 장소 집합을 반복 조회한다. 네트워크 왕복·반복 scan이 병목인지 확인해야 한다.
+- **How:** 생성/일반수정/no-op/같은셀 이동/다른셀 이동/삭제를 분리하고 작은 방·hot 방, 동시1/2/4/8/16에서 비교한다. 변경 전후 affected-cell 집합을 독립 재집계하여 검사한다. 정밀도2 실패, 두 쓰기의 집계 읽기/덮어쓰기 역전, 장소 커밋 후 재집계 실패를 강제하는 검사는 성능 구간 밖에서 실시한다. 정상 부하 종료 후에도 stale count·누락 셀을 확인한다.
+- **기준/성공:** 갱신 SQL6/12 → 제안 목표 ≤3/≤6(50% 이상 감소), HTTP 전체 예산 변화 근거 명시. 공통 성능 gate도 통과해야 “빠르다”로 채택한다. SQL만 줄고 p95가 같으면 왕복 감소만 보고한다. 실패/동시 상태는 **승인한 E-6 의미**와 맞아야 한다.
+- **Opinion:** 한 SQL 결합도 집계와 반영의 원자성을 바꾼다. 현재 부분 커밋 의미를 조용히 보존했다고 주장하지 않는다. 동일 셀의 오래된 snapshot이 마지막에 쓰이는 경쟁은 SQL 합치기만으로 완전히 해결되지 않을 수 있다. 모든 writer가 공유하는 직렬화/버전 검증 등까지 필요해지면 별도 설계 승인 후 진행한다.
+
+### P3. PostGIS 마커 조회
+
+- **What:** 현재 B-tree 조건(A), 같은 의미를 유지하는 B-tree/표현식 개선 대조군(A2), PostGIS geometry+GiST(B)를 비교한다. 확장 자체의 비용과 공간 인덱스 효과를 분리한다(E-8).
+- **Why:** bbox와 ROUND 필터·셀 조회가 큰 대상 방에서 병목인지 기존 plan으로 추정할 수 있지만, 현재 다른 방1만 행 결과로 공간 인덱스 우위를 확정할 수 없다.
+- **How:** 장소 수/방 분포·viewport 선택도·줌/precision·300/301 fallback·699개 분할·group/cluster를 고정한다. geometry는 SRID4326, X=경도/Y=위도 후보. 현재 원본 좌표 비교를 residual predicate로 유지하는 안부터 검토한다. group의 상한 제외, 뒤집힌 bbox의 기존 min/max 정규화, 영점·반올림·정렬·태그 무시·날짜변경선 미지원은 승인 없이 바꾸지 않는다. geography나 새로운 클러스터 알고리즘은 같은 실험으로 섞지 않는다.
+- **기준/성공:** §2 마커SQL/plan을 재수집. 성능 목표는 E-10 공통 기준. 응답·권한·DB 의미 일치, 기대 선택도에서 실제 읽은 행/버퍼가 감소하는 근거, 인덱스 크기·생성 시간·INSERT/UPDATE 지연도 기록한다. p95가 빨라도 작은 방/쓰기 p99가 크게 나빠지면 채택 보류다.
+- **Opinion:** GiST 사용 여부만으로 승자를 정하지 않는다. 최적화된 비공간 대조군과 같은 자원에서 비교한다. 결과가 같아야 하는데 동률 셀 순서가 달라져 overflow 평균/분할까지 달라지면 비교를 느슨하게 하지 말고 중단해 정렬 계약을 별도 결정한다.
+
+### P4. 이미지 비관적 락 대 조건부 UPDATE
+
+- **What:** 현재 cardinality 조건+array_append/remove(A)와 SELECT FOR UPDATE 후 배열 변경(B)을 같은 v3에서 비교한다. 둘 다 변환·파일 생성은 트랜잭션 밖, 최종 검사/변경만 짧은 DB 구간으로 둔다.
+- **Why:** 한 행 배열 조건의 원자적 UPDATE가 짧을 것으로 예상하지만, 전체 업로드 비용은 libvips3프로세스·PNG 중간 변환이 지배할 수 있다.
+- **How:** [기존7절 전체 계획](IMAGE_API_DESIGN.md#7-승인-후-비교-실험-계획)을 유지한다. 정합성 gate는 초기0~3장×N2/4/8/16, 삭제2건·같은URL 중복·혼합 두 순서. 성능은 gate 없이 N1/2/4/8/16, 동일장소 hot 경합과 서로 다른 장소를 분리한다. 작은PNG·2400×1600 JPEG/PNG·허용 한계에 가까운 고정 이미지의 바이트/픽셀 해시를 고정한다.
+- **기준/성공:** §2 SQL4·경쟁 합8/9·정합성0 기준. 초기2장의 N업로드는 성공1·정원400 N−1을 별도 집계한다. 성공/거절 응답별 p50/p95/p99, 성공업로드RPS·전체요청RPS, 변환/파일/DB/보상 시간·SQL·CPU/메모리, lock-wait 표본을 기록한다. 정상 I/O 깨진URL/고아/성공URL유실0 및 승인된 실패 정리 계약 유지가 필수다.
+- **Opinion:** 성공·빠른400을 합친 평균으로 승자를 정하지 않는다. 잠금 전략만 바꾼 E2E가 기준이며, 변환 제외 DB 진단 수치는 보조다. UPDATE 호출 시간은 실행+대기이므로 그대로 lock wait라 부르지 않는다. 차이가 변동 폭보다 작으면 기존 A 유지/우열 미확정이다.
+
+### P5. Redis 읽기 캐시 (마지막)
+
+- **What:** 앞선 정합성/조회 기준이 고정된 뒤 marker 응답 또는 중간 projection을 캐시하는 안을 no-cache와 비교한다(E-9). CMS·인증 세션·rate limit 분산 저장까지 확대하지 않는다.
+- **Why:** 반복 viewport/셀 읽기에서 DB 부하 감소 가능성이 있으나, 높은 key 다양성·잦은 쓰기·권한 조회가 남으면 네트워크/직렬화 비용이 더 클 수 있다.
+- **How:** 동일 읽기 반복/hot80%·다양한bbox/전부miss, 읽기:쓰기100:0/95:5/80:20을 분리한다. 채택안의 key에는 map/endpoint/level·precision/bbox·filter·정렬·limit/표현 버전과 필요한 사용자 범위를 넣는다. 임의 좌표 반올림으로 cache hit를 높이는 것은 응답 의미 변경이므로 하지 않는다. live 인증·지도방 접근 권한 확인 후 캐시를 읽고 실패 응답·토큰·개인정보는 캐시하지 않는다.
+- **기준/성공:** 기존 캐시 없음, hit률/응답시간 미측정. 공통 지표와 Redis hit/miss·eviction·used_memory/RSS·network bytes·DB SQL 감소, cold/warm·fill 경쟁·장애 시 fallback을 측정한다. 정상·권한회수·방 비공개 전환·삭제·장소/이름/좌표/리뷰/이미지 변경·부분 커밋500 후의 stale 응답·데이터 노출을 별도 검사한다.
+- **Opinion:** E-9 A이면 완료한 쓰기 뒤 stale0·미권한 노출0, B이면 승인한 최대 stale 시간 안에서만 허용한다. 커밋 직후 invalidate만으로 느린 reader가 오래된 결과를 다시 채우는 경쟁은 해결되지 않는다. 세대/버전 검증·장애 시 캐시 사용 중지까지 검증하기 전에는 채택하지 않는다. TTL만으로 즉시 일관성을 주장하지 않는다. E-9 B의 최대5초도 캐시 삽입 후 TTL5초만으로 보장되지 않는다. 오래된 조회가 늦게 fill하는 경우를 포함해 원본 변경 시점부터의 지연을 측정하고, 버전/시각 확인·invalidate 실패 시 fallback으로 승인한 상한을 지켜야 한다. hit율이 낮은 시나리오에서 회귀하면 적용 범위를 좁히거나 기각한다.
+
+## 4. 측정 환경과 데이터 제안
+
+### 환경
+
+| 항목 | 로컬 고정안(A) | AWS안(B 또는 C의 재현 단계) |
+|---|---|---|
+| 앱/DB | 단일 v3 앱2CPU/1536MiB, PostgreSQL2CPU/4GiB·shared_buffers1GiB. Java21/Boot·Gradle은 저장소 lock/BOM 그대로 | 우선 같은 Docker/같은 제한을 고정된 비버스터블 EC2에서 실행하는 제안. RDS 전환은 별도 인프라 변수이며 같은 결과로 섞지 않음 |
+| 버전 | PostgreSQL17·PostGIS17-3.6 태그의 실제 patch와 digest, OS/CPU/WSL VM CPU·RAM, JDK/libvips·k6 버전/digest를 manifest에 고정 | region/AZ·instance·AMI·EBS종류/IOPS/throughput·네트워크·배치·NTP 포함. 선택 시 예산/기한/자동종료를 실행 전에 승인받음. 이번 설계는 비용을 발생시키지 않음 |
+| 부하 발생기 | 별도 k6 컨테이너 제안2CPU/2GiB, SUT와 CPU/RAM을 빼앗지 않을 VM 여유 필수. 포화 시 별도 머신으로 이동하고 환경을 새 기준으로 다시 측정 | 별도 EC2에서 발생, 같은 AZ 사설망 경로부터. 앱·DB·발생기의 CPU 여유를 각각 기록 |
+| 부대 서비스 | 기본 측정에는 v2 미기동. scheduler·실제 외부 전송 끄고 동일한 로컬 대역. CMS 파일 사용 시 SeaweedFS1CPU/1GiB, Mailpit0.5CPU/256MiB 조건 기록 | AWS에서도 실제 FCM/Kakao/OAuth/SMTP 키 없음. 외부 지연은 로컬 대역 고정 시나리오 |
+| Redis(선택후) | 제안1CPU/512MiB, maxmemory256MiB·정책 명시. A에도 동일 총 자원 예산을 예약해 B만 자원을 더 받은 비교가 되지 않게 함 | 같은 자원·버전·네트워크 조건을 기록. 운영 매니지드 서비스 선택은 이 설계에서 확정하지 않음 |
+| 풀/파일/캐시 | Hikari 최대/최소·Tomcat thread·JVM heap·GC·work_mem·autovacuum·파일볼륨을 실제 런타임에서 읽어 고정. SQL logging off. A/B는 같은 제한이며 튜닝 변경은 별도 축 | 동일 원칙. 서로 다른 host 파일시스템·EBS 캐시·JVM 설정의 결과를 라이브러리 우열로 단정하지 않음 |
+
+기존 개발 `compose.yaml`을 바로 부하용으로 쓰지 않는다. 승인 뒤 별도 성능용 조립/일회용 볼륨을 만들고 v2 의존 기동·공유 개발 볼륨을 피한다. 현재 [Compose](../../compose.yaml)의 숫자는 출발점이며 이번에 변경하지 않는다. 실제 key/사용자 데이터가 들어 있는 `.env`를 결과물에 복사하지 않는다.
+
+### 데이터 (E-3 제안)
+
+| 데이터셋 | 장소 / 지도방 | 분포·목적 |
+|---|---:|---|
+| R 경계 재현 | 작은 고정 fixture, 추가300/301장소·699/700/701셀 | 기존 실제API 관측+독립 기대값. 속도 대표값에서 제외 |
+| S | 10,000 / 100 | seed·계측 검증과 작은 작업집합 |
+| M | 100,000 / 1,000 | 첫 채택 판단의 기본 규모 |
+| L | 1,000,000 / 10,000 | 메모리/DB 한계 확장. E-3 선택과 S/M 안정화 후 실행 |
+
+각 크기에서 **균등(방당100장소)**과 **편향(한 hot 방50%, 나머지 방에50% 균등)**을 별도 생성한다. 반올림 잔여는 고정 ID 순서로 배분한다. 조회 요청은 균등 방 선택과 hot 방80%/나머지20%를 분리한다. 데이터 분포와 요청 분포를 같은 의미로 쓰지 않는다. viewport는 대상방 장소의 대략0.01%/1%/10%/전체를 선택하도록 생성하되 실제 반환/스캔 수를 기록한다.
+
+좌표는 합성 도시 밀집·넓은 범위·동일좌표군을 각각 분리하며 실제 이용 분포라는 주장은 하지 않는다. 경계 좌표는 R에서 필수로 검사한다. 공개/비공개, 방장/멤버/비회원, 리뷰0/5/50개 군, 태그·동률시각·긴 이름/메모를 포함한다. 리뷰 fanout은 선택한 장소 cohort에만 적용하고 실제 총 리뷰 수를 manifest에 쓴다. CMS 기준 재현은 기존처럼 users/maps/places/reports 각1만/10만·reviews2천으로 별도 실행하고, 신고 처리행 없음/50% 있음은 서로 다른 데이터셋으로 이름 붙인다.
+
+기본안은 고정 난수 seed·결정적 UUID·UTC timestamp·생성기 SHA·데이터 hash/행 수/분포 manifest다. 합성 관리자/앱 계정만 사용한다. 대량 준비는 JPA native batch 또는 테스트 전용 SQL import로 빠르게 하되 **R의 장소 쓰기는 반드시 HTTP를 통과**한다. 대량 셀 backfill과 실서비스 갱신이 독립 기대 집합과 일치하는지 별도 확인한다. prepare/ANALYZE/restore 시간은 부하 구간에 포함하지 않는다.
+
+쓰기·이미지 실험은 각 run에서 같은 초기 상태를 복원한다. 이미지 성공 위주 테스트가 시간이 지나 정원400 테스트로 바뀌지 않게 고정 순환 시나리오 또는 준비된 독립 장소 풀을 사용한다. 복원은 run 사이, 또는 별도 측정에서 제외한 준비 구간만 허용한다. 업로드/삭제 순환을 측정하면 두 요청 모두 workload에 명시하며 삭제 비용을 숨기지 않는다. 기존 개발 데이터·볼륨 삭제는 금지한다.
+
+## 5. 부하 프로토콜·지표·편차 처리
+
+1. **정합성 먼저:** 기존 기능/비교+해당 실험의 oracle/경합/권한/장애 검사를 통과한 동일 artifact를 사용한다. 성능 실행 중 JWT 발급/login/seed/fixture 준비를 하지 않는다. 앱용 토큰은 합성 secret으로 사전 발급하고 CMS는 실제 세션을 준비한다.
+2. **요청 제한 분리(E-7):** 현재 [RequestRateLimiter](src/main/java/com/loco/security/RequestRateLimiter.java)는 method+getRemoteAddr, 기본120/분이며 전역 synchronized다. 한 IP·한 handler의 지속 허용량은 대략2req/s이고 VU/사용자를 늘려도 IP가 같으면 해결되지 않는다. X-Forwarded-For 위조나 부하 중 컨테이너 재시작/시계 점프로 우회하지 않는다. rate limit/429 자체는 기존 필수 테스트와 별도 운영설정 시나리오로 유지한다.
+3. **k6:** read는 open model `constant-arrival-rate`(1 iteration=측정 요청1개), pilot에서1/5/10/25/50/100…req/s 계단으로 한계를 찾아 A/B에 공통 부하 지점을 고정한다. pilot 수치는 승자 판정에서 제외한다. 복합 쓰기는 iteration/s와 HTTP req/s를 둘 다 기록한다. 이미지 경합은 N1/2/4/8/16의 closed concurrency를 별도 표시하며 read의 도착률과 섞지 않는다.
+4. **시간/반복 제안:** JIT/풀 warmup 최소120초, steady run 최소300초. 안정화되지 않으면 예열을 늘린 사실을 기록한다. 각 조건 A/B 각각5회 이상, AB/BA 순서 교대·seed 순서 고정. 첫5회 후 변동으로 우열이 불명확하면 보류하고 추가 고정10회 실험을 따로 계획한다. 유리한 run만 선택하거나 실패 run을 지우지 않는다.
+5. **꼬리 지연:** endpoint·시나리오·응답분류별 n과 p50/p95/p99/max를 기록한다. 성공과 예상정원400·인증401/403·429·오류는 분리한다. 조건별 n<10,000의 p99는 탐색값으로 표시하고 채택 gate 근거로 쓰지 않는다. 필요하면 시간을 사전 연장하며 표본 부족을 다른 endpoint와 합쳐 숨기지 않는다. 각 run percentile의 중앙값/최소~최대 및 대응 A/B 변화율을 보고하고, percentile의 단순 평균을 전체 p99라 부르지 않는다.
+6. **유효 처리량:** 지정 도착률·실제시작·완료·성공 req/s·iteration/s·dropped_iterations·timeout·오류코드 수를 나란히 남긴다. `http_req_duration`은 send+wait+receive이며 연결/TLS 대기는 별도이고, 필요 시 단조시계의 요청 전체 Trend도 기록한다. 단순 body 존재가 아니라 id/count/shape/hash 또는 독립 결과 검사로 실제 업무 수행을 확인한다.
+7. **CPU/RAM:** 앱 JVM+libvips 자식 프로세스를 포함한 컨테이너와 DB·k6·Redis를 각각1초 간격 수집한다. CPU는 사용 core 및 quota 대비%, throttled 시간, 메모리는 working set/RSS·peak·OOM, JVM heap/GC, DB buffer/temp/WAL·디스크 I/O·네트워크를 구분한다. 합계가 quota를 넘는 계산이나 계측 구간 중첩으로 생긴 가짜 속도 향상을 점검한다.
+8. **SQL/병목:** HTTP당 SQL 개수는 같은 workload의 짧은 계측 실행에서 정확히 세고, 성능 실행은 동기 SQL 로그를 끈다. DB statement 통계/플랜·rows/loops/Index Cond와Filter·Buffers·sort/temp·테이블/인덱스 크기를 함께 저장한다. 세부 profilers/JFR·pg_locks/wait_event polling은 별도 진단 run이며 대표 지연에 섞지 않는다. UPDATE 경과 전체와 실제 락 대기를 구분한다.
+9. **환경 이상:** k6 CPU 포화·연결 오류·Windows TCP4227·OOM·외부 프로세스 간섭·dropped iterations는 실패/무효 사유로 원본을 보존한다. timeouts/5xx를 성공 표본에서만 빼고 좋은 수치로 발표하지 않는다. dropped가 SUT 포화인지 발생기 부족인지 진단한다. 도구/관측 비용이 A/B를 다르게 누르면 판정 불가다.
+10. **cache 온도:** primary는 명시된 warm steady 상태. JVM 재시작은 DB/OS cold cache를 뜻하지 않는다. Redis empty/warm와 DB warm/cold는 별도 축이다. cold 실험은 전용 환경의 재생성·방법을 기록하고 사용자 머신의 OS 캐시를 임의로 비우지 않는다. 모든 경우 A/B 실제 설정과 데이터·artifact SHA를 일치시킨다.
+
+### 공통 채택 기준 제안 (E-10 승인 전)
+
+- 필수: 정합성/권한/보상 계약 만족, 예기치 않은429/5xx/timeout0, 목표 도착률에서 dropped0, 데이터 유실/비밀 노출0. 의도된400은 오류0에서 제외하지만 성공 처리량에 포함하지 않는다.
+- 성능: 주 시나리오의 p95 최소20% 감소 또는 같은 응답 품질에서 최대 유효 처리량20% 증가. 비교 부하는 동일하게 고정하고 반복 편차보다 차이가 커야 한다. 충분한 표본의 p99와 반대 workload·쓰기 지연 회귀는10% 이내, 동일 메모리 한도·OOM0. threshold는 B 결과를 보기 전에 고정한다.
+- 이 상대 기준은 운영 SLA가 아니다. 최대 지속 처리량을 비교하려면 허용 지연 budget도 먼저 정해야 하므로 P0 A 측정 후 사용자와 budget을 고정하기 전에는 “최대 처리량 증가”를 채택 근거로 쓰지 않는다. P1 버그 수정은 정합성이 1차 성공이며 p95개선20%를 요구하지 않는다.
+- 차이가 작거나 기여 병목을 설명하지 못하면 **차이 없음/판정 보류**. SQL 감소·hit률 증가·GiST 사용만으로 성공을 선언하지 않는다. CPU/메모리의 실제 비용과 유지보수 복잡성도 Opinion에 적는다.
+
+## 6. v2 호환과 스키마·반영 원칙
+
+| 개선 종류 | 비교/반영 방법 |
+|---|---|
+| 응답·DB 의미 불변 | 기존 v2/v3 비교, 오류·권한·헤더·SQL 예산 테스트 통과. SQL 예산 변경은 측정 근거와 새 상한을 명시하고 assertion을 없애지 않음 |
+| 셀 키/누락/부분 커밋/캐시 freshness 등 의미 변경 | v2 원본 관측은 그대로 유지. 차이를 `improved` 또는 `intentional` case ID로 등록하고 v3 정합성 필수 검사 추가. 기존11건과 신규 건을 따로 표시; 문구를 무시하거나 fixture를 덮어써 통과시키지 않음 |
+| PostGIS/index/파생 데이터 | 승인 후 다음 가용 Flyway 버전을 확인(V6까지 존재). V1~V6 수정 금지. 실험 DDL은 일회용 DB에서 먼저 검증하고 채택 시 forward migration/backfill/롤백 경로·디스크 비용 검토. V1 Prisma diff의 target1은 유지 |
+| 응답에 안 나오는 새 파생 열/테이블 | DB snapshot 제외가 필요하면 항목별 별도 계약/정합성 검사를 승인받음. public 스키마 변화가 있다는 사실을 명시. v2/v3 비교 DB를 분리해 각 지원 스키마 사용; 기존 컬럼 비교를 유지 |
+| 쓰기 전환 | 변경된 셀 규칙의 v2/v3 writer를 한 DB에서 혼용하지 않음. 전환 시 쓰기 중지/재생성/검증 또는 별도 shadow 전략을 승인받음. dev 공유 DB를 임의 재집계하지 않음 |
+
+JPA 단일 데이터 접근은 유지하며 공간 native projection도 JPA EntityManager/Repository 안에 둔다. CMS core는 LOCO 공간/Redis를 모르도록 유지한다. 태그/정렬/권한/개인 목록 공개 정책 등 별도 백로그를 성능 작업에 몰래 포함하지 않는다.
+
+## 7. 결과 기록 제안과 백로그 연결
+
+E-4 권장안은 저장소+노션+원본의 역할을 나누는 방식이다. 아래 경로는 **승인 후 생성할 제안**이며 이번에는 만들지 않는다.
+
+| 산출물 | 내용 |
+|---|---|
+| `perf/stage2/<experiment>/<run-id>/manifest.json` | base/variant SHA·dirty=false·seed/data hash·건수/분포·migration·image digest·도구버전·CPU/RAM/풀·온도·요청/반복·시작/종료시각·유효/무효 사유 |
+| `summary.json`, `RESULTS.md` | run별 n/성공/실패/거절/dropped·p50/p95/p99/RPS/SQL/자원·median/range·WWHO·채택 판단. 표본 부족/실패 원인 포함 |
+| 원본 번들 | k6 JSON.gz·자원 CSV·SQL/EXPLAIN JSON·진단 trace·정합성 결과. 개인정보/토큰/실제 키/Authorization 제외, URL/query에는 합성 값만. 큰 원본은 로컬 보존+GitHub artifact/릴리스 첨부의 checksum/링크/보존기한을 manifest로 추적 |
+| 노션 WWHO | What(대상), Why(기준 병목/가설), How(방법·원본·수치·실패), Opinion(채택/기각·절충·다음 실험). 저장소 commit 링크로 연결 |
+
+원본을 임시 `build/`에만 두고 재현 가능하다고 하지 않는다. 압축본·접근 경로·checksum이 실제 보존됐는지 확인하고, 외부 업로드 위치/보존 비용은 E-4 선택 후 확정한다. 자동 주기 실행/유료 대시보드는 이번 범위에 없다.
+
+| 기존 백로그 | 이 설계의 위치 |
+|---|---|
+| 셀 누락·집계 경합·SQL 비용 | P1/P2, E-5/E-6으로 결과·커밋 의미를 분리 |
+| 마커/관리자 EXPLAIN·N+1 | P0/P3, CMS 인덱스 확대 E-11. 비교 의미와 SQL 예산 유지 |
+| 이미지 락·libvips3회/PNG | P4에서 변환/CPU/파일 I/O를 분리; 변환기 교체는 범위 밖 |
+| RequestRateLimiter 단일 lock | P0 계측/E-7. 고부하 profile와 실제 운영 limit 결과 구분; 알고리즘 변경은 별도 실험 |
+| Redis | P5 읽기 캐시 후보만. 분산 rate limit·세션·다중 서버 invalidation은3단계 |
+| refresh/reset 락, 카카오 풀5/전체deadline, 알림2/4/100 풀 vs가상스레드 | 2단계 후속 후보로 보존. 이번 우선5개와 동시에 구현하지 않음 |
+| 886초 회귀·61초 창·TCP4227 | 측정 유효성/도구 운영에서 관측. 테스트 범위를 줄이거나429를 숨기지 않음 |
+| nginx/getRemoteAddr, 스케줄러 중복·advisory/ShedLock, S3 이전·다중서버 | 3단계로 보존. AWS 측정 환경을 고른다고 이 기능까지 구현하지 않음 |
+
+## 8. 사용자 결정 목록 — 아직 확정하지 않음
+
+| 번호·항목 이름 | A | B | C / 권장 이유 |
+|---|---|---|---|
+| **E-1 측정 환경** | **로컬 자원 고정(권장)**. 비용 없이 반복 용이 / Docker Desktop·host 간섭, 운영 일반화 제한 | AWS만. 배포와 가까운 별도 발생기 / 비용·인프라 설정 변수가 큼 | 둘 다. 로컬 선별 뒤 AWS 재현 / 시간·비용 증가. 첫 실험 A, 채택 후보만 후속 AWS 승인 권장 |
+| **E-2 첫 실험 순서** | **P0→누락→SQL→PostGIS→이미지→Redis(권장)**. 잘못된 결과를 먼저 제거 / 눈에 띄는 속도 결과는 늦음 | P0→누락→PostGIS→SQL→이미지→Redis. 읽기 중심 학습이 빠름 / 쓰기 비용을 나중에 검토 | P0→누락→이미지→SQL→PostGIS→Redis. 이미 정합성 도구가 있는 락 실험부터 / 공간 조회 검증 지연 |
+| **E-3 데이터 생성·규모** | **고정seed 합성 R+S+M, L은후속(권장)**. 재현/검증 비용 적음 / 초대형·실제 분포 대표성 제한 | R+S+M+L부터. 한계 확인 / 저장·생성·반복 비용 큼 | 나중에 확보한 비식별 운영 분포로 합성 재현. 현실성 / 현재 운영 데이터 없고 검증·개인정보 작업 필요. 원본 사용자 데이터 복제는 안 함 |
+| **E-4 결과 기록 방식** | **노션 WWHO+저장소 요약/manifest+압축 원본 외부 artifact(권장)**. 가독성과 재검증 / 링크·보존기한 관리 필요 | 노션+요약·압축 원본 모두 Git(크기상한 승인). 한 저장소 재현 / 저장소·clone 증가 | 저장소 요약+로컬 원본, 노션 링크. 업로드 부담 적음 / 다른 사람이 원본 검증 불가·유실 위험 |
+| **E-5 좌표 규칙 단일화** | **PG numeric ROUND·0 정규화를 쓰기/집계/역조회 공통 규칙으로 검토(권장)**. DB에서 일괄 재생성 용이 / JS cellKey·경계 그룹·groupKey와 응답 변경 범위를 승인해야 함 | JS toFixed 이진값/음수0 의미를 DB 집계까지 유지. 기존 key에 가까움 / SQL과 Java의 정확한 일치 구현·계측 비용 큼 | PostGIS 새 grid로 함께 변경. 큰 구조 통합 / 버그 수정과 공간 최적화 효과를 분리하기 어려움 |
+| **E-6 갱신 SQL의 커밋·경합 범위** | 현재 부분 커밋/경합 그대로, 같은 의미 안에서만 개선. v2 차이 작음 / SQL 결합 목표를 달성 못 할 수 있음 | **장소 커밋 분리는 유지, 셀 갱신 단위 결합과 장애/경합 의미를 별도 개선 차이로 승인(권장)**. 제한된 비용 비교 / 전체 map 정합성을 자동 보장하지 않음 | 장소+관련 셀을 동시 writer까지 일관되게 처리. 부분 실패 문제도 개선 / 전 writer 동기화·잠금순서·migration의 별도 설계 필요, 이번 실험 범위 확대 |
+| **E-7 부하와 요청 제한** | **폐쇄된 perf profile에서 limit만 충분히 높이고 동일 limiter 경로 유지(권장)**. DB/앱 용량 측정 / 운영120/분과 별개, 긴 hit queue 비용도 기록·배포 금지 guard 필요 | 실제 별도 소스IP 여러 개, 각120/분 유지. 운영경로 그대로 / 인프라·연결 분포 비용, JWT만 바꿔서는 안 됨 | limiter bypass. 저장/조회 ceiling 진단 간단 / 단일 synchronized 비용 사라져 대표 E2E로 채택 불가, 보조만 |
+| **E-8 PostGIS 저장·인덱스 범위** | **기존 좌표에 geometry 표현식 GiST부터 검토(권장)**. business column 추가 없이 비교 / expression 비용·정확한 query 일치·쓰기 비용 필요 | 생성 geometry 열+GiST. 조회 SQL 명확 / 열·backfill·snapshot 계약·저장 비용 증가 | 별도 공간 read-model 테이블. 기존 public 형식 분리 / 동기화·누락 문제 추가. 모든 안은 확장/DDL 승인과 새 Flyway 필요 |
+| **E-9 Redis 의미·대상** | **권한 확인 후 markers 읽기, 완료 쓰기 후 stale0 목표(권장)**. 응답 호환 유지 / fill 경쟁·부분 커밋·장애 무효화 검증이 어려워 실패 시 도입 보류 | 같은 대상에 최대5초 stale 허용. 최신성 요구 완화 / 늦은 fill·장애까지5초 상한 검사 필요, 의도된 응답 차이·사용자 경험 변화, 권한은 즉시 검사 필수 | Redis 도입 보류, SQL/PostGIS 결과만 먼저 확정. 복잡성 없음 / 캐시 실험은 후속으로 밀림 |
+| **E-10 성능 채택 기준** | **§5 상대 p95 또는처리량20%, 회귀10% 제안(권장)**. 비교 판정 명확 / 운영SLA를 보장하지 않음, 처리량budget은 B 실행 전 추가 고정 | P0 A의 지연/비용을 본 뒤 절대SLO와 기준을 새로 승인. 현실 목표를 정하기 좋음 / B 구현 전에 한 번 더 정지·결정 필요 | 어느 쪽도 표본 부족p99·정합성 실패를 통과로 처리하지 않음 |
+| **E-11 CMS 조회 실험 범위** | **현재 SQL/EXPLAIN 대조군 수집만(권장)**. 요청한5후보에 집중 / CMS scan/sort 개선은 이연 | 별도 CMS 인덱스 실험 추가(createdAt/id·업무FK·검색). 기존 근거 풍부 / read/write/index 비용까지 범위 확대 | 공간 실험에 섞지 않고 별도 WWHO·별도부모 A/B로 진행해야 함 |
+
+E-5 A는 `toFixed`만 PG로 교체하고 끝내자는 뜻이 아니다. group의6자리 반열림 역조회·음수0·이전key 전환까지 포함한 계약을 실제 승인 후 좁혀서 검증한다. E-6 B도 동시 stale0을 보장하는 구현이 확정됐다는 뜻이 아니다. 필요 잠금/버전 전략이 새로 생기면 추가 E-번호로 멈춘다. 성능 측정을 위해 불필요한 기능 결정을 자동 승인하지 않는다.
+
+## 9. 승인 후 실행 단위와 이번 종료점
+
+1. E 선택을 문서·노션에 기록하고 환경/도구/seed/metric 계약 준비. 일회용 DB·리소스 검증 및 P0 A 반복 결과를 먼저 보고한다.
+2. E-2 순서의 실험마다 부모 SHA 고정→정합성 기준→변경 하나→A/B 반복→WWHO→채택/기각. 의미 변경·미해결 새 결정은 구현 전에 정지한다.
+3. 채택 코드가 앱·공통설정·빌드에 닿으므로 기존 기준대로 allTests build, 관련 UI가 바뀌면 Vitest/Chromium도 실행한다. 알려진차이11건+승인된신규 항목과 기존 case ID/정합성 커버리지 확인. 기존 비교 케이스를 빼는 방식은 금지한다.
+4. 실험별 한국어 커밋·push에 범위/실제 측정 반복·실패·시간·artifact를 기록한다. main 반영·운영 rollout은 자동 수행하지 않는다.
+
+**이번 산출물은 이 문서1개다.** 상대 링크/기존 수치·분포·공식 도구 설명/branch 기준과 diff를 검증한다. 문서만 바뀌므로 allTests·k6·Docker 기동을 실행하지 않으며, 새 성능 수치는 아직 없다. 결정 답변을 받은 후 구현한다.
+
+설계 검증(2026-11-08): main merge SHA/부모와 작업 브랜치를 확인했고 기존 설계·현재 limiter/마커 SQL·CMS plan 수치를 대조했다. 상대 파일/절 링크21개 누락0, E-1~E-11 중복/누락0. WWHO는 노션의 Opinion 정의를 확인했다. 문서 diff 검사만 수행하며 런타임·부하 검증을 했다고 기록하지 않는다.
+
+## 10. 공식 기술 근거 (2026-11-08 확인)
+
+- [k6 constant-arrival-rate](https://grafana.com/docs/k6/latest/using-k6/scenarios/executors/constant-arrival-rate/): 응답과 독립된 도착률, VU 부족과 dropped를 함께 해석. [built-in metrics](https://grafana.com/docs/k6/latest/using-k6/metrics/reference/)에서 HTTP 시간 구간·실패/누락 지표를 확인한다.
+- [k6 JSON 원본 출력](https://grafana.com/docs/k6/latest/results-output/real-time/json/): granular JSON/gzip 산출물. summary percentile만 남기는 방식과 구별한다.
+- [PostGIS ST_Intersects](https://postgis.net/docs/ST_Intersects.html): 공간 인덱스를 활용하는 bbox 사전 비교가 포함된다. 현재 반열림/ROUND/limit 계약과 동등하다는 보장은 아니므로 residual/경계 검사가 필요하다.
+- [PostgreSQL17 표현식 인덱스](https://www.postgresql.org/docs/17/indexes-expressional.html): 파생 표현식 인덱스와 쓰기 유지 비용. 실제 사용 여부는 우리 데이터의 plan으로 확인한다.
