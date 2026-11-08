@@ -28,7 +28,10 @@ public class LocoReadRepository {
                   params.put(key, LocalDateTime.ofInstant(Instant.parse(value), ZoneOffset.UTC));
                 }
                 case "status" -> {
-                  if (!value.equals("ALL"))
+                  if (resource == LocoReadResource.REPORTS) {
+                    clauses.add("coalesce(rp.status,'RECEIVED')=:status");
+                    params.put(key, value);
+                  } else if (!value.equals("ALL"))
                     clauses.add(
                         "t.\"deletedAt\" IS " + (value.equals("ACTIVE") ? "NULL" : "NOT NULL"));
                 }
@@ -126,7 +129,14 @@ public class LocoReadRepository {
       fields +=
           ", (SELECT count(*) FROM public.place_reviews r WHERE r.\"placeId\"=t.id) AS \"reviewCount\","
               + " coalesce((SELECT avg(r.rating) FROM public.place_reviews r WHERE r.\"placeId\"=t.id),0)::float8 AS \"averageRating\"";
-    return "SELECT " + fields + " FROM public." + resource.table + " t";
+    String join = "";
+    if (resource == LocoReadResource.REPORTS) {
+      fields +=
+          ", coalesce(rp.status,'RECEIVED') AS \"status\", rp.handled_by AS \"handledBy\", rp.handled_at AS \"handledAt\"";
+      if (detail) fields += ", rp.note AS \"note\"";
+      join = " LEFT JOIN cms.loco_report_processing rp ON rp.report_id=t.id";
+    }
+    return "SELECT " + fields + " FROM public." + resource.table + " t" + join;
   }
 
   List<Map<String, Object>> read(Plan plan) {

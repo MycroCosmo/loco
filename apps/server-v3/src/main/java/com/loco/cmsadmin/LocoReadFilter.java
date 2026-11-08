@@ -37,8 +37,11 @@ record LocoReadFilter(Map<String, String> values, int size, Cursor cursor, Strin
           values.put(key, OffsetDateTime.parse(value).toInstant().toString());
         if (key.equals("provider") && !Set.of("LOCAL", "GOOGLE", "KAKAO", "NAVER").contains(value))
           throw invalid();
-        if (key.equals("status") && !Set.of("ACTIVE", "DELETED", "ALL").contains(value))
-          throw invalid();
+        if (key.equals("status")
+            && !(resource == LocoReadResource.REPORTS
+                    ? Set.of("RECEIVED", "IN_REVIEW", "RESOLVED", "DISMISSED")
+                    : Set.of("ACTIVE", "DELETED", "ALL"))
+                .contains(value)) throw invalid();
         if (key.equals("visibility") && !Set.of("PUBLIC", "PRIVATE").contains(value))
           throw invalid();
         if (key.equals("targetType") && !Set.of("MAP", "PLACE", "USER").contains(value))

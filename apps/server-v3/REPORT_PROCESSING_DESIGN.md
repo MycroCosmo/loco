@@ -163,7 +163,7 @@ RECEIVED의 null 규칙·후속 필수 값·허용 상태 전이 등 업무 의�
 |---|---|---|
 | 장소 이미지: 한 장소의 배열 길이<3·URL 원소 변경 | cardinality 조건+array_append/array_remove | [이미지 기록](IMAGE_API_DESIGN.md#10-구현-검증): 초기0~3장×N=2/4/8/16 포함 v3정합성22건, 정상 I/O에서 깨진URL·고아·성공URL유실 모두0. 초기2장+업로드2: v2최종4장→v3최종3장(201/400). 락 대비 성능 실험 아님 |
 | CMS 파일: 한 파일의 UPLOADING/ACTIVE/ABANDONED | 현재 상태 조건부 UPDATE | [CMS5-A](CMS_CORE_DESIGN.md#20-c-23-c-확정--파일-선등록조건부-상태-전이): DB gate 두 순서 각1회. ACTIVE우선 성공이력1·객체누락0, ABANDONED우선 성공이력0·객체누락0. SeaweedFS 실제 객체 검증 |
-| 신고 처리: 한 신고의 단방향 현재 상태 | 현재 상태 조건부 UPDATE, 최초 PK 충돌 후 전이 | 이번 묶음에서 실제 HTTP/DB gate로 측정 후 기록. 미측정 수치를 성공값으로 쓰지 않음 |
+| 신고 처리: 한 신고의 단방향 현재 상태 | 현재 상태 조건부 UPDATE, 최초 PK 충돌 후 전이 | [실측 JSON](src/test/resources/cms-report/races-baseline.json): 초기행20회·종결20회 각각200×20/409×20, 덮어쓰기/추가이력0. 테스트 반복 루프 시간1.340초/1.257초(응답 지연·처리량 측정 아님) |
 | 메뉴 트리: 여러 노드의 조상/자손·정렬 조건 | 트리 메타 행 비관적 락+revision | [CMS3](CMS_CORE_DESIGN.md#16-3단계-확정구현-기록): 무보호 교차이동5회 모두순환(10커밋), 보호후200×5/409×5·순환0/5회. 강제 일정의 재현이며 운영 발생확률 아님 |
 
 **한 행 조건=조건부 UPDATE(이미지·CMS 파일·신고 처리) / 여러 행 조건=비관적 락(메뉴 트리).** 조건부 UPDATE도 DB 내부 행 잠금은 사용한다. revision은 필요할 때 같은 한 행 UPDATE의 비교 조건으로 추가할 수 있다.
@@ -175,3 +175,11 @@ RECEIVED의 null 규칙·후속 필수 값·허용 상태 전이 등 업무 의�
 flat descriptor/registry·예약명/버전/민감필드 검사, core validator 어댑터와 버전별 읽기 검사를 구현했다. core의 기존 role enum·정수 JSONB round-trip을 보존하고, 조회용 합성 fixture의 허용되지 않은 title을 실제 menu.treeRevision/role.name으로 수정했다. 원래 계약 검사를 완화한 것이 아니다. sample.documents 실제 저장·조회, 미등록 저장 버전503, 이력 INSERT 실패 시 업무 변경 rollback을 검증했다.
 
 core124 + root347 = **471건 중 성공470·실패0·기존 HEIC skip1**. 첫 core+root 실행263.037초, DB round-trip/rollback 보강 후 core 재실행68.974초(root UP-TO-DATE 재사용). 이 단계는 core+빠른 test 범위이며 최종 전체 비교는 후속 gate에서 수행한다.
+
+### 2. 신고 상태·단방향 전이·원자적 이력
+
+호스트 V6와 엔티티·서비스·CMS HTTP·loco.report 계약을 추가했다. GET의 LEFT JOIN은 행 없음을 RECEIVED로 읽으며 쓰지 않는다. MANAGE는 명시 배정해야 하고 메모는 처리 행만, 이력은 status/hasNote/handledBy/handledAt 네 필드다. 실제 JSONB 필드 목록·메모 표식 제외·public11테이블 불변·원본 삭제 후 이력 보존을 검사했다. 초기/기존 상태 각각 이력 INSERT 실패 시 상태와 메모·행위자·시각·이력 모두 롤백했다.
+
+신고14 + 기존조회32 + migration7 = **53건 성공/실패0/skip0, 66.607초**(core124는 UP-TO-DATE). 초기 행/종결의 실제 두 관리자 HTTP 경쟁은 각20회, 매회성공1·충돌1·성공이력1·패자메모/행위자반영0. Windows Java21·PostgreSQL17 로컬 Testcontainers, 고정 Clock·DB gate로 일정을 강제한 정합성 실험이다. 첫 실행의3실패는 역할 재배정으로 세션이401이 되는 기존 계약을403으로 기대하고 실패 후 READ 역할이 다음 테스트에 남은 fixture 문제였다. 매 준비 단계에서 역할을 복원하고 기존 세션401/재로그인 READ403을 분리해 수정했으며 운영 인증 정책은 바꾸지 않았다.
+
+V5→V6에서 public 컬럼/신고 원문·V1~5 history 불변, 처리 행0·FK0·재기동 migration0을 확인했다. 신규 서비스 메서드는 기존 읽기 목록 검사를 제거하지 않고 실제 쓰기 시나리오 목록에 등록했다. 앱 v2 비교 전체는 최종 gate에서 실행한다.

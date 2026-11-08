@@ -233,6 +233,40 @@ class CmsMigrationIntegrationTest {
             + "FROM information_schema.columns WHERE table_schema='public') c");
   }
 
+  @Test
+  void upgradingV5AddsOnlyHostProcessingState() throws Exception {
+    host()
+        .withPropertyValues("spring.flyway.target=5")
+        .run(context -> assertThat(context).hasNotFailed());
+    String columns = publicColumns();
+    String before =
+        sql("SELECT json_agg(h ORDER BY installed_rank)::text FROM public.flyway_schema_history h");
+    sql(
+        "INSERT INTO users(id,email,nickname,\"updatedAt\") VALUES ('00000000-0000-4000-8000-000000000901','synthetic@example.test','Reporter',CURRENT_TIMESTAMP)");
+    sql(
+        "INSERT INTO reports(id,\"reporterId\",\"targetType\",\"targetId\",reason) VALUES ('00000000-0000-4000-8000-000000000902','00000000-0000-4000-8000-000000000901','USER','00000000-0000-4000-8000-000000000901','reason')");
+    String reports = sql("SELECT json_agg(r ORDER BY id)::text FROM reports r");
+    host()
+        .withPropertyValues("spring.flyway.target=6")
+        .run(
+            context -> {
+              assertThat(context).hasNotFailed();
+              assertThat(publicColumns()).isEqualTo(columns);
+              assertThat(sql("SELECT json_agg(r ORDER BY id)::text FROM reports r"))
+                  .isEqualTo(reports);
+              assertThat(
+                      sql(
+                          "SELECT json_agg(h ORDER BY installed_rank)::text FROM public.flyway_schema_history h WHERE version<>'6'"))
+                  .isEqualTo(before);
+              assertThat(sql("SELECT count(*) FROM cms.loco_report_processing")).isEqualTo("0");
+              assertThat(
+                      sql(
+                          "SELECT count(*) FROM pg_constraint WHERE conrelid='cms.loco_report_processing'::regclass AND contype='f'"))
+                  .isEqualTo("0");
+              assertThat(context.getBean(Flyway.class).migrate().migrationsExecuted).isZero();
+            });
+  }
+
   private String sql(String statement) throws Exception {
     try (var connection = database.createConnection("");
         var query = connection.createStatement()) {

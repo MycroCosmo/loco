@@ -28,7 +28,11 @@ public class AdminScreens {
                     new PermissionCatalog.Definition(
                         resource.key(),
                         resource.label(),
-                        Set.of(com.cms.core.permission.Action.READ),
+                        resource == com.loco.cmsadmin.LocoReadResource.REPORTS
+                            ? Set.of(
+                                com.cms.core.permission.Action.READ,
+                                com.cms.core.permission.Action.MANAGE)
+                            : Set.of(com.cms.core.permission.Action.READ),
                         false))
             .toList();
       }

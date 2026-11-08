@@ -24,10 +24,10 @@ public enum LocoReadResource {
       Set.of("id", "mapId", "createdById", "search", "tag")),
   REPORTS(
       "reports",
-      "신고 조회 (비공개 대상 포함)",
+      "신고 조회·처리 (비공개 대상 포함, 앱 제재 없음)",
       "id,reporterId,targetType,targetId,reason,createdAt",
       "detail",
-      Set.of("id", "reporterId", "targetId", "targetType"));
+      Set.of("id", "reporterId", "targetId", "targetType", "status"));
 
   final String table;
   final String label;

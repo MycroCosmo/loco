@@ -535,11 +535,10 @@ class LocoReadIntegrationTest {
           && !type.getSimpleName().endsWith("Service")) continue;
       for (var method : type.getDeclaredMethods())
         if (java.lang.reflect.Modifier.isPublic(method.getModifiers()) && !method.isSynthetic()) {
-          found.add(
-              type.getName()
-                  + "#"
-                  + method.getName()
-                  + Arrays.toString(method.getParameterTypes()));
+          String signature =
+              type.getName() + "#" + method.getName() + Arrays.toString(method.getParameterTypes());
+          found.add(signature);
+          if (ReportProcessingIntegrationTest.WRITE_CONTRACTS.contains(signature)) continue;
           var tx =
               method.getAnnotation(org.springframework.transaction.annotation.Transactional.class);
           if (tx == null)
@@ -548,10 +547,12 @@ class LocoReadIntegrationTest {
           assertThat(tx.readOnly()).isTrue();
         }
     }
-    assertThat(found)
-        .containsExactlyInAnyOrder(
+    var expected = new TreeSet<>(ReportProcessingIntegrationTest.WRITE_CONTRACTS);
+    expected.addAll(
+        Set.of(
             "com.loco.cmsadmin.LocoReadService#list[class com.cms.core.account.AdminIdentity, class com.loco.cmsadmin.LocoReadResource, interface org.springframework.util.MultiValueMap]",
-            "com.loco.cmsadmin.LocoReadService#detail[class com.cms.core.account.AdminIdentity, class com.loco.cmsadmin.LocoReadResource, class java.lang.String]");
+            "com.loco.cmsadmin.LocoReadService#detail[class com.cms.core.account.AdminIdentity, class com.loco.cmsadmin.LocoReadResource, class java.lang.String]"));
+    assertThat(found).isEqualTo(expected);
   }
 
   @Test
