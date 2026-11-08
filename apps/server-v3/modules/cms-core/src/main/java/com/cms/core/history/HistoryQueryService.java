@@ -23,10 +23,13 @@ public class HistoryQueryService {
 
   private final EntityManager em;
   private final PermissionService access;
+  private final HistoryContractRegistry contracts;
 
-  public HistoryQueryService(EntityManager em, PermissionService access) {
+  public HistoryQueryService(
+      EntityManager em, PermissionService access, HistoryContractRegistry contracts) {
     this.em = em;
     this.access = access;
+    this.contracts = contracts;
   }
 
   public Page list(AdminIdentity actor, Filter filter) {
@@ -73,7 +76,12 @@ public class HistoryQueryService {
     params.forEach(query::setParameter);
     @SuppressWarnings("unchecked")
     List<ChangeHistory> rows = query.getResultList();
-    var items = rows.stream().limit(filter.size()).map(ChangeHistory::view).toList();
+    var items =
+        rows.stream()
+            .limit(filter.size())
+            .map(ChangeHistory::view)
+            .map(contracts::reading)
+            .toList();
     String next = rows.size() > filter.size() ? cursor(items.getLast()) : null;
     return new Page(items, next);
   }
@@ -82,7 +90,7 @@ public class HistoryQueryService {
     access.systemAdmin(actor);
     var history = em.find(ChangeHistory.class, id);
     if (history == null) throw new AdminProblem(404, "Not found");
-    return history.view();
+    return contracts.reading(history.view());
   }
 
   private void equality(

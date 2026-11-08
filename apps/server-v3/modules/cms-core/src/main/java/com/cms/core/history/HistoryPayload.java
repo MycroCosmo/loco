@@ -9,6 +9,45 @@ import java.util.function.Predicate;
 final class HistoryPayload {
   private HistoryPayload() {}
 
+  /** JSONB round trips enums as strings and small whole numbers as Integer. */
+  static Map<String, Object> read(String resource, Map<String, Object> input) {
+    if (input == null) return checked(resource, null);
+    var copy = copyMap(input);
+    if (resource.equals("role") && copy.get("permissions") instanceof Map<?, ?> values) {
+      var converted = new LinkedHashMap<String, Object>();
+      values.forEach(
+          (key, value) ->
+              converted.put((String) key, com.cms.core.permission.Action.valueOf((String) value)));
+      copy.put("permissions", converted);
+    }
+    if (resource.equals("file") && copy.containsKey("byteSize"))
+      copy.put("byteSize", whole(copy.get("byteSize")));
+    if (resource.equals("menu")) {
+      if (copy.containsKey("treeRevision"))
+        copy.put("treeRevision", whole(copy.get("treeRevision")));
+      if (copy.get("sortOrders") instanceof Map<?, ?> values) {
+        var converted = new LinkedHashMap<String, Object>();
+        values.forEach((key, value) -> converted.put((String) key, Math.toIntExact(whole(value))));
+        copy.put("sortOrders", converted);
+      }
+      if (copy.get("node") instanceof Map<?, ?> node) {
+        var converted = copyMap(node);
+        if (converted.containsKey("sortOrder"))
+          converted.put("sortOrder", Math.toIntExact(whole(converted.get("sortOrder"))));
+        copy.put("node", converted);
+      }
+    }
+    return checked(resource, copy);
+  }
+
+  private static long whole(Object value) {
+    if (!(value instanceof Integer
+        || value instanceof Long
+        || value instanceof java.math.BigInteger))
+      throw new IllegalArgumentException("Invalid history integer");
+    return new java.math.BigInteger(value.toString()).longValueExact();
+  }
+
   static Map<String, Object> checked(String resource, Map<String, Object> input) {
     if (resource == null || !Set.of("admin-account", "role", "menu", "file").contains(resource))
       throw new IllegalArgumentException("Unregistered history resource");

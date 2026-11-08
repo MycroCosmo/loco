@@ -16,6 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
   CoreAuditingConfiguration.class,
   AdminService.class,
   HistoryWriter.class,
+  com.cms.core.history.HistoryContractRegistry.class,
   com.cms.core.history.HistoryQueryService.class,
   com.cms.core.permission.PermissionCatalog.class,
   com.cms.core.permission.PermissionService.class,

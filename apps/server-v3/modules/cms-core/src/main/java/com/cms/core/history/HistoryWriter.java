@@ -9,10 +9,13 @@ import org.springframework.transaction.annotation.*;
 public class HistoryWriter {
   private final ChangeHistoryRepository history;
   private final Clock clock;
+  private final HistoryContractRegistry contracts;
 
-  public HistoryWriter(ChangeHistoryRepository history, Clock clock) {
+  public HistoryWriter(
+      ChangeHistoryRepository history, Clock clock, HistoryContractRegistry contracts) {
     this.history = history;
     this.clock = clock;
+    this.contracts = contracts;
   }
 
   @Transactional(propagation = Propagation.MANDATORY)
@@ -33,6 +36,7 @@ public class HistoryWriter {
       String id,
       Map<String, Object> before,
       Map<String, Object> after) {
+    var payload = contracts.writing(resourceType, action, before, after);
     history.saveAndFlush(
         new ChangeHistory(
             actor,
@@ -40,7 +44,8 @@ public class HistoryWriter {
             resourceType,
             id,
             LocalDateTime.now(clock).truncatedTo(ChronoUnit.MILLIS),
-            HistoryPayload.checked(resourceType, before),
-            HistoryPayload.checked(resourceType, after)));
+            payload.before(),
+            payload.after(),
+            payload.version()));
   }
 }

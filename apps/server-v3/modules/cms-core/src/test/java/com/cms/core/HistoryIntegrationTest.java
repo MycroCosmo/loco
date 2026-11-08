@@ -73,6 +73,63 @@ class HistoryIntegrationTest {
   AdminIdentity root;
   String password;
   static final String CORE = "/admin/api/core";
+
+  @Test
+  void hostContractRoundTripAndUnknownStoredVersionAreChecked() {
+    String id = UUID.randomUUID().toString();
+    new TransactionTemplate(transactions)
+        .executeWithoutResult(
+            s ->
+                writer.record(
+                    root.id(),
+                    "CHANGE",
+                    "sample.documents",
+                    id,
+                    Map.of("enabled", false),
+                    Map.of("enabled", true)));
+    String historyId =
+        sql.queryForObject(
+            "SELECT id FROM cms.change_history WHERE resource_type='sample.documents' AND resource_id=?",
+            String.class,
+            id);
+    assertThat(history.detail(root, historyId).after()).containsEntry("enabled", true);
+    assertThat(history.detail(root, historyId).payloadVersion()).isEqualTo(1);
+    sql.update("UPDATE cms.change_history SET payload_version=99 WHERE id=?", historyId);
+    assertThatThrownBy(() -> history.detail(root, historyId))
+        .isInstanceOfSatisfying(
+            AdminProblem.class,
+            p -> assertThat(p.code()).isEqualTo("HISTORY_CONTRACT_UNAVAILABLE"));
+  }
+
+  @Test
+  void hostHistoryInsertFailureRollsBackBusinessChange() {
+    var before = database();
+    sql.execute(
+        "ALTER TABLE cms.change_history ADD CONSTRAINT reject_sample CHECK (resource_type <> 'sample.documents')");
+    try {
+      assertThatThrownBy(
+              () ->
+                  new TransactionTemplate(transactions)
+                      .executeWithoutResult(
+                          s -> {
+                            sql.update(
+                                "UPDATE cms.admin_account SET display_name='Should rollback' WHERE id=?",
+                                root.id());
+                            writer.record(
+                                root.id(),
+                                "CHANGE",
+                                "sample.documents",
+                                root.id(),
+                                Map.of("enabled", false),
+                                Map.of("enabled", true));
+                          }))
+          .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
+      assertThat(database()).isEqualTo(before);
+    } finally {
+      sql.execute("ALTER TABLE cms.change_history DROP CONSTRAINT reject_sample");
+    }
+  }
+
   final HttpClient http = HttpClient.newHttpClient();
 
   @BeforeEach
@@ -469,8 +526,13 @@ class HistoryIntegrationTest {
                 String.class));
     var detail = history.detail(root, seen.getFirst());
     assertThat(detail.resourceId()).startsWith("resource-");
-    assertThat(detail.before()).containsEntry("title", "before");
-    assertThat(detail.after()).containsEntry("title", "after");
+    if (detail.resourceType().equals("menu")) {
+      assertThat(detail.before()).containsEntry("treeRevision", 0L);
+      assertThat(detail.after()).containsEntry("treeRevision", 1L);
+    } else {
+      assertThat(detail.before()).containsEntry("name", "before");
+      assertThat(detail.after()).containsEntry("name", "after");
+    }
     assertThat(detail.payloadVersion()).isEqualTo(1);
     // A deleted target/actor needs no live FK or current name to remain readable.
     assertThat(
@@ -646,7 +708,8 @@ class HistoryIntegrationTest {
       SELECT md5(i::text)::uuid::text,'actor-'||(i%100),'UPDATE',
              CASE WHEN i%2=0 THEN 'menu' ELSE 'role' END,'resource-'||(i%10),
              timestamp '2026-01-01 00:00:00'+(i/2)*interval '1 second',
-             '{"title":"before"}'::jsonb,'{"title":"after"}'::jsonb,1
+             CASE WHEN i%2=0 THEN '{"treeRevision":0}'::jsonb ELSE '{"name":"before"}'::jsonb END,
+             CASE WHEN i%2=0 THEN '{"treeRevision":1}'::jsonb ELSE '{"name":"after"}'::jsonb END,1
       FROM generate_series(0,?-1) i
       """,
         count);
@@ -731,6 +794,22 @@ class HistoryIntegrationTest {
   @EnableAutoConfiguration
   @Import(CmsCoreConfiguration.class)
   static class Host {
+    @Bean
+    HistoryContract.Contribution sampleHistory() {
+      return () ->
+          List.of(
+              new HistoryContract(
+                  "sample.documents",
+                  1,
+                  true,
+                  "sample.documents",
+                  Set.of("CHANGE"),
+                  Map.of(
+                      "enabled",
+                      new HistoryContract.Field(
+                          HistoryContract.Kind.BOOLEAN, false, 1, Set.of()))));
+    }
+
     @Bean
     PermissionCatalog.Contribution sample() {
       return () ->

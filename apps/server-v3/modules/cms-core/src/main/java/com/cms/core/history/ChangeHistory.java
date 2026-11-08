@@ -71,7 +71,8 @@ public class ChangeHistory {
       String resourceId,
       LocalDateTime now,
       Map<String, Object> before,
-      Map<String, Object> after) {
+      Map<String, Object> after,
+      int payloadVersion) {
     this.actorId = actorId;
     this.action = action;
     this.resourceType = resourceType;
@@ -79,5 +80,6 @@ public class ChangeHistory {
     this.occurredAt = now;
     this.beforeData = before;
     this.afterData = after;
+    this.payloadVersion = payloadVersion;
   }
 }
