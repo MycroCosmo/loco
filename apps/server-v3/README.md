@@ -571,6 +571,18 @@ Compose는 endpoint `http://storage:8333`, region `us-east-1`, bucket `cms-files
 
 전용 JPA projection은 기존 public 스키마를 읽고 앱 서비스·마커 재집계를 호출하지 않는다. SYSTEM_ADMIN 기준 목록/상세 업무 SQL1·전체 SQL3을 고정했다. 최신순 목록은 현재 인덱스에서 scan/sort가 남으며 인덱스 추가는 후속 실험이다. public 데이터·변경 이력 불변, core의 LOCO 역참조 없음, CMS/앱 HTTP 선언 혼용 금지를 검사한다.
 
-C-33 호스트 이력 계약은 다음 신고 처리 쓰기 묶음으로 이연(설계2절 보존). 이력 조회는 SYSTEM_ADMIN 유지, 리뷰·피드백 조회·신고 처리/정지·CMS 파일 업무 연결은 이번 범위 밖이다. 최종 회귀는 `gradlew.bat allTests build`, 프런트는 고정 Node 준비 후 `npm.cmd --prefix ../admin run test:unit` 및 별도 `test:e2e`다.
+C-33/C-34의 6단계 당시 이연 기록과 설계2절은 보존한다. 후속 신고 처리에서 flat typed 호스트 이력 계약을 구현하고 업무 이력 열람을 분리했다(아래 참고). 리뷰·피드백 조회·회원 정지·CMS 파일 업무 연결은 이연 상태다. 최종 회귀는 `gradlew.bat allTests build`, 프런트는 고정 Node 준비 후 `npm.cmd --prefix ../admin run test:unit` 및 별도 `test:e2e`다.
 
 6단계 최종 검증: 서버 총1,600건(성공1,599·실패0·기존 HEIC skip1), 알려진 차이11건(개선6·의도5·보류0) 불변. `allTests build`·Spotless1,001.813초(v2 이미지 캐시, 직전 실제 통과한 core101건 UP-TO-DATE 재사용), Vitest23건0.170초, Chromium E2E7건 준비/종료 포함34.789초. 상세 실행 범위와 근거는 [설계11절](LOCO_ADMIN_DESIGN.md#11-최종-검증완료-2026-11-08)에 있다.
+
+## CMS 신고 처리 (마지막 묶음)
+
+`PUT /admin/api/loco/reports/{id}/processing`은 관리자 세션·CSRF·`loco.reports MANAGE`가 필요하다. `expectedStatus`, `nextStatus`, `note`만 받으며 처리자와 시각은 서버가 정한다. 접수→검토중→완료/기각 단방향이고 종결 메모는 필수다. 종결 후 메모 편집·재개, 회원 정지·강제 비공개·앱 알림은 없다.
+
+V6는 호스트 소유 `cms.loco_report_processing`만 추가한다. `public.reports`는 그대로이며 행이 없으면 접수로 조회한다. 첫 쓰기는 INSERT…ON CONFLICT 후 현재 상태 조건부 UPDATE, 성공 이력까지 같은 트랜잭션이다. 메모 원문은 현재 처리 행만, 이력은 status/hasNote/handledBy/handledAt만 저장한다. FK 없는 논리 참조로 원본이 삭제되어도 이력을 보존한다. migration은 앱 기동만 담당하고 bootstrap CLI는 계속 스키마 검증만 수행한다.
+
+`GET /admin/api/core/history/resources`는 현재 허용된 리소스만 반환한다. 신고 READ는 `loco.report` 이력을 읽고 core 4종은 SYSTEM_ADMIN만 읽는다. 역할 MANAGE는 명시 배정하며 기존 역할에 자동 전파하지 않는다. 화면은 409 시 초안을 버리고 최신 상태를 다시 읽으며 자동 쓰기 재전송을 하지 않는다.
+
+[승인 C-43~49·검증](REPORT_PROCESSING_DESIGN.md), [신고 SQL/EXPLAIN 기준](src/test/resources/cms-report/read-plans-baseline.json), [PR 본문 초안](CMS_PR_DRAFT.md)을 참고한다. LOCO 기존 앱 API와 v2 비교 fixture는 변경하지 않았다.
+
+최종 서버1,642건: 성공1,641·실패0·기존 HEIC skip1, 알려진 차이11건(개선6·의도5·보류0). `allTests build`/Spotless1,054.991초(v2 이미지 캐시; core125는 직전 통과 후 재사용, root365·비교1,152 재실행). Vitest26건 runner0.206초, Chromium9건 준비·종료 포함38.724초. PR은 초안 파일만 작성했으며 생성·머지는 하지 않았다.
