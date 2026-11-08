@@ -10,7 +10,7 @@ describe('LOCO read contracts', () => {
     expect(templatePermissions(permissions,'READ')).toHaveLength(2)
   })
   it('keeps report body as text and distinguishes absent and unauthorized targets', () => {
-    const report = { id: 'r1', reporterId: 'u1', targetType: 'MAP', targetId: 'm1', reason: 'reason', detail: '<script>text</script>', targetExists: null, createdAt: '2026-01-01T00:00:00Z' }
+    const report = { id: 'r1', status: 'RECEIVED', note: null, handledBy: null, handledAt: null, reporterId: 'u1', targetType: 'MAP', targetId: 'm1', reason: 'reason', detail: '<script>text</script>', targetExists: null, createdAt: '2026-01-01T00:00:00Z' }
     expect(locoRow('reports', true)(report).relations).toHaveLength(1)
     expect(locoRow('reports', true)({ ...report, targetExists: false }).fields.find(f => f.label === '대상 상태')?.value).toBe('대상 없음')
     expect(locoRow('reports', true)({ ...report, targetExists: true }).relations).toHaveLength(2)

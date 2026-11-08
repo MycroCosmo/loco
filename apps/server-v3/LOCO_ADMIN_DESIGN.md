@@ -2,6 +2,8 @@
 
 상태: **C-33~C-42 확정, 이력 계약을 제외한 6단계 구현·검증 완료.** 2026-11-08, CMS 5-B 완료 `9877ad8` 기준. 최종 승인 표가 과거 제안보다 우선한다.
 
+후속 신고 처리 묶음에서 C-33은 C-48의 flat typed descriptor로 구현하고 C-34는 C-47로 재결정했다. `loco.reports READ`는 `loco.report` 이력만, core 4종은 SYSTEM_ADMIN만 읽는다. 이 문서 2절 원안과 6단계 당시 결정은 보존하며 최신 범위·검증은 [신고 처리 설계](REPORT_PROCESSING_DESIGN.md)를 따른다.
+
 상위 근거: [CMS_CORE_DESIGN.md](CMS_CORE_DESIGN.md)의 C-9-5 A, C-14 A와 18절 백로그, C-18 C / [ADMIN_UI_DESIGN.md](ADMIN_UI_DESIGN.md)의 C-24~C-32. 승인 전 운영 코드·프런트·의존성·DB를 바꾸지 않는다.
 
 ## 0. 최종 승인 (2026-11-08)

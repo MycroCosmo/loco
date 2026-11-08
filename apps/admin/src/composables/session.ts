@@ -1,9 +1,10 @@
 import { reactive, readonly } from 'vue'
-import { api, locoApi, message, nothing } from '../api/client'
+import { api, locoApi, ApiError, message, nothing } from '../api/client'
+import { historyResources } from '../views/reportModel'
 import { identity, explanation, tree, type Identity, type Tree } from '../api/contracts'
 
-const state = reactive<{user: Identity | null; ready: boolean; notice: string; epoch: number; navigation: Tree}>({
-  user: null, ready: false, notice: '', epoch: 0, navigation: { revision: 0, nodes: [] } })
+const state = reactive<{user: Identity | null; ready: boolean; notice: string; epoch: number; navigation: Tree; historyResources: string[]}>({
+  user: null, ready: false, notice: '', epoch: 0, navigation: { revision: 0, nodes: [] }, historyResources: [] })
 const grants = new Map<string, boolean>()
 const pendingGrants = new Map<string, Promise<boolean>>()
 let grantGeneration = 0
@@ -14,7 +15,7 @@ let navigate: (path: string) => void = () => {}
 function clear() {
   api.invalidateSession()
   locoApi.invalidateSession()
-  state.user = null; state.navigation = { revision: 0, nodes: [] }; state.epoch++
+  state.user = null; state.navigation = { revision: 0, nodes: [] }; state.historyResources = []; state.epoch++
   invalidateGrants(); loading = undefined
 }
 async function refresh() {
@@ -27,10 +28,23 @@ async function refresh() {
     if (!user.mustChangePassword) {
       const navigation = await api.read('/navigation', tree)
       if (epoch === state.epoch) state.navigation = navigation
+      if (epoch === state.epoch) await refreshHistoryResources()
     }
   })().finally(() => { if (loading === pending) loading = undefined; if (epoch === state.epoch) state.ready = true })
   loading = pending
   return pending
+}
+async function refreshHistoryResources() {
+  const epoch = state.epoch
+  try {
+    const result = await api.read('/history/resources', historyResources)
+    if (epoch === state.epoch) state.historyResources = result
+    return epoch === state.epoch ? result : []
+  } catch (cause) {
+    if (epoch === state.epoch) state.historyResources = []
+    if (cause instanceof ApiError && cause.status === 403) return []
+    throw cause
+  }
 }
 async function allowed(key: string, action: 'READ' | 'MANAGE') {
   const token = `${key}:${action}`
@@ -60,7 +74,7 @@ for (const client of [api, locoApi]) client.onFailure(async error => {
   if (error.status === 403) invalidateGrants()
 })
 export const session = {
-  state: readonly(state), refresh, allowed,
+  state: readonly(state), refresh, allowed, refreshHistoryResources,
   connectNavigation(handler: typeof navigate) { navigate = handler },
   async start() { try { await api.csrf(); await refresh() } catch { state.ready = true } },
   async login(loginId: string, password: string) {

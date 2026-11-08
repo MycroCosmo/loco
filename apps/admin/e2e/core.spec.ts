@@ -4,9 +4,9 @@ import { object, text } from '../src/api/contracts'
 
 const raw=object(JSON.parse(readFileSync(process.env.CMS_E2E_RUNTIME??'', 'utf8')))
 const runtime={controlUrl:text(raw.controlUrl),controlSecret:text(raw.controlSecret),password:text(raw.password),firstPassword:text(raw.firstPassword),baseUrl:text(raw.baseUrl)}
-async function login(page:Page, first=false) {
+async function login(page:Page, first=false, loginId='root') {
   await page.goto('/admin/login')
-  await page.getByLabel('로그인 ID',{exact:true}).fill(first?'first':'root')
+  await page.getByLabel('로그인 ID',{exact:true}).fill(first?'first':loginId)
   await page.getByLabel('비밀번호',{exact:true}).fill(first?runtime.firstPassword:runtime.password)
   await page.getByRole('button',{name:'로그인',exact:true}).click()
   await expect(page.getByRole('heading',{name:first?'비밀번호 변경':'내 접근 근거',exact:true})).toBeVisible()
@@ -138,7 +138,7 @@ test('LOCO 4종 조회는 마스킹·페이지·비공개·집계·삭제 대상
   await expect(page.getByRole('heading',{name:'상세 정보'})).toBeVisible()
   await expect(page.locator('dl')).toContainText('<img src=x onerror="globalThis.__cmsInjected=true">')
   expect(await page.evaluate(()=>Object.hasOwn(globalThis,'__cmsInjected'))).toBe(false)
-  await nav.getByRole('link',{name:'신고 조회 (비공개 대상 포함)',exact:true}).click()
+  await nav.getByRole('link',{name:'신고 조회·처리 (비공개 대상 포함, 앱 제재 없음)',exact:true}).click()
   await page.getByLabel('신고 ID',{exact:true}).fill('00000000-0000-4000-8000-000000000402')
   await page.getByRole('button',{name:'조회',exact:true}).click()
   await page.getByRole('button',{name:/^상세 /}).first().click()
@@ -153,7 +153,10 @@ test('일반 READ는 허용 업무만 보이고 직접 호출·권한 회수도 
   const nav=page.getByRole('navigation',{name:'관리 도구'})
   await expect(nav.getByRole('link',{name:'지도방 조회 (비공개 포함)',exact:true})).toBeVisible()
   await expect(nav.getByRole('link',{name:'회원 조회',exact:true})).toHaveCount(0)
-  await expect(nav.getByRole('link',{name:'변경 이력',exact:true})).toHaveCount(0)
+  await expect(nav.getByRole('link',{name:'변경 이력',exact:true})).toBeVisible()
+  await nav.getByRole('link',{name:'변경 이력',exact:true}).click()
+  await expect(page.getByLabel('대상 유형').locator('option')).toHaveText(['허용된 전체','loco.report'])
+  expect((await page.request.get(runtime.baseUrl+'/admin/api/core/history?resourceType=role')).status()).toBe(403)
   const forbidden=await page.request.get(runtime.baseUrl+'/admin/api/loco/users')
   expect(forbidden.status()).toBe(403);expect((await forbidden.json()).code).toBe('PERMISSION_DENIED')
   await nav.getByRole('link',{name:'지도방 조회 (비공개 포함)',exact:true}).click()
@@ -167,4 +170,63 @@ test('일반 READ는 허용 업무만 보이고 직접 호출·권한 회수도 
   await expect(page.getByRole('heading',{name:'상세 정보'})).toHaveCount(0)
   const revoked=await page.request.get(runtime.baseUrl+'/admin/api/loco/maps')
   expect(revoked.status()).toBe(403)
+})
+
+const reportId='00000000-0000-4000-8000-000000000401'
+async function openReport(page:Page) {
+  await page.goto('/admin/loco/reports?id='+reportId)
+  await page.getByRole('button',{name:/^상세 /}).click()
+  await expect(page.getByRole('heading',{name:'상세 정보'})).toBeVisible()
+}
+test('신고 READ는 처리 버튼 없이 업무 이력만 읽고 MANAGE는 종결 사유를 저장한다',async({page,browser})=>{
+  await login(page,false,'manager')
+  await openReport(page)
+  await page.getByRole('button',{name:'상태 변경 적용'}).click()
+  await expect(page.locator('dl')).toContainText('검토 중')
+  await page.getByLabel('다음 상태').selectOption('RESOLVED')
+  const note='<script>개인정보 없는 종결 사유</script>'
+  await page.getByLabel('처리 메모 (종결 시 필수)').fill(note)
+  await page.getByRole('button',{name:'상태 변경 적용'}).click()
+  await expect(page.locator('dl')).toContainText(note)
+  await expect(page.getByText('종결된 신고입니다.',{exact:false})).toBeVisible()
+  await expect(page.getByRole('button',{name:'상태 변경 적용'})).toHaveCount(0)
+  await page.getByRole('link',{name:'신고 처리 이력',exact:true}).click()
+  await expect(page.getByRole('table')).toContainText('loco.report')
+  await page.getByRole('button',{name:/^상세 /}).first().click()
+  await expect(page.locator('pre').last()).toContainText('"hasNote": true')
+  await expect(page.locator('pre').last()).not.toContainText(note)
+  const other=await browser.newContext({baseURL:runtime.baseUrl})
+  try {
+    const reader=await other.newPage();await login(reader,false,'viewer');await openReport(reader)
+    await expect(reader.locator('dl')).toContainText(note)
+    await expect(reader.getByRole('form',{name:'신고 처리',exact:true})).toHaveCount(0)
+    const csrf=(await other.cookies()).find(c=>c.name==='XSRF-TOKEN')?.value
+    expect(csrf).toBeTruthy()
+    const denied=await reader.request.put(runtime.baseUrl+'/admin/api/loco/reports/'+reportId+'/processing',{
+      headers:{'X-XSRF-TOKEN':decodeURIComponent(csrf??'')},data:{expectedStatus:'RESOLVED',nextStatus:'IN_REVIEW',note:'denied'}})
+    expect(denied.status()).toBe(403)
+    await reader.getByRole('link',{name:'신고 처리 이력',exact:true}).click()
+    await expect(reader.getByLabel('대상 유형').locator('option')).toHaveText(['허용된 전체','loco.report'])
+    await expect(reader.getByRole('table')).toContainText('loco.report')
+  } finally {await other.close()}
+})
+
+test('두 관리자의 신고 처리 충돌은 최신 상태를 표시하고 메모를 버리며 재전송하지 않는다',async({page,browser})=>{
+  const other=await browser.newContext({baseURL:runtime.baseUrl})
+  try {
+    const peer=await other.newPage();await login(page);await login(peer,false,'manager')
+    await openReport(page);await openReport(peer)
+    let writes=0
+    peer.on('request',r=>{if(r.url().endsWith('/processing')&&r.method()==='PUT')writes++})
+    await peer.getByLabel('처리 메모 (종결 시 필수)').fill('패자의 초안')
+    await page.getByRole('button',{name:'상태 변경 적용'}).click()
+    await expect(page.locator('dl')).toContainText('검토 중')
+    const response=peer.waitForResponse(r=>r.url().endsWith('/processing')&&r.request().method()==='PUT')
+    await peer.getByRole('button',{name:'상태 변경 적용'}).click()
+    expect((await (await response).json()).code).toBe('STALE_REPORT_STATE')
+    await expect(peer.getByRole('status').filter({hasText:'다른 관리자가'})).toBeVisible()
+    await expect(peer.locator('dl')).toContainText('검토 중')
+    await expect(peer.getByLabel('처리 메모 (종결 시 필수)')).toHaveValue('')
+    expect(writes).toBe(1)
+  } finally {await other.close()}
 })

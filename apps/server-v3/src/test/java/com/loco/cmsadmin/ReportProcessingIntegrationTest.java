@@ -34,7 +34,10 @@ import org.testcontainers.utility.DockerImageName;
       "loco.cleanup.enabled=false",
       "loco.notifications.service-account="
     })
-@Import(ReportProcessingIntegrationTest.TimeConfig.class)
+@Import({
+  ReportProcessingIntegrationTest.TimeConfig.class,
+  com.loco.maps.SqlQueryCounter.Configuration.class
+})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ReportProcessingIntegrationTest {
   @Container
@@ -357,6 +360,86 @@ class ReportProcessingIntegrationTest {
   }
 
   @Test
+  void businessReadFiltersMixedHistoryBeforePaginationAndRevokesImmediately() throws Exception {
+    var role = roles.create(root, "HISTORY_READER", "Reader", "READ_ONLY", Set.of("loco.reports"));
+    var member = admins.authenticate("second", password);
+    roles.assign(root, member.id(), Set.of(role.id()), member.authVersion());
+    var reader = login("second");
+    sql.execute("TRUNCATE cms.change_history");
+    sql.update(
+        """
+      INSERT INTO cms.change_history(id,actor_id,action,resource_type,resource_id,occurred_at,before_data,after_data,payload_version)
+      SELECT md5(i::text)::uuid::text,?,CASE WHEN i%2=0 THEN 'RENAME' ELSE 'TRANSITION' END,
+      CASE WHEN i%2=0 THEN 'role' ELSE 'loco.report' END,?,timestamp '2026-01-01'+(i/2)*interval '1 millisecond',
+      CASE WHEN i%2=0 THEN '{"name":"before"}'::jsonb ELSE '{"status":"RECEIVED","hasNote":false,"handledBy":null,"handledAt":null}'::jsonb END,
+      CASE WHEN i%2=0 THEN '{"name":"after"}'::jsonb ELSE jsonb_build_object('status','IN_REVIEW','hasNote',false,'handledBy',?::text,'handledAt','2026-01-01T00:00:00Z') END,1
+      FROM generate_series(1,10000) i
+      """,
+        second.id(), report, second.id());
+    sql.execute("ANALYZE cms.change_history");
+    assertThat(json.readTree(get(reader, "/admin/api/core/history/resources").body()))
+        .containsExactly(json.getNodeFactory().textNode("loco.report"));
+    com.loco.maps.SqlQueryCounter.reset();
+    var first = get(reader, "/admin/api/core/history?size=100");
+    assertThat(first.statusCode()).isEqualTo(200);
+    String actual =
+        com.loco.maps.SqlQueryCounter.statements().stream()
+            .filter(s -> s.startsWith("SELECT h.* FROM cms.change_history"))
+            .findFirst()
+            .orElseThrow();
+    assertThat(actual).contains("h.resource_type IN");
+    var plan =
+        sql.queryForList(
+            "EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT) " + actual, String.class, "loco.report", 101);
+    var path = Path.of("build/reports/cms-report/history-explain.txt");
+    Files.createDirectories(path.getParent());
+    Files.writeString(
+        path,
+        "rows=10000 (5000 core/5000 business), PostgreSQL17, ANALYZE, warm local query\n"
+            + actual
+            + "\nbindings=[loco.report,101]\n"
+            + String.join("\n", plan));
+    var seen = new HashSet<String>();
+    String cursor = null;
+    int pages = 0;
+    do {
+      var response =
+          get(
+              reader,
+              "/admin/api/core/history?size=100"
+                  + (cursor == null
+                      ? ""
+                      : "&cursor="
+                          + URLEncoder.encode(cursor, java.nio.charset.StandardCharsets.UTF_8)));
+      assertThat(response.statusCode()).isEqualTo(200);
+      var page = json.readTree(response.body());
+      for (var h : page.path("items")) {
+        assertThat(h.path("resourceType").asText()).isEqualTo("loco.report");
+        assertThat(seen.add(h.path("id").asText())).isTrue();
+      }
+      cursor = page.path("nextCursor").isNull() ? null : page.path("nextCursor").asText();
+      pages++;
+    } while (cursor != null && pages < 60);
+    assertThat(seen).hasSize(5000);
+    assertThat(pages).isEqualTo(50);
+    assertThat(cursor).isNull();
+    String coreId =
+        sql.queryForObject(
+            "SELECT id FROM cms.change_history WHERE resource_type='role' LIMIT 1", String.class);
+    String business = seen.iterator().next();
+    assertThat(get(reader, "/admin/api/core/history/" + coreId).statusCode()).isEqualTo(404);
+    assertThat(get(reader, "/admin/api/core/history/absent").statusCode()).isEqualTo(404);
+    assertThat(get(reader, "/admin/api/core/history?resourceType=role").statusCode())
+        .isEqualTo(403);
+    assertThat(get(reader, "/admin/api/core/history/" + business).statusCode()).isEqualTo(200);
+    sql.update("DELETE FROM reports WHERE id=?", report);
+    assertThat(get(reader, "/admin/api/core/history/" + business).statusCode()).isEqualTo(200);
+    roles.permissions(root, role.id(), Map.of(), role.version());
+    assertThat(get(reader, "/admin/api/core/history").statusCode()).isEqualTo(403);
+    assertThat(get(reader, "/admin/api/core/history/" + business).statusCode()).isEqualTo(403);
+  }
+
+  @Test
   void forcedRacesHaveOneWinnerAndOneHistoryForTwentyRoundsEach() throws Exception {
     var reportRows = new ArrayList<Map<String, Object>>();
     for (boolean initial : List.of(true, false)) {
@@ -414,6 +497,57 @@ class ReportProcessingIntegrationTest {
     var path = Path.of("build/reports/cms-report/races.json");
     Files.createDirectories(path.getParent());
     json.writerWithDefaultPrettyPrinter().writeValue(path.toFile(), reportRows);
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void waitingRequestWinsAfterFirstHistoryFailure(boolean existing) throws Exception {
+    if (existing)
+      assertThat(put(one, "RECEIVED", "IN_REVIEW", "original").statusCode()).isEqualTo(200);
+    long before = histories();
+    sql.execute(
+        "ALTER TABLE cms.change_history ADD CONSTRAINT reject_first_actor CHECK (resource_type<>'loco.report' OR actor_id<>'"
+            + root.id()
+            + "') NOT VALID");
+    try (var gate =
+            DriverManager.getConnection(db.getJdbcUrl(), db.getUsername(), db.getPassword());
+        var pool = Executors.newFixedThreadPool(2)) {
+      gate.setAutoCommit(false);
+      try (var statement = gate.createStatement()) {
+        statement.execute("LOCK TABLE cms.change_history IN SHARE MODE");
+      }
+      String expected = existing ? "IN_REVIEW" : "RECEIVED",
+          next = existing ? "RESOLVED" : "IN_REVIEW";
+      var first = pool.submit(() -> put(one, expected, next, "failed-note"));
+      java.util.concurrent.Future<HttpResponse<String>> secondRequest;
+      try {
+        waitForDatabaseLock("%insert into cms.change_history%", 1);
+        secondRequest = pool.submit(() -> put(two, expected, next, "surviving-note"));
+        waitForDatabaseLock("%cms.loco_report_processing%", 1);
+      } finally {
+        gate.rollback();
+      }
+      assertThat(first.get(15, TimeUnit.SECONDS).statusCode()).isGreaterThanOrEqualTo(400);
+      assertThat(secondRequest.get(15, TimeUnit.SECONDS).statusCode()).isEqualTo(200);
+      assertThat(detail().path("note").asText()).isEqualTo("surviving-note");
+      assertThat(detail().path("handledBy").asText()).isEqualTo(second.id());
+      assertThat(histories()).isEqualTo(before + 1);
+    } finally {
+      sql.execute("ALTER TABLE cms.change_history DROP CONSTRAINT reject_first_actor");
+    }
+  }
+
+  void waitForDatabaseLock(String query, int count) throws Exception {
+    long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+    while (sql.queryForObject(
+            "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event_type='Lock' AND query ILIKE ?",
+            Integer.class,
+            query)
+        < count) {
+      if (System.nanoTime() > deadline)
+        throw new AssertionError("HTTP request did not reach the expected DB gate");
+      Thread.sleep(10);
+    }
   }
 
   List<HttpResponse<String>> race(boolean initial, String first, String secondBody)

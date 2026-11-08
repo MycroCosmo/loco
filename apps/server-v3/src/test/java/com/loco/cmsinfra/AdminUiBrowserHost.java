@@ -139,7 +139,7 @@ public class AdminUiBrowserHost {
                   case "/reset" -> {
                     clock.advance(Duration.ofDays(1));
                     sql.execute(
-                        "TRUNCATE cms.stored_file,cms.change_history,cms.menu_node,cms.role_permission,cms.admin_account_role,cms.admin_account");
+                        "TRUNCATE cms.loco_report_processing,cms.stored_file,cms.change_history,cms.menu_node,cms.role_permission,cms.admin_account_role,cms.admin_account");
                     sql.update("DELETE FROM cms.admin_role WHERE code<>'SYSTEM_ADMIN'");
                     sql.update("UPDATE cms.administration_state SET bootstrap_completed=false");
                     sql.update("UPDATE cms.menu_tree_revision SET revision=0");
@@ -158,6 +158,14 @@ public class AdminUiBrowserHost {
                             "READ_ONLY",
                             Set.of("loco.maps", "loco.reports"));
                     roles.assign(root, viewer.id(), Set.of(viewRole.id()), viewer.authVersion());
+                    var manager = admins.createAccount(root, "manager", "신고 처리 관리자", password);
+                    admins.changePassword(manager, password, password);
+                    manager = admins.authenticate("manager", password);
+                    var manageRole =
+                        roles.create(
+                            root, "REPORT_MANAGER", "신고 처리", "MANAGER", Set.of("loco.reports"));
+                    roles.assign(
+                        root, manager.id(), Set.of(manageRole.id()), manager.authVersion());
                     sql.execute("TRUNCATE users CASCADE");
                     for (int i = 1; i <= 2; i++)
                       sql.update(

@@ -223,7 +223,11 @@ class LocoReadIntegrationTest {
                     && !s.contains("public.users"));
     assertThat(get(reader, "/admin/api/loco/maps/" + mapId(1)).statusCode()).isEqualTo(403);
     assertThat(get(reader, "/admin/api/loco/places").statusCode()).isEqualTo(403);
-    assertThat(get(reader, "/admin/api/core/history").statusCode()).isEqualTo(403);
+    var history = get(reader, "/admin/api/core/history");
+    assertThat(history.statusCode()).isEqualTo(200);
+    assertThat(json.readTree(history.body()).path("items")).isEmpty();
+    assertThat(get(reader, "/admin/api/core/history?resourceType=role").statusCode())
+        .isEqualTo(403);
   }
 
   @Test

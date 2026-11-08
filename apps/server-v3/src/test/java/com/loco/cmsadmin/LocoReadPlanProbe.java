@@ -86,6 +86,8 @@ final class LocoReadPlanProbe {
             cases.put("tag", query(Map.of("tag", "rare")));
           }
           case REPORTS -> {
+            cases.put("received", query(Map.of("status", "RECEIVED")));
+            cases.put("in-review", query(Map.of("status", "IN_REVIEW")));
             cases.put("state", query(Map.of("targetType", "MAP")));
             cases.put("foreign-key", query(Map.of("reporterId", key(sql, "user-1"))));
             cases.put("target", query(Map.of("targetId", key(sql, "map-1"))));
@@ -200,6 +202,7 @@ final class LocoReadPlanProbe {
   }
 
   private static void seed(JdbcTemplate sql, int count) {
+    sql.execute("TRUNCATE cms.loco_report_processing");
     sql.execute("TRUNCATE users CASCADE");
     sql.update(
         """
@@ -241,6 +244,14 @@ final class LocoReadPlanProbe {
       'synthetic','synthetic',timestamp '2026-01-01'+(i/100)*interval '1 millisecond' FROM generate_series(1,?) i
       """,
         count);
+    sql.update(
+        """
+      INSERT INTO cms.loco_report_processing(report_id,status,handled_by,handled_at)
+      SELECT md5('report-'||i)::uuid::text,'IN_REVIEW',md5('synthetic-admin')::uuid::text,timestamp '2026-01-01'
+      FROM generate_series(2,?,2) i
+      """,
+        count);
+    sql.execute("ANALYZE cms.loco_report_processing");
     for (String table : List.of("users", "maps", "places", "reports", "place_reviews"))
       sql.execute("ANALYZE public." + table);
   }

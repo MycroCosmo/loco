@@ -753,6 +753,8 @@ EXPLAIN 산출물은 `modules/cms-core/build/reports/history-query-plans.txt`다
 
 ## 18. 5-A 착수 전 검토와 6단계 백로그
 
+**후속 갱신:** 마지막 신고 처리 묶음에서 C-48 flat typed descriptor와 기존 core validator 어댑터로 호스트 등록을 구현했다. C-47은 core 4종 SYSTEM_ADMIN / `loco.report`는 `loco.reports READ`로 열람 범위를 분리한다. 원래 백로그와 6단계 이연 사유는 아래에 보존하며, 현재 계약·검증·조건부 UPDATE와 메뉴 락의 실측 비교는 [REPORT_PROCESSING_DESIGN.md](REPORT_PROCESSING_DESIGN.md)를 따른다.
+
 ### 6단계 시작 전 필수 설계: 호스트 등록형 이력 계약
 
 2026-11-08 설계 반영: [LOCO_ADMIN_DESIGN.md 2절](LOCO_ADMIN_DESIGN.md#2-호스트-등록형-이력-계약-c-33-a-제안)에 등록 API·예약 보호·이름 충돌·중첩 타입·payloadVersion·쓰기/민감값 검사 연결을 제안했다. C-33은 A 방향만 확정하고 신고 처리 쓰기 묶음으로 구현을 이연했다. C-34는 SYSTEM_ADMIN 유지, C-41은 파일 연결 보류다. C-14 권한과 C-18 파일 연결 재검토도 같은 문서에 있다. 아래는 5-A 당시 발견한 제약 기록이다.

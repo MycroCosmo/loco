@@ -24,16 +24,43 @@ public class HistoryQueryService {
   private final EntityManager em;
   private final PermissionService access;
   private final HistoryContractRegistry contracts;
+  private final AdminService admins;
 
   public HistoryQueryService(
-      EntityManager em, PermissionService access, HistoryContractRegistry contracts) {
+      EntityManager em,
+      PermissionService access,
+      HistoryContractRegistry contracts,
+      AdminService admins) {
     this.em = em;
     this.access = access;
     this.contracts = contracts;
+    this.admins = admins;
+  }
+
+  private record Scope(boolean system, Set<String> resources) {}
+
+  private Scope scope(AdminIdentity actor) {
+    var current = admins.current(actor);
+    if (current.mustChangePassword()) throw AdminProblem.passwordRequired();
+    if (current.systemAdmin()) return new Scope(true, contracts.resources());
+    var allowed = new TreeSet<String>();
+    for (String resource : contracts.resources()) {
+      String permission = contracts.readPermission(resource);
+      if (permission != null
+          && access
+              .explain(current, current.id(), permission, com.cms.core.permission.Action.READ)
+              .allowed()) allowed.add(resource);
+    }
+    if (allowed.isEmpty()) throw AdminProblem.forbidden();
+    return new Scope(false, allowed);
+  }
+
+  public List<String> resources(AdminIdentity actor) {
+    return scope(actor).resources().stream().sorted().toList();
   }
 
   public Page list(AdminIdentity actor, Filter filter) {
-    access.systemAdmin(actor);
+    var scope = scope(actor);
     if (filter.size() < 1
         || filter.size() > 100
         || (filter.from() != null
@@ -42,6 +69,12 @@ public class HistoryQueryService {
       throw new AdminProblem(400, "Invalid history range or page size");
     var params = new LinkedHashMap<String, Object>();
     var where = new ArrayList<String>();
+    if (!scope.system()) {
+      if (filter.resourceType() != null && !scope.resources().contains(filter.resourceType()))
+        throw AdminProblem.forbidden();
+      where.add("h.resource_type IN (:allowedResources)");
+      params.put("allowedResources", scope.resources());
+    }
     equality(where, params, "resource_type", "resourceType", filter.resourceType());
     equality(where, params, "resource_id", "resourceId", filter.resourceId());
     equality(where, params, "actor_id", "actorId", filter.actorId());
@@ -87,8 +120,19 @@ public class HistoryQueryService {
   }
 
   public ChangeHistory.View detail(AdminIdentity actor, String id) {
-    access.systemAdmin(actor);
-    var history = em.find(ChangeHistory.class, id);
+    var scope = scope(actor);
+    ChangeHistory history;
+    if (scope.system()) history = em.find(ChangeHistory.class, id);
+    else {
+      var rows =
+          em.createNativeQuery(
+                  "SELECT h.* FROM cms.change_history h WHERE h.id=:id AND h.resource_type IN (:allowedResources)",
+                  ChangeHistory.class)
+              .setParameter("id", id)
+              .setParameter("allowedResources", scope.resources())
+              .getResultList();
+      history = rows.isEmpty() ? null : (ChangeHistory) rows.getFirst();
+    }
     if (history == null) throw new AdminProblem(404, "Not found");
     return contracts.reading(history.view());
   }

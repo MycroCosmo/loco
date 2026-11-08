@@ -19,7 +19,7 @@ export const router = createRouter({ history: createWebHistory('/admin/'), route
   { path: '/roles', component: RolesView, meta: { permission: 'cms.roles' } },
   { path: '/menus', component: MenusView, meta: { permission: 'cms.menus' } },
   { path: '/files', component: FilesView, meta: { permission: 'cms.files' } },
-  { path: '/history', component: HistoryView, meta: { systemOnly: true } },
+  { path: '/history', component: HistoryView, meta: { history: true } },
   { path: '/loco/users', component: LocoReadView, props: { resource: 'users' }, meta: { permission: 'loco.users' } },
   { path: '/loco/maps', component: LocoReadView, props: { resource: 'maps' }, meta: { permission: 'loco.maps' } },
   { path: '/loco/places', component: LocoReadView, props: { resource: 'places' }, meta: { permission: 'loco.places' } },
@@ -31,7 +31,10 @@ router.beforeEach(async to => {
   const user = session.state.user
   if (!user && to.path !== '/login') return '/login'
   if (user?.mustChangePassword && to.path !== '/password' && to.path !== '/login') return '/password'
-  if (user && to.meta.systemOnly && !user.systemAdmin) return '/access?denied=1'
+  if (user && to.meta.history) {
+    try { if (!(await session.refreshHistoryResources()).length) return '/access?denied=1' }
+    catch { return '/access?unavailable=1' }
+  }
   if (user && typeof to.meta.permission === 'string') {
     try { if (!await session.allowed(to.meta.permission, 'READ')) return '/access?denied=1' }
     catch { return '/access?unavailable=1' }

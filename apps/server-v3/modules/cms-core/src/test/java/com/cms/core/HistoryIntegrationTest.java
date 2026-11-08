@@ -130,6 +130,38 @@ class HistoryIntegrationTest {
     }
   }
 
+  @Test
+  void registeredBusinessReadCanSeeOnlyItsHistoryWithoutKnowingHostTypes() {
+    var member = admins.createAccount(root, "reader", "Reader", password);
+    admins.changePassword(member, password, password + "-changed");
+    member = admins.authenticate("reader", password + "-changed");
+    var role =
+        roles.create(root, "HISTORY_READER", "Reader", "READ_ONLY", Set.of("sample.documents"));
+    roles.assign(root, member.id(), Set.of(role.id()), member.authVersion());
+    var actor = admins.authenticate("reader", password + "-changed");
+    new TransactionTemplate(transactions)
+        .executeWithoutResult(
+            s ->
+                writer.record(
+                    root.id(),
+                    "CHANGE",
+                    "sample.documents",
+                    UUID.randomUUID().toString(),
+                    Map.of("enabled", false),
+                    Map.of("enabled", true)));
+    assertThat(history.resources(actor)).containsExactly("sample.documents");
+    var page =
+        history.list(actor, new HistoryQueryService.Filter(null, null, null, null, null, null, 50));
+    assertThat(page.items())
+        .hasSize(1)
+        .allSatisfy(h -> assertThat(h.resourceType()).isEqualTo("sample.documents"));
+    String coreId =
+        sql.queryForObject(
+            "SELECT id FROM cms.change_history WHERE resource_type='role' LIMIT 1", String.class);
+    assertThatThrownBy(() -> history.detail(actor, coreId))
+        .isInstanceOfSatisfying(AdminProblem.class, p -> assertThat(p.status()).isEqualTo(404));
+  }
+
   final HttpClient http = HttpClient.newHttpClient();
 
   @BeforeEach
@@ -410,6 +442,7 @@ class HistoryIntegrationTest {
             "PermissionService.require/3",
             "HistoryQueryService.list/2",
             "HistoryQueryService.detail/2",
+            "HistoryQueryService.resources/1",
             "FileService.list/3",
             "FileService.detail/2",
             "FileService.download/2");

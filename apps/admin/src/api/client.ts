@@ -15,6 +15,9 @@ export function message(error: unknown): string {
     AUTHENTICATION_REQUIRED: '로그인이 필요합니다.', UNAUTHORIZED: '인증 정보를 확인하세요.',
     PASSWORD_CHANGE_REQUIRED: '먼저 비밀번호를 변경하세요.', PERMISSION_DENIED: '이 작업의 권한이 없습니다. 내 접근 근거를 확인하세요.',
     STALE_REVISION: '다른 관리자가 메뉴를 변경했습니다. 최신 트리에서 위치를 다시 확인하세요.',
+    STALE_REPORT_STATE: '다른 관리자가 신고를 변경했습니다. 최신 상태를 확인하고 다시 작성하세요.',
+    INVALID_REPORT_TRANSITION: '허용되지 않은 상태 전이입니다. 최신 상태를 확인하세요.',
+    HISTORY_CONTRACT_UNAVAILABLE: '이력 계약을 확인할 수 없습니다. 관리자에게 문의하세요.',
     RATE_LIMITED: '로그인은 IP·계정별 분당 5회까지입니다. 잠시 후 다시 시도하세요.',
   }
   return labels[error.code] ?? error.message

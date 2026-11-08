@@ -36,4 +36,9 @@ public class HistoryController {
       @AuthenticationPrincipal AdminIdentity actor, @PathVariable String id) {
     return history.detail(actor, id);
   }
+
+  @GetMapping("/resources")
+  public java.util.List<String> resources(@AuthenticationPrincipal AdminIdentity actor) {
+    return history.resources(actor);
+  }
 }
