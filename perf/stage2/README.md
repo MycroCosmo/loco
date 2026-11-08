@@ -21,6 +21,8 @@
 
 Java 21, 저장소의 Node 준비 스크립트, Docker Desktop이 필요하다. Windows AC 연결·최고 성능 overlay를 매 측정 전후 확인한다. `.wslconfig`가 없으면 Docker가 보고한 실제 VM CPU/RAM을 기록한다. 다른 앱은 중단하지 않고 배경 사용량을 함께 측정한다.
 
+아래는 개별 실행 명령이다. 새 checkout의 빈 build 출력에서 재현하고, 기존 원본은 먼저 보존한다. 각 명령의 `$LASTEXITCODE`가0인지 확인한다. 실패하면 다음 부하를 자동으로 이어 실행하지 않는다. 이번 P0의 viewport10%·전체는 예열에서 실패했으며, 전체 범위 뒤에는 로그·DB 불변 확인 후 `docker restart loco-perf-p0-perf-app-1`로 **같은 설정**의 앱을 복구했다. 실패 조건의 검증을 약화하거나 도착률을 바꾼 성공값으로 대체하지 않는다. 실제 성공/실패와 원인은 [P0 결과](P0_RESULTS.md)를 따른다.
+
 ```powershell
 Set-Location apps/server-v3
 . ../admin/prepare-node.ps1
@@ -63,6 +65,8 @@ node perf/stage2/run.mjs stop
 한 실행은 예열120초·측정300초다. P0 주 조건5회35분, 탐색6회42분, CMS1회7분으로 부하84분. pilot6분+준비/진단+회귀 약18분을 포함한 **예상110~130분(구현 제외)**을 실행 전에 고정했다. 실제 실패·재실행·준비 시간은 별도 기록한다. 모든 실행 원본은 `apps/server-v3/build/perf-stage2`에 남는다. 실패 실행도 지우지 않는다.
 
 `profile`은 대표 측정과 분리한 JFR 진단(예열120초+진단90초)이다. 환경변수/시스템 속성 이벤트를 끄고, 공개 원본에는 필요한 실행 샘플·소켓 대기·GC·잠금 이벤트만 내보낸다. 설정·프로파일러의 비용을 대표 지연에 섞지 않는다. [JFR 설정 근거](https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html).
+
+JFR와 CMS 진단의 일회성 앱은 `--use-aliases`로 같은 `perf-app` DNS를 사용한다. 종료 후 원래 앱을 다시 시작한다. JFR 이벤트 추출은 Java21의 `jfr print --json --events jdk.ExecutionSample,jdk.SocketRead,jdk.GarbageCollection,jdk.GCHeapSummary,jdk.JavaMonitorEnter,jdk.ThreadPark,jdk.CPULoad <diagnostic.jfr>`를 사용한다. `jfr summary`로 환경변수·시스템 속성 이벤트0도 확인한다.
 
 CMS는 1만/10만 행과 처리행0%/50%의 네 데이터셋에서 SQL/EXPLAIN·HTTP 결과를 준비 구간에 수집한다. 실제 부하는 10만·처리행50% 한 조합만 1회 탐색한다. 이 4종 준비 작업을 4회 부하 측정으로 부풀리지 않는다.
 

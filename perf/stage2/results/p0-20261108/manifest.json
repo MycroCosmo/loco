@@ -1,0 +1,494 @@
+{
+  "purpose": "P0 A baseline only. Local laptop relative comparison; not production capacity. No E-10 latency budget or B adoption.",
+  "sourceCodeSha": "ad963bae20020bef1d4c7a71dd512ae231fb66c8",
+  "primaryAppAndRunSha": "e331713df4cc05e4c59892257c14fc5a4b634fe7",
+  "explorationRunnerSha": "a6dc819d9f1a8047fdcb6e49a2a8dbc35a8f0d5e",
+  "primary": {
+    "environment": {
+      "at": "2026-11-08T08:54:55.379Z",
+      "power": {
+        "cpu": {
+          "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+          "NumberOfCores": 24,
+          "NumberOfLogicalProcessors": 32
+        },
+        "ac": 1,
+        "wslConfigExists": false,
+        "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+        "powerRead": true,
+        "memory": 34049220608
+      },
+      "docker": {
+        "version": "28.1.1",
+        "cpus": 32,
+        "memory": 16609128448,
+        "os": "Docker Desktop"
+      },
+      "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+      "background": [
+        {
+          "alias": "background-bb89aed8"
+        },
+        {
+          "alias": "background-c4a2e818"
+        },
+        {
+          "alias": "background-893207ea"
+        },
+        {
+          "alias": "background-ddce412a"
+        },
+        {
+          "alias": "background-95b31c2c"
+        },
+        {
+          "alias": "background-13993ca1"
+        },
+        {
+          "alias": "background-08b4c2e9"
+        }
+      ]
+    },
+    "git": "e331713df4cc05e4c59892257c14fc5a4b634fe7",
+    "dirty": "",
+    "jarSha256": "c1a5293f1dc59a6ee0e648548e92695857a0357c57d10e45f06704a96952158f",
+    "runtime": {
+      "java": "21.0.13+9-LTS",
+      "cpuCount": 2,
+      "maxHeapBytes": 389283840,
+      "jvmArguments": [],
+      "gc": [
+        "Copy",
+        "MarkSweepCompact"
+      ],
+      "hikariMaximum": 10,
+      "hikariMinimum": 10,
+      "hikariConnectionTimeoutMs": 30000,
+      "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+      "shared_buffers": "1GB",
+      "work_mem": "4MB",
+      "max_connections": "100",
+      "pg_stat_statements.track": "none"
+    },
+    "data": {
+      "cms.admin_account": {
+        "rows": 1,
+        "hash": "4ef64ab731e588156f0ba1ce5c6c1cbd"
+      },
+      "cms.admin_account_role": {
+        "rows": 1,
+        "hash": "2339c4ceeefe0528df4b7fce1261c54e"
+      },
+      "cms.admin_role": {
+        "rows": 1,
+        "hash": "6d950d8bda889fb522138b2b6765f83e"
+      },
+      "cms.administration_state": {
+        "rows": 1,
+        "hash": "15478b7e4046697b421bdc16e99f77ab"
+      },
+      "cms.change_history": {
+        "rows": 2,
+        "hash": "f78ec97227ea8acdd7c2bef861d48a56"
+      },
+      "cms.loco_report_processing": {
+        "rows": 50000,
+        "hash": "248254eb0d0d3dc4d506637ff90ebdda"
+      },
+      "cms.menu_node": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.menu_tree_revision": {
+        "rows": 1,
+        "hash": "b0384dccd782893bdb3a6ec9a0c04bf6"
+      },
+      "cms.role_permission": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.stored_file": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.favorites": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.feedbacks": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.map_members": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.maps": {
+        "rows": 1000,
+        "hash": "4fe0ccbf6ab685a941d07a6783b2b5f0"
+      },
+      "public.password_reset_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.place_marker_cells": {
+        "rows": 209911,
+        "hash": "e8c55ba0a4d2df42b9e120d1ac53b871"
+      },
+      "public.place_reviews": {
+        "rows": 2000,
+        "hash": "869eeb42a06f0e88ad309bc6af9bb043"
+      },
+      "public.places": {
+        "rows": 100000,
+        "hash": "20f94cc714af58e3402d6980799d8296"
+      },
+      "public.refresh_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.reports": {
+        "rows": 100000,
+        "hash": "4cb06e6fa8c35c4406bd636e7251a01f"
+      },
+      "public.users": {
+        "rows": 100000,
+        "hash": "8b0265fb87bdfb7044448d9e59fdd766"
+      }
+    },
+    "images": [
+      {
+        "extname": "plpgsql"
+      },
+      {
+        "extname": "pg_stat_statements"
+      }
+    ],
+    "containers": [
+      {
+        "id": "fcaa7ad3adb800f6722e3d2ebf18bd8011f50ca6c9205457a8fd2caa69f7adbd",
+        "name": "/loco-perf-p0-perf-app-1",
+        "image": "sha256:985c8f260403246086c1063fb04abc5951303af3d2419706d6e305a13b5a7306",
+        "cpu": 2000000000,
+        "memory": 1610612736,
+        "oomKilled": false,
+        "network": [
+          "loco-perf-p0_default"
+        ]
+      },
+      {
+        "id": "e03fe9ccc28a5464009cbb4a97f5a28af8ee11a46750a3c0e6a6fc389adf0b93",
+        "name": "/loco-perf-p0-perf-db-1",
+        "image": "sha256:9fa71488d8990a73e5bef7575ba1dec17c69958f8e1bedc23597eba7eda67e96",
+        "cpu": 2000000000,
+        "memory": 4294967296,
+        "oomKilled": false,
+        "network": [
+          "loco-perf-p0_default"
+        ]
+      }
+    ]
+  },
+  "platform": {
+    "dockerKernel": "6.18.33.2-microsoft-standard-WSL2",
+    "interpretation": "Local laptop relative comparison; not production absolute capacity.",
+    "windows": {
+      "Caption": "Microsoft Windows 11 Home",
+      "Version": "10.0.26200",
+      "BuildNumber": "26200"
+    },
+    "recordedAt": "2026-11-08T19:08:34.4183008+09:00"
+  },
+  "seed": "loco-perf-20261108",
+  "primaryCondition": {
+    "places": 100000,
+    "maps": 1000,
+    "hotMapPlaces": 50000,
+    "hotRequestsPercent": 80,
+    "viewportAreaPercent": 1,
+    "hotSelectedPlaces": 515,
+    "rate": 50,
+    "rounds": 5,
+    "warmupSeconds": 120,
+    "measuredSeconds": 300
+  },
+  "images": {
+    "postgres": "postgis/postgis:17-3.6@sha256:1ac10b2551ba84ae05db8e7da477afcd0a3fede99bcb7705da2ee157390cb095",
+    "k6": "grafana/k6:2.3.0@sha256:2dd4756ec6e14e62778916e1eb850108e4b499304c02df56760fa0bdb0fba0b8",
+    "codec": "sha256:6ba999f0935a12ab51affcb7e8d3e5021a1f62a7aaa18d628c3524223374568c"
+  },
+  "regression": {
+    "knownDifferences": 11,
+    "execution": {
+      "exitCode": 0,
+      "scope": "core test + root fast test + v2 comparison + build + perfBootJar",
+      "seconds": 1111.5033602
+    },
+    "comparison": {
+      "failed": 0,
+      "skipped": 0,
+      "passed": 1152,
+      "total": 1152
+    },
+    "core": {
+      "failed": 0,
+      "skipped": 0,
+      "passed": 125,
+      "total": 125
+    },
+    "fast": {
+      "failed": 0,
+      "skipped": 1,
+      "passed": 376,
+      "total": 377
+    }
+  },
+  "timing": {
+    "plannedMinutes": [
+      110,
+      130
+    ],
+    "measuredGroups": {
+      "pilot": {
+        "runs": 6,
+        "configuredSeconds": 360,
+        "wallSeconds": 369.38599999999997
+      },
+      "primary": {
+        "runs": 10,
+        "configuredSeconds": 2100,
+        "wallSeconds": 2113.6440000000002
+      },
+      "exploratory": {
+        "runs": 10,
+        "configuredSeconds": 1920,
+        "wallSeconds": 1940.6239999999998
+      },
+      "profile": {
+        "runs": 2,
+        "configuredSeconds": 210,
+        "wallSeconds": 212.98899999999998
+      },
+      "cms": {
+        "runs": 2,
+        "configuredSeconds": 420,
+        "wallSeconds": 421.86199999999997
+      }
+    },
+    "regressionSeconds": 1111.5033602,
+    "observedStart": "2026-11-08T08:20:43.833Z",
+    "observedEnd": "2026-11-08T10:34:18.909Z",
+    "observedSpanSeconds": 8015.076,
+    "runAndRegressionSeconds": 6170.0083601999995,
+    "caveat": "Observed span includes full regression, setup, code/tool verification, investigation and operator gaps. Initial implementation/pulls precede this window and were not completely timed. Failed viewport runs ended during warmup; not all planned measurement intervals ran."
+  },
+  "tcpEvents": {
+    "start": "2026-11-08T17:18:48.0000000+09:00",
+    "eventIds": [
+      4227,
+      4231
+    ],
+    "querySucceeded": true,
+    "counts": {
+      "4227": 0,
+      "4231": 0
+    },
+    "end": "2026-11-08T19:35:53.0459270+09:00"
+  },
+  "failedExplorations": {
+    "failures": [
+      {
+        "condition": "viewport-large",
+        "phase": "warmup",
+        "measuredPhaseStarted": false,
+        "dbUnchanged": true,
+        "containerOomKilled": [
+          {
+            "name": "/loco-perf-p0-perf-app-1",
+            "oom": false
+          },
+          {
+            "name": "/loco-perf-p0-perf-db-1",
+            "oom": false
+          }
+        ],
+        "attempted": 2839,
+        "checks": {
+          "rate": 0.23036280380415639,
+          "passes": 654,
+          "fails": 2185
+        },
+        "dropped": 3162,
+        "httpFailures": 28,
+        "meaning": "Invalid as latency/adoption evidence; raw result retained"
+      },
+      {
+        "condition": "viewport-full",
+        "phase": "warmup",
+        "measuredPhaseStarted": false,
+        "dbUnchanged": true,
+        "containerOomKilled": [
+          {
+            "name": "/loco-perf-p0-perf-app-1",
+            "oom": false
+          },
+          {
+            "name": "/loco-perf-p0-perf-db-1",
+            "oom": false
+          }
+        ],
+        "attempted": 1202,
+        "checks": {
+          "rate": 0.0016638935108153079,
+          "passes": 2,
+          "fails": 1200
+        },
+        "dropped": 4799,
+        "httpFailures": 1200,
+        "meaning": "Invalid as latency/adoption evidence; raw result retained"
+      }
+    ],
+    "recovery": "Stopped subsequent setup; saved app logs; restarted only perf app with unchanged JAR/heap/limits before uniform-requests warmup.",
+    "rootCauseEvidence": [
+      "overflow-probe.json: visible ID set and overflow center changed at tied count boundary",
+      "overflow-app.log: PostgreSQL result retrieval caused java.lang.OutOfMemoryError: Java heap space"
+    ]
+  },
+  "jfr": {
+    "durationSeconds": 60,
+    "counts": {
+      "jdk.GCHeapSummary": 578,
+      "jdk.GarbageCollection": 289,
+      "jdk.CPULoad": 60,
+      "jdk.ThreadPark": 3172,
+      "jdk.ExecutionSample": 208
+    },
+    "gc": {
+      "count": 289,
+      "totalDurationMs": 435.18972399999984,
+      "totalPauseMs": 435.18972399999984,
+      "maxPauseMs": 2.692819
+    },
+    "topLeafMethods": [
+      [
+        "java/util/HashMap.getNode",
+        18
+      ],
+      [
+        "java/util/HashMap.putVal",
+        16
+      ],
+      [
+        "java/util/concurrent/ConcurrentHashMap.get",
+        12
+      ],
+      [
+        "com/fasterxml/jackson/databind/ser/std/MapSerializer.serializeFields",
+        10
+      ],
+      [
+        "com/fasterxml/jackson/core/json/UTF8JsonGenerator.writeString",
+        6
+      ],
+      [
+        "java/math/BigInteger.multiply",
+        5
+      ],
+      [
+        "java/lang/String.hashCode",
+        4
+      ],
+      [
+        "java/util/HashMap.resize",
+        4
+      ],
+      [
+        "java/lang/StringLatin1.hashCode",
+        4
+      ],
+      [
+        "org/springframework/web/util/pattern/LiteralPathElement.matches",
+        3
+      ],
+      [
+        "org/apache/coyote/http11/Http11OutputBuffer.write",
+        3
+      ],
+      [
+        "org/hibernate/type/descriptor/jdbc/BasicExtractor.extract",
+        3
+      ]
+    ],
+    "appFrames": [
+      [
+        "com/loco/places/MarkerQueryRepository.markers",
+        9
+      ],
+      [
+        "com/loco/places/MarkerQueryRepository.cells",
+        8
+      ],
+      [
+        "com/loco/places/PlaceResponses.text",
+        5
+      ],
+      [
+        "com/loco/places/MarkerQueryRepository.text",
+        5
+      ],
+      [
+        "com/loco/places/MarkerQueryRepository.number",
+        5
+      ],
+      [
+        "com/loco/places/PrismaFloats.input",
+        4
+      ],
+      [
+        "com/loco/config/ApiWebConfig$1.preHandle",
+        3
+      ],
+      [
+        "com/loco/web/GlobalHttpFilter.doFilterInternal",
+        2
+      ],
+      [
+        "com/loco/places/CoordinateKeys.fixed",
+        1
+      ],
+      [
+        "com/loco/places/MarkerQueryRepository.individual",
+        1
+      ],
+      [
+        "com/loco/places/MarkerInputs.floating",
+        1
+      ],
+      [
+        "com/loco/security/JwtAuthenticationFilter.doFilterInternal",
+        1
+      ],
+      [
+        "com/loco/security/RateLimitInterceptor.preHandle",
+        1
+      ],
+      [
+        "com/loco/web/GlobalHttpFilter.weakEtag",
+        1
+      ]
+    ],
+    "limits": "Separate profile run. Sample presence is not wall-time share. Zero thresholded monitor/socket events does not prove zero contention/I/O. Normal young GC Allocation Failure cause is not the large-viewport OOM."
+  },
+  "release": "https://github.com/MycroCosmo/loco/releases/tag/perf-stage2-p0-20261108",
+  "rawArchive": "p0-20261108-local.tar.gz",
+  "limitations": [
+    "10% viewport tied overflow selection changed response and overloaded the app; full viewport caused JVM heap OOM. No successful measured phase for these two conditions.",
+    "Same untuned 371.25 MiB heap/Serial GC; no maximum capacity or technology superiority claim.",
+    "CMS/other one-run exploration and per-endpoint samples below 10000 are not adoption evidence.",
+    "No per-load WAL/temp delta was collected; raw Docker I/O and diagnostic EXPLAIN buffers/temp remain available.",
+    "Other-project background processes stayed running; P/E affinity and temperature were not controlled."
+  ],
+  "archiveSha256": "b19e883c72ac8b126462771e7e27be9b5dceee155ad7930d0372106679bbac02",
+  "archiveBytes": 35141593,
+  "rawFileCount": 290
+}
