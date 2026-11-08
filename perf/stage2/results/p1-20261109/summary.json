@@ -1,0 +1,4258 @@
+{
+  "evaluation": {
+    "purpose": "P1 correctness complete; performance adoption withheld. Do not call 16 req/s maximum sustainable throughput.",
+    "primary": {
+      "runs": [
+        "primary-16-1",
+        "primary-16-2",
+        "primary-16-3",
+        "primary-16-4",
+        "primary-16-5"
+      ],
+      "requests": 24004,
+      "errors": 0,
+      "businessFailures": 0,
+      "dropped": 0,
+      "httpMilliseconds": {
+        "med": {
+          "median": 32.601223,
+          "min": 30.744021500000002,
+          "max": 40.709011,
+          "rangePercentOfMedian": 30.566305748713766
+        },
+        "p(95)": {
+          "median": 119.847135,
+          "min": 99.59249645000017,
+          "max": 166.411052,
+          "rangePercentOfMedian": 55.75315217172262
+        },
+        "p(99)": {
+          "median": 150.991801,
+          "min": 134.41628119000003,
+          "max": 190.359305,
+          "rangePercentOfMedian": 37.05037190065702
+        }
+      }
+    },
+    "regression": {
+      "runs": [
+        "regression-1pct-1",
+        "regression-1pct-2",
+        "regression-1pct-3",
+        "regression-1pct-4",
+        "regression-1pct-5"
+      ],
+      "requests": 75004,
+      "errors": 0,
+      "businessFailures": 0,
+      "dropped": 0,
+      "httpMilliseconds": {
+        "med": {
+          "median": 5.891627,
+          "min": 5.83862,
+          "max": 6.012487,
+          "rangePercentOfMedian": 2.951086346776543
+        },
+        "p(95)": {
+          "median": 8.618708049999999,
+          "min": 8.507265,
+          "max": 8.97146,
+          "rangePercentOfMedian": 5.385900036374943
+        },
+        "p(99)": {
+          "median": 11.06235685,
+          "min": 10.810069,
+          "max": 11.607206,
+          "rangePercentOfMedian": 7.205851436622199
+        }
+      },
+      "p0Reference": {
+        "p95": 7.340846,
+        "p99": 8.830588
+      },
+      "regressionPercent": {
+        "p95": 17.40755833864378,
+        "p99": 25.2731624439958
+      },
+      "limitPercent": 10,
+      "allFiveExceedLimit": true
+    },
+    "gates": {
+      "correctnessPassed": true,
+      "primaryFiveBudgetPassed": true,
+      "primaryP95RangeWithin10Percent": false,
+      "regressionWithin10Percent": false,
+      "maximumSustainableThroughputConfirmed": false,
+      "fullViewportOomZero": false
+    },
+    "knownDifferences": {
+      "total": 13,
+      "intentional": 5,
+      "improved": 8,
+      "deferred": 0
+    },
+    "tests": {
+      "counts": [
+        {
+          "scope": "core",
+          "passed": 125,
+          "skipped": 0,
+          "failed": 0,
+          "total": 125
+        },
+        {
+          "scope": "fast",
+          "passed": 415,
+          "skipped": 1,
+          "failed": 0,
+          "total": 416
+        },
+        {
+          "scope": "comparison",
+          "passed": 1153,
+          "skipped": 0,
+          "failed": 0,
+          "total": 1153
+        }
+      ],
+      "coreReusedUpToDate": true,
+      "final": {
+        "seconds": 1222.3581865,
+        "scope": "perfBootJar allTests build",
+        "exit": 0
+      },
+      "initialFailure": {
+        "scope": "allTests build perfBootJar",
+        "seconds": 1130.133495,
+        "exit": 1
+      }
+    },
+    "timing": {
+      "categories": {
+        "long exploratory probes": {
+          "runs": 3,
+          "seconds": 908.9789999999999
+        },
+        "short search and recovery": {
+          "runs": 15,
+          "seconds": 1253.312
+        },
+        "full viewport stress": {
+          "runs": 1,
+          "seconds": 124.081
+        },
+        "regression JFR": {
+          "runs": 2,
+          "seconds": 213.713
+        },
+        "wide JFR": {
+          "runs": 2,
+          "seconds": 232.811
+        },
+        "1 percent matching P0 pilot": {
+          "runs": 6,
+          "seconds": 368.93600000000004
+        },
+        "10 percent A5 including warmup": {
+          "runs": 10,
+          "seconds": 2115.957
+        },
+        "primary prewarm": {
+          "runs": 1,
+          "seconds": 122
+        },
+        "failed cold target warmups": {
+          "runs": 3,
+          "seconds": 387.39799999999997
+        },
+        "1 percent regression A5 including warmup": {
+          "runs": 10,
+          "seconds": 2112.147
+        }
+      },
+      "k6ExecutionSeconds": 7839.334000000002,
+      "observedSpan": {
+        "firstUtc": "2026-11-08T14:08:52.496Z",
+        "lastUtc": "2026-11-08T16:57:54.781Z",
+        "seconds": 10142.285
+      },
+      "note": "Execution sum excludes preflight, fingerprints, investigation and gaps; observed span includes gaps and is not total implementation time."
+    },
+    "collector": {
+      "errors": [],
+      "maxSampleGapSeconds": 1.216
+    },
+    "limits": [
+      "Historical P0 comparison; no same-session randomized P0/P1 causal attribution.",
+      "Warmup/execution history differs between cold failures and late 22 req/s success.",
+      "16 req/s p99 has fewer than 10000 samples per run; descriptive only.",
+      "P1 adds no heap/GC tuning or P2/P3 optimization."
+    ],
+    "resources": {
+      "primary": {
+        "resources": {
+          "perf-app-1": {
+            "meanCpuCores": 0.341067632477826,
+            "maxWorkingSetMiB": 506.5,
+            "throttleDelta": [
+              {
+                "periods": 3003,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2999,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 3002,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 3000,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 3000,
+                "throttledPeriods": 0,
+                "seconds": 0
+              }
+            ]
+          },
+          "perf-db-1": {
+            "meanCpuCores": 0.2651942420423238,
+            "maxWorkingSetMiB": 379.671875,
+            "throttleDelta": [
+              {
+                "periods": 3002,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2998,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 3002,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 3000,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 3002,
+                "throttledPeriods": 0,
+                "seconds": 0
+              }
+            ]
+          },
+          "-load": {
+            "meanCpuCores": 0.2808541806123122,
+            "maxWorkingSetMiB": 359.44140625,
+            "throttleDelta": [
+              {
+                "periods": 2997,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2996,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2995,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2995,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2995,
+                "throttledPeriods": 0,
+                "seconds": 0
+              }
+            ]
+          }
+        },
+        "meanHostCpuPercent": 10.548312596345028
+      },
+      "regression": {
+        "resources": {
+          "perf-app-1": {
+            "meanCpuCores": 0.13835520579324964,
+            "maxWorkingSetMiB": 425.60546875,
+            "throttleDelta": [
+              {
+                "periods": 3000,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2998,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2999,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2997,
+                "throttledPeriods": 1,
+                "seconds": 0.022385
+              },
+              {
+                "periods": 3000,
+                "throttledPeriods": 0,
+                "seconds": 0
+              }
+            ]
+          },
+          "perf-db-1": {
+            "meanCpuCores": 0.15086445553330946,
+            "maxWorkingSetMiB": 373.9296875,
+            "throttleDelta": [
+              {
+                "periods": 3001,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2999,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 3000,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 3000,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 3000,
+                "throttledPeriods": 0,
+                "seconds": 0
+              }
+            ]
+          },
+          "-load": {
+            "meanCpuCores": 0.4980390399347792,
+            "maxWorkingSetMiB": 296.3359375,
+            "throttleDelta": [
+              {
+                "periods": 2994,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2994,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2995,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2993,
+                "throttledPeriods": 0,
+                "seconds": 0
+              },
+              {
+                "periods": 2995,
+                "throttledPeriods": 0,
+                "seconds": 0
+              }
+            ]
+          }
+        },
+        "meanHostCpuPercent": 7.720095256229625
+      },
+      "full": {
+        "resources": {
+          "perf-app-1": {
+            "meanCpuCores": 1.1005078553226597,
+            "maxWorkingSetMiB": 702.6484375,
+            "throttleDelta": [
+              {
+                "periods": 1224,
+                "throttledPeriods": 107,
+                "seconds": 83.094715
+              }
+            ]
+          },
+          "perf-db-1": {
+            "meanCpuCores": 0.060722593097789206,
+            "maxWorkingSetMiB": 451.70703125,
+            "throttleDelta": [
+              {
+                "periods": 289,
+                "throttledPeriods": 11,
+                "seconds": 7.351524
+              }
+            ]
+          },
+          "-load": {
+            "meanCpuCores": 0.015604907846602388,
+            "maxWorkingSetMiB": 208.11328125,
+            "throttleDelta": [
+              {
+                "periods": 1147,
+                "throttledPeriods": 0,
+                "seconds": 0
+              }
+            ]
+          }
+        },
+        "meanHostCpuPercent": 8.56383179506549
+      },
+      "overload44": {
+        "resources": {
+          "perf-app-1": {
+            "meanCpuCores": 1.4777664976709601,
+            "maxWorkingSetMiB": 686.48828125,
+            "throttleDelta": [
+              {
+                "periods": 3041,
+                "throttledPeriods": 518,
+                "seconds": 40.47849
+              }
+            ]
+          },
+          "perf-db-1": {
+            "meanCpuCores": 0.4584168099444696,
+            "maxWorkingSetMiB": 392.6171875,
+            "throttleDelta": [
+              {
+                "periods": 2899,
+                "throttledPeriods": 22,
+                "seconds": 1.039345
+              }
+            ]
+          },
+          "-load": {
+            "meanCpuCores": 0.4651307081846359,
+            "maxWorkingSetMiB": 442.953125,
+            "throttleDelta": [
+              {
+                "periods": 3030,
+                "throttledPeriods": 5,
+                "seconds": 0.01163
+              }
+            ]
+          }
+        },
+        "meanHostCpuPercent": 15.966880337659886
+      },
+      "p0HostMean": 6.307223797392007
+    },
+    "windowsNetworkEvents": {
+      "startUtc": "2026-11-08T14:08:52.4960000Z",
+      "count": 0,
+      "endUtc": "2026-11-08T16:57:54.7810000Z",
+      "ids": [
+        4227,
+        4231
+      ],
+      "events": []
+    },
+    "runExitCounts": {
+      "0": 42,
+      "99": 11
+    }
+  },
+  "runs": [
+    {
+      "run": "adjacent-17",
+      "category": "long exploratory probes",
+      "rate": 17,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "p(95)": 120.994401,
+        "p(99)": 138.190089,
+        "max": 173.084775,
+        "avg": 36.47523997451468,
+        "min": 1.51948,
+        "med": 32.003989
+      },
+      "requests": {
+        "count": 5101,
+        "rate": 17.00158738948956
+      },
+      "status": {
+        "200": 5101
+      },
+      "checks": {
+        "passes": 5101,
+        "fails": 0,
+        "rate": 1
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 4081,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1020,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.32932049731689084,
+          "cpuP95Cores": 0.4100171166237827,
+          "peakWorkingSetBytes": 531316736,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.26893374662899244,
+          "cpuP95Cores": 0.31094483792287797,
+          "peakWorkingSetBytes": 395345920,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.0223615301920565,
+          "cpuP95Cores": 0.0694913730395668,
+          "peakWorkingSetBytes": 968368128,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.27921031149571773,
+          "cpuP95Cores": 0.33958433819167816,
+          "peakWorkingSetBytes": 365309952,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 9.842183177198805,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.026,
+      "execution": {
+        "run": "adjacent-17",
+        "exitCode": 0,
+        "elapsedSeconds": 301.585
+      }
+    },
+    {
+      "run": "capacity-1",
+      "category": "short search and recovery",
+      "rate": 1,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "max": 126.935098,
+        "avg": 39.68699681967212,
+        "min": 2.807494,
+        "med": 36.173989,
+        "p(95)": 122.187728,
+        "p(99)": 126.1845304
+      },
+      "requests": {
+        "count": 61,
+        "rate": 1.0157063799522834
+      },
+      "status": {
+        "200": 61
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 61,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 49,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 12,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.03494215574361051,
+          "cpuP95Cores": 0.11164456436189756,
+          "peakWorkingSetBytes": 479547392,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.0262731548561488,
+          "cpuP95Cores": 0.04323562838485843,
+          "peakWorkingSetBytes": 396804096,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.021110693678389424,
+          "cpuP95Cores": 0.055745276101760444,
+          "peakWorkingSetBytes": 968577024,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.021657341990104922,
+          "cpuP95Cores": 0.06977086199174057,
+          "peakWorkingSetBytes": 282636288,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 7.702925041343702,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.03,
+      "execution": {
+        "run": "capacity-1",
+        "exitCode": 0,
+        "elapsedSeconds": 61.448
+      }
+    },
+    {
+      "run": "capacity-16",
+      "category": "short search and recovery",
+      "rate": 16,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "p(95)": 127.495297,
+        "p(99)": 142.7992276,
+        "max": 158.259482,
+        "avg": 50.57075280853275,
+        "min": 1.358867,
+        "med": 41.318754
+      },
+      "requests": {
+        "count": 961,
+        "rate": 16.005505966268707
+      },
+      "status": {
+        "200": 961
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 961,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 769,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 192,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.4504563712701779,
+          "cpuP95Cores": 0.6260037806875942,
+          "peakWorkingSetBytes": 492220416,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.26169003569370647,
+          "cpuP95Cores": 0.29646900777990004,
+          "peakWorkingSetBytes": 395194368,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.022623754382674492,
+          "cpuP95Cores": 0.06108868495570021,
+          "peakWorkingSetBytes": 965505024,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.27517407882618944,
+          "cpuP95Cores": 0.3547104196052358,
+          "peakWorkingSetBytes": 338763776,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 12.138200129030878,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.019,
+      "execution": {
+        "run": "capacity-16",
+        "exitCode": 0,
+        "elapsedSeconds": 61.497
+      }
+    },
+    {
+      "run": "capacity-2",
+      "category": "short search and recovery",
+      "rate": 2,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "p(95)": 130.743982,
+        "p(99)": 140.620637,
+        "max": 175.127284,
+        "avg": 41.575658206611536,
+        "min": 2.285548,
+        "med": 38.178618
+      },
+      "requests": {
+        "count": 121,
+        "rate": 2.0149489912270764
+      },
+      "status": {
+        "200": 121
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 121,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 97,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 24,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.0662169232602649,
+          "cpuP95Cores": 0.17300072378060566,
+          "peakWorkingSetBytes": 481546240,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.04242087983592389,
+          "cpuP95Cores": 0.07513734296838039,
+          "peakWorkingSetBytes": 398716928,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.021477974231542886,
+          "cpuP95Cores": 0.0607852531479903,
+          "peakWorkingSetBytes": 969015296,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.039284754097095094,
+          "cpuP95Cores": 0.09370471930859085,
+          "peakWorkingSetBytes": 301465600,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 9.249241992557197,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.017,
+      "execution": {
+        "run": "capacity-2",
+        "exitCode": 0,
+        "elapsedSeconds": 61.464
+      }
+    },
+    {
+      "run": "capacity-24",
+      "category": "short search and recovery",
+      "rate": 24,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "avg": 50.07110488272033,
+        "min": 2.22337,
+        "med": 37.242624,
+        "p(95)": 149.265268,
+        "p(99)": 182.75556679999968,
+        "max": 326.043842
+      },
+      "requests": {
+        "count": 1441,
+        "rate": 23.997476468673263
+      },
+      "status": {
+        "200": 1441
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 1441,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1153,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 288,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.5991854975619018,
+          "cpuP95Cores": 0.8534097527936623,
+          "peakWorkingSetBytes": 527548416,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.3845542894090312,
+          "cpuP95Cores": 0.428734948111523,
+          "peakWorkingSetBytes": 398196736,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.022582216807744908,
+          "cpuP95Cores": 0.09232829062318276,
+          "peakWorkingSetBytes": 966967296,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.41665893148869687,
+          "cpuP95Cores": 0.4990942380518205,
+          "peakWorkingSetBytes": 370806784,
+          "throttledNanosecondsDelta": 2851000
+        }
+      },
+      "hostCpuMeanPercent": 11.700924620619254,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.016,
+      "execution": {
+        "run": "capacity-24",
+        "exitCode": 0,
+        "elapsedSeconds": 61.528
+      }
+    },
+    {
+      "run": "capacity-25",
+      "category": "short search and recovery",
+      "rate": 25,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "min": 37.772767,
+        "med": 6573.399389,
+        "p(95)": 10000.48706175,
+        "p(99)": 10005.16102775,
+        "max": 10031.706941,
+        "avg": 6296.158614535643
+      },
+      "requests": {
+        "count": 926,
+        "rate": 13.228845992325082
+      },
+      "status": {
+        "0": 116,
+        "200": 810
+      },
+      "checks": {
+        "rate": 0.8747300215982722,
+        "passes": 810,
+        "fails": 116
+      },
+      "dropped": 574,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 742,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 184,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 1.43288422771611,
+          "cpuP95Cores": 1.6028998408387582,
+          "peakWorkingSetBytes": 723484672,
+          "throttledNanosecondsDelta": 73279204000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.3294581788387641,
+          "cpuP95Cores": 0.5681176808460026,
+          "peakWorkingSetBytes": 404705280,
+          "throttledNanosecondsDelta": 476877000
+        },
+        "background": {
+          "cpuMeanCores": 0.028459004824270506,
+          "cpuP95Cores": 0.07060199160373622,
+          "peakWorkingSetBytes": 966352896,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.2877062906232972,
+          "cpuP95Cores": 0.5266548404052784,
+          "peakWorkingSetBytes": 414703616,
+          "throttledNanosecondsDelta": 6389000
+        }
+      },
+      "hostCpuMeanPercent": 15.900108379516242,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.031,
+      "execution": {
+        "run": "capacity-25",
+        "exitCode": 99,
+        "elapsedSeconds": 71.651
+      }
+    },
+    {
+      "run": "capacity-25-recovery",
+      "category": "short search and recovery",
+      "rate": 1,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "avg": 65.35122558677686,
+        "min": 4.001117,
+        "med": 58.623645,
+        "p(95)": 194.146317,
+        "p(99)": 231.8737221999999,
+        "max": 267.08406
+      },
+      "requests": {
+        "count": 121,
+        "rate": 1.007752800360449
+      },
+      "status": {
+        "200": 121
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 121,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 97,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 24,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.07804168909472639,
+          "cpuP95Cores": 0.20883489797594484,
+          "peakWorkingSetBytes": 467439616,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.03472599886002632,
+          "cpuP95Cores": 0.0611145228153843,
+          "peakWorkingSetBytes": 396681216,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02735223434790522,
+          "cpuP95Cores": 0.11636396019080539,
+          "peakWorkingSetBytes": 967319552,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.02732315498991866,
+          "cpuP95Cores": 0.09845290121533186,
+          "peakWorkingSetBytes": 322002944,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.755388887046406,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.141,
+      "execution": {
+        "run": "capacity-25-recovery",
+        "exitCode": 0,
+        "elapsedSeconds": 122.039
+      }
+    },
+    {
+      "run": "capacity-26",
+      "category": "short search and recovery",
+      "rate": 26,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "med": 5418.10519,
+        "p(95)": 9999.3222454,
+        "p(99)": 10001.3793899,
+        "max": 10055.822105,
+        "avg": 5296.9923667354315,
+        "min": 40.579367
+      },
+      "requests": {
+        "count": 1047,
+        "rate": 15.479346713102016
+      },
+      "status": {
+        "0": 61,
+        "200": 986
+      },
+      "checks": {
+        "rate": 0.941738299904489,
+        "passes": 986,
+        "fails": 61
+      },
+      "dropped": 514,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 839,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 208,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 1.467720521458651,
+          "cpuP95Cores": 1.6201629588483328,
+          "peakWorkingSetBytes": 730660864,
+          "throttledNanosecondsDelta": 40984775000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.3793322077465481,
+          "cpuP95Cores": 0.5848361998666554,
+          "peakWorkingSetBytes": 405065728,
+          "throttledNanosecondsDelta": 143808000
+        },
+        "background": {
+          "cpuMeanCores": 0.029425529765103882,
+          "cpuP95Cores": 0.07896605708902094,
+          "peakWorkingSetBytes": 967974912,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.3530530291769353,
+          "cpuP95Cores": 0.5575771058761264,
+          "peakWorkingSetBytes": 446414848,
+          "throttledNanosecondsDelta": 5793000
+        }
+      },
+      "hostCpuMeanPercent": 16.030406916894904,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.216,
+      "execution": {
+        "run": "capacity-26",
+        "exitCode": 99,
+        "elapsedSeconds": 69.542
+      }
+    },
+    {
+      "run": "capacity-26-recovery",
+      "category": "short search and recovery",
+      "rate": 1,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(95)": 191.02796854999997,
+        "p(99)": 222.28659202000003,
+        "max": 244.362844,
+        "avg": 63.09439466666668,
+        "min": 4.293512,
+        "med": 53.824201
+      },
+      "requests": {
+        "count": 120,
+        "rate": 1.0000320459102408
+      },
+      "status": {
+        "200": 120
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 120,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 96,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 24,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.0792513879819949,
+          "cpuP95Cores": 0.23476446233398843,
+          "peakWorkingSetBytes": 467537920,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.03385210206443515,
+          "cpuP95Cores": 0.057884988771047564,
+          "peakWorkingSetBytes": 393854976,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.026400661939872828,
+          "cpuP95Cores": 0.07374043306638692,
+          "peakWorkingSetBytes": 969371648,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.02602944856587358,
+          "cpuP95Cores": 0.09723929938677951,
+          "peakWorkingSetBytes": 305713152,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.33553919684532,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.036,
+      "execution": {
+        "run": "capacity-26-recovery",
+        "exitCode": 0,
+        "elapsedSeconds": 121.998
+      }
+    },
+    {
+      "run": "capacity-28",
+      "category": "short search and recovery",
+      "rate": 28,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "p(99)": 8523.682923629996,
+        "max": 10001.587039,
+        "avg": 3795.17784800146,
+        "min": 2.969216,
+        "med": 3942.9419625,
+        "p(95)": 7070.265929100002
+      },
+      "requests": {
+        "rate": 21.18049566439354,
+        "count": 1372
+      },
+      "status": {
+        "0": 4,
+        "200": 1368
+      },
+      "checks": {
+        "rate": 0.9970845481049563,
+        "passes": 1368,
+        "fails": 4
+      },
+      "dropped": 308,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1098,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 274,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 1.4945502115068423,
+          "cpuP95Cores": 1.6746509884349403,
+          "peakWorkingSetBytes": 714276864,
+          "throttledNanosecondsDelta": 13143484000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.4651352308563782,
+          "cpuP95Cores": 0.6301786470407525,
+          "peakWorkingSetBytes": 405942272,
+          "throttledNanosecondsDelta": 514257000
+        },
+        "background": {
+          "cpuMeanCores": 0.027301214853466,
+          "cpuP95Cores": 0.09909200142868174,
+          "peakWorkingSetBytes": 973512704,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.47305564446993786,
+          "cpuP95Cores": 0.6168428987893635,
+          "peakWorkingSetBytes": 443842560,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 22.121787700457862,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.017,
+      "execution": {
+        "run": "capacity-28",
+        "exitCode": 99,
+        "elapsedSeconds": 66.529
+      }
+    },
+    {
+      "run": "capacity-28-recovery",
+      "category": "short search and recovery",
+      "rate": 1,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "max": 175.19145,
+        "avg": 46.117535000000004,
+        "min": 3.530524,
+        "med": 39.878155,
+        "p(95)": 157.881098,
+        "p(99)": 172.0518606
+      },
+      "requests": {
+        "count": 121,
+        "rate": 1.008040334389262
+      },
+      "status": {
+        "200": 121
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 121,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 97,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 24,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.05992491140653857,
+          "cpuP95Cores": 0.20129823706925742,
+          "peakWorkingSetBytes": 470605824,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.026339377395266757,
+          "cpuP95Cores": 0.047427384970193026,
+          "peakWorkingSetBytes": 398397440,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02169675284691525,
+          "cpuP95Cores": 0.051593894693633506,
+          "peakWorkingSetBytes": 967241728,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.021794369610998905,
+          "cpuP95Cores": 0.08462688977467725,
+          "peakWorkingSetBytes": 302043136,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 9.156909670984314,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.017,
+      "execution": {
+        "run": "capacity-28-recovery",
+        "exitCode": 0,
+        "elapsedSeconds": 120.996
+      }
+    },
+    {
+      "run": "capacity-32",
+      "category": "short search and recovery",
+      "rate": 32,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "avg": 4016.4923110288155,
+        "min": 3.264577,
+        "med": 4008.523481,
+        "p(95)": 7310.173114499997,
+        "p(99)": 8743.290954789998,
+        "max": 10001.072181
+      },
+      "requests": {
+        "count": 1388,
+        "rate": 20.997517218679135
+      },
+      "status": {
+        "0": 3,
+        "200": 1385
+      },
+      "checks": {
+        "rate": 0.9978386167146974,
+        "passes": 1385,
+        "fails": 3
+      },
+      "dropped": 533,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1112,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 276,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 1.4882813887958506,
+          "cpuP95Cores": 1.6892303558708612,
+          "peakWorkingSetBytes": 748797952,
+          "throttledNanosecondsDelta": 13600220000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.45437424291857154,
+          "cpuP95Cores": 0.6966492474883406,
+          "peakWorkingSetBytes": 408002560,
+          "throttledNanosecondsDelta": 400074000
+        },
+        "background": {
+          "cpuMeanCores": 0.027446474785441526,
+          "cpuP95Cores": 0.07227496863702872,
+          "peakWorkingSetBytes": 967004160,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.4610305229304335,
+          "cpuP95Cores": 0.6943448072106507,
+          "peakWorkingSetBytes": 446971904,
+          "throttledNanosecondsDelta": 3160000
+        }
+      },
+      "hostCpuMeanPercent": 19.309447343182825,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.024,
+      "execution": {
+        "run": "capacity-32",
+        "exitCode": 99,
+        "elapsedSeconds": 67.588
+      }
+    },
+    {
+      "run": "capacity-32-recovery",
+      "category": "short search and recovery",
+      "rate": 1,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(95)": 151.895792,
+        "p(99)": 205.4521649999999,
+        "max": 245.352627,
+        "avg": 48.81719897520664,
+        "min": 3.863845,
+        "med": 40.515527
+      },
+      "requests": {
+        "count": 121,
+        "rate": 1.0079835642293264
+      },
+      "status": {
+        "200": 121
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 121,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 97,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 24,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.06685904434417547,
+          "cpuP95Cores": 0.23351673072548873,
+          "peakWorkingSetBytes": 473153536,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.027231071100802175,
+          "cpuP95Cores": 0.048614192582872834,
+          "peakWorkingSetBytes": 394354688,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.022396305805541507,
+          "cpuP95Cores": 0.05864213820879395,
+          "peakWorkingSetBytes": 967213056,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.022460939509490515,
+          "cpuP95Cores": 0.08077456004939795,
+          "peakWorkingSetBytes": 299855872,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.390726704208042,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.018,
+      "execution": {
+        "run": "capacity-32-recovery",
+        "exitCode": 0,
+        "elapsedSeconds": 122.008
+      }
+    },
+    {
+      "run": "capacity-4",
+      "category": "short search and recovery",
+      "rate": 4,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "max": 148.234716,
+        "avg": 38.725672871369326,
+        "min": 2.081971,
+        "med": 35.428658,
+        "p(95)": 119.466642,
+        "p(99)": 139.031783
+      },
+      "requests": {
+        "rate": 4.014315048395365,
+        "count": 241
+      },
+      "status": {
+        "200": 241
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 241,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 193,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 48,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.11702333487525428,
+          "cpuP95Cores": 0.18782108165478023,
+          "peakWorkingSetBytes": 484089856,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.07068048131899435,
+          "cpuP95Cores": 0.10796751728030644,
+          "peakWorkingSetBytes": 386854912,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02196457395874139,
+          "cpuP95Cores": 0.065094642827029,
+          "peakWorkingSetBytes": 964935680,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.07179185142670165,
+          "cpuP95Cores": 0.12443148504270737,
+          "peakWorkingSetBytes": 322146304,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 7.955061886494324,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.018,
+      "execution": {
+        "run": "capacity-4",
+        "exitCode": 0,
+        "elapsedSeconds": 61.542
+      }
+    },
+    {
+      "run": "capacity-8",
+      "category": "short search and recovery",
+      "rate": 8,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "max": 177.928804,
+        "avg": 39.75934236798337,
+        "min": 1.654021,
+        "med": 36.758487,
+        "p(95)": 124.079159,
+        "p(99)": 136.2979502
+      },
+      "requests": {
+        "count": 481,
+        "rate": 7.997406238112646
+      },
+      "status": {
+        "200": 481
+      },
+      "checks": {
+        "passes": 481,
+        "fails": 0,
+        "rate": 1
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 385,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 96,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.22206066227267535,
+          "cpuP95Cores": 0.29159789811407516,
+          "peakWorkingSetBytes": 491651072,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.13487989743744008,
+          "cpuP95Cores": 0.16415369483364628,
+          "peakWorkingSetBytes": 392962048,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.022505437623639348,
+          "cpuP95Cores": 0.0581273032449771,
+          "peakWorkingSetBytes": 966246400,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.14182180119602777,
+          "cpuP95Cores": 0.18066754769039536,
+          "peakWorkingSetBytes": 325787648,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 10.41824072550234,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.018,
+      "execution": {
+        "run": "capacity-8",
+        "exitCode": 0,
+        "elapsedSeconds": 61.492
+      }
+    },
+    {
+      "run": "capacity-initial-warmup",
+      "category": "short search and recovery",
+      "rate": 1,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(99)": 163.72536279999997,
+        "max": 274.631869,
+        "avg": 43.907755694214885,
+        "min": 2.846164,
+        "med": 38.381381,
+        "p(95)": 134.234165
+      },
+      "requests": {
+        "count": 121,
+        "rate": 1.007923091928593
+      },
+      "status": {
+        "200": 121
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 121,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 97,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 24,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.04712898542223591,
+          "cpuP95Cores": 0.13551086068701215,
+          "peakWorkingSetBytes": 481832960,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.02656143518455993,
+          "cpuP95Cores": 0.04487348628312566,
+          "peakWorkingSetBytes": 399032320,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02114598292074906,
+          "cpuP95Cores": 0.05625412699950996,
+          "peakWorkingSetBytes": 966701056,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.02183658494622393,
+          "cpuP95Cores": 0.08025670275286109,
+          "peakWorkingSetBytes": 307392512,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 7.15483438135237,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.072,
+      "execution": {
+        "run": "capacity-initial-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 121.99
+      }
+    },
+    {
+      "run": "full-stress",
+      "category": "full viewport stress",
+      "rate": 50,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "avg": 7281.325879375215,
+        "min": 0,
+        "med": 9999.4975735,
+        "p(95)": 10000.85295535,
+        "p(99)": 10001.153621669999,
+        "max": 10001.316437
+      },
+      "requests": {
+        "rate": 9.833351786770093,
+        "count": 1202
+      },
+      "status": {
+        "0": 1200,
+        "200": 2
+      },
+      "checks": {
+        "rate": 0.0016638935108153079,
+        "passes": 2,
+        "fails": 1200
+      },
+      "dropped": 4799,
+      "endpointSamples": {
+        "markers-other": {
+          "n": 240,
+          "p99SampleSufficient": false
+        },
+        "markers-hot": {
+          "n": 962,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 1.1005078553226597,
+          "cpuP95Cores": 1.5932462131877247,
+          "peakWorkingSetBytes": 736780288,
+          "throttledNanosecondsDelta": 83094715000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.060722593097789206,
+          "cpuP95Cores": 0.24196534631529323,
+          "peakWorkingSetBytes": 473649152,
+          "throttledNanosecondsDelta": 7351524000
+        },
+        "background": {
+          "cpuMeanCores": 0.020332192182904014,
+          "cpuP95Cores": 0.05921685531673806,
+          "peakWorkingSetBytes": 972128256,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.015604907846602388,
+          "cpuP95Cores": 0.04503514760859115,
+          "peakWorkingSetBytes": 218222592,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.56383179506549,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.018,
+      "execution": {
+        "run": "full-stress",
+        "exitCode": 99,
+        "elapsedSeconds": 124.081
+      }
+    },
+    {
+      "run": "p1-regression-diagnostic",
+      "category": "regression JFR",
+      "rate": 50,
+      "seconds": 90,
+      "httpMilliseconds": {
+        "p(99)": 11.101343,
+        "max": 15.990713,
+        "avg": 5.696729513219271,
+        "min": 0.978412,
+        "med": 6.079694,
+        "p(95)": 8.95323
+      },
+      "requests": {
+        "rate": 50.00568148865889,
+        "count": 4501
+      },
+      "status": {
+        "200": 4501
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 4501,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 3601,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 900,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-jfr": {
+          "cpuMeanCores": 0.15195530258932807,
+          "cpuP95Cores": 0.1945707183688786,
+          "peakWorkingSetBytes": 445599744,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.14990040201408042,
+          "cpuP95Cores": 0.16890800360514932,
+          "peakWorkingSetBytes": 391651328,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.01954438386843678,
+          "cpuP95Cores": 0.061037085002089125,
+          "peakWorkingSetBytes": 966356992,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.5018629467309769,
+          "cpuP95Cores": 0.5542452255607063,
+          "peakWorkingSetBytes": 301830144,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 7.463535271558989,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.049,
+      "execution": {
+        "run": "p1-regression-diagnostic",
+        "exitCode": 0,
+        "elapsedSeconds": 91.771
+      }
+    },
+    {
+      "run": "p1-regression-warmup",
+      "category": "regression JFR",
+      "rate": 50,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(95)": 9.81656,
+        "p(99)": 13.404652,
+        "max": 105.090382,
+        "avg": 6.410783282786219,
+        "min": 1.236181,
+        "med": 6.610122
+      },
+      "requests": {
+        "count": 6001,
+        "rate": 50.004721490633244
+      },
+      "status": {
+        "200": 6001
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 6001,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 4801,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1200,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-jfr": {
+          "cpuMeanCores": 0.2708557985538419,
+          "cpuP95Cores": 0.6836666754950185,
+          "peakWorkingSetBytes": 438669312,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.15038618154339548,
+          "cpuP95Cores": 0.17223020855440466,
+          "peakWorkingSetBytes": 389775360,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.019860864816553293,
+          "cpuP95Cores": 0.08183592360535615,
+          "peakWorkingSetBytes": 969244672,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.504454107487036,
+          "cpuP95Cores": 0.5641103782913754,
+          "peakWorkingSetBytes": 308285440,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 7.779439929849588,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.016,
+      "execution": {
+        "run": "p1-regression-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 121.942
+      }
+    },
+    {
+      "run": "p1-wide-diagnostic",
+      "category": "wide JFR",
+      "rate": 20,
+      "seconds": 90,
+      "httpMilliseconds": {
+        "max": 10017.735966,
+        "avg": 9065.012883478557,
+        "min": 1022.689967,
+        "med": 9998.5433,
+        "p(95)": 10000.7671288,
+        "p(99)": 10001.38141938
+      },
+      "requests": {
+        "count": 1003,
+        "rate": 10.089069097966586
+      },
+      "status": {
+        "0": 652,
+        "200": 351
+      },
+      "checks": {
+        "passes": 351,
+        "fails": 652,
+        "rate": 0.34995014955134596
+      },
+      "dropped": 798,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 803,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 200,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-jfr": {
+          "cpuMeanCores": 1.4879961588057835,
+          "cpuP95Cores": 1.8303250819477939,
+          "peakWorkingSetBytes": 792907776,
+          "throttledNanosecondsDelta": 191794385000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.3318609221269298,
+          "cpuP95Cores": 0.522412024290377,
+          "peakWorkingSetBytes": 409116672,
+          "throttledNanosecondsDelta": 284661000
+        },
+        "background": {
+          "cpuMeanCores": 0.029609986064572002,
+          "cpuP95Cores": 0.07561523689281627,
+          "peakWorkingSetBytes": 968318976,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.09839399520040845,
+          "cpuP95Cores": 0.3592079351766617,
+          "peakWorkingSetBytes": 393687040,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 18.88920274144523,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.024,
+      "execution": {
+        "run": "p1-wide-diagnostic",
+        "exitCode": 99,
+        "elapsedSeconds": 100.714
+      }
+    },
+    {
+      "run": "p1-wide-warmup",
+      "category": "wide JFR",
+      "rate": 20,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(99)": 10001.147645199999,
+        "max": 10010.97343,
+        "avg": 6231.757683653821,
+        "min": 0,
+        "med": 6306.17609,
+        "p(95)": 10000.6916102
+      },
+      "requests": {
+        "count": 1609,
+        "rate": 12.377375702223604
+      },
+      "status": {
+        "0": 670,
+        "200": 939
+      },
+      "checks": {
+        "fails": 670,
+        "rate": 0.5835922933499068,
+        "passes": 939
+      },
+      "dropped": 791,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1288,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 321,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-jfr": {
+          "cpuMeanCores": 1.4123147860303409,
+          "cpuP95Cores": 1.8068074857094227,
+          "peakWorkingSetBytes": 750080000,
+          "throttledNanosecondsDelta": 509251991000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.2029594403441306,
+          "cpuP95Cores": 0.5116755170896289,
+          "peakWorkingSetBytes": 406200320,
+          "throttledNanosecondsDelta": 932446000
+        },
+        "background": {
+          "cpuMeanCores": 0.030251419031835848,
+          "cpuP95Cores": 0.08224203253077646,
+          "peakWorkingSetBytes": 968331264,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.19766451919988373,
+          "cpuP95Cores": 0.5577154913779072,
+          "peakWorkingSetBytes": 424656896,
+          "throttledNanosecondsDelta": 5204000
+        }
+      },
+      "hostCpuMeanPercent": 17.76937261626695,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.04,
+      "execution": {
+        "run": "p1-wide-warmup",
+        "exitCode": 99,
+        "elapsedSeconds": 132.097
+      }
+    },
+    {
+      "run": "pilot-1",
+      "category": "1 percent matching P0 pilot",
+      "rate": 1,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "p(99)": 19.0001152,
+        "max": 19.665796,
+        "avg": 10.075821737704919,
+        "min": 4.053485,
+        "med": 10.142215,
+        "p(95)": 15.509288
+      },
+      "requests": {
+        "count": 61,
+        "rate": 1.0163519485766925
+      },
+      "status": {
+        "200": 61
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 61,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 49,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 12,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.046008778983978114,
+          "cpuP95Cores": 0.20038382345678998,
+          "peakWorkingSetBytes": 411504640,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.015370415732997255,
+          "cpuP95Cores": 0.031457109255701686,
+          "peakWorkingSetBytes": 387481600,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02109080051879951,
+          "cpuP95Cores": 0.05765022029970359,
+          "peakWorkingSetBytes": 971440128,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.01703970391292254,
+          "cpuP95Cores": 0.06930608057434166,
+          "peakWorkingSetBytes": 237690880,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.256217024714939,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.016,
+      "execution": {
+        "run": "pilot-1",
+        "exitCode": 0,
+        "elapsedSeconds": 61.482
+      }
+    },
+    {
+      "run": "pilot-10",
+      "category": "1 percent matching P0 pilot",
+      "rate": 10,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "avg": 7.327245820299502,
+        "min": 2.771014,
+        "med": 7.697991,
+        "p(95)": 10.542345,
+        "p(99)": 11.567023,
+        "max": 15.129082
+      },
+      "requests": {
+        "rate": 10.014466006956031,
+        "count": 601
+      },
+      "status": {
+        "200": 601
+      },
+      "checks": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 601
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 481,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 120,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.07687571558802546,
+          "cpuP95Cores": 0.1617045050349153,
+          "peakWorkingSetBytes": 420122624,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.04090251048096367,
+          "cpuP95Cores": 0.05796313786598242,
+          "peakWorkingSetBytes": 387284992,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.021044142824829856,
+          "cpuP95Cores": 0.0645755848050256,
+          "peakWorkingSetBytes": 967000064,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.1074014467117085,
+          "cpuP95Cores": 0.15343619431669758,
+          "peakWorkingSetBytes": 293064704,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 7.576533241261385,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.018,
+      "execution": {
+        "run": "pilot-10",
+        "exitCode": 0,
+        "elapsedSeconds": 61.506
+      }
+    },
+    {
+      "run": "pilot-100",
+      "category": "1 percent matching P0 pilot",
+      "rate": 100,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "p(95)": 12.664315400000001,
+        "p(99)": 19.853187550000012,
+        "max": 44.142309,
+        "avg": 7.189887672166669,
+        "min": 1.012831,
+        "med": 6.9681085
+      },
+      "requests": {
+        "count": 6000,
+        "rate": 99.99464337694948
+      },
+      "status": {
+        "200": 6000
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 6000,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 4800,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1200,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.3281935918711802,
+          "cpuP95Cores": 0.4107560745272089,
+          "peakWorkingSetBytes": 431775744,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.3298605062855568,
+          "cpuP95Cores": 0.3600042845654854,
+          "peakWorkingSetBytes": 390225920,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02225792788384813,
+          "cpuP95Cores": 0.09196318919544647,
+          "peakWorkingSetBytes": 967536640,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 1.1542676770805067,
+          "cpuP95Cores": 1.2673886923826658,
+          "peakWorkingSetBytes": 392605696,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 13.5276240290081,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.019,
+      "execution": {
+        "run": "pilot-100",
+        "exitCode": 0,
+        "elapsedSeconds": 61.465
+      }
+    },
+    {
+      "run": "pilot-25",
+      "category": "1 percent matching P0 pilot",
+      "rate": 25,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "p(95)": 9.98126,
+        "p(99)": 11.68514,
+        "max": 95.265944,
+        "avg": 7.031563354430389,
+        "min": 2.362131,
+        "med": 7.297758
+      },
+      "requests": {
+        "count": 1501,
+        "rate": 25.01155863066534
+      },
+      "status": {
+        "200": 1501
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 1501,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1201,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 300,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.15085273094643298,
+          "cpuP95Cores": 0.349693305300015,
+          "peakWorkingSetBytes": 425701376,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.08523445569327628,
+          "cpuP95Cores": 0.11234754800444283,
+          "peakWorkingSetBytes": 390475776,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.021434831538650133,
+          "cpuP95Cores": 0.06459348710072786,
+          "peakWorkingSetBytes": 965820416,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.26873611924494195,
+          "cpuP95Cores": 0.3194947371936855,
+          "peakWorkingSetBytes": 296636416,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.95201686675552,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.015,
+      "execution": {
+        "run": "pilot-25",
+        "exitCode": 0,
+        "elapsedSeconds": 61.504
+      }
+    },
+    {
+      "run": "pilot-5",
+      "category": "1 percent matching P0 pilot",
+      "rate": 5,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "max": 19.536124,
+        "avg": 8.410156916943517,
+        "min": 3.179454,
+        "med": 8.589647,
+        "p(95)": 12.389397,
+        "p(99)": 16.136959
+      },
+      "requests": {
+        "count": 301,
+        "rate": 5.015667704740143
+      },
+      "status": {
+        "200": 301
+      },
+      "checks": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 301
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 241,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 60,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.051714222462183414,
+          "cpuP95Cores": 0.09547828014771734,
+          "peakWorkingSetBytes": 414785536,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.027517343068364918,
+          "cpuP95Cores": 0.047675481067659835,
+          "peakWorkingSetBytes": 388718592,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.021881804028583883,
+          "cpuP95Cores": 0.0650704187773242,
+          "peakWorkingSetBytes": 967217152,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.061563592804624916,
+          "cpuP95Cores": 0.12021069350418706,
+          "peakWorkingSetBytes": 288972800,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.271259318416297,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.015,
+      "execution": {
+        "run": "pilot-5",
+        "exitCode": 0,
+        "elapsedSeconds": 61.511
+      }
+    },
+    {
+      "run": "pilot-50",
+      "category": "1 percent matching P0 pilot",
+      "rate": 50,
+      "seconds": 60,
+      "httpMilliseconds": {
+        "min": 1.274964,
+        "med": 7.1471225,
+        "p(95)": 10.804681249999994,
+        "p(99)": 13.459941649999985,
+        "max": 19.672979,
+        "avg": 6.834829847000015
+      },
+      "requests": {
+        "count": 3000,
+        "rate": 50.00165168789299
+      },
+      "status": {
+        "200": 3000
+      },
+      "checks": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 3000
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 2400,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 600,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.2394829721921835,
+          "cpuP95Cores": 0.4585019772097318,
+          "peakWorkingSetBytes": 428994560,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.1638251097811452,
+          "cpuP95Cores": 0.1892525885084707,
+          "peakWorkingSetBytes": 389357568,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02064111938372528,
+          "cpuP95Cores": 0.05919877886836305,
+          "peakWorkingSetBytes": 965992448,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.5496074261237861,
+          "cpuP95Cores": 0.6119524692500943,
+          "peakWorkingSetBytes": 301522944,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 10.321070157271533,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.016,
+      "execution": {
+        "run": "pilot-50",
+        "exitCode": 0,
+        "elapsedSeconds": 61.468
+      }
+    },
+    {
+      "run": "primary-16-1",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "med": 40.709011,
+        "p(95)": 166.411052,
+        "p(99)": 190.359305,
+        "max": 240.625829,
+        "avg": 50.26670199458445,
+        "min": 1.802159
+      },
+      "requests": {
+        "count": 4801,
+        "rate": 16.000028325615656
+      },
+      "status": {
+        "200": 4801
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 4801,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 3841,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.4431710038922794,
+          "cpuP95Cores": 0.5643512691240781,
+          "peakWorkingSetBytes": 523935744,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.30441138662775313,
+          "cpuP95Cores": 0.35026299883955897,
+          "peakWorkingSetBytes": 396718080,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02802440601808756,
+          "cpuP95Cores": 0.07195371592546965,
+          "peakWorkingSetBytes": 969306112,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.3307475980553703,
+          "cpuP95Cores": 0.4137083611257189,
+          "peakWorkingSetBytes": 376901632,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 12.516213961989168,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.02,
+      "execution": {
+        "run": "primary-16-1",
+        "exitCode": 0,
+        "elapsedSeconds": 301.731
+      }
+    },
+    {
+      "run": "primary-16-1-warmup",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "avg": 74.1433813029673,
+        "min": 2.6861,
+        "med": 53.680711,
+        "p(95)": 189.189557,
+        "p(99)": 244.0781101999998,
+        "max": 406.886766
+      },
+      "requests": {
+        "count": 1921,
+        "rate": 16.002471720623053
+      },
+      "status": {
+        "200": 1921
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 1921,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1537,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 384,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.6332975542254343,
+          "cpuP95Cores": 0.9869974950176019,
+          "peakWorkingSetBytes": 519901184,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.3148559876351323,
+          "cpuP95Cores": 0.37594910483068406,
+          "peakWorkingSetBytes": 396320768,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.028256552508759136,
+          "cpuP95Cores": 0.07716099565074228,
+          "peakWorkingSetBytes": 969150464,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.3415146439007237,
+          "cpuP95Cores": 0.43976619160865965,
+          "peakWorkingSetBytes": 369242112,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 15.061837411492364,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.144,
+      "execution": {
+        "run": "primary-16-1-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 122.09
+      }
+    },
+    {
+      "run": "primary-16-2",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "p(99)": 172.705944,
+        "max": 248.176163,
+        "avg": 39.558090599041975,
+        "min": 1.174252,
+        "med": 34.46507,
+        "p(95)": 124.915135
+      },
+      "requests": {
+        "count": 4801,
+        "rate": 16.002066336660192
+      },
+      "status": {
+        "200": 4801
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 4801,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 3841,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.3358705137676253,
+          "cpuP95Cores": 0.47240691498971665,
+          "peakWorkingSetBytes": 522907648,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.2683477910171434,
+          "cpuP95Cores": 0.33266393676793254,
+          "peakWorkingSetBytes": 398114816,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02320124985933777,
+          "cpuP95Cores": 0.0596045931853064,
+          "peakWorkingSetBytes": 966549504,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.28331445918335,
+          "cpuP95Cores": 0.37233356794600925,
+          "peakWorkingSetBytes": 348315648,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 10.43198711719207,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.023,
+      "execution": {
+        "run": "primary-16-2",
+        "exitCode": 0,
+        "elapsedSeconds": 301.589
+      }
+    },
+    {
+      "run": "primary-16-2-warmup",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(99)": 208.82175059999997,
+        "max": 246.667145,
+        "avg": 53.467367523165,
+        "min": 1.821152,
+        "med": 42.565219,
+        "p(95)": 178.329896
+      },
+      "requests": {
+        "count": 1921,
+        "rate": 16.001433232498147
+      },
+      "status": {
+        "200": 1921
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 1921,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1537,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 384,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.4454856590317738,
+          "cpuP95Cores": 0.555142796466919,
+          "peakWorkingSetBytes": 521846784,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.31184083416104097,
+          "cpuP95Cores": 0.37477094394916455,
+          "peakWorkingSetBytes": 396988416,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.028969012958378178,
+          "cpuP95Cores": 0.07922608480547311,
+          "peakWorkingSetBytes": 966660096,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.34012063659611874,
+          "cpuP95Cores": 0.42591758481372916,
+          "peakWorkingSetBytes": 368517120,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 13.514797131391697,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.113,
+      "execution": {
+        "run": "primary-16-2-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 122.077
+      }
+    },
+    {
+      "run": "primary-16-3",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "avg": 33.85324986479174,
+        "min": 1.251985,
+        "med": 30.744021500000002,
+        "p(95)": 99.59249645000017,
+        "p(99)": 134.41628119000003,
+        "max": 224.057063
+      },
+      "requests": {
+        "rate": 16.000616867995298,
+        "count": 4800
+      },
+      "status": {
+        "200": 4800
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 4800,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 3840,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.2938052036277359,
+          "cpuP95Cores": 0.3955631128620831,
+          "peakWorkingSetBytes": 530264064,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.2436017690610089,
+          "cpuP95Cores": 0.291113204882225,
+          "peakWorkingSetBytes": 391602176,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.021289345278601882,
+          "cpuP95Cores": 0.07775620524109701,
+          "peakWorkingSetBytes": 968450048,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.2545088809946173,
+          "cpuP95Cores": 0.3252806555370293,
+          "peakWorkingSetBytes": 338944000,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 9.753581291738593,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.023,
+      "execution": {
+        "run": "primary-16-3",
+        "exitCode": 0,
+        "elapsedSeconds": 301.487
+      }
+    },
+    {
+      "run": "primary-16-3-warmup",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(95)": 91.21686,
+        "p(99)": 130.13961220000002,
+        "max": 150.382367,
+        "avg": 32.981114744403946,
+        "min": 1.13938,
+        "med": 30.051021
+      },
+      "requests": {
+        "count": 1921,
+        "rate": 16.003422468169667
+      },
+      "status": {
+        "200": 1921
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 1921,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1537,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 384,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.28659521497405,
+          "cpuP95Cores": 0.38496810070174714,
+          "peakWorkingSetBytes": 519929856,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.2381338387930146,
+          "cpuP95Cores": 0.28463890393695973,
+          "peakWorkingSetBytes": 397844480,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.020377838866043503,
+          "cpuP95Cores": 0.06350487116296853,
+          "peakWorkingSetBytes": 966373376,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.2495461155789476,
+          "cpuP95Cores": 0.3049232693856924,
+          "peakWorkingSetBytes": 335532032,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.518420882115665,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.033,
+      "execution": {
+        "run": "primary-16-3-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 121.042
+      }
+    },
+    {
+      "run": "primary-16-4",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "min": 0.354881,
+        "med": 32.601223,
+        "p(95)": 119.234551,
+        "p(99)": 150.991801,
+        "max": 235.012181,
+        "avg": 37.2530324553219
+      },
+      "requests": {
+        "count": 4801,
+        "rate": 16.00152749022931
+      },
+      "status": {
+        "200": 4801
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 4801,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 3841,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.3212366851168672,
+          "cpuP95Cores": 0.44384238630589984,
+          "peakWorkingSetBytes": 530157568,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.25741550602808183,
+          "cpuP95Cores": 0.30659412422890114,
+          "peakWorkingSetBytes": 382701568,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02261601585054037,
+          "cpuP95Cores": 0.08051335046932122,
+          "peakWorkingSetBytes": 969949184,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.27168070698097135,
+          "cpuP95Cores": 0.35222950742140613,
+          "peakWorkingSetBytes": 365318144,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 10.443482746893842,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.019,
+      "execution": {
+        "run": "primary-16-4",
+        "exitCode": 0,
+        "elapsedSeconds": 301.452
+      }
+    },
+    {
+      "run": "primary-16-4-warmup",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(99)": 138.61567179999997,
+        "max": 166.924496,
+        "avg": 34.35347612077035,
+        "min": 1.110494,
+        "med": 31.170398,
+        "p(95)": 101.844823
+      },
+      "requests": {
+        "count": 1921,
+        "rate": 16.003080559918647
+      },
+      "status": {
+        "200": 1921
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 1921,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1537,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 384,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.2950773037433079,
+          "cpuP95Cores": 0.38290770688179926,
+          "peakWorkingSetBytes": 528588800,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.24701147493061873,
+          "cpuP95Cores": 0.2948662468654221,
+          "peakWorkingSetBytes": 380612608,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02166252209324585,
+          "cpuP95Cores": 0.06659200172087652,
+          "peakWorkingSetBytes": 966270976,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.2577331767543881,
+          "cpuP95Cores": 0.32167411165484866,
+          "peakWorkingSetBytes": 351162368,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 9.324198890670718,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.021,
+      "execution": {
+        "run": "primary-16-4-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 120.971
+      }
+    },
+    {
+      "run": "primary-16-5",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "p(95)": 119.847135,
+        "p(99)": 137.660272,
+        "max": 199.939836,
+        "avg": 36.012026760466576,
+        "min": 1.28444,
+        "med": 31.732725
+      },
+      "requests": {
+        "count": 4801,
+        "rate": 16.001732997562648
+      },
+      "status": {
+        "200": 4801
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 4801,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 3841,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.3112547559846223,
+          "cpuP95Cores": 0.4043550565344543,
+          "peakWorkingSetBytes": 531103744,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.2521947574776315,
+          "cpuP95Cores": 0.29761807301044635,
+          "peakWorkingSetBytes": 385032192,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.021605270961798224,
+          "cpuP95Cores": 0.06713838686987442,
+          "peakWorkingSetBytes": 973471744,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.2640192578472519,
+          "cpuP95Cores": 0.3240060634113034,
+          "peakWorkingSetBytes": 348233728,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 9.596297863911463,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.022,
+      "execution": {
+        "run": "primary-16-5",
+        "exitCode": 0,
+        "elapsedSeconds": 301.579
+      }
+    },
+    {
+      "run": "primary-16-5-warmup",
+      "category": "10 percent A5 including warmup",
+      "rate": 16,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(99)": 150.31778719999997,
+        "max": 202.041412,
+        "avg": 36.860880595523156,
+        "min": 1.475276,
+        "med": 32.239681,
+        "p(95)": 120.895941
+      },
+      "requests": {
+        "count": 1921,
+        "rate": 16.002516008433087
+      },
+      "status": {
+        "200": 1921
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 1921,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1537,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 384,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.31385373152488094,
+          "cpuP95Cores": 0.406627586573377,
+          "peakWorkingSetBytes": 524468224,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.25511105631167685,
+          "cpuP95Cores": 0.30718561465639316,
+          "peakWorkingSetBytes": 382595072,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02240122785626696,
+          "cpuP95Cores": 0.056812156634250946,
+          "peakWorkingSetBytes": 970514432,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.2659328738921251,
+          "cpuP95Cores": 0.3396388091353562,
+          "peakWorkingSetBytes": 338784256,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 9.635277367459611,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.042,
+      "execution": {
+        "run": "primary-16-5-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 121.939
+      }
+    },
+    {
+      "run": "primary-16-prewarm",
+      "category": "primary prewarm",
+      "rate": 1,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(95)": 187.249714,
+        "p(99)": 223.82571359999997,
+        "max": 260.320344,
+        "avg": 61.35818439669421,
+        "min": 3.849336,
+        "med": 54.580122
+      },
+      "requests": {
+        "count": 121,
+        "rate": 1.0075733525844004
+      },
+      "status": {
+        "200": 121
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 121,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 97,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 24,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.06701911686768845,
+          "cpuP95Cores": 0.18667914942522773,
+          "peakWorkingSetBytes": 443002880,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.03527555847253085,
+          "cpuP95Cores": 0.06212101184854088,
+          "peakWorkingSetBytes": 394567680,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02738437495361285,
+          "cpuP95Cores": 0.10026849246367618,
+          "peakWorkingSetBytes": 971882496,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.02594744642854913,
+          "cpuP95Cores": 0.09097486908430236,
+          "peakWorkingSetBytes": 306925568,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 10.142819758715575,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.174,
+      "execution": {
+        "run": "primary-16-prewarm",
+        "exitCode": 0,
+        "elapsedSeconds": 122
+      }
+    },
+    {
+      "run": "primary-22-1-warmup",
+      "category": "failed cold target warmups",
+      "rate": 22,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "avg": 7448.884614837808,
+        "min": 55.137083,
+        "med": 8129.149019500001,
+        "p(95)": 10000.778785,
+        "p(99)": 10001.79032095,
+        "max": 10022.97148
+      },
+      "requests": {
+        "count": 1566,
+        "rate": 12.270827415715384
+      },
+      "status": {
+        "0": 494,
+        "200": 1072
+      },
+      "checks": {
+        "rate": 0.6845466155810983,
+        "passes": 1072,
+        "fails": 494
+      },
+      "dropped": 1075,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1254,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 312,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 1.4657041812383433,
+          "cpuP95Cores": 1.756755321129382,
+          "peakWorkingSetBytes": 720203776,
+          "throttledNanosecondsDelta": 235557968000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.3108024382680867,
+          "cpuP95Cores": 0.5584271927782127,
+          "peakWorkingSetBytes": 406331392,
+          "throttledNanosecondsDelta": 565685000
+        },
+        "background": {
+          "cpuMeanCores": 0.02884278598633411,
+          "cpuP95Cores": 0.10285621566975908,
+          "peakWorkingSetBytes": 967446528,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.21266734992009,
+          "cpuP95Cores": 0.41185443960079987,
+          "peakWorkingSetBytes": 423116800,
+          "throttledNanosecondsDelta": 1470000
+        }
+      },
+      "hostCpuMeanPercent": 15.69793669235997,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.026,
+      "execution": {
+        "run": "primary-22-1-warmup",
+        "exitCode": 99,
+        "elapsedSeconds": 129.103
+      }
+    },
+    {
+      "run": "primary-23-1-warmup",
+      "category": "failed cold target warmups",
+      "rate": 23,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "p(95)": 10000.211509,
+        "p(99)": 10001.3219106,
+        "max": 10052.59753,
+        "avg": 6365.930519735849,
+        "min": 40.158096,
+        "med": 6482.902173
+      },
+      "requests": {
+        "count": 1821,
+        "rate": 14.403179725304154
+      },
+      "status": {
+        "0": 124,
+        "200": 1697
+      },
+      "checks": {
+        "rate": 0.9319055464030752,
+        "passes": 1697,
+        "fails": 124
+      },
+      "dropped": 939,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1457,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 364,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 1.4587860096448046,
+          "cpuP95Cores": 1.6748973984925337,
+          "peakWorkingSetBytes": 737435648,
+          "throttledNanosecondsDelta": 85291954000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.3676193378786246,
+          "cpuP95Cores": 0.5576664173123627,
+          "peakWorkingSetBytes": 408956928,
+          "throttledNanosecondsDelta": 378526000
+        },
+        "background": {
+          "cpuMeanCores": 0.029214999755071257,
+          "cpuP95Cores": 0.09911230013319175,
+          "peakWorkingSetBytes": 968388608,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.34340247938619334,
+          "cpuP95Cores": 0.5346809622261655,
+          "peakWorkingSetBytes": 434450432,
+          "throttledNanosecondsDelta": 10238000
+        }
+      },
+      "hostCpuMeanPercent": 16.394677298650034,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.034,
+      "execution": {
+        "run": "primary-23-1-warmup",
+        "exitCode": 99,
+        "elapsedSeconds": 128.182
+      }
+    },
+    {
+      "run": "primary-24-1-warmup",
+      "category": "failed cold target warmups",
+      "rate": 24,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "avg": 6540.568518617892,
+        "min": 5.856339,
+        "med": 6960.803736,
+        "p(95)": 10000.656699250001,
+        "p(99)": 10001.50215455,
+        "max": 10042.489564
+      },
+      "requests": {
+        "count": 1756,
+        "rate": 13.654636131704375
+      },
+      "status": {
+        "0": 278,
+        "200": 1478
+      },
+      "checks": {
+        "passes": 1478,
+        "fails": 278,
+        "rate": 0.8416856492027335
+      },
+      "dropped": 1125,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 1406,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 350,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 1.4585782028579388,
+          "cpuP95Cores": 1.6674868246192593,
+          "peakWorkingSetBytes": 731594752,
+          "throttledNanosecondsDelta": 142819317000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.34706329437489797,
+          "cpuP95Cores": 0.546052443971301,
+          "peakWorkingSetBytes": 407281664,
+          "throttledNanosecondsDelta": 329797000
+        },
+        "background": {
+          "cpuMeanCores": 0.029745023845366005,
+          "cpuP95Cores": 0.09520972494501641,
+          "peakWorkingSetBytes": 968540160,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.28828489421489484,
+          "cpuP95Cores": 0.4738183279513327,
+          "peakWorkingSetBytes": 445947904,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 16.36054987898317,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.033,
+      "execution": {
+        "run": "primary-24-1-warmup",
+        "exitCode": 99,
+        "elapsedSeconds": 130.113
+      }
+    },
+    {
+      "run": "regression-1pct-1",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "med": 6.012487,
+        "p(95)": 8.97146,
+        "p(99)": 11.607206,
+        "max": 19.396274,
+        "avg": 5.691492247716792,
+        "min": 0.911267
+      },
+      "requests": {
+        "count": 15001,
+        "rate": 50.00275826027773
+      },
+      "status": {
+        "200": 15001
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 15001,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 12001,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.14141215850764935,
+          "cpuP95Cores": 0.16796869147163063,
+          "peakWorkingSetBytes": 432734208,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.15390955497052586,
+          "cpuP95Cores": 0.18170787422436677,
+          "peakWorkingSetBytes": 390369280,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02039723902614559,
+          "cpuP95Cores": 0.09374986318267395,
+          "peakWorkingSetBytes": 977965056,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.5109455399352272,
+          "cpuP95Cores": 0.5760045356517816,
+          "peakWorkingSetBytes": 308965376,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.71908674772238,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.027,
+      "execution": {
+        "run": "regression-1pct-1",
+        "exitCode": 0,
+        "elapsedSeconds": 301.426
+      }
+    },
+    {
+      "run": "regression-1pct-1-warmup",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "avg": 6.3930493396100765,
+        "min": 0.917028,
+        "med": 6.685302,
+        "p(95)": 10.477869,
+        "p(99)": 13.848367,
+        "max": 22.274258
+      },
+      "requests": {
+        "count": 6001,
+        "rate": 50.00486356919073
+      },
+      "status": {
+        "200": 6001
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 6001,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 4801,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1200,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.16229448530047985,
+          "cpuP95Cores": 0.19816419324645404,
+          "peakWorkingSetBytes": 432111616,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.1678017681051862,
+          "cpuP95Cores": 0.19897998343004505,
+          "peakWorkingSetBytes": 391450624,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.021831097320296235,
+          "cpuP95Cores": 0.0841737291462736,
+          "peakWorkingSetBytes": 967090176,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.5564988770027046,
+          "cpuP95Cores": 0.6423868957105817,
+          "peakWorkingSetBytes": 318373888,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 11.358930571403208,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.029,
+      "execution": {
+        "run": "regression-1pct-1-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 121.022
+      }
+    },
+    {
+      "run": "regression-1pct-2",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "p(99)": 11.09348,
+        "max": 18.329733,
+        "avg": 5.581078745750302,
+        "min": 0.939422,
+        "med": 5.910476,
+        "p(95)": 8.691274
+      },
+      "requests": {
+        "rate": 50.00346648489738,
+        "count": 15001
+      },
+      "status": {
+        "200": 15001
+      },
+      "checks": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 15001
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 12001,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.13823463129797664,
+          "cpuP95Cores": 0.15705401055526289,
+          "peakWorkingSetBytes": 433274880,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.1509733066603647,
+          "cpuP95Cores": 0.172917645487317,
+          "peakWorkingSetBytes": 390877184,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.01995208950153111,
+          "cpuP95Cores": 0.05704304608474789,
+          "peakWorkingSetBytes": 973508608,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.49792494138484594,
+          "cpuP95Cores": 0.5539074815944158,
+          "peakWorkingSetBytes": 308158464,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 7.470286654040507,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.02,
+      "execution": {
+        "run": "regression-1pct-2",
+        "exitCode": 0,
+        "elapsedSeconds": 301.417
+      }
+    },
+    {
+      "run": "regression-1pct-2-warmup",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "med": 6.706845,
+        "p(95)": 9.886947,
+        "p(99)": 12.034295,
+        "max": 20.397662,
+        "avg": 6.273498310281605,
+        "min": 1.204853
+      },
+      "requests": {
+        "count": 6001,
+        "rate": 50.0047567001896
+      },
+      "status": {
+        "200": 6001
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 6001,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 4801,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1200,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.156850318015127,
+          "cpuP95Cores": 0.1834336184116337,
+          "peakWorkingSetBytes": 432885760,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.16496657534579756,
+          "cpuP95Cores": 0.19649443895853017,
+          "peakWorkingSetBytes": 389718016,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.02148791521557599,
+          "cpuP95Cores": 0.07221335875514563,
+          "peakWorkingSetBytes": 969330688,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.5505378349118284,
+          "cpuP95Cores": 0.6398499270496439,
+          "peakWorkingSetBytes": 309252096,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 15.875468037088636,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.016,
+      "execution": {
+        "run": "regression-1pct-2-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 120.971
+      }
+    },
+    {
+      "run": "regression-1pct-3",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "p(99)": 10.810069,
+        "max": 21.00204,
+        "avg": 5.50034614352377,
+        "min": 0.920642,
+        "med": 5.83862,
+        "p(95)": 8.513754
+      },
+      "requests": {
+        "count": 15001,
+        "rate": 50.00338113673238
+      },
+      "status": {
+        "200": 15001
+      },
+      "checks": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 15001
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 12001,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.1368610111568809,
+          "cpuP95Cores": 0.15873260269038103,
+          "peakWorkingSetBytes": 440918016,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.1481650491656839,
+          "cpuP95Cores": 0.16875653027589446,
+          "peakWorkingSetBytes": 383111168,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.019575582350295,
+          "cpuP95Cores": 0.05756146732442364,
+          "peakWorkingSetBytes": 969666560,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.49066388673192696,
+          "cpuP95Cores": 0.5525688951791242,
+          "peakWorkingSetBytes": 309215232,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 6.944346014287924,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.019,
+      "execution": {
+        "run": "regression-1pct-3",
+        "exitCode": 0,
+        "elapsedSeconds": 301.491
+      }
+    },
+    {
+      "run": "regression-1pct-3-warmup",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "min": 0.902281,
+        "med": 5.8343395000000005,
+        "p(95)": 8.52495175,
+        "p(99)": 11.14187276,
+        "max": 15.896101,
+        "avg": 5.509654992833327
+      },
+      "requests": {
+        "rate": 50.001629199750774,
+        "count": 6000
+      },
+      "status": {
+        "200": 6000
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 6000,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 4800,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1200,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.13629000414871867,
+          "cpuP95Cores": 0.15995640276688305,
+          "peakWorkingSetBytes": 435023872,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.14966884090319246,
+          "cpuP95Cores": 0.172370841756025,
+          "peakWorkingSetBytes": 389197824,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.01922670363909169,
+          "cpuP95Cores": 0.05339327948790767,
+          "peakWorkingSetBytes": 970514432,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.49289119441489054,
+          "cpuP95Cores": 0.5517749150992044,
+          "peakWorkingSetBytes": 303869952,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 6.9375526401163965,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.027,
+      "execution": {
+        "run": "regression-1pct-3-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 121.033
+      }
+    },
+    {
+      "run": "regression-1pct-4",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "med": 5.891627,
+        "p(95)": 8.618708049999999,
+        "p(99)": 11.06235685,
+        "max": 185.035199,
+        "avg": 5.62990256693335,
+        "min": 0.933855
+      },
+      "requests": {
+        "count": 15000,
+        "rate": 50.00201005330304
+      },
+      "status": {
+        "200": 15000
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 15000,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 12000,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.13990581933594348,
+          "cpuP95Cores": 0.16351069428352139,
+          "peakWorkingSetBytes": 446279680,
+          "throttledNanosecondsDelta": 22385000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.15106810725978248,
+          "cpuP95Cores": 0.1737735144141868,
+          "peakWorkingSetBytes": 391700480,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.020026292152810397,
+          "cpuP95Cores": 0.058161428543475065,
+          "peakWorkingSetBytes": 971878400,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.4972178476564495,
+          "cpuP95Cores": 0.5557505768586969,
+          "peakWorkingSetBytes": 307654656,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 8.193407278120258,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.018,
+      "execution": {
+        "run": "regression-1pct-4",
+        "exitCode": 0,
+        "elapsedSeconds": 301.323
+      }
+    },
+    {
+      "run": "regression-1pct-4-warmup",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "avg": 5.55218825583334,
+        "min": 0.95182,
+        "med": 5.895275,
+        "p(95)": 8.63223375,
+        "p(99)": 10.807411920000005,
+        "max": 16.549613
+      },
+      "requests": {
+        "count": 6000,
+        "rate": 50.00207376683995
+      },
+      "status": {
+        "200": 6000
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 6000,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 4800,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1200,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.13694359400425282,
+          "cpuP95Cores": 0.1575007612270621,
+          "peakWorkingSetBytes": 444387328,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.1490702591795651,
+          "cpuP95Cores": 0.16945567507829026,
+          "peakWorkingSetBytes": 375083008,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.019507157008656215,
+          "cpuP95Cores": 0.05180814577480615,
+          "peakWorkingSetBytes": 970444800,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.49119695006204456,
+          "cpuP95Cores": 0.5452141554251131,
+          "peakWorkingSetBytes": 304361472,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 6.918817461821379,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.021,
+      "execution": {
+        "run": "regression-1pct-4-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 120.991
+      }
+    },
+    {
+      "run": "regression-1pct-5",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "avg": 5.530586950203305,
+        "min": 0.849146,
+        "med": 5.852025,
+        "p(95)": 8.507265,
+        "p(99)": 11.0026,
+        "max": 16.744348
+      },
+      "requests": {
+        "count": 15001,
+        "rate": 50.002688226151314
+      },
+      "status": {
+        "200": 15001
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 15001,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 12001,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.13536240866779797,
+          "cpuP95Cores": 0.1555448431165189,
+          "peakWorkingSetBytes": 446255104,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.15020625961019032,
+          "cpuP95Cores": 0.17297623195136158,
+          "peakWorkingSetBytes": 392093696,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.01958795686613844,
+          "cpuP95Cores": 0.053196132636281965,
+          "peakWorkingSetBytes": 972517376,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.4934429839654465,
+          "cpuP95Cores": 0.5497159500783922,
+          "peakWorkingSetBytes": 310730752,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 7.273349586977056,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.019,
+      "execution": {
+        "run": "regression-1pct-5",
+        "exitCode": 0,
+        "elapsedSeconds": 301.524
+      }
+    },
+    {
+      "run": "regression-1pct-5-warmup",
+      "category": "1 percent regression A5 including warmup",
+      "rate": 50,
+      "seconds": 120,
+      "httpMilliseconds": {
+        "med": 5.90618,
+        "p(95)": 8.791946,
+        "p(99)": 11.358017,
+        "max": 18.468972,
+        "avg": 5.588410285285785,
+        "min": 0.941077
+      },
+      "requests": {
+        "count": 6001,
+        "rate": 49.99989186117372
+      },
+      "status": {
+        "200": 6001
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 6001,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 4801,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1200,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.13633843091884154,
+          "cpuP95Cores": 0.15928924437709216,
+          "peakWorkingSetBytes": 446369792,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.15149410147564862,
+          "cpuP95Cores": 0.17386936830501684,
+          "peakWorkingSetBytes": 388521984,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.020145995632545478,
+          "cpuP95Cores": 0.07331052193727933,
+          "peakWorkingSetBytes": 975024128,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.49510900226237425,
+          "cpuP95Cores": 0.5617436037649512,
+          "peakWorkingSetBytes": 307154944,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 7.365528125149886,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.017,
+      "execution": {
+        "run": "regression-1pct-5-warmup",
+        "exitCode": 0,
+        "elapsedSeconds": 120.949
+      }
+    },
+    {
+      "run": "sustained-22",
+      "category": "long exploratory probes",
+      "rate": 22,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "min": 1.06974,
+        "med": 33.873042,
+        "p(95)": 129.993491,
+        "p(99)": 150.850534,
+        "max": 192.946098,
+        "avg": 40.975820817906296
+      },
+      "requests": {
+        "count": 6601,
+        "rate": 22.000211176370936
+      },
+      "status": {
+        "200": 6601
+      },
+      "checks": {
+        "rate": 1,
+        "passes": 6601,
+        "fails": 0
+      },
+      "dropped": 0,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 5281,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1320,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 0.43969745572976265,
+          "cpuP95Cores": 0.5284643284830057,
+          "peakWorkingSetBytes": 531292160,
+          "throttledNanosecondsDelta": 0
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.354114688310862,
+          "cpuP95Cores": 0.39920693697823145,
+          "peakWorkingSetBytes": 390930432,
+          "throttledNanosecondsDelta": 0
+        },
+        "background": {
+          "cpuMeanCores": 0.022289902313232742,
+          "cpuP95Cores": 0.09094103258509231,
+          "peakWorkingSetBytes": 971718656,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.37087822133616055,
+          "cpuP95Cores": 0.4309988372237784,
+          "peakWorkingSetBytes": 370434048,
+          "throttledNanosecondsDelta": 0
+        }
+      },
+      "hostCpuMeanPercent": 11.2014115516444,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.034,
+      "execution": {
+        "run": "sustained-22",
+        "exitCode": 0,
+        "elapsedSeconds": 301.621
+      }
+    },
+    {
+      "run": "sustained-44",
+      "category": "long exploratory probes",
+      "rate": 44,
+      "seconds": 300,
+      "httpMilliseconds": {
+        "med": 4236.4608305,
+        "p(95)": 7448.518410000001,
+        "p(99)": 9304.46142175,
+        "max": 10009.685475,
+        "avg": 4356.884405800322,
+        "min": 2.34225
+      },
+      "requests": {
+        "rate": 22.280299670047004,
+        "count": 6776
+      },
+      "status": {
+        "0": 31,
+        "200": 6745
+      },
+      "checks": {
+        "rate": 0.9954250295159386,
+        "passes": 6745,
+        "fails": 31
+      },
+      "dropped": 6425,
+      "endpointSamples": {
+        "markers-hot": {
+          "n": 5422,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 1354,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "/loco-perf-p1-perf-app-1": {
+          "cpuMeanCores": 1.4777664976709601,
+          "cpuP95Cores": 1.6026087203806731,
+          "peakWorkingSetBytes": 719835136,
+          "throttledNanosecondsDelta": 40478490000
+        },
+        "/loco-perf-p1-perf-db-1": {
+          "cpuMeanCores": 0.4584168099444696,
+          "cpuP95Cores": 0.6331489270271579,
+          "peakWorkingSetBytes": 411688960,
+          "throttledNanosecondsDelta": 1039345000
+        },
+        "background": {
+          "cpuMeanCores": 0.024613357154486468,
+          "cpuP95Cores": 0.06557432811105,
+          "peakWorkingSetBytes": 972099584,
+          "throttledNanosecondsDelta": null
+        },
+        "/loco-perf-p1-load": {
+          "cpuMeanCores": 0.4651307081846359,
+          "cpuP95Cores": 0.6236585096596137,
+          "peakWorkingSetBytes": 464470016,
+          "throttledNanosecondsDelta": 11630000
+        }
+      },
+      "hostCpuMeanPercent": 15.966880337659886,
+      "collectorErrors": [],
+      "sampleGapMaxSeconds": 1.025,
+      "execution": {
+        "run": "sustained-44",
+        "exitCode": 99,
+        "elapsedSeconds": 305.773
+      }
+    }
+  ],
+  "detailSource": "Full endpoint/resource distributions, preparation runs and raw samples are retained in the Release archive summary.json and per-run files. This repository summary projects the same 53 runs without changing values."
+}

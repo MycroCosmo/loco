@@ -2,6 +2,8 @@
 
 ## P1 재현 추가
 
+최신 [P1 결과](P1_RESULTS.md): 정합성·전체 회귀는 통과했지만1% 지연 회귀10% 기준은 미통과다.10%·16req/s A5는 참고 기준선이며 편차55.8%로 성능 채택·최대 처리량은 보류했다. 기본 힙의 전체 viewport OOM과 group 역조회 Seq Scan도 보존한다. 아래 `measure`의 k6 종료0은 p95 200ms 검사를 뜻하며 **P0 대비 회귀10% 통과를 대신하지 않는다**. 회귀율과 별도 gate는 결과 summary의 evaluation을 확인한다.
+
 P0 명령·결과는 아래에 그대로 보존한다. P1은 `$env:PERF_STAGE='p1'`을 먼저 설정한다. `run.mjs`, 결과 요약/압축, artifact 검사가 `loco-perf-p1` 프로젝트·별도 볼륨·`apps/server-v3/build/perf-stage2-p1` 출력으로 분리되며 이미지도 `loco-perf-p1:local`이어야 한다. P0 태그·볼륨·결과를 덮어쓰지 않는다. P1측정 중에도 JVM 옵션을 추가하지 않는다.
 
 ```powershell
