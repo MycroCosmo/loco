@@ -5,7 +5,7 @@ import {spawnSync,spawn} from 'node:child_process';
 import {randomBytes,createHmac} from 'node:crypto';
 import http from 'node:http';
 import assert from 'node:assert/strict';
-import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql} from './data.mjs';
+import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measurementSpec} from './data.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const output=path.join(root,'apps/server-v3/build/perf-stage2');
@@ -110,7 +110,9 @@ async function observe(stream,signal) {
 }
 async function runLoad(config) {
   assert.equal(sql('SHOW pg_stat_statements.track;'),'none','SQL tracing must be off during load');
-  const folder=path.join(output,config.run);fs.mkdirSync(folder,{recursive:true});
+  const folder=path.join(output,config.run);
+  assert.ok(!fs.existsSync(folder),'Result directory already exists; choose a new run name');
+  fs.mkdirSync(folder,{recursive:true});
   write(`${config.run}/config.json`,config);
   const log=fs.openSync(path.join(folder,'k6.log'),'w');
   const hostLog=fs.openSync(path.join(folder,'host-collector.log'),'w');
@@ -241,13 +243,16 @@ if(action==='up') {
   console.log('Marker SQL and EXPLAIN captured outside measurement');
 } else if(action==='measure') {
   const [name,rateText='50',viewportText='1',requestMix='hot80',repeatsText='1']=args;
-  assert.match(name,/^[a-z0-9-]+$/);
+  const spec=measurementSpec(name,rateText,viewportText,requestMix,repeatsText);
+  for(let i=1;i<=spec.repeats;i++)for(const suffix of ['', '-warmup'])
+    assert.ok(!fs.existsSync(path.join(output,`${name}-${i}${suffix}`)),'Result directory already exists; choose a new run name');
   const dataset=JSON.parse(fs.readFileSync(path.join(output,'dataset.json')));
-  const cases=await markerCases(Number(viewportText),dataset.size==='S'?100:1000);
+  assert.ok(['S','M'].includes(dataset.size),'Marker workload requires an S or M dataset');
+  const cases=await markerCases(spec.viewport,dataset.size==='S'?100:1000);
   const before=fingerprint();snapshot(`${name}-manifest.json`);
   await diagnostic([cases[0],cases[1]],`${name}-sql.json`);
-  for(let i=1;i<=Number(repeatsText);i++) {
-    const config={rate:Number(rateText),hot80:requestMix==='hot80',cases};
+  for(let i=1;i<=spec.repeats;i++) {
+    const config={rate:spec.rate,hot80:spec.mix==='hot80',cases};
     await runLoad({...config,run:`${name}-${i}-warmup`,seconds:120});
     await runLoad({...config,run:`${name}-${i}`,seconds:300});
     assert.deepEqual(fingerprint(),before,'Read workload must not change business data');
@@ -256,12 +261,24 @@ if(action==='up') {
 } else if(action==='cms'||action==='cms-probe') {
   const dataset=JSON.parse(fs.readFileSync(path.join(output,'dataset.json')));
   const prefix=`cms-${dataset.size}-${dataset.processing}`;
+  const planFile=path.join(output,'runtime/cms-plans.json');
+  if(fs.existsSync(planFile))fs.unlinkSync(planFile);
   // Restart outside measured intervals to collect real generated CMS SQL/EXPLAIN.
   dc('stop','perf-app');
   dc('run','-d','--name','loco-perf-p0-plan','--service-ports','perf-app','--capture-plans');
   appContainer='loco-perf-p0-plan';
   await ready(); await bootstrap();
-  const plans=JSON.parse(fs.readFileSync(path.join(output,'runtime/cms-plans.json')));
+  let plans;
+  for(let i=0;i<120;i++) {
+    try {plans=JSON.parse(fs.readFileSync(planFile));break;}
+    catch(error) {if(error.code!=='ENOENT'&&!(error instanceof SyntaxError))throw error;}
+    await new Promise(r=>setTimeout(r,250));
+  }
+  assert.ok(Array.isArray(plans)&&plans.length===17,'Current dataset plans did not finish');
+  for(const plan of plans.filter(p=>p.case==='deep')) {
+    const cursorId=Buffer.from(plan.query.cursor,'base64url').toString().split('|')[2];
+    assert.equal(cursorId,key(plan.resource.slice(0,-1),dataset.size==='CMS-S'?5000:50000),'Stale dataset cursor');
+  }
   write(`${prefix}-plans.json`,plans);
   const cases=[];
   for(const p of plans) {const url=p.path+'?'+new URLSearchParams(p.query);const r=await request(url,'GET',null,true);cases.push({name:p.resource+'-'+p.case,path:url,hash:hash(canonical(r.body))});}

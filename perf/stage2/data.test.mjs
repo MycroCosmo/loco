@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {key,datasetSql,markerPath,canonical,hash,bindObservedSql} from './data.mjs';
+import {key,datasetSql,markerPath,canonical,hash,bindObservedSql,measurementSpec} from './data.mjs';
 test('synthetic identifiers are stable, distinct UUID strings',()=>{
   assert.match(key('map',1),/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/);
   assert.equal(key('map',1),key('map',1));
@@ -31,4 +31,15 @@ test('EXPLAIN replay restores PostgreSQL-normalized projection zero',()=>{
 });
 test('EXPLAIN replay rejects unrecognized bindings rather than inventing a value',()=>{
   assert.throws(()=>bindObservedSql('SELECT * FROM places WHERE id=$2',['synthetic']),/Missing observed SQL binding/);
+});
+test('approved measurement arguments preserve their meaning',()=>{
+  assert.deepEqual(measurementSpec('primary','50','1','hot80','5'),{name:'primary',rate:50,viewport:1,mix:'hot80',repeats:5});
+});
+test('invalid repeat counts cannot silently produce zero measurements',()=>{
+  for(const value of ['0','-1','NaN','1.5'])assert.throws(()=>measurementSpec('primary',50,1,'hot80',value));
+});
+test('mistyped conditions or unsafe names cannot change the workload silently',()=>{
+  assert.throws(()=>measurementSpec('../old',50,1,'hot80',5));
+  assert.throws(()=>measurementSpec('primary',0,1,'hot80',5));
+  assert.throws(()=>measurementSpec('primary',50,1,'hot8',5));
 });

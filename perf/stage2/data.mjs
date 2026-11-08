@@ -8,6 +8,14 @@ export const key = (kind, i) => {
 export const hash = value => createHash('sha256').update(value).digest('hex');
 export const sqlKey = (kind, expr) => `md5('${seed}/${kind}/'||(${expr})::text)::uuid::text`;
 export const sqlString = value => `'${String(value).replaceAll("'", "''")}'`;
+export function measurementSpec(name,rate,viewport,mix,repeats) {
+  if(!/^[a-z0-9-]+$/.test(name||''))throw Error('Invalid run name');
+  rate=Number(rate);viewport=Number(viewport);repeats=Number(repeats);
+  if(!Number.isInteger(rate)||rate<1||rate>10000)throw Error('Invalid request rate');
+  if(!Number.isInteger(repeats)||repeats<1||repeats>10)throw Error('Invalid repeat count');
+  if(![0.01,1,10,100].includes(viewport)||!['hot80','uniform'].includes(mix))throw Error('Invalid measurement condition');
+  return {name,rate,viewport,mix,repeats};
+}
 export function bindObservedSql(query, parameters) {
   const values=[...parameters];
   // pg_stat_statements normalizes the projection's literal COALESCE(...,0) too.
