@@ -1,5 +1,11 @@
 # 성능 2단계 측정 도구
 
+## E-14/E-15 같은 세션 대조
+
+[고정 실행 계약과 결과](E14_E15_RESULTS.md). E-15는 `PERF_STAGE=e15-a/e15-b`로 기존 P0/P1 출력과 DB를 보존한다. A의 기존 `loco-perf-p0:local` 이미지를 재빌드하지 않는다. B는 검증한 perf JAR로 `docker build -f perf/stage2/Dockerfile -t loco-perf-e15-b:local .`을 실행한다. 양쪽에 `run.mjs up`, `seed M skew`, `verify-seed`, `stop`을 각각 적용한 뒤 `node perf/stage2/paired.mjs`가20개 측정을 교대 실행한다. 각 실행은120초 예열+300초, 실패도 보존한다. 측정 전 현재 사용자 확인에 따라 PERF_HEAVY_APPS_STATUS를 closed-user-confirmed 또는 not-closed-user-confirmed로 설정한다. 이전 확인을 다음 세션에 재사용하지 않는다.
+
+쓰기 비용은 B에서 `node perf/stage2/run.mjs write-cost`로 별도 수행한다. 인덱스 없는 B/있는 B5쌍의 단일 VU 실제 CRUD와 별도 SQL 추적이며 E-15 읽기 결과와 섞지 않는다. 종료 후 V8 인덱스를 복구한다. 각 stage에서 `node perf/stage2/summarize.mjs` 후 `node perf/stage2/paired-analysis.mjs`가5쌍 회귀율·실패 여부를 판정한다. Node 검증은 `node --test perf/stage2/*.test.mjs`다.
+
 ## P1 재현 추가
 
 최신 [P1 결과](P1_RESULTS.md): 정합성·전체 회귀는 통과했지만1% 지연 회귀10% 기준은 미통과다.10%·16req/s A5는 참고 기준선이며 편차55.8%로 성능 채택·최대 처리량은 보류했다. 기본 힙의 전체 viewport OOM과 group 역조회 Seq Scan도 보존한다. 아래 `measure`의 k6 종료0은 p95 200ms 검사를 뜻하며 **P0 대비 회귀10% 통과를 대신하지 않는다**. 회귀율과 별도 gate는 결과 summary의 evaluation을 확인한다.

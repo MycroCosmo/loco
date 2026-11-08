@@ -8,9 +8,14 @@ export const key = (kind, i) => {
 export const hash = value => createHash('sha256').update(value).digest('hex');
 export const sqlKey = (kind, expr) => `md5('${seed}/${kind}/'||(${expr})::text)::uuid::text`;
 export const sqlString = value => `'${String(value).replaceAll("'", "''")}'`;
+export function pairedThresholdFailure(exitCode, summary) {
+  // k6 Rate "passes" counts true values: for http_req_failed those are failed requests.
+  return exitCode===99 && (summary.metrics.business_failure?.values.count||0)<=(summary.metrics.http_req_failed?.values.passes||0);
+}
 export function stageSettings(stage = process.env.PERF_STAGE || 'p0') {
-  if (!['p0','p1'].includes(stage)) throw Error('Unknown performance stage');
-  return {stage, project:`loco-perf-${stage}`, output:`apps/server-v3/build/perf-stage2${stage==='p0'?'':'-'+stage}`};
+  if (!['p0','p1','e15-a','e15-b'].includes(stage)) throw Error('Unknown performance stage');
+  return {stage:stage==='e15-a'?'p0':stage==='e15-b'?'p1':stage, project:`loco-perf-${stage}`, output:`apps/server-v3/build/perf-stage2${stage==='p0'?'':'-'+stage}`,
+    image:stage==='e15-a'?'loco-perf-p0:local':`loco-perf-${stage}:local`, paired:stage.startsWith('e15-')};
 }
 export function measurementSpec(name,rate,viewport,mix,repeats) {
   if(!/^[a-z0-9-]+$/.test(name||''))throw Error('Invalid run name');

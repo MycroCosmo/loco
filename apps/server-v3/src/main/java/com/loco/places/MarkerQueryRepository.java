@@ -81,11 +81,23 @@ public class MarkerQueryRepository {
             "SELECT count FROM place_marker_cells WHERE \"mapId\"=:map AND precision=:precision AND \"cellLatKey\"=:lat AND \"cellLngKey\"=:lng",
             params);
     if (cell.isEmpty()) return Map.of("count", 0, "items", List.of(), "hasMore", false);
+    // A literal precision preserves expression-index matching even with a generic prepared plan.
+    String scale =
+        switch (precision) {
+          case 1 -> "1";
+          case 2 -> "2";
+          case 3 -> "3";
+          default -> throw new IllegalArgumentException("Unsupported marker precision");
+        };
     var ids =
         rows(
-            "SELECT id FROM places WHERE \"mapId\"=:map AND ROUND(latitude::numeric,:precision)::text=:lat AND ROUND(longitude::numeric,:precision)::text=:lng ORDER BY \"createdAt\" DESC,id DESC LIMIT "
+            "SELECT id FROM places WHERE \"mapId\"=:map AND ROUND(latitude::numeric,"
+                + scale
+                + ")::text=:lat AND ROUND(longitude::numeric,"
+                + scale
+                + ")::text=:lng ORDER BY \"createdAt\" DESC,id DESC LIMIT "
                 + (limit + 1),
-            params);
+            Map.of("map", id, "lat", keys[0], "lng", keys[1]));
     boolean more = ids.size() > limit;
     var selected = ids.stream().limit(limit).map(t -> t.get("id").toString()).toList();
     List<PlaceResponses.Read> items = List.of();

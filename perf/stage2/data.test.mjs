@@ -61,3 +61,9 @@ test('EXPLAIN replay restores six-digit P1 key literals without changing paramet
   assert.match(grouped,/CAST\('37.05' AS float8\)::numeric,'6'/);
   assert.doesNotMatch(grouped,/\$\d/);
 });
+
+test('E14 cluster replay retains constant precision and all request bindings',()=>{
+  const query='SELECT id FROM places WHERE "mapId"=$1 AND ROUND(latitude::numeric,$4)::text=$2 AND ROUND(longitude::numeric,$5)::text=$3 ORDER BY "createdAt" DESC,id DESC LIMIT $6';
+  const bound=bindObservedSql(query,['map','37.444','127.889',3,3,21]);
+  assert.match(bound,/latitude::numeric,'3'/);assert.match(bound,/::text='37.444'/);assert.match(bound,/LIMIT '21'/);
+});

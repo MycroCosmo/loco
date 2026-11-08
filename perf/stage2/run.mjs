@@ -5,7 +5,8 @@ import {spawnSync,spawn} from 'node:child_process';
 import {randomBytes,createHmac} from 'node:crypto';
 import http from 'node:http';
 import assert from 'node:assert/strict';
-import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measurementSpec,stageSettings} from './data.mjs';
+import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measurementSpec,stageSettings,pairedThresholdFailure} from './data.mjs';
+import {overflowMatches} from './overflow-contract.js';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const settings=stageSettings();
@@ -16,7 +17,7 @@ fs.mkdirSync(privateDir,{recursive:true}); fs.mkdirSync(path.join(output,'runtim
 const secretsFile=path.join(privateDir,'secrets.json');
 if(!fs.existsSync(secretsFile)) fs.writeFileSync(secretsFile,JSON.stringify({db:randomBytes(24).toString('hex'),jwt:randomBytes(48).toString('hex'),password:randomBytes(24).toString('hex'),nextPassword:randomBytes(24).toString('hex')}));
 const secrets=JSON.parse(fs.readFileSync(secretsFile));
-const env={...process.env,PERF_DB_PASSWORD:secrets.db,PERF_JWT_SECRET:secrets.jwt,PERF_OUTPUT_DIR:output.replaceAll('\\','/'),PERF_APP_IMAGE:`${project}:local`};
+const env={...process.env,PERF_DB_PASSWORD:secrets.db,PERF_JWT_SECRET:secrets.jwt,PERF_OUTPUT_DIR:output.replaceAll('\\','/'),PERF_APP_IMAGE:settings.image};
 const compose=['compose','-p',project,'-f','perf/stage2/compose.yml'];
 const write=(name,value)=>fs.writeFileSync(path.join(output,name),JSON.stringify(value,null,2));
 function command(executable,args,input) {
@@ -83,7 +84,7 @@ function environment() {
   return {at:new Date().toISOString(),power,docker:{version:docker.ServerVersion,cpus:docker.NCPU,memory:docker.MemTotal,os:docker.OperatingSystem},hybridCoreCaveat:'i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures',background:containers.filter(c=>!c.Names.startsWith(project)).map(c=>({alias:'background-'+hash(c.ID).slice(0,8)}))};
 }
 function snapshot(name) {
-  write(name,{environment:environment(),git:command('git',['rev-parse','HEAD']),dirty:command('git',['status','--porcelain']),jarSha256:hash(fs.readFileSync(path.join(root,'apps/server-v3/build/libs/loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar'))),runtime:JSON.parse(fs.readFileSync(path.join(output,'runtime/runtime.json'))),sqlTrackingAtSnapshot:sql('SHOW pg_stat_statements.track;'),data:fingerprint(),images:query('SELECT extname FROM pg_extension'),containers:JSON.parse(command('docker',['inspect',...dc('ps','-q').split(/\s+/)])).map(c=>({id:c.Id,name:c.Name,image:c.Image,cpu:c.HostConfig.NanoCpus,memory:c.HostConfig.Memory,oomKilled:c.State.OOMKilled,network:Object.keys(c.NetworkSettings.Networks)}))});
+  write(name,{environment:environment(),git:command('git',['rev-parse','HEAD']),dirty:command('git',['status','--porcelain']),jarSha256:command('docker',['exec',appContainer,'sha256sum','/app/app.jar']).split(/\s+/)[0],runtime:JSON.parse(fs.readFileSync(path.join(output,'runtime/runtime.json'))),sqlTrackingAtSnapshot:sql('SHOW pg_stat_statements.track;'),data:fingerprint(),images:query('SELECT extname FROM pg_extension'),containers:JSON.parse(command('docker',['inspect',...dc('ps','-q').split(/\s+/)])).map(c=>({id:c.Id,name:c.Name,image:c.Image,cpu:c.HostConfig.NanoCpus,memory:c.HostConfig.Memory,oomKilled:c.State.OOMKilled,network:Object.keys(c.NetworkSettings.Networks)}))});
 }
 const socketHost=command('docker',['context','inspect','--format','{{.Endpoints.docker.Host}}']);
 const socketPath=socketHost.replace('npipe:////./pipe/','\\\\.\\pipe\\');
@@ -146,7 +147,16 @@ async function markerCases(viewport, maps) {
     const rows=selectedRows.get(id)||{count:0,ids:[]},total=body.reduce((s,m)=>s+m.count,0);
     assert.equal(total,Number(rows.count)<=300?Number(rows.count):cellCounts.get(id));
     if(Number(rows.count)<=300) assert.deepEqual(body.map(m=>m.id).sort(),rows.ids);
-    cases.push({name:i===1?'markers-hot':'markers-other',path:p,hash:hash(canonical(body)),returned:body.length,total,selectedPlaces:Number(rows.count)});
+    const entry={name:i===1?'markers-hot':'markers-other',path:p,hash:hash(canonical(body)),returned:body.length,total,selectedPlaces:Number(rows.count)};
+    if(settings.paired && viewport===10 && body.some(m=>m.id==='overflow')) {
+      const cells=query(`SELECT "placeId" AS id,"placeName" AS name,latitude,longitude,count FROM place_marker_cells WHERE "mapId"=${sqlString(id)} AND precision=3 AND "maxLat">=${minLat} AND "minLat"<=${maxLat} AND "maxLng">=${minLng} AND "minLng"<=${maxLng}`);
+      assert.ok(cells.every(c=>c.count===1),'Overflow contract only covers the approved all-singleton M seed');
+      const places=Object.fromEntries(cells.map(c=>[c.id,{name:c.name,latitude:Number(c.latitude.toPrecision(16)),longitude:Number(c.longitude.toPrecision(16))}]));
+      entry.overflow={places,count:cells.length,latSum:Object.values(places).reduce((n,c)=>n+c.latitude,0),lngSum:Object.values(places).reduce((n,c)=>n+c.longitude,0)};
+      assert.ok(overflowMatches(body,entry.overflow),'Preflight must satisfy the full known-difference contract');
+      if(settings.stage==='p0') delete entry.hash;
+    }
+    cases.push(entry);
   }
   assert.ok(cases[0].returned>0,'Primary hot map must do work');
   return cases;
@@ -159,7 +169,9 @@ async function diagnostic(cases,name) {
   assert.equal(sql('SHOW pg_stat_statements.track;'),'all','Diagnostic tracking setting must take effect');
   for(const c of cases) {
     sql('SELECT pg_stat_statements_reset();');
-    const r=await request(c.path,'GET',null,c.path.startsWith('/admin/'));assert.equal(hash(canonical(r.body)),c.hash);
+    const r=await request(c.path,'GET',null,c.path.startsWith('/admin/'));
+    if(c.overflow)assert.ok(overflowMatches(r.body,c.overflow));
+    if(c.hash)assert.equal(hash(canonical(r.body)),c.hash);
     const statements=query("SELECT query,calls,total_exec_time,rows,shared_blks_hit,shared_blks_read FROM pg_stat_statements WHERE query !~ '(pg_stat_statements|pg_reload_conf|ALTER SYSTEM)' ORDER BY query");
     const explain=[];
     const url=new URL(c.path,'http://local'),q=url.searchParams,map=url.pathname.split('/')[3];
@@ -168,7 +180,7 @@ async function diagnostic(cases,name) {
       if(s.query.startsWith('SELECT id,name,latitude,longitude')) values=[map,+q.get('swLat'),+q.get('neLat'),+q.get('swLng'),+q.get('neLng'),...(settings.stage==='p0'?[301]:[])];
       if(s.query.startsWith('SELECT * FROM place_marker_cells WHERE')) values=[map,3,+q.get('swLat'),+q.get('neLat'),+q.get('swLng'),+q.get('neLng')];
       if(s.query.startsWith('SELECT count FROM place_marker_cells')) values=[map,3,q.get('cellLatKey'),q.get('cellLngKey')];
-      if(s.query.startsWith('SELECT id FROM places WHERE')) values=[map,3,q.get('cellLatKey'),3,q.get('cellLngKey'),21];
+      if(s.query.startsWith('SELECT id FROM places WHERE')) values=settings.stage==='p0'?[map,3,q.get('cellLatKey'),3,q.get('cellLngKey'),21]:[map,q.get('cellLatKey'),q.get('cellLngKey'),3,3,21];
       if(s.query.includes('WHERE p.id IN (')) values=r.body.items.map(item=>item.id);
       if(s.query.includes('WHERE p."mapId"=') && q.has('groupKey')) {
         const [lat,lng]=q.get('groupKey').split(':').map(Number);
@@ -260,10 +272,22 @@ if(action==='up') {
   await diagnostic([cases[0],cases[1]],`${name}-sql.json`);
   for(let i=1;i<=spec.repeats;i++) {
     const config={rate:spec.rate,hot80:spec.mix==='hot80',cases};
-    await runLoad({...config,run:`${name}-${i}-warmup`,seconds:120});
-    await runLoad({...config,run:`${name}-${i}`,seconds:300,...(settings.stage==='p1'?{budgetMs:200}:{})});
+    for(const [suffix,seconds] of [['-warmup',120],['',300]]) {
+      try {await runLoad({...config,run:`${name}-${i}${suffix}`,seconds,...(!suffix&&(settings.stage==='p1'||settings.paired)?{budgetMs:200}:{})});}
+      catch(error) {
+        if(!settings.paired)throw error;
+        const folder=path.join(output,`${name}-${i}${suffix}`),e=JSON.parse(fs.readFileSync(path.join(folder,'execution.json'))),s=JSON.parse(fs.readFileSync(path.join(folder,'summary.json')));
+        if(!pairedThresholdFailure(e.exitCode,s))throw error;
+        console.log('Paired threshold failure retained; same prescribed duration and rate, no favorable retry');
+      }
+    }
     assert.deepEqual(fingerprint(),before,'Read workload must not change business data');
+    write(`${name}-${i}-db-check.json`,{unchanged:true});
     environment();
+  }
+  if(settings.paired) {
+    const logs=spawnSync('docker',['logs',appContainer],{encoding:'utf8',maxBuffer:64*1024*1024,windowsHide:true});
+    assert.equal(logs.status,0);fs.writeFileSync(path.join(output,name+'-app.log'),logs.stdout+'\n'+logs.stderr);
   }
 } else if(action==='probe'||action==='warmup') {
   const [name,rate='1',viewport='10',seconds='60']=args;
@@ -279,6 +303,43 @@ if(action==='up') {
     assert.equal(logs.status,0,'App log capture failed');
     fs.writeFileSync(path.join(output,name+'-app.log'),logs.stdout+'\n'+logs.stderr);
   }
+} else if(action==='write-cost') {
+  assert.equal(project,'loco-perf-e15-b','Write experiment is confined to the new disposable B database');
+  const ddl=fs.readFileSync(path.join(root,'apps/server-v3/src/main/resources/db/migration/V8__index_marker_round_lookups.sql'),'utf8');
+  const indexes=['places_map_round6_idx',...Array.from({length:3},(_,i)=>`places_map_round${i+1}_text_idx`)];
+  const drop=()=>sql(indexes.map(i=>`DROP INDEX IF EXISTS ${i};`).join('\n'));
+  const before=fingerprint();const results=[];
+  try {
+    for(let pair=1;pair<=5;pair++)for(const indexed of pair%2?[false,true]:[true,false]) {
+      drop();const ddlStart=Date.now();if(indexed)sql(ddl);const indexBuildSeconds=(Date.now()-ddlStart)/1000;sql('ANALYZE places;');
+      const name=`write-${pair}-${indexed?'indexed':'noindex'}`;
+      const sizes=query(`SELECT indexrelname,pg_relation_size(indexrelid) AS bytes FROM pg_stat_user_indexes WHERE indexrelname LIKE 'places_map_round%' ORDER BY 1`);
+      await runLoad({run:name+'-warmup',seconds:600,writeCycles:10,map:key('map',1)});
+      await runLoad({run:name,seconds:600,writeCycles:30,map:key('map',1)});
+      assert.deepEqual(fingerprint(),before,'Synthetic create/update/delete must restore business data');
+      results.push({pair,indexed,indexBuildSeconds,sizes,unchanged:true});write('write-cost-progress.json',results);
+    }
+    // SQL instrumentation stays outside the timed HTTP samples.
+    for(const indexed of [false,true]) {
+      drop();if(indexed)sql(ddl);sql('ANALYZE places; ALTER SYSTEM SET pg_stat_statements.track=\'all\'; SELECT pg_reload_conf();');
+      await new Promise(r=>setTimeout(r,1000));
+      const entries=[];
+      for(let i=0;i<5;i++) {
+        sql('SELECT pg_stat_statements_reset();');
+        const created=await request(`/api/maps/${key('map',1)}/places`,'POST',{name:'e14-write-cost',address:'synthetic',latitude:-70.1234567,longitude:-140.1234567});
+        entries.push({operation:'create',statements:query("SELECT query,calls,total_exec_time,rows,wal_bytes FROM pg_stat_statements WHERE query !~ '(pg_stat_statements|pg_reload_conf|ALTER SYSTEM)' ORDER BY query")});
+        sql('SELECT pg_stat_statements_reset();');
+        await request('/api/places/'+created.body.id,'PUT',{latitude:-70.2234567,longitude:-140.2234567});
+        entries.push({operation:'update',statements:query("SELECT query,calls,total_exec_time,rows,wal_bytes FROM pg_stat_statements WHERE query !~ '(pg_stat_statements|pg_reload_conf|ALTER SYSTEM)' ORDER BY query")});
+        sql('SELECT pg_stat_statements_reset();');
+        await request('/api/places/'+created.body.id,'DELETE');
+        entries.push({operation:'delete',statements:query("SELECT query,calls,total_exec_time,rows,wal_bytes FROM pg_stat_statements WHERE query !~ '(pg_stat_statements|pg_reload_conf|ALTER SYSTEM)' ORDER BY query")});
+      }
+      write(`write-sql-${indexed?'indexed':'noindex'}.json`,entries);
+      sql("ALTER SYSTEM SET pg_stat_statements.track='none'; SELECT pg_reload_conf();");
+      assert.deepEqual(fingerprint(),before);
+    }
+  } finally {drop();sql(ddl);sql("ANALYZE places; ALTER SYSTEM SET pg_stat_statements.track='none'; SELECT pg_reload_conf();");}
 } else if(action==='restart') {
   console.log(dc('restart','perf-app'));await ready();
 } else if(action==='cms'||action==='cms-probe') {
