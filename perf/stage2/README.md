@@ -1,0 +1,75 @@
+# P0 로컬 측정
+
+운영 절대 수치가 아닌 **동일 노트북 상대 비교**를 위한 도구다. P0에는 개선안 B가 없다. 앱/DB/발생기는 각각 CPU 2, 메모리 1.5/4/2GiB, DB shared_buffers 1GiB다. 외부 통신·호스트 포트가 없는 내부 Docker 네트워크를 사용하며 기존 개발 볼륨은 건드리지 않는다. 데이터 초기화는 이름이 `loco_perf`인 이 프로젝트 DB만 허용한다.
+
+## 파일과 실행 경계
+
+- `compose.yml`: 버전/digest·자원·내부 네트워크를 고정한다. PostGIS 이미지의 자동 확장 초기화를 비워 P3 이전 공간 확장 도입을 막는다. pg_stat_statements는 진단 구간만 추적한다.
+- `Dockerfile`, `Dockerfile.dockerignore`: 운영 Dockerfile의 codec-runtime 위에 **별도 perf JAR만** 복사한다. 일반 Docker 빌드의 build/비밀 파일 제외 규칙은 그대로다.
+- `data.mjs`, `data.test.mjs`: 고정 seed·UUID·시각·좌표와 데이터 생성 SQL/응답 검사를 검증한다. 대량 seed는 SQL, 경계 R은 실제 HTTP다. S/M의 리뷰 2천 건(평점1~5)은 전체 manifest에 기록한다. CMS 데이터는 10만 회원/방/장소/신고 및 50% 신고 처리행으로 별도 준비한다.
+- `load.js`: k6 constant-arrival-rate, 요청1개=iteration1개. 80% hot/20% 나머지 모든 방에 결정적으로 분산한다. 균등 요청은 모든 방을 순회한다. 성공200뿐 아니라 전체 업무 응답 hash를 검증한다. 마커 count 동률의 순서만 정규화한다. 각 경로의 n·지연·오류를 원본에 남긴다.
+- `run.mjs`: 준비·HTTP 관측·SQL 수집·k6·1초 자원 샘플·데이터 불변 검증. 호스트 HTTP 프록시 없이 준비 요청만 컨테이너 안의 curl로 전송한다. k6 본 측정은 앱에 직접 요청한다. 비밀번호/JWT는 매 준비 환경에서 생성해 gitignore 대상 build/private에 보관하고 원본 묶음에서 제외한다.
+- `check-artifacts.mjs`: 실제 일반/측정 JAR의 잘못된 profile 기동을 검사해 DB/Flyway 초기화 전 거절되는지 확인한다.
+- `summarize.mjs`: 압축된 k6 원본에서 경로별 표본·percentile을 다시 계산하고 CPU·메모리·샘플 간격을 요약한다.
+- `host-sample.ps1`: Windows 기본 성능 카운터로 호스트 전체 CPU·가용 메모리를 1초마다 읽는다. 컨테이너 CPU와 중복되므로 둘을 합산하지 않는다.
+- `package-results.mjs`, `publish-results.mjs`: 자격증명 제외·검사, 배경 컨테이너 비식별 처리, 파일별 SHA256, 압축 및 GitHub Release 업로드 후 digest 확인. 기존 원본/Release를 덮어쓰지 않는다. 업로드는 결과 검토·커밋 후 명시 명령으로만 실행한다.
+- `RequestLimitPolicy`, `PerfEnvironmentGuard`, `spring.factories`: 일반 JAR에서 perf 활성화를 **DB/Flyway 초기화 전에** 거절한다. 측정 JAR도 perf 단독 프로필·격리 확인·전용 DB·외부 발송 비활성 조건이 필요하다. 외부 배포를 기술적으로 완전히 막는 정책 시스템은 아니므로 측정 JAR 자체를 배포 대상으로 사용하지 않는다.
+- `src/perf/resources/*`: 일반 bootJar에 없는 표식과 설정. 요청 한도600,000/분 외 기존 limiter의 method+IP·synchronized·창 계산을 그대로 통과한다. 한도를 높여 누적 hit deque 메모리가 늘어나는 비용도 포함한다.
+- `PerfReadPlans`: perf JAR에만 들어가는 준비 시점 진단. 실제 CMS query builder의 SQL/EXPLAIN과 실제 JVM·Hikari·DB 설정을 기록한다. 부하 중에는 실행하지 않는다.
+
+## 재현 명령 (저장소 루트)
+
+Java 21, 저장소의 Node 준비 스크립트, Docker Desktop이 필요하다. Windows AC 연결·최고 성능 overlay를 매 측정 전후 확인한다. `.wslconfig`가 없으면 Docker가 보고한 실제 VM CPU/RAM을 기록한다. 다른 앱은 중단하지 않고 배경 사용량을 함께 측정한다.
+
+```powershell
+Set-Location apps/server-v3
+. ../admin/prepare-node.ps1
+./gradlew.bat spotlessApply allTests build perfBootJar --console=plain
+Set-Location ../..
+node --test perf/stage2/data.test.mjs
+docker build --target codec-runtime -f infra/docker/server-v3.Dockerfile -t loco-perf-codec:8.15.3 .
+docker build -f perf/stage2/Dockerfile -t loco-perf-p0:local .
+node perf/stage2/run.mjs up
+node perf/stage2/run.mjs seed S skew
+node perf/stage2/run.mjs boundary
+node perf/stage2/run.mjs seed M skew
+node perf/stage2/run.mjs verify-seed
+node perf/stage2/run.mjs pilot
+# P0 pilot에서 50req/s 확정. 지연 budget/SLA나 최대 지속 처리량은 아니다.
+node perf/stage2/run.mjs measure primary 50 1 hot80 5
+node perf/stage2/run.mjs measure viewport-small 50 0.01 hot80 1
+node perf/stage2/run.mjs measure viewport-large 50 10 hot80 1
+node perf/stage2/run.mjs measure viewport-full 50 100 hot80 1
+node perf/stage2/run.mjs measure uniform-requests 50 1 uniform 1
+node perf/stage2/run.mjs seed S skew
+node perf/stage2/run.mjs measure small-data 50 1 hot80 1
+node perf/stage2/run.mjs seed M uniform
+node perf/stage2/run.mjs measure uniform-data 50 1 hot80 1
+node perf/stage2/run.mjs seed M skew
+node perf/stage2/run.mjs diagnostic
+node perf/stage2/run.mjs profile
+node perf/stage2/run.mjs seed CMS-S uniform none
+node perf/stage2/run.mjs cms-probe
+node perf/stage2/run.mjs seed CMS-S uniform half
+node perf/stage2/run.mjs cms-probe
+node perf/stage2/run.mjs seed CMS uniform none
+node perf/stage2/run.mjs cms-probe
+node perf/stage2/run.mjs seed CMS uniform
+node perf/stage2/run.mjs cms
+node perf/stage2/run.mjs snapshot
+node perf/stage2/run.mjs stop
+```
+
+한 실행은 예열120초·측정300초다. P0 주 조건5회35분, 탐색6회42분, CMS1회7분으로 부하84분. pilot6분+준비/진단+회귀 약18분을 포함한 **예상110~130분(구현 제외)**을 실행 전에 고정했다. 실제 실패·재실행·준비 시간은 별도 기록한다. 모든 실행 원본은 `apps/server-v3/build/perf-stage2`에 남는다. 실패 실행도 지우지 않는다.
+
+`profile`은 대표 측정과 분리한 JFR 진단(예열120초+진단90초)이다. 환경변수/시스템 속성 이벤트를 끄고, 공개 원본에는 필요한 실행 샘플·소켓 대기·GC·잠금 이벤트만 내보낸다. 설정·프로파일러의 비용을 대표 지연에 섞지 않는다. [JFR 설정 근거](https://docs.oracle.com/en/java/javase/21/docs/specs/man/java.html).
+
+CMS는 1만/10만 행과 처리행0%/50%의 네 데이터셋에서 SQL/EXPLAIN·HTTP 결과를 준비 구간에 수집한다. 실제 부하는 10만·처리행50% 한 조합만 1회 탐색한다. 이 4종 준비 작업을 4회 부하 측정으로 부풀리지 않는다.
+
+## 해석
+
+P0는 현재 배포 기본 JVM/GC/풀 그대로의 **미튜닝 기준선**이다. 기본값이 병목이면 설정을 통제한 별도 대조군을 먼저 만들고 B와 비교해야 하며, 현재 설정만을 근거로 기술의 우열을 선언하지 않는다. p99는 경로별 성공 표본1만 미만일 때 탐색값이다. E-10 지연 budget은 P0 결과를 사용자와 검토한 후 정한다. 지연 budget 없는 pilot의 높은 RPS를 최대 지속 처리량으로 발표하지 않는다.
+
+주 조건의 실행별 p95 범위가 중앙값의10%를 넘으면 변동 원인을 먼저 조사한다. k6/배경 부하·throttling·OOM·TCP 실패·dropped·업무 응답 오류를 원본과 함께 보고한다. 평균 percentile을 전체 p99라고 부르지 않는다. 원본 압축은 private/비밀·세션·쿠키·토큰을 제외하고, 다른 프로젝트 컨테이너 이름은 비식별 별칭으로 바꾼 사본만 Release에 올린다.
+
+기술 근거: [k6 constant arrival rate](https://grafana.com/docs/k6/latest/using-k6/scenarios/executors/constant-arrival-rate/), [k6 2.3.0](https://github.com/grafana/k6/releases/tag/v2.3.0), [Windows 최고 성능 overlay](https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/customize-power-slider).

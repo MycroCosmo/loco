@@ -1,0 +1,17 @@
+# Included only by perfBootJar. Never packaged by bootJar.
+loco:
+  cleanup:
+    enabled: false
+  notifications:
+    service-account: ''
+    base-url: http://127.0.0.1:9
+  kakao:
+    base-url: http://127.0.0.1:9
+    api-key: ''
+cms:
+  storage:
+    enabled: false
+spring:
+  mail:
+    host: 127.0.0.1
+    port: 9

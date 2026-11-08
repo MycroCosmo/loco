@@ -92,6 +92,24 @@ tasks.named('processResources') {
     dependsOn 'adminBuild'
     from('../admin/dist') { into 'admin-ui' }
 }
+
+sourceSets {
+    perf {
+        compileClasspath += sourceSets.main.output + configurations.compileClasspath
+        runtimeClasspath += sourceSets.main.output + configurations.runtimeClasspath
+    }
+}
+
+tasks.register('perfBootJar', org.springframework.boot.gradle.tasks.bundling.BootJar) {
+    description = '격리된 로컬 측정 전용 JAR (일반 배포 금지)'
+    group = 'build'
+    dependsOn 'perfClasses'
+    archiveClassifier = 'perf-local-only'
+    targetJavaVersion = JavaVersion.VERSION_21
+    mainClass = tasks.named('bootJar').get().mainClass
+    classpath = sourceSets.perf.runtimeClasspath
+    manifest { attributes 'Main-Class': 'org.springframework.boot.loader.launch.PropertiesLauncher' }
+}
 def vipsExecutable = providers.environmentVariable('VIPS_EXECUTABLE').getOrElse(windowsHost
         ? layout.buildDirectory.file('vips/vips-dev-8.15/bin/vips.exe').get().asFile.absolutePath : 'vips')
 tasks.register('prepareVips', Exec) {
