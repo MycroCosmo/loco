@@ -161,3 +161,5 @@ P0는 현재 배포 기본 JVM/GC/풀 그대로의 **미튜닝 기준선**이다
 기술 근거: [k6 constant arrival rate](https://grafana.com/docs/k6/latest/using-k6/scenarios/executors/constant-arrival-rate/), [k6 2.3.0](https://github.com/grafana/k6/releases/tag/v2.3.0), [Windows 최고 성능 overlay](https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/customize-power-slider).
 
 P2 쓰기 재측정: [P2_WRITE_RETEST.md](P2_WRITE_RETEST.md). 기존 읽기·전체viewport는 승인, 새 단일VU5쌍은 모두 유효하지만 반복 편차로 최종 채택 보류. 원본 분리·복구 완료·기준 변경 없음.
+
+[E-23 쓰기 본표본300 결과·E-24 선택지](P2_WRITE_E23.md): 19유효/1무효·HTTP9,300성공, 편차/간섭으로채택보류. 이전두쓰기세션 원본보존·7개복구.
