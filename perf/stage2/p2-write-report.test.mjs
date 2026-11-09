@@ -3,12 +3,20 @@ import assert from 'node:assert/strict';
 import {writeRetestSchedule} from './p2-protocol.mjs';
 import {evaluateWriteRetest} from './p2-write-report.mjs';
 
-const fixture=()=>writeRetestSchedule().flatMap(item=>[false,true].map(warmup=>({
-  run:item.name+(warmup?'-warmup':''),writeCycles:warmup?10:30,writeConcurrency:1,
+const fixture=(cycles=30)=>writeRetestSchedule().flatMap(item=>[false,true].map(warmup=>({
+  run:item.name+(warmup?'-warmup':''),writeCycles:warmup?10:cycles,writeConcurrency:1,
   validity:{valid:true},checks:{fails:0},dropped:0,collectorErrors:[],execution:{exitCode:0,hostObservationBracketsWorkload:true},
-  status:{200:warmup?20:60,201:warmup?10:30},http:{med:10,'p(95)':20,'p(99)':25},
-  endpoints:Object.fromEntries(['place-create','place-update','place-delete'].map(k=>[k,{n:warmup?10:30,p50:10,p95:20,p99:25}]))
+  status:{200:warmup?20:cycles*2,201:warmup?10:cycles},http:{med:10,'p(95)':20,'p(99)':25},
+  endpoints:Object.fromEntries(['place-create','place-update','place-delete'].map(k=>[k,{n:warmup?10:cycles,p50:10,p95:20,p99:25}]))
 })));
+
+test('E-23 requires 300 samples per endpoint and keeps the same variance limit',()=>{
+  const rows=fixture(300);assert.equal(evaluateWriteRetest(rows,300).totals.requests,9300);
+  assert.equal(evaluateWriteRetest(rows,300).passed,true);
+  assert.throws(()=>evaluateWriteRetest(fixture(),300));
+  rows.find(r=>r.run==='write-3-c1-b').endpoints['place-create'].p95=23;
+  assert.equal(evaluateWriteRetest(rows,300).passed,false);
+});
 
 test('complete stable five-pair writes pass; missing or duplicated intervals never do',()=>{
   const rows=fixture();assert.equal(evaluateWriteRetest(rows).passed,true);

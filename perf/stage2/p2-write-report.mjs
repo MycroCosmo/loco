@@ -4,13 +4,14 @@ import {pathToFileURL} from 'node:url';
 import {distribution} from './paired-analysis.mjs';
 import {protocol,writeRetestSchedule} from './p2-protocol.mjs';
 
-export function evaluateWriteRetest(rows) {
+export function evaluateWriteRetest(rows,measuredCycles=30) {
+  assert.ok([30,300].includes(measuredCycles),'Only approved sample counts');
   const schedule=writeRetestSchedule();
   assert.equal(rows.length,20,'Keep every prescribed main and warmup interval');
   for(const item of schedule)for(const warmup of [false,true]) {
     const run=item.name+(warmup?'-warmup':'');
     const matches=rows.filter(r=>r.run===run);assert.equal(matches.length,1,'Missing or duplicate '+run);
-    const r=matches[0],cycles=warmup?10:30;
+    const r=matches[0],cycles=warmup?10:measuredCycles;
     assert.equal(r.writeConcurrency,1);assert.equal(r.writeCycles,cycles);
     for(const endpoint of ['place-create','place-update','place-delete'])assert.equal(r.endpoints[endpoint].n,cycles);
   }
@@ -34,20 +35,22 @@ export function evaluateWriteRetest(rows) {
     totals:{intervals:rows.length,requests:rows.reduce((n,r)=>n+Object.values(r.status).reduce((a,b)=>a+b,0),0),
       mainRequests:mains.reduce((n,r)=>n+Object.values(r.status).reduce((a,b)=>a+b,0),0),
       failedChecks:rows.reduce((n,r)=>n+r.checks.fails,0),dropped:rows.reduce((n,r)=>n+r.dropped,0)},
-    note:'No sample exclusions or replacement. p99 is descriptive: only 30 samples per endpoint per main run. Existing p95 regression/range gates remain unchanged.'};
+    measuredCycles,note:`No sample exclusions or replacement. p99 is descriptive: ${measuredCycles} samples per endpoint per main run. Existing p95 regression/range gates remain unchanged.`};
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href) {
-  const base='apps/server-v3/build/perf-stage2-p2-write-retest1';
+  const mode=process.argv[2]||'write-retest';assert.ok(['write-retest','write-e23'].includes(mode));
+  const suffix=mode==='write-e23'?'write-e23':'write-retest1';
+  const base='apps/server-v3/build/perf-stage2-p2-'+suffix;
   const read=p=>JSON.parse(fs.readFileSync(p));
-  const session=read(base+'/write-retest-session.json'),background=read(base+'/background-manifest.json'),verification=read(base+'/final-verification.json');
+  const session=read(base+'/'+mode+'-session.json'),background=read(base+'/background-manifest.json'),verification=read(base+'/final-verification.json');
   assert.ok(session.finishedAt&&background.restored&&verification.allRunning&&verification.originalsUnchanged);
   assert.deepEqual(session.schedule,writeRetestSchedule());assert.equal(session.runs.length,10);
   assert.deepEqual(session.sourcePlaces,read('apps/server-v3/build/perf-stage2-p2/writes-session.json').sourcePlaces);
-  const rows=['a1','b'].flatMap(side=>read(`apps/server-v3/build/perf-stage2-p2-${side}-write-retest1/summary.json`));
-  const evaluation=evaluateWriteRetest(rows),runs=[];
+  const rows=['a1','b'].flatMap(side=>read(`apps/server-v3/build/perf-stage2-p2-${side}-${suffix}/summary.json`));
+  const evaluation=evaluateWriteRetest(rows,mode==='write-e23'?300:30),runs=[];
   for(const item of session.runs) {
-    const dir=`apps/server-v3/build/perf-stage2-p2-${item.side}-write-retest1`,row=rows.find(r=>r.run===item.name);
+    const dir=`apps/server-v3/build/perf-stage2-p2-${item.side}-${suffix}`,row=rows.find(r=>r.run===item.name);
     const snapshot=read(dir+'/'+item.name+'-after.json');
     assert.equal(snapshot.jarSha256,session.expectedJars[item.side]);assert.equal(snapshot.runtime.maxHeapBytes,protocol.heapBytes);
     assert.equal(snapshot.sqlTrackingAtSnapshot,'none');assert.ok(snapshot.containers.every(c=>!c.oomKilled));

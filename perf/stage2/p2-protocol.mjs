@@ -24,10 +24,13 @@ export function fullViewportSchedule() {
   return Array.from({length:3},(_,i)=>({name:'full-viewport-'+(i+1),rate:16,viewport:100}));
 }
 export const writeRetestSchedule=()=>writeSchedule().filter(r=>r.concurrency===1);
-export function writeSpec(name,concurrency) {
+export const writeSessions={'write-retest':'write-retest1','write-e23':'write-e23'};
+export function writeSpec(name,concurrency,session='') {
   assert.match(name||'',/^[a-z0-9-]+$/);concurrency=Number(concurrency);
   assert.ok([1,2,4,8,16].includes(concurrency),'Only approved write concurrency levels');
-  return {name,concurrency,warmupCycles:10*concurrency,measuredCycles:30*concurrency};
+  assert.ok(['',...Object.values(writeSessions)].includes(session),'Unknown write session');
+  if(session==='write-e23')assert.equal(concurrency,1,'E-23 changes sample count only for single-VU writes');
+  return {name,concurrency,warmupCycles:10*concurrency,measuredCycles:(session==='write-e23'?300:30)*concurrency};
 }
 export function evaluate(reads) {
   const median=values=>[...values].sort((a,b)=>a-b)[2];

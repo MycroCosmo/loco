@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import {spawn,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {withPausedBackground,restoreBackground} from './background-lease.mjs';
-import {fullViewportSchedule} from './p2-protocol.mjs';
+import {fullViewportSchedule,writeSessions} from './p2-protocol.mjs';
 
 const original='apps/server-v3/build/perf-stage2-p2';
 const mode=process.argv[2]||'all';
 const phase=mode==='watchdog'?(process.argv[4]||'all'):mode==='restore'?(process.argv[3]||(fs.existsSync(original+'/background-remaining-manifest.json')?'remaining':'all')):mode;
-const base=original+(phase==='write-retest'?'-write-retest1':'');
+const base=original+(writeSessions[phase]?'-'+writeSessions[phase]:'');
 fs.mkdirSync(base,{recursive:true});
 const file=base+'/background'+(phase==='remaining'?'-remaining':'')+'-manifest.json';
 const ids=JSON.parse(fs.readFileSync(original+'/private/approved-background.json'));
@@ -20,7 +20,7 @@ function record(phase,data) {
   manifest.history.push({at:new Date().toISOString(),phase,...data});
   if(phase==='restored')manifest.restored=data.restored;
   fs.writeFileSync(file,JSON.stringify(manifest,null,2));
-  if(phase==='before'&&['all','remaining','write-retest'].includes(mode)) {
+  if(phase==='before'&&['all','remaining',...Object.keys(writeSessions)].includes(mode)) {
     const monitor=spawn(process.execPath,[fileURLToPath(import.meta.url),'watchdog',String(process.pid),mode],{detached:true,stdio:'ignore',windowsHide:true});monitor.unref();
   }
 }
@@ -40,7 +40,7 @@ if(mode==='watchdog') {
 } else if(mode==='restore') {
   try {stopOwnWorkloads();} finally {restoreBackground(ids,docker,record);}
 } else {
-  assert.ok(['all','remaining','write-retest'].includes(mode));assert.ok(!fs.existsSync(file),'Never overwrite a previous pause/restore manifest');
+  assert.ok(['all','remaining',...Object.keys(writeSessions)].includes(mode));assert.ok(!fs.existsSync(file),'Never overwrite a previous pause/restore manifest');
   assert.equal(command('git',['status','--porcelain']),'','Commit the protocol before timing');
   if(mode==='remaining')assert.equal(JSON.parse(fs.readFileSync(base+'/reads-session.json')).runs.length,20,'Preserve and complete all prescribed reads before resuming later phases');
   let child;
@@ -59,8 +59,8 @@ if(mode==='watchdog') {
   try {
     await withPausedBackground(ids,docker,record,async()=>{
       try {
-        if(mode==='write-retest') {
-          await run('p2-paired',['write-retest']);
+        if(writeSessions[mode]) {
+          await run('p2-paired',[mode]);
           record('measurement-complete',{completedAt:new Date().toISOString()});
           return;
         }

@@ -32,6 +32,15 @@ test('write retest preserves all five AB/BA pairs and 10+30 cycles in isolated o
   assert.throws(()=>stageSettings('p2-b','../overwrite'));
   assert.throws(()=>stageSettings('p0','write-retest1'));
 });
+test('E-23 increases measured single-VU samples only, preserving both earlier sessions',()=>{
+  assert.deepEqual(writeSpec('e23',1,'write-e23'),{name:'e23',concurrency:1,warmupCycles:10,measuredCycles:300});
+  assert.equal(writeSpec('old',1).measuredCycles,30);
+  assert.equal(writeSpec('old',1,'write-retest1').measuredCycles,30);
+  assert.throws(()=>writeSpec('e23',2,'write-e23'));
+  const settings=['','write-retest1','write-e23'].map(s=>stageSettings('p2-b',s));
+  assert.equal(new Set(settings.map(s=>s.project)).size,3);assert.equal(new Set(settings.map(s=>s.output)).size,3);
+  assert.equal(new Set(settings.map(s=>s.image)).size,1);
+});
 test('full viewport follows the approved 16 req/s three-run contract, not the 1% load',()=>{
   assert.equal(fullViewportSchedule().length,3);
   assert.ok(fullViewportSchedule().every(r=>r.rate===16&&r.viewport===100));
