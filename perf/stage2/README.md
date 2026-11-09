@@ -9,6 +9,7 @@
 - `sql-replay.mjs`/테스트: pg_stat_statements가 정규화한 CTE 파라미터를 실제 소스 SQL과 대조해 EXPLAIN한다. 문장·토큰·값이 다르거나 누락되면 중단한다. 임의의 자리 번호/상수 추측은 하지 않는다.
 - `p2-write NAME N`: 같은 hot 방의 서로 다른 셀을 VU별로 사용한다. 동시 N=1/2/4/8/16, VU당 CRUD 10회 예열+30회 측정이며 기존 E14의 단일 VU 동작은 유지한다. 쓰기 전후 업무 DB hash가 같아야 한다. 단일 VU의 5쌍 회귀와 다중 VU의 각 1쌍 탐색을 분리한다.
 - `p2-write-sql NAME N`: VU당 CRUD 5회의 별도 SQL 진단이다. 추적을 켜고 lock SELECT 시간(대기 포함)·SQL 수·WAL을 남긴 후 끈다. 이 실행의 HTTP 시간은 대표 지연에 섞지 않는다.
+- `host-sample.ps1`/`interference.mjs`: 시작 manifest의 상위 CPU·메모리 프로세스와5초 간격 호스트 관측,회차별 `validity.json`을 기록한다. 무효 회차를 자동 재실행/제외하지 않으며 warmup 간섭도 채택을 막는다. 규칙·예외·관측 한계는 [설계 §13](../../apps/server-v3/PERF_STAGE2_P2_DESIGN.md)에 측정 전에 고정했다.
 
 P2는 역할별 `PERF_STAGE=p2-a0/p2-a1/p2-b`로 DB·출력 경로를 분리한다. A0=`loco-perf-p0:local`, A1=`loco-perf-e15-b:local`은 재빌드하지 않는다. B만 현재 perfBootJar로 `loco-perf-p2-b:local`에 빌드한다. 원래 P0/A1 JAR SHA는 설계 §8·프로토콜에 고정했다. 외부 API 키·개발 DB·기존 볼륨을 사용하지 않는다.
 

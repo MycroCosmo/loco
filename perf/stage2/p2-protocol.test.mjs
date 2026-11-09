@@ -18,7 +18,7 @@ test('write sampling retains five single-VU pairs and one exploratory pair per c
   for(const c of [1,2,4,8,16])assert.equal(writeSpec('example',c).measuredCycles,30*c);
   assert.throws(()=>writeSpec('example',3));assert.throws(()=>writeSpec('../old',1));
 });
-const readings=()=>readSchedule().map(r=>({run:r.name+'-1',http:{'p(95)':r.viewport===1?(r.side==='b'?10.9:10):(r.side==='b'?79:100),'p(99)':r.viewport===1?(r.side==='b'?10.9:10):110},checks:{fails:0},dropped:0,status:{200:100},collectorErrors:[]}));
+const readings=()=>readSchedule().map(r=>({run:r.name+'-1',validity:{valid:true},warmupValidity:{valid:true},http:{'p(95)':r.viewport===1?(r.side==='b'?10.9:10):(r.side==='b'?79:100),'p(99)':r.viewport===1?(r.side==='b'?10.9:10):110},checks:{fails:0},dropped:0,status:{200:100},collectorErrors:[]}));
 test('both fixed gates pass only with clean complete five-pair evidence',()=>{
   const runs=readings();assert.ok(Object.values(evaluate(runs)).every(r=>r.passed));
   assert.throws(()=>evaluate(runs.slice(1)),/Missing/);
@@ -32,3 +32,5 @@ test('1% p99 regression, 10% improvement miss and large variance each block adop
   runs=readings();runs.find(r=>r.run==='pair-1-v10-a1-1').http['p(95)']=120;
   assert.equal(evaluate(runs)[10].stable,false);
 });
+
+test('detected interference blocks adoption without discarding the prescribed sample',()=>{const runs=readings();runs[0].validity={valid:false};assert.equal(evaluate(runs)[1].valid,false);assert.equal(evaluate(runs)[1].stats['p(95)'].a.length,5);});

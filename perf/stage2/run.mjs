@@ -9,6 +9,7 @@ import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measu
 import {overflowMatches} from './overflow-contract.js';
 import {bindTemplate,javaSqlTemplate} from './sql-replay.mjs';
 import {writeSpec} from './p2-protocol.mjs';
+import {assessInterference} from './interference.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const settings=stageSettings();
@@ -83,7 +84,11 @@ function environment() {
   assert.equal(power.ac,1,'AC connection required'); assert.equal(power.overlay.toLowerCase(),'ded574b5-45a0-4f42-8737-46345c09c238','Best performance overlay required');
   const docker=JSON.parse(command('docker',['info','--format','{{json .}}']));
   const containers=command('docker',['ps','--format','json']).split('\n').filter(Boolean).map(s=>JSON.parse(s));
-  return {at:new Date().toISOString(),power,docker:{version:docker.ServerVersion,cpus:docker.NCPU,memory:docker.MemTotal,os:docker.OperatingSystem},hybridCoreCaveat:'i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures',background:containers.filter(c=>!c.Names.startsWith(project)).map(c=>({alias:'background-'+hash(c.ID).slice(0,8)}))};
+  const processFile=path.join(output,'process-snapshot.jsonl');
+  command('pwsh',['-NoProfile','-File','perf/stage2/host-sample.ps1','-OutputFile',processFile,'-Seconds','6']);
+  const hostProcesses=JSON.parse(fs.readFileSync(processFile,'utf8').trim().split('\n').at(-1));
+  assert.ok(hostProcesses.processCount>=10,'Host processes are sandbox-hidden; use the authorized host execution environment');
+  return {at:new Date().toISOString(),power,hostProcesses,docker:{version:docker.ServerVersion,cpus:docker.NCPU,memory:docker.MemTotal,os:docker.OperatingSystem},hybridCoreCaveat:'i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures',background:containers.filter(c=>!c.Names.startsWith(project)).map(c=>({alias:'background-'+hash(c.ID).slice(0,8)}))};
 }
 function snapshot(name) {
   write(name,{environment:environment(),git:command('git',['rev-parse','HEAD']),dirty:command('git',['status','--porcelain']),jarSha256:command('docker',['exec',appContainer,'sha256sum','/app/app.jar']).split(/\s+/)[0],runtime:JSON.parse(fs.readFileSync(path.join(output,'runtime/runtime.json'))),sqlTrackingAtSnapshot:sql('SHOW pg_stat_statements.track;'),data:fingerprint(),images:query('SELECT extname FROM pg_extension'),containers:JSON.parse(command('docker',['inspect',...dc('ps','-q').split(/\s+/)])).map(c=>({id:c.Id,name:c.Name,image:c.Image,cpu:c.HostConfig.NanoCpus,memory:c.HostConfig.Memory,oomKilled:c.State.OOMKilled,network:Object.keys(c.NetworkSettings.Networks)}))});
@@ -129,7 +134,14 @@ async function runLoad(config) {
   const progress=setInterval(()=>console.log(`${config.run}: ${Math.round((Date.now()-start)/1000)}/${config.seconds}s`),60000);
   const code=await new Promise((resolve,reject)=>{child.on('exit',resolve);child.on('error',reject);});
   clearInterval(progress);abort.abort();await observing;samples.end();fs.closeSync(log);
-  host.kill();fs.closeSync(hostLog);
+  if(host.exitCode===null&&host.signalCode===null) {
+    const hostExit=new Promise(resolve=>host.once('exit',resolve));host.kill();await hostExit;
+  }
+  fs.closeSync(hostLog);
+  const readLines=file=>fs.readFileSync(path.join(folder,file),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
+  const validity=assessInterference(readLines('host.jsonl'),readLines('resources.jsonl'));
+  write(config.run+'/validity.json',validity);
+  if(!validity.valid)console.log('INVALID interference: '+validity.reasons.join(', ')+'; original run retained, no automatic retry');
   const result={run:config.run,exitCode:code,elapsedSeconds:(Date.now()-start)/1000};write(`${config.run}/execution.json`,result);
   console.log(JSON.stringify(result));
   if(code!==0) throw Error('k6 failed; raw results retained at '+folder);

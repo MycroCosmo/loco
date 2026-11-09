@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 
 const {output:base,project,stage}=stageSettings();
 const destination=process.argv[2];
-assert.match(destination||'',/^p[01]-[a-z0-9-]+$/);
+assert.match(destination||'',/^p[012]-[a-z0-9-]+$/);
 assert.ok(destination.startsWith(stage+'-'),'Bundle name must match PERF_STAGE');
 const staging=`apps/server-v3/build/${destination}`;
 assert.ok(!fs.existsSync(staging),'Use a new bundle name; never overwrite prior evidence');

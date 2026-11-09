@@ -33,7 +33,7 @@ export function evaluate(reads) {
       const r=reads.find(r=>r.run===`pair-${i+1}-v${viewport}-${side}-1`);assert.ok(r,'Missing prescribed run');return r;
     });
     const a=select(baseline),b=select('b'),all=[...a,...b];
-    const valid=all.every(r=>r.checks.fails===0&&r.dropped===0&&Object.keys(r.status).every(s=>s==='200')&&r.collectorErrors.length===0);
+    const valid=all.every(r=>r.validity?.valid===true&&r.warmupValidity?.valid===true&&r.checks.fails===0&&r.dropped===0&&Object.keys(r.status).every(s=>s==='200')&&r.collectorErrors.length===0);
     const stats={};
     for(const metric of ['p(95)','p(99)']) {
       const av=a.map(r=>r.http[metric]),bv=b.map(r=>r.http[metric]);

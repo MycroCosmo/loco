@@ -23,7 +23,7 @@ if(mode==='evaluate') {
   assert.equal(cmd('git',['status','--porcelain']),'','Commit measured code first');
   const bJar=hash(fs.readFileSync('apps/server-v3/build/libs/loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar'));
   const schedule=mode==='reads'?readSchedule():writeSchedule();
-  const session={startedAt:new Date().toISOString(),source:cmd('git',['rev-parse','HEAD']),mode,protocol,userDeclaration:process.env.PERF_HEAVY_APPS_STATUS,expectedJars:{...originalJars,b:bJar},schedule,runs:[]};
+  const session={startedAt:new Date().toISOString(),source:cmd('git',['rev-parse','HEAD']),implementation:'91d653a2b69a5f403f9969bd754f3c46eac76735',mode,protocol,userDeclaration:process.env.PERF_HEAVY_APPS_STATUS,confirmedConditions:'AC connected, Windows best performance, sleep disabled, Windows Update paused, no heavy applications until measurement ends',expectedJars:{...originalJars,b:bJar},schedule,runs:[]};
   fs.writeFileSync(file,JSON.stringify(session,null,2));
   for(const item of schedule) {
     for(const other of ['a0','a1','b'].filter(s=>s!==item.side))await run(other,'run','stop');
