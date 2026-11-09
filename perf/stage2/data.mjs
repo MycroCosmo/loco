@@ -14,7 +14,7 @@ export function pairedThresholdFailure(exitCode, summary) {
 }
 export function stageSettings(stage = process.env.PERF_STAGE || 'p0', session = process.env.PERF_SESSION || '') {
   if (!['p0','p1','e15-a','e15-b','p2-a0','p2-a1','p2-b'].includes(stage)) throw Error('Unknown performance stage');
-  if (session && (!['write-retest1','write-e23'].includes(session)||!stage.startsWith('p2-'))) throw Error('Unknown performance session');
+  if (session && (!['write-retest1','write-e23','write-e24'].includes(session)||!stage.startsWith('p2-'))) throw Error('Unknown performance session');
   const suffix=session?'-'+session:'';
   const mapped={'e15-a':'p0','e15-b':'p1','p2-a0':'p0','p2-a1':'p1','p2-b':'p2'};
   const images={'e15-a':'loco-perf-p0:local','p2-a0':'loco-perf-p0:local','p2-a1':'loco-perf-e15-b:local'};

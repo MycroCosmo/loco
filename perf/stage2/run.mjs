@@ -340,7 +340,7 @@ if(action==='up') {
     fs.writeFileSync(path.join(output,name+'-app.log'),logs.stdout+'\n'+logs.stderr);
   }
 } else if(action==='p2-write'||action==='p2-write-sql') {
-  assert.match(project,/^loco-perf-p2-(a1|b)(-write-(retest1|e23))?$/,'P2 writes require isolated A1/B projects');
+  assert.match(project,/^loco-perf-p2-(a1|b)(-write-(retest1|e23|e24))?$/,'P2 writes require isolated A1/B projects');
   const {name,concurrency,warmupCycles,measuredCycles}=writeSpec(args[0],args[1],process.env.PERF_SESSION||'');
   const before=fingerprint(),diagnosis=action==='p2-write-sql';
   snapshot(name+'-manifest.json');

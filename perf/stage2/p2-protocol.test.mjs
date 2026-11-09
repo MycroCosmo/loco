@@ -41,6 +41,12 @@ test('E-23 increases measured single-VU samples only, preserving both earlier se
   assert.equal(new Set(settings.map(s=>s.project)).size,3);assert.equal(new Set(settings.map(s=>s.output)).size,3);
   assert.equal(new Set(settings.map(s=>s.image)).size,1);
 });
+test('E-24 preserves E-23 workload and isolates the new one-time session',()=>{
+  assert.deepEqual(writeSpec('same',1,'write-e24'),writeSpec('same',1,'write-e23'));
+  assert.throws(()=>writeSpec('bad',2,'write-e24'));
+  const before=stageSettings('p2-b','write-e23'),after=stageSettings('p2-b','write-e24');
+  assert.equal(after.image,before.image);assert.notEqual(after.project,before.project);assert.notEqual(after.output,before.output);
+});
 test('full viewport follows the approved 16 req/s three-run contract, not the 1% load',()=>{
   assert.equal(fullViewportSchedule().length,3);
   assert.ok(fullViewportSchedule().every(r=>r.rate===16&&r.viewport===100));

@@ -7,9 +7,9 @@ import {hash} from './data.mjs';
 const [tag,codeSha,resultSha,archive,report]=process.argv.slice(2);
 assert.match(tag||'',/^perf-stage2-p[012]-[a-z0-9-]+$/);
 const stage=tag.split('-')[2].toUpperCase();
-assert.ok(!report||['E14_E15_RESULTS.md','P2_WRITE_RETEST.md','P2_WRITE_E23.md'].includes(report),'Only an approved paired report may override the default');
+assert.ok(!report||['E14_E15_RESULTS.md','P2_WRITE_RETEST.md','P2_WRITE_E23.md','P2_WRITE_E24.md'].includes(report),'Only an approved paired report may override the default');
 const reportFile=report||`${stage}_RESULTS.md`;
-const description=report==='P2_WRITE_E23.md'?'E-23 단일 요청자 쓰기 A1/B5쌍, 사전 승인된 예열10+본300 CRUD. AB/BA·간섭·편차·회귀 기준 불변. 이전 두 쓰기 세션과 원본을 병기하며 최종 판정은 결과 문서를 따릅니다.':report==='P2_WRITE_RETEST.md'?'P2 단일 요청자 쓰기 A1/B 전체5쌍 새 세션. 예열10+본30 CRUD·AB/BA·간섭·편차 기준 불변, 기존 원본과 분리. 모든 결과를 보존하며 최종 판정은 결과 문서를 따릅니다.':report?'E-14 ROUND 표현식 인덱스·쓰기 비용, E-15 원본 P0와 P1+E-14의 같은 세션 AB/BA 5쌍. 1% 50req/s·10% 16req/s. 실패도 보존하며 판정은 결과 문서를 따릅니다.':stage==='P2' ? '원래 P0 대비1%50req/s 회귀와 A1 대비10%16req/s 개선의 같은 세션 AB/BA5쌍,전체 viewport·쓰기 동시1/2/4/8/16.무효·실패 회차도 보존하며 채택은 결과 문서를 따릅니다.' : stage==='P0'
+const description=report==='P2_WRITE_E24.md'?'E-24 B 새 세션: 단일VU 예열10+본300 CRUD, A1/B5쌍 AB/BA. 모든 paired p95 비율≤1.10 필수, 반복편차10%는 경고만. 유효성 불변·과거 소급적용/추가반복 없음.':report==='P2_WRITE_E23.md'?'E-23 단일 요청자 쓰기 A1/B5쌍, 사전 승인된 예열10+본300 CRUD. AB/BA·간섭·편차·회귀 기준 불변. 이전 두 쓰기 세션과 원본을 병기하며 최종 판정은 결과 문서를 따릅니다.':report==='P2_WRITE_RETEST.md'?'P2 단일 요청자 쓰기 A1/B 전체5쌍 새 세션. 예열10+본30 CRUD·AB/BA·간섭·편차 기준 불변, 기존 원본과 분리. 모든 결과를 보존하며 최종 판정은 결과 문서를 따릅니다.':report?'E-14 ROUND 표현식 인덱스·쓰기 비용, E-15 원본 P0와 P1+E-14의 같은 세션 AB/BA 5쌍. 1% 50req/s·10% 16req/s. 실패도 보존하며 판정은 결과 문서를 따릅니다.':stage==='P2' ? '원래 P0 대비1%50req/s 회귀와 A1 대비10%16req/s 개선의 같은 세션 AB/BA5쌍,전체 viewport·쓰기 동시1/2/4/8/16.무효·실패 회차도 보존하며 채택은 결과 문서를 따릅니다.' : stage==='P0'
   ? 'M·편향·hot80%·viewport1%, A5회. 탐색은 채택 근거 제외. E-10 지연 budget 미확정.'
   : '좌표 정합성·결정적 overflow 반영 후 M·편향·hot80%·viewport10% 새 기준선과 viewport1% 회귀, 전체 범위 스트레스. p95 200ms·오류0·dropped0. 실패/상한·반복 결과는 결과 문서를 따릅니다.';
 assert.match(codeSha||'',/^[0-9a-f]{40}$/);assert.match(resultSha||'',/^[0-9a-f]{40}$/);

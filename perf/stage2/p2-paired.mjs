@@ -3,7 +3,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {spawn,spawnSync} from 'node:child_process';
 import {stageSettings,hash} from './data.mjs';
-import {protocol,originalJars,readSchedule,writeSchedule,writeRetestSchedule,writeSessions,writeSpec,evaluate} from './p2-protocol.mjs';
+import {protocol,originalJars,readSchedule,writeSchedule,writeRetestSchedule,writeSessions,writeSpec,writeE24Policy,evaluate} from './p2-protocol.mjs';
 
 const mode=process.argv[2];assert.ok(['reads','writes',...Object.keys(writeSessions),'evaluate'].includes(mode),'Unknown paired mode');
 const writeSession=writeSessions[mode];
@@ -36,6 +36,10 @@ if(mode==='evaluate') {
     session.preservedOriginalSession='apps/server-v3/build/perf-stage2-p2/writes-session.json';
     session.writeSpec=writeSpec('protocol',1,writeSession);
     if(mode==='write-e23')session.preservedRetestSession='apps/server-v3/build/perf-stage2-p2-write-retest1/write-retest-session.json';
+    if(mode==='write-e24') {
+      session.adoptionPolicy=writeE24Policy;
+      session.preservedEarlierSessions=['apps/server-v3/build/perf-stage2-p2-write-retest1/write-retest-session.json','apps/server-v3/build/perf-stage2-p2-write-e23/write-e23-session.json'];
+    }
     assert.equal(bJar,'639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e','Retest the unchanged P2 JAR');
     fs.writeFileSync(file,JSON.stringify(session,null,2));
   }
