@@ -9,7 +9,7 @@ import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measu
 import {overflowMatches} from './overflow-contract.js';
 import {bindTemplate,javaSqlTemplate} from './sql-replay.mjs';
 import {writeSpec} from './p2-protocol.mjs';
-import {assessInterference} from './interference.mjs';
+import {assessInterference,waitForHostCoverage} from './interference.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const settings=stageSettings();
@@ -129,22 +129,36 @@ async function runLoad(config) {
   const log=fs.openSync(path.join(folder,'k6.log'),'w');
   const hostLog=fs.openSync(path.join(folder,'host-collector.log'),'w');
   const host=spawn('pwsh',['-NoProfile','-File','perf/stage2/host-sample.ps1','-OutputFile',path.join(folder,'host.jsonl'),'-Seconds',String(config.seconds+30)],{cwd:root,stdio:['ignore',hostLog,hostLog],windowsHide:true});
+  const readHost=()=>{
+    const file=path.join(folder,'host.jsonl');if(!fs.existsSync(file))return [];
+    const content=fs.readFileSync(file,'utf8');
+    return content.slice(0,content.lastIndexOf('\n')+1).split('\n').filter(Boolean).map(JSON.parse);
+  };
+  const hostAlive=()=>host.exitCode===null&&host.signalCode===null;
+  const stopHost=async()=>{
+    if(hostAlive()){const done=new Promise(resolve=>host.once('exit',resolve));host.kill();await done;}
+    fs.closeSync(hostLog);
+  };
+  if(config.writeCycles) {
+    try {await waitForHostCoverage(readHost,{alive:hostAlive});}
+    catch(e){await stopHost();fs.closeSync(log);throw e;}
+  }
   const samples=fs.createWriteStream(path.join(folder,'resources.jsonl'));
   const abort=new AbortController(), observing=observe(samples,abort.signal);
   const child=spawn('docker',[...compose,'run','--rm','-T','--name',`${project}-load`,'-e',`CONFIG=/results/${config.run}/config.json`,'load','run','--quiet','--no-usage-report','--out',`json=/results/${config.run}/raw.json.gz`,'/scripts/load.js'],{cwd:root,env,stdio:['ignore',log,log],windowsHide:true});
   const start=Date.now();
   const progress=setInterval(()=>console.log(`${config.run}: ${Math.round((Date.now()-start)/1000)}/${config.seconds}s`),60000);
   const code=await new Promise((resolve,reject)=>{child.on('exit',resolve);child.on('error',reject);});
+  const workloadEndedAt=Date.now();
   clearInterval(progress);abort.abort();await observing;samples.end();fs.closeSync(log);
-  if(host.exitCode===null&&host.signalCode===null) {
-    const hostExit=new Promise(resolve=>host.once('exit',resolve));host.kill();await hostExit;
-  }
-  fs.closeSync(hostLog);
+  try {if(config.writeCycles)await waitForHostCoverage(readHost,{after:workloadEndedAt,alive:hostAlive});}
+  finally {await stopHost();}
   const readLines=file=>fs.readFileSync(path.join(folder,file),'utf8').trim().split('\n').filter(Boolean).map(JSON.parse);
   const validity=assessInterference(readLines('host.jsonl'),readLines('resources.jsonl'));
   write(config.run+'/validity.json',validity);
   if(!validity.valid)console.log('INVALID interference: '+validity.reasons.join(', ')+'; original run retained, no automatic retry');
-  const result={run:config.run,exitCode:code,elapsedSeconds:(Date.now()-start)/1000};write(`${config.run}/execution.json`,result);
+  const result={run:config.run,exitCode:code,elapsedSeconds:(Date.now()-start)/1000,
+    ...(config.writeCycles?{workloadStartedAt:new Date(start).toISOString(),workloadEndedAt:new Date(workloadEndedAt).toISOString(),workloadElapsedSeconds:(workloadEndedAt-start)/1000,hostObservationBracketsWorkload:true}:{})};write(`${config.run}/execution.json`,result);
   console.log(JSON.stringify(result));
   if(code!==0) throw Error('k6 failed; raw results retained at '+folder);
 }

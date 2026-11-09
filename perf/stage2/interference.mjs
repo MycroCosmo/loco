@@ -2,6 +2,16 @@
 export const interferencePolicy={backgroundCpuCores:2,sustainedSeconds:10,minAvailableBytes:2*1024**3,maxSampleGapSeconds:10,
   expectedProcesses:['vmmemWSL','vmmem','com.docker.backend','collector PID'],
   note:'Detection is a conservative proxy, not proof of absent interference; names/PIDs/resources only, no command lines'};
+export async function waitForHostCoverage(read,{after=-Infinity,alive=()=>true,now=Date.now,sleep=ms=>new Promise(r=>setTimeout(r,ms)),timeout=15000}={}) {
+  const deadline=now()+timeout;
+  for(;;) {
+    const rows=read();
+    if(rows.length>=2&&Date.parse(rows.at(-1).at)>=after)return rows;
+    if(!alive())throw Error('Host collector exited before covering the workload');
+    if(now()>=deadline)throw Error('Host collector did not cover the workload before timeout');
+    await sleep(100);
+  }
+}
 export function assessInterference(host,resources=[]) {
   const reasons=new Set();let cpu=0,memory=0,previous;
   if(host.length<2)reasons.add('host-samples-missing');
