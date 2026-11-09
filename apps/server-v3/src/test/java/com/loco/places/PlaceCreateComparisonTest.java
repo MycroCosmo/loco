@@ -68,8 +68,8 @@ class PlaceCreateComparisonTest extends CompatibilityTestBase {
                     : status == 403
                         ? 3
                         : expected.path("path").asText().equals(PlaceWriteSupport.createPath(2))
-                            ? 11
-                            : 10;
+                            ? 8
+                            : 7;
         assertThat(SqlQueryCounter.statements()).as("create SQL").hasSize(budget);
       }
       if (response.getStatusCode().isError())

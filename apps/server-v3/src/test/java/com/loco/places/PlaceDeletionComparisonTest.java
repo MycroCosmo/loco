@@ -123,10 +123,10 @@ class PlaceDeletionComparisonTest extends CompatibilityTestBase {
             assertThat(SqlQueryCounter.statements())
                 .hasSize(
                     expected == 200
-                        ? 10
+                        ? 7
                         : expected == 403
                             ? 3
-                            : expected == 404 ? 2 : precision == 0 ? 4 : 4 + precision * 2);
+                            : expected == 404 ? 2 : precision == 0 ? 4 : 4 + precision);
           boolean removed = expected == 200 || precision > 0;
           if (!removed) seeded.assertUnchanged(DatabaseSnapshot.capture(db, rules));
           try (var rows =

@@ -45,16 +45,10 @@ class PlaceUpdateComparisonTest extends CompatibilityTestBase {
       assertThat(status).as(expected.toString()).isEqualTo(expected.path("status").asInt());
       assertThat(PlaceWriteSupport.normalize(response.getBody())).isEqualTo(expected.get("body"));
       if (side == SharedHarness.Side.V3) {
-        boolean move =
-            status == 200
-                && (response.getBody().path("latitude").doubleValue() != 37.4444
-                    || response.getBody().path("longitude").doubleValue() != 127.8888);
         int budget =
             status == 400
                 ? 1
-                : status != 200
-                    ? 2
-                    : 9 + (expected.path("updated").asBoolean() ? 1 : 0) + (move ? 6 : 0);
+                : status != 200 ? 2 : 6 + (expected.path("updated").asBoolean() ? 1 : 0);
         assertThat(SqlQueryCounter.statements()).as("update SQL").hasSize(budget);
       }
       try (var db = environment().connect(side)) {

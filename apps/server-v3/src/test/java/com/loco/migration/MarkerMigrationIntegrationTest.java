@@ -5,7 +5,8 @@ import static org.assertj.core.api.Assertions.*;
 import java.sql.*;
 import java.util.*;
 import org.flywaydb.core.Flyway;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -43,9 +44,11 @@ class MarkerMigrationIntegrationTest {
     }
   }
 
-  @Test
-  void rebuildsExistingMissingStaleAndNegativeZeroCellsWithoutChangingPlaces() throws Exception {
-    migration("6").migrate();
+  @ParameterizedTest
+  @ValueSource(strings = {"7", "9"})
+  void rebuildsExistingMissingStaleAndNegativeZeroCellsWithoutChangingPlaces(String target)
+      throws Exception {
+    migration(Integer.toString(Integer.parseInt(target) - 1)).migrate();
     try (var db = connection();
         var q = db.createStatement()) {
       ScriptUtils.executeSqlScript(db, new ClassPathResource("places/seed.sql"));
@@ -57,7 +60,7 @@ class MarkerMigrationIntegrationTest {
     }
     String places = scalar("SELECT json_agg(p ORDER BY id)::text FROM places p");
     String baseline = scalar("SELECT checksum FROM flyway_schema_history WHERE version='1'");
-    assertThat(migration("7").migrate().migrationsExecuted).isEqualTo(1);
+    assertThat(migration(target).migrate().migrationsExecuted).isEqualTo(1);
     assertThat(scalar("SELECT json_agg(p ORDER BY id)::text FROM places p")).isEqualTo(places);
     assertThat(scalar("SELECT checksum FROM flyway_schema_history WHERE version='1'"))
         .isEqualTo(baseline);
@@ -71,13 +74,14 @@ class MarkerMigrationIntegrationTest {
             scalar(
                 "WITH expected AS (SELECT \"mapId\",p,ROUND(latitude::numeric,p)::text lat,ROUND(longitude::numeric,p)::text lng,count(*) n FROM places CROSS JOIN generate_series(1,3)p GROUP BY 1,2,3,4) SELECT count(*) FROM expected e FULL JOIN place_marker_cells c ON c.\"mapId\"=e.\"mapId\" AND c.precision=e.p AND c.\"cellLatKey\"=e.lat AND c.\"cellLngKey\"=e.lng WHERE c.count IS DISTINCT FROM e.n"))
         .isEqualTo("0");
-    assertThat(migration("7").migrate().migrationsExecuted).isZero();
-    migration("7").validate();
+    assertThat(migration(target).migrate().migrationsExecuted).isZero();
+    migration(target).validate();
   }
 
-  @Test
-  void failedRebuildRollsBackDeletionAndDoesNotRecordV7() throws Exception {
-    migration("6").migrate();
+  @ParameterizedTest
+  @ValueSource(strings = {"7", "9"})
+  void failedRebuildRollsBackDeletionAndDoesNotRecordVersion(String target) throws Exception {
+    migration(Integer.toString(Integer.parseInt(target) - 1)).migrate();
     try (var db = connection();
         var q = db.createStatement()) {
       ScriptUtils.executeSqlScript(db, new ClassPathResource("places/seed.sql"));
@@ -88,18 +92,18 @@ class MarkerMigrationIntegrationTest {
     String cells =
         scalar(
             "SELECT json_agg(c ORDER BY \"mapId\",precision,\"cellLatKey\",\"cellLngKey\")::text FROM place_marker_cells c");
-    assertThatThrownBy(() -> migration("7").migrate())
-        .hasMessageContaining("V7__rebuild_marker_coordinate_keys.sql");
+    assertThatThrownBy(() -> migration(target).migrate())
+        .hasMessageContaining("V" + target + "__rebuild_marker_");
     assertThat(
             scalar(
                 "SELECT json_agg(c ORDER BY \"mapId\",precision,\"cellLatKey\",\"cellLngKey\")::text FROM place_marker_cells c"))
         .isEqualTo(cells);
-    assertThat(scalar("SELECT count(*) FROM flyway_schema_history WHERE version='7'"))
+    assertThat(scalar("SELECT count(*) FROM flyway_schema_history WHERE version='" + target + "'"))
         .isEqualTo("0");
     try (var db = connection();
         var q = db.createStatement()) {
       q.execute("DROP TRIGGER reject_rebuild ON place_marker_cells");
     }
-    assertThat(migration("7").migrate().migrationsExecuted).isEqualTo(1);
+    assertThat(migration(target).migrate().migrationsExecuted).isEqualTo(1);
   }
 }

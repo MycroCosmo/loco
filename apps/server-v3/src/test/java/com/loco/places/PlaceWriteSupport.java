@@ -51,7 +51,7 @@ final class PlaceWriteSupport {
     var rules = rules();
     double latitude = expected.path("body").path("latitude").asDouble(Double.NaN);
     if (expected.path("status").asInt() >= 400 || (latitude != 37.05 && latitude != -0.00001)) {
-      DatabaseSnapshot.compare(left, right, seedIds, rules);
+      compareCenters(left.normalized(seedIds, rules), right.normalized(seedIds, rules));
       return;
     }
     // E-5 changes only these boundary cells. All other tables and cells stay exact comparisons.
@@ -101,6 +101,36 @@ final class PlaceWriteSupport {
         .containsExactlyInAnyOrderElementsOf(historical);
     v2Cells.removeAll(actualV2);
     v3Cells.removeAll(actualV3);
-    assertThat(v3).as("All unaffected DB state still matches v2").isEqualTo(v2);
+    compareCenters(v2, v3);
+  }
+
+  static void compareCenters(
+      Map<String, java.util.List<ObjectNode>> expected,
+      Map<String, java.util.List<ObjectNode>> actual) {
+    var order =
+        java.util.Comparator.comparing((ObjectNode c) -> c.path("mapId").asText())
+            .thenComparingInt(c -> c.path("precision").asInt())
+            .thenComparing(c -> c.path("cellLatKey").asText())
+            .thenComparing(c -> c.path("cellLngKey").asText());
+    var left = expected.get("place_marker_cells");
+    var right = actual.get("place_marker_cells");
+    left.sort(order);
+    right.sort(order);
+    assertThat(right.size())
+        .as("E-20 does not permit missing or extra cells")
+        .isEqualTo(left.size());
+    for (int i = 0; i < left.size(); i++)
+      for (String key : java.util.List.of("latitude", "longitude")) {
+        assertThat(right.get(i).path(key).isNumber()).isTrue();
+        assertThat(right.get(i).path(key).asDouble())
+            .as("E-20 center only: " + key)
+            .isFinite()
+            .isCloseTo(
+                left.get(i).path(key).asDouble(), org.assertj.core.data.Offset.offset(1e-10));
+        right.get(i).set(key, left.get(i).get(key));
+      }
+    if (!actual.equals(expected))
+      throw new AssertionError(
+          "E-20 permits only center deltas; all keys/counts/extents/other DB fields must match exactly");
   }
 }

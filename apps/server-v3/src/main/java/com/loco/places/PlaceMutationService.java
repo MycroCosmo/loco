@@ -96,10 +96,12 @@ public class PlaceMutationService {
                   queries.core(id), oldLat, oldLng, place.getLatitude(), place.getLongitude());
             });
     var result = changed.result();
-    cells.refresh(result.mapId(), changed.oldLatitude(), changed.oldLongitude());
-    if (changed.oldLatitude() != changed.latitude()
-        || changed.oldLongitude() != changed.longitude())
-      cells.refresh(result.mapId(), changed.latitude(), changed.longitude());
+    cells.refresh(
+        result.mapId(),
+        changed.oldLatitude(),
+        changed.oldLongitude(),
+        changed.latitude(),
+        changed.longitude());
     return result;
   }
 
