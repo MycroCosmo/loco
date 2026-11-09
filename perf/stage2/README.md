@@ -1,6 +1,33 @@
 # 성능 2단계 측정 도구
 
-최신 결정 E-16: P1의 정합성 수정 비용을 조건부 승인하고 P2에서 **원래 P0 대비1%·50req/s p95/p99 회귀≤10%**를 회복한다. [P2 설계](../../apps/server-v3/PERF_STAGE2_P2_DESIGN.md)의 E-17~E-21 A를 승인받아 W/R을 구현·집중 검증했다. 교차 이동의 새 deadlock을 재현해 **E-22 잠금 범위 선택 전 중단**했다. 전체 회귀·정식 측정은 아직 없다. 실패 회귀 테스트는 skip하지 않는다. 아래 E-15 결과는 당시 실패 기록으로 보존한다.
+최신 결정 E-16: P1의 정합성 수정 비용을 조건부 승인하고 P2에서 **원래 P0 대비1%·50req/s p95/p99 회귀≤10%**를 회복한다. [P2 설계](../../apps/server-v3/PERF_STAGE2_P2_DESIGN.md)의 E-17~E-21 A를 승인받아 W/R을 구현·집중 검증했다. E-22 B 변형으로 잠금 SELECT를 DML 앞에 분리하고6SQL·3커밋으로 구현했다. 교차 이동·stale0 및 전체 allTests build가 통과했다(1,032.436초,알려진 차이16건). 정식 측정·채택 판정은 아직 하지 않았으며 새 환경 확인 후 시작한다. 아래 E-15 결과는 당시 실패 기록으로 보존한다.
+
+## P2 실행 준비 — 사용자 환경 확인 후에만 실행
+
+- `p2-protocol.mjs`/테스트: A0/B의 1%·50req/s와 A1/B의 10%·16req/s, 각각 AB/BA 5쌍과 고정 판정 기준을 한곳에 둔다. 누락·오류·dropped·큰 편차·꼬리 회귀를 통과로 계산하지 않는다.
+- `p2-paired.mjs`: 원래 A0/A1 JAR SHA·기본 힙 371.25MiB·Hikari 10·PG 설정·clean Git를 검사하고, 비활성 프로젝트를 정지한 뒤 매 회차 새 JVM으로 실행한다. 기존 세션 파일이 있으면 덮어쓰기/자동 재시작을 거절한다.
+- `sql-replay.mjs`/테스트: pg_stat_statements가 정규화한 CTE 파라미터를 실제 소스 SQL과 대조해 EXPLAIN한다. 문장·토큰·값이 다르거나 누락되면 중단한다. 임의의 자리 번호/상수 추측은 하지 않는다.
+- `p2-write NAME N`: 같은 hot 방의 서로 다른 셀을 VU별로 사용한다. 동시 N=1/2/4/8/16, VU당 CRUD 10회 예열+30회 측정이며 기존 E14의 단일 VU 동작은 유지한다. 쓰기 전후 업무 DB hash가 같아야 한다. 단일 VU의 5쌍 회귀와 다중 VU의 각 1쌍 탐색을 분리한다.
+- `p2-write-sql NAME N`: VU당 CRUD 5회의 별도 SQL 진단이다. 추적을 켜고 lock SELECT 시간(대기 포함)·SQL 수·WAL을 남긴 후 끈다. 이 실행의 HTTP 시간은 대표 지연에 섞지 않는다.
+
+P2는 역할별 `PERF_STAGE=p2-a0/p2-a1/p2-b`로 DB·출력 경로를 분리한다. A0=`loco-perf-p0:local`, A1=`loco-perf-e15-b:local`은 재빌드하지 않는다. B만 현재 perfBootJar로 `loco-perf-p2-b:local`에 빌드한다. 원래 P0/A1 JAR SHA는 설계 §8·프로토콜에 고정했다. 외부 API 키·개발 DB·기존 볼륨을 사용하지 않는다.
+
+```powershell
+# 아래는 전체 검증·커밋·push 후 새 환경 확인을 받은 세션 전용이다.
+$env:PERF_HEAVY_APPS_STATUS='closed-user-confirmed'
+node perf/stage2/p2-paired.mjs reads
+node perf/stage2/p2-paired.mjs evaluate
+# 읽기 gate 실패/큰 편차이면 먼저 원인을 보고하고 채택을 보류한다.
+node perf/stage2/p2-paired.mjs writes
+$env:PERF_STAGE='p2-b'
+node perf/stage2/run.mjs up
+node perf/stage2/run.mjs p2-write-sql lock-c16 16
+node perf/stage2/run.mjs stop
+```
+
+환경 확인에는 전원 연결·Windows 최고 성능·무거운 앱 종료/측정 중 미사용이 포함된다. 동시성 쓰기 추가 후 총 예상 260~320분(구현 제외)이며, 각 실행 원본의 실제 시간을 별도 기록한다. `inspect`/Node 테스트는 설정 검증이며 부하 측정이 아니다.
+
+`profile NAME RATE VIEWPORT 1`은 메모리 비교를 위한 단일 VU JFR 진단이다. 1%/10%/전체 viewport에서 같은 동시성으로 실행하고 할당·GC·live heap을 요청 수와 함께 해석한다. 대표 도착률 측정은 이 선택 인자를 사용하지 않는다.
 
 ## E-14/E-15 같은 세션 대조
 

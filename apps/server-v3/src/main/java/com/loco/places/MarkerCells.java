@@ -3,7 +3,9 @@ package com.loco.places;
 import jakarta.persistence.EntityManager;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Repository
@@ -14,7 +16,8 @@ public class MarkerCells {
 
   public MarkerCells(EntityManager em, TransactionTemplate transaction, Clock clock) {
     this.em = em;
-    this.transaction = transaction;
+    this.transaction = new TransactionTemplate(transaction.getTransactionManager(), transaction);
+    this.transaction.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
     this.clock = clock;
   }
 
@@ -24,20 +27,28 @@ public class MarkerCells {
 
   public void refresh(
       String mapId, double oldLatitude, double oldLongitude, double latitude, double longitude) {
+    int mapKey = UUID.fromString(mapId).hashCode();
     for (int precision = 1; precision <= 3; precision++) {
       final int scale = precision;
       // E-17: each precision commits both affected cells; the place has already committed.
       transaction.executeWithoutResult(
-          status ->
-              em.createNativeQuery(SQL.replace("$scale", Integer.toString(scale)))
-                  .setParameter("map", mapId)
-                  .setParameter("p", scale)
-                  .setParameter("oldLat", oldLatitude)
-                  .setParameter("oldLng", oldLongitude)
-                  .setParameter("lat", latitude)
-                  .setParameter("lng", longitude)
-                  .setParameter("now", LocalDateTime.now(clock))
-                  .executeUpdate());
+          status -> {
+            // E-22: a separate statement gives the DML a fresh READ COMMITTED snapshot
+            // after waiting. UUID hash collisions only serialize unrelated maps.
+            em.createNativeQuery("SELECT 1 FROM pg_advisory_xact_lock(:mapKey, :precision)")
+                .setParameter("mapKey", mapKey)
+                .setParameter("precision", scale)
+                .getSingleResult();
+            em.createNativeQuery(SQL.replace("$scale", Integer.toString(scale)))
+                .setParameter("map", mapId)
+                .setParameter("p", scale)
+                .setParameter("oldLat", oldLatitude)
+                .setParameter("oldLng", oldLongitude)
+                .setParameter("lat", latitude)
+                .setParameter("lng", longitude)
+                .setParameter("now", LocalDateTime.now(clock))
+                .executeUpdate();
+          });
     }
   }
 

@@ -7,6 +7,8 @@ import http from 'node:http';
 import assert from 'node:assert/strict';
 import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measurementSpec,stageSettings,pairedThresholdFailure} from './data.mjs';
 import {overflowMatches} from './overflow-contract.js';
+import {bindTemplate,javaSqlTemplate} from './sql-replay.mjs';
+import {writeSpec} from './p2-protocol.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const settings=stageSettings();
@@ -112,7 +114,7 @@ async function observe(stream,signal) {
   }
 }
 async function runLoad(config) {
-  assert.equal(sql('SHOW pg_stat_statements.track;'),'none','SQL tracing must be off during load');
+  assert.equal(sql('SHOW pg_stat_statements.track;'),config.diagnostic?'all':'none','SQL tracing must be off except explicitly separate diagnostics');
   const folder=path.join(output,config.run);
   assert.ok(!fs.existsSync(folder),'Result directory already exists; choose a new run name');
   fs.mkdirSync(folder,{recursive:true});
@@ -151,7 +153,7 @@ async function markerCases(viewport, maps) {
     if(settings.paired && viewport===10 && body.some(m=>m.id==='overflow')) {
       const cells=query(`SELECT "placeId" AS id,"placeName" AS name,latitude,longitude,count FROM place_marker_cells WHERE "mapId"=${sqlString(id)} AND precision=3 AND "maxLat">=${minLat} AND "minLat"<=${maxLat} AND "maxLng">=${minLng} AND "minLng"<=${maxLng}`);
       assert.ok(cells.every(c=>c.count===1),'Overflow contract only covers the approved all-singleton M seed');
-      const places=Object.fromEntries(cells.map(c=>[c.id,{name:c.name,latitude:Number(c.latitude.toPrecision(16)),longitude:Number(c.longitude.toPrecision(16))}]));
+      const places=Object.fromEntries(cells.map(c=>[c.id,{name:c.name,latitude:settings.stage==='p2'?c.latitude:Number(c.latitude.toPrecision(16)),longitude:settings.stage==='p2'?c.longitude:Number(c.longitude.toPrecision(16))}]));
       entry.overflow={places,count:cells.length,latSum:Object.values(places).reduce((n,c)=>n+c.latitude,0),lngSum:Object.values(places).reduce((n,c)=>n+c.longitude,0)};
       assert.ok(overflowMatches(body,entry.overflow),'Preflight must satisfy the full known-difference contract');
       if(settings.stage==='p0') delete entry.hash;
@@ -177,6 +179,12 @@ async function diagnostic(cases,name) {
     const url=new URL(c.path,'http://local'),q=url.searchParams,map=url.pathname.split('/')[3];
     for(const s of statements) {
       let values;
+      if(/^WITH (marker_candidates|matching) AS/.test(s.query)) {
+        const template=javaSqlTemplate(fs.readFileSync(path.join(root,'apps/server-v3/src/main/java/com/loco/places/MarkerQueryRepository.java'),'utf8'),s.query.startsWith('WITH marker_candidates')?'CANDIDATES':'BOUNDED_CELLS');
+        const parameters={map,precision:3,minLat:+q.get('swLat'),maxLat:+q.get('neLat'),minLng:+q.get('swLng'),maxLng:+q.get('neLng')};
+        const bound=bindTemplate(s.query,template,parameters);
+        explain.push({sql:s.query,parameters,plan:JSON.parse(sql('EXPLAIN (ANALYZE,BUFFERS,FORMAT JSON) '+bound))});
+      }
       if(s.query.startsWith('SELECT id,name,latitude,longitude')) values=[map,+q.get('swLat'),+q.get('neLat'),+q.get('swLng'),+q.get('neLng'),...(settings.stage==='p0'?[301]:[])];
       if(s.query.startsWith('SELECT * FROM place_marker_cells WHERE')) values=[map,3,+q.get('swLat'),+q.get('neLat'),+q.get('swLng'),+q.get('neLng')];
       if(s.query.startsWith('SELECT count FROM place_marker_cells')) values=[map,3,q.get('cellLatKey'),q.get('cellLngKey')];
@@ -191,7 +199,7 @@ async function diagnostic(cases,name) {
         explain.push({sql:s.query,parameters:values,plan:JSON.parse(sql('EXPLAIN (ANALYZE,BUFFERS,FORMAT JSON) '+bound))});
       }
     }
-    const selects=statements.filter(s=>/^select/i.test(s.query.trim()));
+    const selects=statements.filter(s=>/^(select|WITH (marker_candidates|matching) AS)/i.test(s.query.trim()));
     const postgresSelectCount=selects.reduce((n,s)=>n+Number(s.calls),0);
     const driverMetadataQueries=selects.filter(s=>s.query.includes('pg_catalog.')).reduce((n,s)=>n+Number(s.calls),0);
     const sqlCount=postgresSelectCount-driverMetadataQueries;
@@ -303,6 +311,25 @@ if(action==='up') {
     assert.equal(logs.status,0,'App log capture failed');
     fs.writeFileSync(path.join(output,name+'-app.log'),logs.stdout+'\n'+logs.stderr);
   }
+} else if(action==='p2-write'||action==='p2-write-sql') {
+  assert.ok(['loco-perf-p2-a1','loco-perf-p2-b'].includes(project),'P2 writes require isolated A1/B projects');
+  const {name,concurrency,warmupCycles,measuredCycles}=writeSpec(args[0],args[1]);
+  const before=fingerprint(),diagnosis=action==='p2-write-sql';
+  snapshot(name+'-manifest.json');
+  try {
+    if(diagnosis) {
+      sql("ALTER SYSTEM SET pg_stat_statements.track='all'; SELECT pg_reload_conf();");
+      await new Promise(r=>setTimeout(r,1000));sql('SELECT pg_stat_statements_reset();');
+    }
+    if(!diagnosis)await runLoad({run:name+'-warmup',seconds:600,writeCycles:warmupCycles,writeConcurrency:concurrency,map:key('map',1)});
+    await runLoad({run:name,seconds:600,writeCycles:diagnosis?concurrency*5:measuredCycles,writeConcurrency:concurrency,map:key('map',1),diagnostic:diagnosis});
+    if(diagnosis)write(name+'-sql.json',{note:'Diagnostic only; SELECT lock total_exec_time includes wait and execution, not pure wait time',concurrency,
+      statements:query("SELECT query,calls,total_exec_time,mean_exec_time,max_exec_time,rows,wal_bytes,shared_blks_hit,shared_blks_read FROM pg_stat_statements WHERE query !~ '(pg_stat_statements|pg_reload_conf|ALTER SYSTEM)' ORDER BY query")});
+    assert.deepEqual(fingerprint(),before,'Disjoint-cell CRUD cycles must restore every business table');
+    write(name+'-db-check.json',{unchanged:true,concurrency});
+  } finally {
+    if(diagnosis)sql("ALTER SYSTEM SET pg_stat_statements.track='none'; SELECT pg_reload_conf();");
+  }
 } else if(action==='write-cost') {
   assert.equal(project,'loco-perf-e15-b','Write experiment is confined to the new disposable B database');
   const ddl=fs.readFileSync(path.join(root,'apps/server-v3/src/main/resources/db/migration/V8__index_marker_round_lookups.sql'),'utf8');
@@ -376,6 +403,8 @@ if(action==='up') {
   command('docker',['stop',`${project}-plan`]);command('docker',['rm',`${project}-plan`]);dc('start','perf-app');appContainer=`${project}-perf-app-1`;await ready();
 } else if(action==='profile') {
   const [name='profile',rate='50',viewport='1']=args;
+  const fixedConcurrency=args[3]===undefined?undefined:Number(args[3]);
+  assert.ok(fixedConcurrency===undefined||fixedConcurrency===1,'Memory comparison uses fixed concurrency 1; primary arrival-rate runs are unchanged');
   const spec=measurementSpec(name,rate,viewport,'hot80',1);
   const recording=name==='profile'?'diagnostic.jfr':name+'.jfr';
   assert.ok(!fs.existsSync(path.join(output,'runtime',recording)),'Do not overwrite a JFR recording');
@@ -388,7 +417,7 @@ if(action==='up') {
   const cases=await markerCases(spec.viewport,1000),before=fingerprint();
   for(const [suffix,seconds] of [['warmup',120],['diagnostic',90]]) {
     const run=`${name}-${suffix}`;
-    try {await runLoad({run,rate:spec.rate,seconds,hot80:true,cases});}
+    try {await runLoad({run,rate:spec.rate,seconds,hot80:true,cases,...(fixedConcurrency?{fixedConcurrency}:{})});}
     catch(error) {
       const result=JSON.parse(fs.readFileSync(path.join(output,run,'execution.json')));
       if(result.exitCode!==99)throw error;

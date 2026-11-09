@@ -100,7 +100,7 @@ class PlaceBoundaryComparisonTest extends CompatibilityTestBase {
                   126.99643769342003));
       assertThat(response.getStatusCode().value()).isEqualTo(201);
       responses.add(PlaceWriteSupport.normalize(response.getBody()));
-      if (side == SharedHarness.Side.V3) assertThat(SqlQueryCounter.statements()).hasSize(7);
+      if (side == SharedHarness.Side.V3) assertThat(SqlQueryCounter.statements()).hasSize(10);
     }
     assertThat(responses.get(1)).isEqualTo(responses.get(0));
     try (var left = environment().connect(SharedHarness.Side.V2);

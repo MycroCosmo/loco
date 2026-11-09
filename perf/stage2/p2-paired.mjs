@@ -1,0 +1,50 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {spawn,spawnSync} from 'node:child_process';
+import {stageSettings,hash} from './data.mjs';
+import {protocol,originalJars,readSchedule,writeSchedule,evaluate} from './p2-protocol.mjs';
+
+const mode=process.argv[2];assert.ok(['reads','writes','evaluate'].includes(mode),'Use reads | writes | evaluate');
+const output='apps/server-v3/build/perf-stage2-p2';fs.mkdirSync(output,{recursive:true});
+const cmd=(exe,args)=>{const r=spawnSync(exe,args,{encoding:'utf8',windowsHide:true});assert.equal(r.status,0,r.stderr);return r.stdout.trim();};
+async function run(side,script,...args) {
+  console.log(`${new Date().toISOString()} ${side} ${args.join(' ')}`);
+  const p=spawn(process.execPath,[`perf/stage2/${script}.mjs`,...args],{env:{...process.env,PERF_STAGE:'p2-'+side},stdio:'inherit',windowsHide:true});
+  assert.equal(await new Promise((resolve,reject)=>{p.on('error',reject);p.on('exit',resolve);}),0,'Run failed; retain artifacts, no automatic retry');
+}
+if(mode==='evaluate') {
+  const readings=[];
+  for(const side of ['a0','a1','b']) {await run(side,'summarize');readings.push(...JSON.parse(fs.readFileSync(stageSettings('p2-'+side).output+'/summary.json')));}
+  const result=evaluate(readings);fs.writeFileSync(path.join(output,'read-evaluation.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
+} else {
+  const file=path.join(output,mode+'-session.json');assert.ok(!fs.existsSync(file),'Do not overwrite or silently resume a session');
+  assert.equal(process.env.PERF_HEAVY_APPS_STATUS,'closed-user-confirmed','Obtain a fresh user environment confirmation after tests and push');
+  assert.equal(cmd('git',['status','--porcelain']),'','Commit measured code first');
+  const bJar=hash(fs.readFileSync('apps/server-v3/build/libs/loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar'));
+  const schedule=mode==='reads'?readSchedule():writeSchedule();
+  const session={startedAt:new Date().toISOString(),source:cmd('git',['rev-parse','HEAD']),mode,protocol,userDeclaration:process.env.PERF_HEAVY_APPS_STATUS,expectedJars:{...originalJars,b:bJar},schedule,runs:[]};
+  fs.writeFileSync(file,JSON.stringify(session,null,2));
+  for(const item of schedule) {
+    for(const other of ['a0','a1','b'].filter(s=>s!==item.side))await run(other,'run','stop');
+    await run(item.side,'run','up');
+    const dir=stageSettings('p2-'+item.side).output,state=JSON.parse(fs.readFileSync(dir+'/environment-initial.json'));
+    assert.equal(state.jarSha256,session.expectedJars[item.side],'Never rebuild the historical A0/A1 artifacts');
+    assert.equal(state.runtime.maxHeapBytes,protocol.heapBytes);assert.equal(state.runtime.hikariMaximum,10);
+    assert.deepEqual(state.runtime.gc,['Copy','MarkSweepCompact']);assert.equal(state.runtime.work_mem,'4MB');
+    assert.equal(state.runtime.shared_buffers,'1GB');assert.equal(state.environment.background.length,0,'Stop unrelated containers before timing');
+    if(!fs.existsSync(dir+'/dataset.json')) {await run(item.side,'run','seed','M','skew');await run(item.side,'run','verify-seed');}
+    const data=JSON.parse(fs.readFileSync(dir+'/dataset.json'));assert.equal(data.size,'M');assert.equal(data.distribution,'skew');
+    session.sourcePlaces??=data.data['public.places'];assert.deepEqual(data.data['public.places'],session.sourcePlaces);
+    const start=Date.now();
+    if(mode==='reads')await run(item.side,'run','measure',item.name,String(item.rate),String(item.viewport),'hot80','1');
+    else await run(item.side,'run','p2-write',item.name,String(item.concurrency));
+    await run(item.side,'run','snapshot',item.name+'-after.json');
+    const after=JSON.parse(fs.readFileSync(dir+'/'+item.name+'-after.json'));
+    assert.ok(after.containers.every(c=>!c.oomKilled),'OOM is a failed run, not an excluded sample');
+    session.runs.push({...item,elapsedSeconds:(Date.now()-start)/1000,jar:state.jarSha256,environment:state.environment});
+    fs.writeFileSync(file,JSON.stringify(session,null,2));
+    await run(item.side,'run','stop');
+  }
+  session.finishedAt=new Date().toISOString();fs.writeFileSync(file,JSON.stringify(session,null,2));
+}

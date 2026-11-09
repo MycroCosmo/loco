@@ -57,6 +57,7 @@ class MarkerMigrationIntegrationTest {
       ScriptUtils.executeSqlScript(db, new ClassPathResource("markers/cells.sql"));
       q.execute(
           "DELETE FROM place_marker_cells WHERE \"cellLatKey\"='37.1'; UPDATE place_marker_cells SET count=999,\"cellLatKey\"='-0.0' WHERE precision=1 AND \"cellLatKey\"='0.0'");
+      q.execute("UPDATE place_marker_cells SET latitude=89.9,longitude=179.9");
     }
     String places = scalar("SELECT json_agg(p ORDER BY id)::text FROM places p");
     String baseline = scalar("SELECT checksum FROM flyway_schema_history WHERE version='1'");
@@ -72,7 +73,7 @@ class MarkerMigrationIntegrationTest {
         .isEqualTo("3");
     assertThat(
             scalar(
-                "WITH expected AS (SELECT \"mapId\",p,ROUND(latitude::numeric,p)::text lat,ROUND(longitude::numeric,p)::text lng,count(*) n FROM places CROSS JOIN generate_series(1,3)p GROUP BY 1,2,3,4) SELECT count(*) FROM expected e FULL JOIN place_marker_cells c ON c.\"mapId\"=e.\"mapId\" AND c.precision=e.p AND c.\"cellLatKey\"=e.lat AND c.\"cellLngKey\"=e.lng WHERE c.count IS DISTINCT FROM e.n"))
+                "WITH expected AS (SELECT \"mapId\",p,ROUND(latitude::numeric,p)::text lat,ROUND(longitude::numeric,p)::text lng,count(*) n,avg(latitude) center_lat,avg(longitude) center_lng FROM places CROSS JOIN generate_series(1,3)p GROUP BY 1,2,3,4) SELECT count(*) FROM expected e FULL JOIN place_marker_cells c ON c.\"mapId\"=e.\"mapId\" AND c.precision=e.p AND c.\"cellLatKey\"=e.lat AND c.\"cellLngKey\"=e.lng WHERE c.count IS DISTINCT FROM e.n OR c.latitude IS DISTINCT FROM e.center_lat OR c.longitude IS DISTINCT FROM e.center_lng"))
         .isEqualTo("0");
     assertThat(migration(target).migrate().migrationsExecuted).isZero();
     migration(target).validate();

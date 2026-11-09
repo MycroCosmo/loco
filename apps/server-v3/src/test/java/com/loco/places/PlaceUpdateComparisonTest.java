@@ -48,7 +48,7 @@ class PlaceUpdateComparisonTest extends CompatibilityTestBase {
         int budget =
             status == 400
                 ? 1
-                : status != 200 ? 2 : 6 + (expected.path("updated").asBoolean() ? 1 : 0);
+                : status != 200 ? 2 : 9 + (expected.path("updated").asBoolean() ? 1 : 0);
         assertThat(SqlQueryCounter.statements()).as("update SQL").hasSize(budget);
       }
       try (var db = environment().connect(side)) {

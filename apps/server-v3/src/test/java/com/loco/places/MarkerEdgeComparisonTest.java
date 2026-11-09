@@ -105,7 +105,7 @@ class MarkerEdgeComparisonTest extends MarkerTestSupport {
       } else assertThat(last.path("id").asText()).isNotEqualTo("overflow");
       if (side == SharedHarness.Side.V3) assertThat(SqlQueryCounter.statements()).hasSize(3);
     }
-    JsonComparison.compare(bodies.get(0), bodies.get(1), Map.of());
+    compareCellResponses(bodies.get(0), bodies.get(1));
   }
 
   @ParameterizedTest
@@ -171,6 +171,8 @@ class MarkerEdgeComparisonTest extends MarkerTestSupport {
       JsonComparison.compare(canonical.getBody(), v3.getBody(), Map.of());
       assertThat(v3.getBody().size()).isEqualTo(1);
       assertThat(v3.getBody().get(0).path("id").asText()).isEqualTo(PlaceObservationTest.place(2));
+    } else if (api.equals("markers?swLat=-90&neLat=90&swLng=-180&neLng=180&level=6")) {
+      compareCellResponses(v2.getBody(), v3.getBody());
     } else JsonComparison.compare(v2.getBody(), v3.getBody(), Map.of());
     assertThat(SqlQueryCounter.statements()).hasSize(3);
   }

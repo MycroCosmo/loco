@@ -140,29 +140,16 @@ class MarkerComparisonTest extends MarkerTestSupport {
         assertThat(r.getStatusCode().value())
             .as("%s %s", side, path)
             .isEqualTo(row.path("status").asInt());
-        var actual = r.getBody().deepCopy();
+        var actual = r.getBody();
+        boolean cells = false;
         if (side == SharedHarness.Side.V3 && path.contains("/markers?") && actual.isArray()) {
           var level = java.util.regex.Pattern.compile("[?&]level=([0-9]+)(?:&|$)").matcher(path);
-          boolean cells =
+          cells =
               level.find()
                   && (Integer.parseInt(level.group(1)) >= 6 || scenario.equals("threshold301"));
-          if (cells) {
-            assertThat(actual.size()).isEqualTo(row.get("body").size());
-            for (int i = 0; i < actual.size(); i++)
-              if (!actual.get(i).path("type").asText().equals("place"))
-                for (String key : List.of("latitude", "longitude")) {
-                  assertThat(actual.get(i).path(key).isNumber()).isTrue();
-                  assertThat(actual.get(i).path(key).asDouble())
-                      .isFinite()
-                      .isCloseTo(
-                          row.get("body").get(i).path(key).asDouble(),
-                          org.assertj.core.data.Offset.offset(1e-10));
-                  ((com.fasterxml.jackson.databind.node.ObjectNode) actual.get(i))
-                      .set(key, row.get("body").get(i).get(key));
-                }
-          }
         }
-        JsonComparison.compare(row.get("body"), actual, Map.of());
+        if (cells) compareCellResponses(row.get("body"), actual);
+        else JsonComparison.compare(row.get("body"), actual, Map.of());
         if (side == SharedHarness.Side.V3)
           assertThat(SqlQueryCounter.statements()).as(path).hasSize(sqlCount(row, scenario));
         before.assertUnchanged(DatabaseSnapshot.capture(db, PlaceWriteSupport.rules()));

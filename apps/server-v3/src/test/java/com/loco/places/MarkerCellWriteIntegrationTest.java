@@ -43,7 +43,7 @@ class MarkerCellWriteIntegrationTest extends MarkerTestSupport {
                 PlaceWriteSupport.token(environment()),
                 Map.of("latitude", latitude));
         assertThat(r.getStatusCode().value()).isEqualTo(200);
-        assertThat(SqlQueryCounter.statements()).hasSize(7);
+        assertThat(SqlQueryCounter.statements()).hasSize(10);
         try (var rows =
             q.executeQuery(
                 "SELECT p,count(*),count(DISTINCT lat),count(DISTINCT at) FROM marker_write_audit GROUP BY p ORDER BY p")) {
@@ -65,7 +65,7 @@ class MarkerCellWriteIntegrationTest extends MarkerTestSupport {
 
   @ParameterizedTest
   @ValueSource(ints = {2, 4, 8, 16})
-  void oneStatementDoesNotClaimToFixAStaleConcurrentSnapshot(int requests) throws Exception {
+  void separateLockStatementRefreshesSnapshotAfterWaiting(int requests) throws Exception {
     seed("basic");
     try (var gate = environment().connect(SharedHarness.Side.V3);
         var observe = environment().connect(SharedHarness.Side.V3);
@@ -113,9 +113,22 @@ class MarkerCellWriteIntegrationTest extends MarkerTestSupport {
         }
         var rest = new ArrayList<Future<Integer>>();
         for (int i = 1; i < requests; i++) rest.add(pool.submit(create));
-        for (var future : rest) assertThat(future.get(30, TimeUnit.SECONDS)).isEqualTo(201);
+        long waitUntil = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
+        int waiting;
+        do {
+          try (var rows =
+              q.executeQuery(
+                  "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event='advisory' AND query LIKE 'SELECT 1 FROM pg_advisory_xact_lock%'")) {
+            rows.next();
+            waiting = rows.getInt(1);
+          }
+          if (System.nanoTime() > waitUntil)
+            throw new AssertionError("Concurrent writers did not wait before aggregate snapshot");
+          if (waiting < Math.min(requests - 1, 8)) Thread.sleep(20);
+        } while (waiting < Math.min(requests - 1, 8));
         gate.commit();
         assertThat(first.get(30, TimeUnit.SECONDS)).isEqualTo(201);
+        for (var future : rest) assertThat(future.get(30, TimeUnit.SECONDS)).isEqualTo(201);
         var counts = new ArrayList<Integer>();
         try (var rows =
             q.executeQuery("SELECT precision,count FROM place_marker_cells ORDER BY precision")) {
@@ -127,9 +140,9 @@ class MarkerCellWriteIntegrationTest extends MarkerTestSupport {
           assertThat(rows.next()).isFalse();
         }
         assertThat(counts)
-            .as("E-6 B explicitly retains the stale snapshot risk")
-            .containsExactly(1, requests, requests);
-        var output = java.nio.file.Path.of("build/reports/markers/p2-race-" + requests + ".json");
+            .as("E-22 waits before opening the aggregate statement snapshot")
+            .containsExactly(requests, requests, requests);
+        var output = java.nio.file.Path.of("build/reports/markers/e22-race-" + requests + ".json");
         java.nio.file.Files.createDirectories(output.getParent());
         mapper
             .writerWithDefaultPrettyPrinter()
@@ -143,13 +156,13 @@ class MarkerCellWriteIntegrationTest extends MarkerTestSupport {
                     "errors",
                     0,
                     "staleCells",
-                    1,
+                    0,
                     "counts",
                     counts,
                     "expectedCount",
                     requests,
                     "limit",
-                    "E-6 B: aggregate snapshot can precede the conflicting writer; no serialization promised"));
+                    "E-22: separate transaction advisory lock then READ COMMITTED aggregate; all participating writers completed"));
       } finally {
         gate.rollback();
         first.cancel(true);

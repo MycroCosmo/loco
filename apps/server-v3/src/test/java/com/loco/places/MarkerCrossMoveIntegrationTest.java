@@ -89,6 +89,16 @@ class MarkerCrossMoveIntegrationTest extends MarkerTestSupport {
         awaitGate(q, 1, left);
         right = pool.submit(second);
         awaitGate(q, 2, right);
+        if (side == SharedHarness.Side.V3) {
+          try (var rows =
+              q.executeQuery(
+                  "SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND wait_event='advisory' AND query LIKE 'SELECT 1 FROM pg_advisory_xact_lock%'")) {
+            rows.next();
+            assertThat(rows.getInt(1))
+                .as("Second writer waits before its DML snapshot")
+                .isEqualTo(1);
+          }
+        }
         gate.commit();
         var statuses = List.of(left.get(15, TimeUnit.SECONDS), right.get(15, TimeUnit.SECONDS));
         var cells = new ArrayList<Map<String, Object>>();
@@ -107,7 +117,7 @@ class MarkerCrossMoveIntegrationTest extends MarkerTestSupport {
         }
         var output =
             java.nio.file.Path.of(
-                "build/reports/markers/p2-cross-move-" + side.name().toLowerCase() + ".json");
+                "build/reports/markers/e22-cross-move-" + side.name().toLowerCase() + ".json");
         java.nio.file.Files.createDirectories(output.getParent());
         mapper
             .writerWithDefaultPrettyPrinter()
@@ -116,6 +126,8 @@ class MarkerCrossMoveIntegrationTest extends MarkerTestSupport {
         assertThat(statuses)
             .as("A new deadlock is not an approved stale-snapshot difference")
             .containsExactly(200, 200);
+        assertThat(cells).hasSize(6);
+        assertThat(cells).allSatisfy(cell -> assertThat(cell.get("count")).isEqualTo(1));
       } finally {
         gate.rollback();
         left.cancel(true);
