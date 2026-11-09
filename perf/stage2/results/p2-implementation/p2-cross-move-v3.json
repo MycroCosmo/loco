@@ -1,0 +1,25 @@
+{
+  "side" : "V3",
+  "cells" : [ {
+    "count" : 2,
+    "key" : "38.0",
+    "precision" : 1
+  }, {
+    "count" : 1,
+    "key" : "37.00",
+    "precision" : 2
+  }, {
+    "count" : 1,
+    "key" : "38.00",
+    "precision" : 2
+  }, {
+    "count" : 1,
+    "key" : "37.000",
+    "precision" : 3
+  }, {
+    "count" : 1,
+    "key" : "38.000",
+    "precision" : 3
+  } ],
+  "statuses" : [ 200, 500 ]
+}

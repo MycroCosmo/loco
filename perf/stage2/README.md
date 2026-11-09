@@ -1,10 +1,10 @@
 # 성능 2단계 측정 도구
 
-최신 결정 E-16: P1의 정합성 수정 비용을 조건부 승인하고 P2에서 **원래 P0 대비1%·50req/s p95/p99 회귀≤10%**를 회복한다. [P2 설계·선택지](../../apps/server-v3/PERF_STAGE2_P2_DESIGN.md)만 작성했으며 새 구현·측정은 없다. 아래 E-15 결과는 당시 실패 기록으로 보존한다.
+최신 결정 E-16: P1의 정합성 수정 비용을 조건부 승인하고 P2에서 **원래 P0 대비1%·50req/s p95/p99 회귀≤10%**를 회복한다. [P2 설계](../../apps/server-v3/PERF_STAGE2_P2_DESIGN.md)의 E-17~E-21 A를 승인받아 W/R을 구현·집중 검증했다. 교차 이동의 새 deadlock을 재현해 **E-22 잠금 범위 선택 전 중단**했다. 전체 회귀·정식 측정은 아직 없다. 실패 회귀 테스트는 skip하지 않는다. 아래 E-15 결과는 당시 실패 기록으로 보존한다.
 
 ## E-14/E-15 같은 세션 대조
 
-최종 결과: group/cluster Index Scan 복귀·전체 회귀 통과. 같은 세션1% p95+11.84%·p99+14.22%로 상대 회귀 기준 미달이며 SQL·JFR 진단 후 중단했다. P2/P3는 미진행이다. [회차별 결과·원본](E14_E15_RESULTS.md)을 확인한다.
+최종 결과: group/cluster Index Scan 복귀·전체 회귀 통과. 같은 세션1% p95+11.84%·p99+14.22%로 상대 회귀 기준 미달이며 SQL·JFR 진단 후 중단했다. 이는 E-15 종료 당시 기록이다. P2 최신 상태는 맨 위 기록을 따른다. [회차별 결과·원본](E14_E15_RESULTS.md)을 확인한다.
 
 [고정 실행 계약과 결과](E14_E15_RESULTS.md). E-15는 `PERF_STAGE=e15-a/e15-b`로 기존 P0/P1 출력과 DB를 보존한다. A의 기존 `loco-perf-p0:local` 이미지를 재빌드하지 않는다. B는 검증한 perf JAR로 `docker build -f perf/stage2/Dockerfile -t loco-perf-e15-b:local .`을 실행한다. 양쪽에 `run.mjs up`, `seed M skew`, `verify-seed`, `stop`을 각각 적용한 뒤 `node perf/stage2/paired.mjs`가20개 측정을 교대 실행한다. 각 실행은120초 예열+300초, 실패도 보존한다. 측정 전 현재 사용자 확인에 따라 PERF_HEAVY_APPS_STATUS를 closed-user-confirmed 또는 not-closed-user-confirmed로 설정한다. 이전 확인을 다음 세션에 재사용하지 않는다.
 
