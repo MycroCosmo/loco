@@ -1,0 +1,2551 @@
+{
+  "session": {
+    "startedAt": "2026-11-09T14:45:01.966Z",
+    "source": "d3526bb8532ea0575680b43d6c0f43c6da3eb38e",
+    "implementation": "91d653a2b69a5f403f9969bd754f3c46eac76735",
+    "mode": "write-e24",
+    "protocol": {
+      "warmupSeconds": 120,
+      "measuredSeconds": 300,
+      "pairs": 5,
+      "heapBytes": 389283840,
+      "p95BudgetMs": 200,
+      "maxRegressionPercent": 10,
+      "minImprovementPercent": 20,
+      "maxRangePercent": 10,
+      "expectedMinutes": [
+        260,
+        320
+      ],
+      "note": "Laptop relative comparison, not production capacity; do not change gates after measuring"
+    },
+    "userDeclaration": "closed-user-confirmed",
+    "confirmedConditions": "AC connected, Windows best performance, sleep disabled, Windows Update paused, no heavy applications until measurement ends, including browsers closed and unused",
+    "expectedJars": {
+      "a0": "c1a5293f1dc59a6ee0e648548e92695857a0357c57d10e45f06704a96952158f",
+      "a1": "da87c44168c321d1b05c5d3bbf61a459284c937fdd145c93aa6e940fff1d1a60",
+      "b": "639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e"
+    },
+    "schedule": [
+      {
+        "pair": 1,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-1-c1-a1"
+      },
+      {
+        "pair": 1,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-1-c1-b"
+      },
+      {
+        "pair": 2,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-2-c1-b"
+      },
+      {
+        "pair": 2,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-2-c1-a1"
+      },
+      {
+        "pair": 3,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-3-c1-a1"
+      },
+      {
+        "pair": 3,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-3-c1-b"
+      },
+      {
+        "pair": 4,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-4-c1-b"
+      },
+      {
+        "pair": 4,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-4-c1-a1"
+      },
+      {
+        "pair": 5,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-5-c1-a1"
+      },
+      {
+        "pair": 5,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-5-c1-b"
+      }
+    ],
+    "runs": [
+      {
+        "pair": 1,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-1-c1-a1",
+        "elapsedSeconds": 250.9,
+        "jar": "da87c44168c321d1b05c5d3bbf61a459284c937fdd145c93aa6e940fff1d1a60",
+        "environment": {
+          "at": "2026-11-09T14:45:35.765Z",
+          "power": {
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "ac": 1,
+            "powerRead": true,
+            "memory": 34049220608,
+            "wslConfigExists": false,
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            }
+          },
+          "hostProcesses": {
+            "cpuPercent": 5.4532056005895395,
+            "memoryLoadPercent": 73,
+            "topCpu": [
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 247951360,
+                "pid": 14832,
+                "name": "Docker Desktop",
+                "cpuCores": 0.3908059460914309
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 556982272,
+                "pid": 235136,
+                "name": "chrome",
+                "cpuCores": 0.2262560740529337
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 875016192,
+                "pid": 204276,
+                "name": "chrome",
+                "cpuCores": 0.07052137373078453
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 877678592,
+                "pid": 167952,
+                "name": "chrome",
+                "cpuCores": 0.05876781144232043
+              },
+              {
+                "expectedWorkload": true,
+                "workingSetBytes": 183595008,
+                "pid": 260220,
+                "name": "pwsh",
+                "cpuCores": 0.05582942087020441
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 446672896,
+                "pid": 167476,
+                "name": "chrome",
+                "cpuCores": 0.044075858581740325
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 10264576,
+                "pid": 53928,
+                "name": "CCDaemon",
+                "cpuCores": 0.03232229629327624
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 287928320,
+                "pid": 29048,
+                "name": "claude",
+                "cpuCores": 0.026445515149044196
+              },
+              {
+                "expectedWorkload": true,
+                "workingSetBytes": 1654947840,
+                "pid": 34408,
+                "name": "com.docker.backend",
+                "cpuCores": 0.023507124576928176
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 12726272,
+                "pid": 38828,
+                "name": "ipf_helper",
+                "cpuCores": 0.005876781144232044
+              }
+            ],
+            "ac": 1,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "processCount": 689,
+            "topMemory": [
+              {
+                "expectedWorkload": true,
+                "workingSetBytes": 2656768000,
+                "pid": 59880,
+                "name": "vmmemWSL",
+                "cpuCores": 0
+              },
+              {
+                "expectedWorkload": true,
+                "workingSetBytes": 1654947840,
+                "pid": 34408,
+                "name": "com.docker.backend",
+                "cpuCores": 0.023507124576928176
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 960618496,
+                "pid": 11356,
+                "name": "claude",
+                "cpuCores": 0
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 954863616,
+                "pid": 46900,
+                "name": "ChatGPT",
+                "cpuCores": 0.002938390572116022
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 877678592,
+                "pid": 167952,
+                "name": "chrome",
+                "cpuCores": 0.05876781144232043
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 875016192,
+                "pid": 204276,
+                "name": "chrome",
+                "cpuCores": 0.07052137373078453
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 589496320,
+                "pid": 234460,
+                "name": "chrome",
+                "cpuCores": 0
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 556982272,
+                "pid": 235136,
+                "name": "chrome",
+                "cpuCores": 0.2262560740529337
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 446672896,
+                "pid": 167476,
+                "name": "chrome",
+                "cpuCores": 0.044075858581740325
+              },
+              {
+                "expectedWorkload": false,
+                "workingSetBytes": 444030976,
+                "pid": 48012,
+                "name": "MsMpEng",
+                "cpuCores": 0
+              }
+            ],
+            "at": "2026-11-09T14:45:30.6238944+00:00",
+            "availablePhysicalBytes": 8887496704,
+            "nonWorkloadCpuCores": 0.8991475150675025
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      },
+      {
+        "pair": 1,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-1-c1-b",
+        "elapsedSeconds": 103.665,
+        "jar": "639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e",
+        "environment": {
+          "at": "2026-11-09T14:50:46.416Z",
+          "power": {
+            "ac": 1,
+            "memory": 34049220608,
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            },
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "powerRead": true,
+            "wslConfigExists": false
+          },
+          "hostProcesses": {
+            "cpuPercent": 8.05940414742371,
+            "memoryLoadPercent": 75,
+            "availablePhysicalBytes": 8509464576,
+            "ac": 1,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "topCpu": [
+              {
+                "cpuCores": 0.4127536074432753,
+                "pid": 14832,
+                "workingSetBytes": 240902144,
+                "expectedWorkload": false,
+                "name": "Docker Desktop"
+              },
+              {
+                "cpuCores": 0.33136557217277035,
+                "pid": 204276,
+                "workingSetBytes": 511102976,
+                "expectedWorkload": false,
+                "name": "chrome"
+              },
+              {
+                "cpuCores": 0.19765665708551214,
+                "pid": 162156,
+                "workingSetBytes": 188747776,
+                "expectedWorkload": true,
+                "name": "pwsh"
+              },
+              {
+                "cpuCores": 0.10173504408813125,
+                "pid": 34408,
+                "workingSetBytes": 1558437888,
+                "expectedWorkload": true,
+                "name": "com.docker.backend"
+              },
+              {
+                "cpuCores": 0.0668544575436291,
+                "pid": 11356,
+                "workingSetBytes": 920604672,
+                "expectedWorkload": false,
+                "name": "claude"
+              },
+              {
+                "cpuCores": 0.049414164271378035,
+                "pid": 63648,
+                "workingSetBytes": 264699904,
+                "expectedWorkload": false,
+                "name": "claude"
+              },
+              {
+                "cpuCores": 0.040694017635252495,
+                "pid": 29048,
+                "workingSetBytes": 288239616,
+                "expectedWorkload": false,
+                "name": "claude"
+              },
+              {
+                "cpuCores": 0.026160439908376604,
+                "pid": 53928,
+                "workingSetBytes": 10272768,
+                "expectedWorkload": false,
+                "name": "CCDaemon"
+              },
+              {
+                "cpuCores": 0.026160439908376604,
+                "pid": 38212,
+                "workingSetBytes": 41394176,
+                "expectedWorkload": false,
+                "name": "ctfmon"
+              },
+              {
+                "cpuCores": 0.01744029327225107,
+                "pid": 21512,
+                "workingSetBytes": 159715328,
+                "expectedWorkload": false,
+                "name": "Docker Desktop"
+              }
+            ],
+            "processCount": 690,
+            "topMemory": [
+              {
+                "cpuCores": 0,
+                "pid": 59880,
+                "workingSetBytes": 3668783104,
+                "expectedWorkload": true,
+                "name": "vmmemWSL"
+              },
+              {
+                "cpuCores": 0.10173504408813125,
+                "pid": 34408,
+                "workingSetBytes": 1558437888,
+                "expectedWorkload": true,
+                "name": "com.docker.backend"
+              },
+              {
+                "cpuCores": 0.005813431090750357,
+                "pid": 46900,
+                "workingSetBytes": 955588608,
+                "expectedWorkload": false,
+                "name": "ChatGPT"
+              },
+              {
+                "cpuCores": 0.0668544575436291,
+                "pid": 11356,
+                "workingSetBytes": 920604672,
+                "expectedWorkload": false,
+                "name": "claude"
+              },
+              {
+                "cpuCores": 0.0029067155453751784,
+                "pid": 235136,
+                "workingSetBytes": 644505600,
+                "expectedWorkload": false,
+                "name": "chrome"
+              },
+              {
+                "cpuCores": 0.008720146636125536,
+                "pid": 167952,
+                "workingSetBytes": 573956096,
+                "expectedWorkload": false,
+                "name": "chrome"
+              },
+              {
+                "cpuCores": 0,
+                "pid": 3848,
+                "workingSetBytes": 552595456,
+                "expectedWorkload": false,
+                "name": "Memory Compression"
+              },
+              {
+                "cpuCores": 0.0029067155453751784,
+                "pid": 234460,
+                "workingSetBytes": 534048768,
+                "expectedWorkload": false,
+                "name": "chrome"
+              },
+              {
+                "cpuCores": 0.33136557217277035,
+                "pid": 204276,
+                "workingSetBytes": 511102976,
+                "expectedWorkload": false,
+                "name": "chrome"
+              },
+              {
+                "cpuCores": 0.011626862181500714,
+                "pid": 167476,
+                "workingSetBytes": 433790976,
+                "expectedWorkload": false,
+                "name": "chrome"
+              }
+            ],
+            "at": "2026-11-09T14:50:41.2685370+00:00",
+            "nonWorkloadCpuCores": 1.1045519072425678
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      },
+      {
+        "pair": 2,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-2-c1-b",
+        "elapsedSeconds": 103.469,
+        "jar": "639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e",
+        "environment": {
+          "at": "2026-11-09T14:53:25.671Z",
+          "power": {
+            "memory": 34049220608,
+            "powerRead": true,
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            },
+            "ac": 1,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "wslConfigExists": false
+          },
+          "hostProcesses": {
+            "nonWorkloadCpuCores": 0.16675896882863184,
+            "topMemory": [
+              {
+                "name": "vmmemWSL",
+                "pid": 59880,
+                "workingSetBytes": 4384120832,
+                "cpuCores": 0,
+                "expectedWorkload": true
+              },
+              {
+                "name": "com.docker.backend",
+                "pid": 34408,
+                "workingSetBytes": 1689784320,
+                "cpuCores": 0.3510715133234355,
+                "expectedWorkload": true
+              },
+              {
+                "name": "ChatGPT",
+                "pid": 46900,
+                "workingSetBytes": 944791552,
+                "cpuCores": 0.0029255959443619623,
+                "expectedWorkload": false
+              },
+              {
+                "name": "claude",
+                "pid": 11356,
+                "workingSetBytes": 910987264,
+                "cpuCores": 0.017553575666171772,
+                "expectedWorkload": false
+              },
+              {
+                "name": "chrome",
+                "pid": 235136,
+                "workingSetBytes": 607703040,
+                "cpuCores": 0,
+                "expectedWorkload": false
+              },
+              {
+                "name": "Memory Compression",
+                "pid": 3848,
+                "workingSetBytes": 496357376,
+                "cpuCores": 0,
+                "expectedWorkload": false
+              },
+              {
+                "name": "MsMpEng",
+                "pid": 48012,
+                "workingSetBytes": 433164288,
+                "cpuCores": 0,
+                "expectedWorkload": false
+              },
+              {
+                "name": "chrome",
+                "pid": 167476,
+                "workingSetBytes": 408715264,
+                "cpuCores": 0.005851191888723925,
+                "expectedWorkload": false
+              },
+              {
+                "name": "ChatGPT",
+                "pid": 12344,
+                "workingSetBytes": 382607360,
+                "cpuCores": 0.026330363499257662,
+                "expectedWorkload": false
+              },
+              {
+                "name": "chrome",
+                "pid": 167952,
+                "workingSetBytes": 379486208,
+                "cpuCores": 0,
+                "expectedWorkload": false
+              }
+            ],
+            "processCount": 684,
+            "availablePhysicalBytes": 8867987456,
+            "ac": 1,
+            "at": "2026-11-09T14:53:20.5097934+00:00",
+            "memoryLoadPercent": 73,
+            "topCpu": [
+              {
+                "name": "com.docker.backend",
+                "pid": 34408,
+                "workingSetBytes": 1689784320,
+                "cpuCores": 0.3510715133234355,
+                "expectedWorkload": true
+              },
+              {
+                "name": "pwsh",
+                "pid": 172096,
+                "workingSetBytes": 188829696,
+                "cpuCores": 0.18431254449480364,
+                "expectedWorkload": true
+              },
+              {
+                "name": "ChatGPT",
+                "pid": 12344,
+                "workingSetBytes": 382607360,
+                "cpuCores": 0.026330363499257662,
+                "expectedWorkload": false
+              },
+              {
+                "name": "CCDaemon",
+                "pid": 53928,
+                "workingSetBytes": 10272768,
+                "cpuCores": 0.026330363499257662,
+                "expectedWorkload": false
+              },
+              {
+                "name": "codex",
+                "pid": 23524,
+                "workingSetBytes": 268300288,
+                "cpuCores": 0.017553575666171772,
+                "expectedWorkload": false
+              },
+              {
+                "name": "claude",
+                "pid": 11356,
+                "workingSetBytes": 910987264,
+                "cpuCores": 0.017553575666171772,
+                "expectedWorkload": false
+              },
+              {
+                "name": "wsl",
+                "pid": 60396,
+                "workingSetBytes": 12468224,
+                "cpuCores": 0.01462797972180981,
+                "expectedWorkload": false
+              },
+              {
+                "name": "RexpertPrintStartup",
+                "pid": 46284,
+                "workingSetBytes": 13127680,
+                "cpuCores": 0.01170238377744785,
+                "expectedWorkload": false
+              },
+              {
+                "name": "delfino",
+                "pid": 29192,
+                "workingSetBytes": 26873856,
+                "cpuCores": 0.01170238377744785,
+                "expectedWorkload": false
+              },
+              {
+                "name": "chrome",
+                "pid": 167476,
+                "workingSetBytes": 408715264,
+                "cpuCores": 0.005851191888723925,
+                "expectedWorkload": false
+              }
+            ],
+            "cpuPercent": 6.2294782925939485,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238"
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      },
+      {
+        "pair": 2,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-2-c1-a1",
+        "elapsedSeconds": 262.922,
+        "jar": "da87c44168c321d1b05c5d3bbf61a459284c937fdd145c93aa6e940fff1d1a60",
+        "environment": {
+          "at": "2026-11-09T14:55:47.110Z",
+          "power": {
+            "ac": 1,
+            "wslConfigExists": false,
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            },
+            "powerRead": true,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "memory": 34049220608
+          },
+          "hostProcesses": {
+            "cpuPercent": 15.014419610670515,
+            "topMemory": [
+              {
+                "cpuCores": 0,
+                "pid": 59880,
+                "name": "vmmemWSL",
+                "expectedWorkload": true,
+                "workingSetBytes": 4390547456
+              },
+              {
+                "cpuCores": 1.042905445204932,
+                "pid": 34408,
+                "name": "com.docker.backend",
+                "expectedWorkload": true,
+                "workingSetBytes": 1667751936
+              },
+              {
+                "cpuCores": 0,
+                "pid": 46900,
+                "name": "ChatGPT",
+                "expectedWorkload": false,
+                "workingSetBytes": 966643712
+              },
+              {
+                "cpuCores": 0,
+                "pid": 11356,
+                "name": "claude",
+                "expectedWorkload": false,
+                "workingSetBytes": 965586944
+              },
+              {
+                "cpuCores": 0.5562162374426304,
+                "pid": 235136,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 862732288
+              },
+              {
+                "cpuCores": 0.231756765601096,
+                "pid": 167952,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 519303168
+              },
+              {
+                "cpuCores": 0,
+                "pid": 3848,
+                "name": "Memory Compression",
+                "expectedWorkload": false,
+                "workingSetBytes": 491659264
+              },
+              {
+                "cpuCores": 0,
+                "pid": 48012,
+                "name": "MsMpEng",
+                "expectedWorkload": false,
+                "workingSetBytes": 440045568
+              },
+              {
+                "cpuCores": 0.2925929165713837,
+                "pid": 167476,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 418033664
+              },
+              {
+                "cpuCores": 0.0202787169900959,
+                "pid": 12344,
+                "name": "ChatGPT",
+                "expectedWorkload": false,
+                "workingSetBytes": 386510848
+              }
+            ],
+            "ac": 1,
+            "topCpu": [
+              {
+                "cpuCores": 1.042905445204932,
+                "pid": 34408,
+                "name": "com.docker.backend",
+                "expectedWorkload": true,
+                "workingSetBytes": 1667751936
+              },
+              {
+                "cpuCores": 0.5562162374426304,
+                "pid": 235136,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 862732288
+              },
+              {
+                "cpuCores": 0.2925929165713837,
+                "pid": 167476,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 418033664
+              },
+              {
+                "cpuCores": 0.231756765601096,
+                "pid": 167952,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 519303168
+              },
+              {
+                "cpuCores": 0.1767145337708357,
+                "pid": 221256,
+                "name": "pwsh",
+                "expectedWorkload": true,
+                "workingSetBytes": 187166720
+              },
+              {
+                "cpuCores": 0.0666300701103151,
+                "pid": 62768,
+                "name": "StSess",
+                "expectedWorkload": false,
+                "workingSetBytes": 15388672
+              },
+              {
+                "cpuCores": 0.0608361509702877,
+                "pid": 152160,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 74592256
+              },
+              {
+                "cpuCores": 0.0347635148401644,
+                "pid": 168736,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 153657344
+              },
+              {
+                "cpuCores": 0.0260726361301233,
+                "pid": 29048,
+                "name": "claude",
+                "expectedWorkload": false,
+                "workingSetBytes": 304676864
+              },
+              {
+                "cpuCores": 0.0231756765601096,
+                "pid": 53928,
+                "name": "CCDaemon",
+                "expectedWorkload": false,
+                "workingSetBytes": 10272768
+              }
+            ],
+            "memoryLoadPercent": 74,
+            "nonWorkloadCpuCores": 1.4079223510266579,
+            "processCount": 685,
+            "at": "2026-11-09T14:55:41.9530541+00:00",
+            "availablePhysicalBytes": 8611176448,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238"
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      },
+      {
+        "pair": 3,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-3-c1-a1",
+        "elapsedSeconds": 279.085,
+        "jar": "da87c44168c321d1b05c5d3bbf61a459284c937fdd145c93aa6e940fff1d1a60",
+        "environment": {
+          "at": "2026-11-09T15:00:52.469Z",
+          "power": {
+            "memory": 34049220608,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "powerRead": true,
+            "wslConfigExists": false,
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            },
+            "ac": 1
+          },
+          "hostProcesses": {
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "topCpu": [
+              {
+                "workingSetBytes": 312221696,
+                "expectedWorkload": false,
+                "pid": 160812,
+                "cpuCores": 0.4197968028757246,
+                "name": "Installer"
+              },
+              {
+                "workingSetBytes": 1576169472,
+                "expectedWorkload": true,
+                "pid": 34408,
+                "cpuCores": 0.34741804375922036,
+                "name": "com.docker.backend"
+              },
+              {
+                "workingSetBytes": 988921856,
+                "expectedWorkload": false,
+                "pid": 46900,
+                "cpuCores": 0.2866198861013568,
+                "name": "ChatGPT"
+              },
+              {
+                "workingSetBytes": 252051456,
+                "expectedWorkload": false,
+                "pid": 14832,
+                "cpuCores": 0.1794993226089305,
+                "name": "Docker Desktop"
+              },
+              {
+                "workingSetBytes": 118030336,
+                "expectedWorkload": false,
+                "pid": 19324,
+                "cpuCores": 0.16791872115028983,
+                "name": "FnKey"
+              },
+              {
+                "workingSetBytes": 539385856,
+                "expectedWorkload": false,
+                "pid": 20140,
+                "cpuCores": 0.16502357078562965,
+                "name": "explorer"
+              },
+              {
+                "workingSetBytes": 378634240,
+                "expectedWorkload": false,
+                "pid": 12344,
+                "cpuCores": 0.11870116495106695,
+                "name": "ChatGPT"
+              },
+              {
+                "workingSetBytes": 183816192,
+                "expectedWorkload": true,
+                "pid": 101612,
+                "cpuCores": 0.07527390948116441,
+                "name": "pwsh"
+              },
+              {
+                "workingSetBytes": 42680320,
+                "expectedWorkload": false,
+                "pid": 30840,
+                "cpuCores": 0.05790300729320339,
+                "name": "svchost"
+              },
+              {
+                "workingSetBytes": 50610176,
+                "expectedWorkload": false,
+                "pid": 62620,
+                "cpuCores": 0.03763695474058221,
+                "name": "OneDrive.Sync.Service"
+              }
+            ],
+            "ac": 1,
+            "nonWorkloadCpuCores": 1.699453264055519,
+            "cpuPercent": 27.129963898916966,
+            "at": "2026-11-09T15:00:47.3026220+00:00",
+            "topMemory": [
+              {
+                "workingSetBytes": 4272226304,
+                "expectedWorkload": true,
+                "pid": 59880,
+                "cpuCores": 0,
+                "name": "vmmemWSL"
+              },
+              {
+                "workingSetBytes": 1576169472,
+                "expectedWorkload": true,
+                "pid": 34408,
+                "cpuCores": 0.34741804375922036,
+                "name": "com.docker.backend"
+              },
+              {
+                "workingSetBytes": 988921856,
+                "expectedWorkload": false,
+                "pid": 46900,
+                "cpuCores": 0.2866198861013568,
+                "name": "ChatGPT"
+              },
+              {
+                "workingSetBytes": 955904000,
+                "expectedWorkload": false,
+                "pid": 11356,
+                "cpuCores": 0,
+                "name": "claude"
+              },
+              {
+                "workingSetBytes": 728834048,
+                "expectedWorkload": false,
+                "pid": 3848,
+                "cpuCores": 0,
+                "name": "Memory Compression"
+              },
+              {
+                "workingSetBytes": 723226624,
+                "expectedWorkload": false,
+                "pid": 235136,
+                "cpuCores": 0,
+                "name": "chrome"
+              },
+              {
+                "workingSetBytes": 539385856,
+                "expectedWorkload": false,
+                "pid": 20140,
+                "cpuCores": 0.16502357078562965,
+                "name": "explorer"
+              },
+              {
+                "workingSetBytes": 488259584,
+                "expectedWorkload": false,
+                "pid": 48012,
+                "cpuCores": 0,
+                "name": "MsMpEng"
+              },
+              {
+                "workingSetBytes": 401473536,
+                "expectedWorkload": false,
+                "pid": 167476,
+                "cpuCores": 0.00868545109398051,
+                "name": "chrome"
+              },
+              {
+                "workingSetBytes": 378634240,
+                "expectedWorkload": false,
+                "pid": 12344,
+                "cpuCores": 0.11870116495106695,
+                "name": "ChatGPT"
+              }
+            ],
+            "memoryLoadPercent": 74,
+            "processCount": 718,
+            "availablePhysicalBytes": 8779132928
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      },
+      {
+        "pair": 3,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-3-c1-b",
+        "elapsedSeconds": 108.551,
+        "jar": "639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e",
+        "environment": {
+          "at": "2026-11-09T15:06:10.814Z",
+          "power": {
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            },
+            "wslConfigExists": false,
+            "ac": 1,
+            "memory": 34049220608,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "powerRead": true
+          },
+          "hostProcesses": {
+            "at": "2026-11-09T15:06:05.6458635+00:00",
+            "memoryLoadPercent": 82,
+            "processCount": 719,
+            "topCpu": [
+              {
+                "expectedWorkload": true,
+                "name": "com.docker.backend",
+                "workingSetBytes": 3221065728,
+                "cpuCores": 2.1251347335421062,
+                "pid": 34408
+              },
+              {
+                "expectedWorkload": true,
+                "name": "pwsh",
+                "workingSetBytes": 188051456,
+                "cpuCores": 0.18666724010842825,
+                "pid": 65712
+              },
+              {
+                "expectedWorkload": false,
+                "name": "ChatGPT",
+                "workingSetBytes": 1177104384,
+                "cpuCores": 0.12923116622891187,
+                "pid": 46900
+              },
+              {
+                "expectedWorkload": false,
+                "name": "chrome",
+                "workingSetBytes": 410394624,
+                "cpuCores": 0.09189771820722621,
+                "pid": 167476
+              },
+              {
+                "expectedWorkload": false,
+                "name": "explorer",
+                "workingSetBytes": 525840384,
+                "cpuCores": 0.08041050343132294,
+                "pid": 20140
+              },
+              {
+                "expectedWorkload": false,
+                "name": "claude",
+                "workingSetBytes": 292577280,
+                "cpuCores": 0.0746668960433713,
+                "pid": 29048
+              },
+              {
+                "expectedWorkload": false,
+                "name": "chrome",
+                "workingSetBytes": 675233792,
+                "cpuCores": 0.07179509234939549,
+                "pid": 103080
+              },
+              {
+                "expectedWorkload": false,
+                "name": "backgroundTaskHost",
+                "workingSetBytes": 63492096,
+                "cpuCores": 0.06605148496144385,
+                "pid": 249740
+              },
+              {
+                "expectedWorkload": false,
+                "name": "chrome",
+                "workingSetBytes": 231964672,
+                "cpuCores": 0.03446164432770983,
+                "pid": 255932
+              },
+              {
+                "expectedWorkload": false,
+                "name": "audiodg",
+                "workingSetBytes": 31141888,
+                "cpuCores": 0.028718036939758194,
+                "pid": 125200
+              }
+            ],
+            "cpuPercent": 14.61621233859397,
+            "topMemory": [
+              {
+                "expectedWorkload": true,
+                "name": "vmmemWSL",
+                "workingSetBytes": 4123893760,
+                "cpuCores": 0,
+                "pid": 59880
+              },
+              {
+                "expectedWorkload": true,
+                "name": "com.docker.backend",
+                "workingSetBytes": 3221065728,
+                "cpuCores": 2.1251347335421062,
+                "pid": 34408
+              },
+              {
+                "expectedWorkload": false,
+                "name": "ChatGPT",
+                "workingSetBytes": 1177104384,
+                "cpuCores": 0.12923116622891187,
+                "pid": 46900
+              },
+              {
+                "expectedWorkload": false,
+                "name": "claude",
+                "workingSetBytes": 966799360,
+                "cpuCores": 0.017230822163854916,
+                "pid": 11356
+              },
+              {
+                "expectedWorkload": false,
+                "name": "Memory Compression",
+                "workingSetBytes": 879132672,
+                "cpuCores": 0,
+                "pid": 3848
+              },
+              {
+                "expectedWorkload": false,
+                "name": "chrome",
+                "workingSetBytes": 770904064,
+                "cpuCores": 0.008615411081927458,
+                "pid": 235136
+              },
+              {
+                "expectedWorkload": false,
+                "name": "chrome",
+                "workingSetBytes": 675233792,
+                "cpuCores": 0.07179509234939549,
+                "pid": 103080
+              },
+              {
+                "expectedWorkload": false,
+                "name": "explorer",
+                "workingSetBytes": 525840384,
+                "cpuCores": 0.08041050343132294,
+                "pid": 20140
+              },
+              {
+                "expectedWorkload": false,
+                "name": "chrome",
+                "workingSetBytes": 483573760,
+                "cpuCores": 0.014359018469879097,
+                "pid": 62844
+              },
+              {
+                "expectedWorkload": false,
+                "name": "MsMpEng",
+                "workingSetBytes": 481599488,
+                "cpuCores": 0,
+                "pid": 48012
+              }
+            ],
+            "nonWorkloadCpuCores": 0.847182089722866,
+            "ac": 1,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "availablePhysicalBytes": 5965905920
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      },
+      {
+        "pair": 4,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-4-c1-b",
+        "elapsedSeconds": 108.67,
+        "jar": "639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e",
+        "environment": {
+          "at": "2026-11-09T15:08:43.150Z",
+          "power": {
+            "memory": 34049220608,
+            "wslConfigExists": false,
+            "powerRead": true,
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            },
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "ac": 1
+          },
+          "hostProcesses": {
+            "processCount": 734,
+            "availablePhysicalBytes": 4379545600,
+            "cpuPercent": 16.22474747474747,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "nonWorkloadCpuCores": 2.2343432966366956,
+            "memoryLoadPercent": 87,
+            "at": "2026-11-09T15:08:37.9960676+00:00",
+            "topMemory": [
+              {
+                "cpuCores": 0,
+                "pid": 59880,
+                "name": "vmmemWSL",
+                "expectedWorkload": true,
+                "workingSetBytes": 4186771456
+              },
+              {
+                "cpuCores": 1.1663735084774458,
+                "pid": 34408,
+                "name": "com.docker.backend",
+                "expectedWorkload": true,
+                "workingSetBytes": 3224199168
+              },
+              {
+                "cpuCores": 0.0028942270681822473,
+                "pid": 46900,
+                "name": "ChatGPT",
+                "expectedWorkload": false,
+                "workingSetBytes": 1191763968
+              },
+              {
+                "cpuCores": 0,
+                "pid": 11356,
+                "name": "claude",
+                "expectedWorkload": false,
+                "workingSetBytes": 961736704
+              },
+              {
+                "cpuCores": 0,
+                "pid": 3848,
+                "name": "Memory Compression",
+                "expectedWorkload": false,
+                "workingSetBytes": 928280576
+              },
+              {
+                "cpuCores": 0.6801433610228281,
+                "pid": 235136,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 893845504
+              },
+              {
+                "cpuCores": 0.292316933886407,
+                "pid": 103080,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 869863424
+              },
+              {
+                "cpuCores": 0,
+                "pid": 72492,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 566722560
+              },
+              {
+                "cpuCores": 0,
+                "pid": 48012,
+                "name": "MsMpEng",
+                "expectedWorkload": false,
+                "workingSetBytes": 517963776
+              },
+              {
+                "cpuCores": 0,
+                "pid": 12936,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 497582080
+              }
+            ],
+            "ac": 1,
+            "topCpu": [
+              {
+                "cpuCores": 1.1663735084774458,
+                "pid": 34408,
+                "name": "com.docker.backend",
+                "expectedWorkload": true,
+                "workingSetBytes": 3224199168
+              },
+              {
+                "cpuCores": 0.6801433610228281,
+                "pid": 235136,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 893845504
+              },
+              {
+                "cpuCores": 0.47754746625007083,
+                "pid": 167476,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 453279744
+              },
+              {
+                "cpuCores": 0.292316933886407,
+                "pid": 103080,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 869863424
+              },
+              {
+                "cpuCores": 0.23732661959094428,
+                "pid": 14832,
+                "name": "Docker Desktop",
+                "expectedWorkload": false,
+                "workingSetBytes": 242466816
+              },
+              {
+                "cpuCores": 0.17365362409093485,
+                "pid": 167524,
+                "name": "pwsh",
+                "expectedWorkload": true,
+                "workingSetBytes": 185507840
+              },
+              {
+                "cpuCores": 0.10129794738637866,
+                "pid": 29048,
+                "name": "claude",
+                "expectedWorkload": false,
+                "workingSetBytes": 289460224
+              },
+              {
+                "cpuCores": 0.09550949325001416,
+                "pid": 62768,
+                "name": "StSess",
+                "expectedWorkload": false,
+                "workingSetBytes": 16445440
+              },
+              {
+                "cpuCores": 0.04341340602273371,
+                "pid": 125200,
+                "name": "audiodg",
+                "expectedWorkload": false,
+                "workingSetBytes": 31019008
+              },
+              {
+                "cpuCores": 0.03762495188636922,
+                "pid": 73992,
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 77012992
+              }
+            ]
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      },
+      {
+        "pair": 4,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-4-c1-a1",
+        "elapsedSeconds": 281.511,
+        "jar": "da87c44168c321d1b05c5d3bbf61a459284c937fdd145c93aa6e940fff1d1a60",
+        "environment": {
+          "at": "2026-11-09T15:11:10.613Z",
+          "power": {
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "ac": 1,
+            "memory": 34049220608,
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            },
+            "powerRead": true,
+            "wslConfigExists": false
+          },
+          "hostProcesses": {
+            "availablePhysicalBytes": 4887412736,
+            "cpuPercent": 18.317186939361317,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "topCpu": [
+              {
+                "cpuCores": 1.036104022207935,
+                "expectedWorkload": true,
+                "workingSetBytes": 3226648576,
+                "name": "com.docker.backend",
+                "pid": 34408
+              },
+              {
+                "cpuCores": 0.4879160215383628,
+                "expectedWorkload": false,
+                "workingSetBytes": 950116352,
+                "name": "chrome",
+                "pid": 72492
+              },
+              {
+                "cpuCores": 0.4190337596741233,
+                "expectedWorkload": false,
+                "workingSetBytes": 447385600,
+                "name": "chrome",
+                "pid": 167476
+              },
+              {
+                "cpuCores": 0.33006083809948067,
+                "expectedWorkload": false,
+                "workingSetBytes": 194469888,
+                "name": "codex",
+                "pid": 187248
+              },
+              {
+                "cpuCores": 0.2439580107691814,
+                "expectedWorkload": true,
+                "workingSetBytes": 187301888,
+                "name": "pwsh",
+                "pid": 217272
+              },
+              {
+                "cpuCores": 0.23821782228049476,
+                "expectedWorkload": false,
+                "workingSetBytes": 991653888,
+                "name": "claude",
+                "pid": 11356
+              },
+              {
+                "cpuCores": 0.23534772803615145,
+                "expectedWorkload": false,
+                "workingSetBytes": 70545408,
+                "name": "codex-computer-use",
+                "pid": 172964
+              },
+              {
+                "cpuCores": 0.14637480646150883,
+                "expectedWorkload": false,
+                "workingSetBytes": 444731392,
+                "name": "chrome",
+                "pid": 12936
+              },
+              {
+                "cpuCores": 0.1406346179728222,
+                "expectedWorkload": false,
+                "workingSetBytes": 69681152,
+                "name": "OneDrive.Sync.Service",
+                "pid": 62620
+              },
+              {
+                "cpuCores": 0.12915424099544898,
+                "expectedWorkload": false,
+                "workingSetBytes": 909844480,
+                "name": "chrome",
+                "pid": 103080
+              }
+            ],
+            "ac": 1,
+            "topMemory": [
+              {
+                "cpuCores": 0,
+                "expectedWorkload": true,
+                "workingSetBytes": 4217892864,
+                "name": "vmmemWSL",
+                "pid": 59880
+              },
+              {
+                "cpuCores": 1.036104022207935,
+                "expectedWorkload": true,
+                "workingSetBytes": 3226648576,
+                "name": "com.docker.backend",
+                "pid": 34408
+              },
+              {
+                "cpuCores": 0,
+                "expectedWorkload": false,
+                "workingSetBytes": 1098043392,
+                "name": "ChatGPT",
+                "pid": 46900
+              },
+              {
+                "cpuCores": 0.23821782228049476,
+                "expectedWorkload": false,
+                "workingSetBytes": 991653888,
+                "name": "claude",
+                "pid": 11356
+              },
+              {
+                "cpuCores": 0.4879160215383628,
+                "expectedWorkload": false,
+                "workingSetBytes": 950116352,
+                "name": "chrome",
+                "pid": 72492
+              },
+              {
+                "cpuCores": 0,
+                "expectedWorkload": false,
+                "workingSetBytes": 921587712,
+                "name": "Memory Compression",
+                "pid": 3848
+              },
+              {
+                "cpuCores": 0.12915424099544898,
+                "expectedWorkload": false,
+                "workingSetBytes": 909844480,
+                "name": "chrome",
+                "pid": 103080
+              },
+              {
+                "cpuCores": 0,
+                "expectedWorkload": false,
+                "workingSetBytes": 555798528,
+                "name": "MsMpEng",
+                "pid": 48012
+              },
+              {
+                "cpuCores": 0.00861028273302993,
+                "expectedWorkload": false,
+                "workingSetBytes": 450936832,
+                "name": "chrome",
+                "pid": 62844
+              },
+              {
+                "cpuCores": 0,
+                "expectedWorkload": false,
+                "workingSetBytes": 449880064,
+                "name": "explorer",
+                "pid": 20140
+              }
+            ],
+            "processCount": 734,
+            "memoryLoadPercent": 85,
+            "nonWorkloadCpuCores": 2.4022688825153504,
+            "at": "2026-11-09T15:11:05.3922451+00:00"
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      },
+      {
+        "pair": 5,
+        "concurrency": 1,
+        "side": "a1",
+        "name": "write-5-c1-a1",
+        "elapsedSeconds": 285.81,
+        "jar": "da87c44168c321d1b05c5d3bbf61a459284c937fdd145c93aa6e940fff1d1a60",
+        "environment": {
+          "at": "2026-11-09T15:16:32.495Z",
+          "power": {
+            "ac": 1,
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            },
+            "memory": 34049220608,
+            "powerRead": true,
+            "wslConfigExists": false,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238"
+          },
+          "hostProcesses": {
+            "cpuPercent": 16.250335750738653,
+            "topMemory": [
+              {
+                "name": "vmmemWSL",
+                "workingSetBytes": 4157108224,
+                "expectedWorkload": true,
+                "pid": 59880,
+                "cpuCores": 0
+              },
+              {
+                "name": "com.docker.backend",
+                "workingSetBytes": 3009163264,
+                "expectedWorkload": true,
+                "pid": 34408,
+                "cpuCores": 1.0782271546909623
+              },
+              {
+                "name": "chrome",
+                "workingSetBytes": 1239715840,
+                "expectedWorkload": false,
+                "pid": 103080,
+                "cpuCores": 0.2041443412881555
+              },
+              {
+                "name": "ChatGPT",
+                "workingSetBytes": 1076625408,
+                "expectedWorkload": false,
+                "pid": 46900,
+                "cpuCores": 0.023002179300073863
+              },
+              {
+                "name": "Memory Compression",
+                "workingSetBytes": 1064239104,
+                "expectedWorkload": false,
+                "pid": 3848,
+                "cpuCores": 0
+              },
+              {
+                "name": "chrome",
+                "workingSetBytes": 989429760,
+                "expectedWorkload": false,
+                "pid": 72492,
+                "cpuCores": 0.914336627177936
+              },
+              {
+                "name": "claude",
+                "workingSetBytes": 898465792,
+                "expectedWorkload": false,
+                "pid": 11356,
+                "cpuCores": 0
+              },
+              {
+                "name": "MsMpEng",
+                "workingSetBytes": 558772224,
+                "expectedWorkload": false,
+                "pid": 48012,
+                "cpuCores": 0
+              },
+              {
+                "name": "chrome",
+                "workingSetBytes": 463433728,
+                "expectedWorkload": false,
+                "pid": 62844,
+                "cpuCores": 0.028752724125092326
+              },
+              {
+                "name": "chrome",
+                "workingSetBytes": 457953280,
+                "expectedWorkload": false,
+                "pid": 167476,
+                "cpuCores": 0.6469362928145773
+              }
+            ],
+            "at": "2026-11-09T15:16:27.2544033+00:00",
+            "nonWorkloadCpuCores": 2.837893871146613,
+            "ac": 1,
+            "topCpu": [
+              {
+                "name": "com.docker.backend",
+                "workingSetBytes": 3009163264,
+                "expectedWorkload": true,
+                "pid": 34408,
+                "cpuCores": 1.0782271546909623
+              },
+              {
+                "name": "chrome",
+                "workingSetBytes": 989429760,
+                "expectedWorkload": false,
+                "pid": 72492,
+                "cpuCores": 0.914336627177936
+              },
+              {
+                "name": "chrome",
+                "workingSetBytes": 457953280,
+                "expectedWorkload": false,
+                "pid": 167476,
+                "cpuCores": 0.6469362928145773
+              },
+              {
+                "name": "codex-computer-use",
+                "workingSetBytes": 74981376,
+                "expectedWorkload": false,
+                "pid": 172964,
+                "cpuCores": 0.3507832343261264
+              },
+              {
+                "name": "chrome",
+                "workingSetBytes": 438091776,
+                "expectedWorkload": false,
+                "pid": 12936,
+                "cpuCores": 0.2041443412881555
+              },
+              {
+                "name": "chrome",
+                "workingSetBytes": 1239715840,
+                "expectedWorkload": false,
+                "pid": 103080,
+                "cpuCores": 0.2041443412881555
+              },
+              {
+                "name": "claude",
+                "workingSetBytes": 296738816,
+                "expectedWorkload": false,
+                "pid": 29048,
+                "cpuCores": 0.16389052751302627
+              },
+              {
+                "name": "pwsh",
+                "workingSetBytes": 181682176,
+                "expectedWorkload": true,
+                "pid": 154860,
+                "cpuCores": 0.08050762755025852
+              },
+              {
+                "name": "chrome",
+                "workingSetBytes": 74842112,
+                "expectedWorkload": false,
+                "pid": 167980,
+                "cpuCores": 0.051754903425166185
+              },
+              {
+                "name": "audiodg",
+                "workingSetBytes": 31965184,
+                "expectedWorkload": false,
+                "pid": 125200,
+                "cpuCores": 0.04312908618763849
+              }
+            ],
+            "processCount": 734,
+            "availablePhysicalBytes": 4696121344,
+            "memoryLoadPercent": 86,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238"
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      },
+      {
+        "pair": 5,
+        "concurrency": 1,
+        "side": "b",
+        "name": "write-5-c1-b",
+        "elapsedSeconds": 107.873,
+        "jar": "639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e",
+        "environment": {
+          "at": "2026-11-09T15:21:59.406Z",
+          "power": {
+            "cpu": {
+              "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+              "NumberOfCores": 24,
+              "NumberOfLogicalProcessors": 32
+            },
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "memory": 34049220608,
+            "ac": 1,
+            "powerRead": true,
+            "wslConfigExists": false
+          },
+          "hostProcesses": {
+            "memoryLoadPercent": 83,
+            "processCount": 724,
+            "cpuPercent": 11.082709512506849,
+            "nonWorkloadCpuCores": 1.5753599644324752,
+            "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+            "availablePhysicalBytes": 5586268160,
+            "topMemory": [
+              {
+                "name": "vmmemWSL",
+                "expectedWorkload": true,
+                "workingSetBytes": 3582046208,
+                "pid": 59880,
+                "cpuCores": 0
+              },
+              {
+                "name": "com.docker.backend",
+                "expectedWorkload": true,
+                "workingSetBytes": 2927042560,
+                "pid": 34408,
+                "cpuCores": 1.0872614225767736
+              },
+              {
+                "name": "Memory Compression",
+                "expectedWorkload": false,
+                "workingSetBytes": 1372569600,
+                "pid": 3848,
+                "cpuCores": 0
+              },
+              {
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 1186430976,
+                "pid": 72492,
+                "cpuCores": 0.675154270471061
+              },
+              {
+                "name": "ChatGPT",
+                "expectedWorkload": false,
+                "workingSetBytes": 1068326912,
+                "pid": 46900,
+                "cpuCores": 0
+              },
+              {
+                "name": "claude",
+                "expectedWorkload": false,
+                "workingSetBytes": 893337600,
+                "pid": 11356,
+                "cpuCores": 0
+              },
+              {
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 862961664,
+                "pid": 103080,
+                "cpuCores": 0.34780674539418294
+              },
+              {
+                "name": "MsMpEng",
+                "expectedWorkload": false,
+                "workingSetBytes": 546115584,
+                "pid": 48012,
+                "cpuCores": 0
+              },
+              {
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 467709952,
+                "pid": 62844,
+                "cpuCores": 0
+              },
+              {
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 457347072,
+                "pid": 167476,
+                "cpuCores": 0.0672231524711446
+              }
+            ],
+            "at": "2026-11-09T15:21:54.2254032+00:00",
+            "topCpu": [
+              {
+                "name": "com.docker.backend",
+                "expectedWorkload": true,
+                "workingSetBytes": 2927042560,
+                "pid": 34408,
+                "cpuCores": 1.0872614225767736
+              },
+              {
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 1186430976,
+                "pid": 72492,
+                "cpuCores": 0.675154270471061
+              },
+              {
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 862961664,
+                "pid": 103080,
+                "cpuCores": 0.34780674539418294
+              },
+              {
+                "name": "codex-computer-use",
+                "expectedWorkload": false,
+                "workingSetBytes": 70598656,
+                "pid": 172964,
+                "cpuCores": 0.16075101677882406
+              },
+              {
+                "name": "KakaoTalk",
+                "expectedWorkload": false,
+                "workingSetBytes": 189341696,
+                "pid": 262824,
+                "cpuCores": 0.11398708462498433
+              },
+              {
+                "name": "pwsh",
+                "expectedWorkload": true,
+                "workingSetBytes": 183779328,
+                "pid": 73144,
+                "cpuCores": 0.07014589823075959
+              },
+              {
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 457347072,
+                "pid": 167476,
+                "cpuCores": 0.0672231524711446
+              },
+              {
+                "name": "claude",
+                "expectedWorkload": false,
+                "workingSetBytes": 297394176,
+                "pid": 29048,
+                "cpuCores": 0.049686677913454706
+              },
+              {
+                "name": "chrome",
+                "expectedWorkload": false,
+                "workingSetBytes": 74579968,
+                "pid": 167980,
+                "cpuCores": 0.03215020335576481
+              },
+              {
+                "name": "CCDaemon",
+                "expectedWorkload": false,
+                "workingSetBytes": 10289152,
+                "pid": 53928,
+                "cpuCores": 0.026304711836534846
+              }
+            ],
+            "ac": 1
+          },
+          "docker": {
+            "version": "28.1.1",
+            "cpus": 32,
+            "memory": 16609128448,
+            "os": "Docker Desktop"
+          },
+          "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+          "background": [],
+          "pausedBackground": [
+            {
+              "alias": "background-e889d562",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-ff59cc56",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-a7d65270",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-488ea115",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-e2be4830",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-5336624b",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            },
+            {
+              "alias": "background-c8fc47b2",
+              "state": "paused",
+              "note": "Memory retained; user-authorized pause only"
+            }
+          ]
+        }
+      }
+    ],
+    "preservedOriginalSession": "apps/server-v3/build/perf-stage2-p2/writes-session.json",
+    "writeSpec": {
+      "name": "protocol",
+      "concurrency": 1,
+      "warmupCycles": 10,
+      "measuredCycles": 300
+    },
+    "adoptionPolicy": {
+      "name": "e24-b",
+      "requiredPairs": 5,
+      "maxPairedP95Ratio": 1.1,
+      "repeatabilityWarningPercent": 10,
+      "repeatabilityBlocksAdoption": false,
+      "bootstrap": false,
+      "confidenceIntervals": false,
+      "invalidReplacement": false,
+      "invalidOutcome": "Read/full viewport adopted; write improvement direction observed, quantitative verdict withheld; close P2 without another run"
+    },
+    "preservedEarlierSessions": [
+      "apps/server-v3/build/perf-stage2-p2-write-retest1/write-retest-session.json",
+      "apps/server-v3/build/perf-stage2-p2-write-e23/write-e23-session.json"
+    ],
+    "sourcePlaces": {
+      "rows": 100000,
+      "hash": "20f94cc714af58e3402d6980799d8296"
+    },
+    "finishedAt": "2026-11-09T15:23:58.769Z"
+  },
+  "background": {
+    "startedAt": "2026-11-09T14:45:00.520Z",
+    "source": "d3526bb8532ea0575680b43d6c0f43c6da3eb38e",
+    "history": [
+      {
+        "at": "2026-11-09T14:45:00.562Z",
+        "phase": "before",
+        "states": [
+          {
+            "alias": "background-e889d562",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-ff59cc56",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-a7d65270",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-488ea115",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-e2be4830",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-5336624b",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-c8fc47b2",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          }
+        ]
+      },
+      {
+        "at": "2026-11-09T14:45:01.736Z",
+        "phase": "paused",
+        "states": [
+          {
+            "alias": "background-e889d562",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-ff59cc56",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-a7d65270",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-488ea115",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-e2be4830",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-5336624b",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-c8fc47b2",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          }
+        ]
+      },
+      {
+        "at": "2026-11-09T15:23:58.784Z",
+        "phase": "measurement-complete",
+        "completedAt": "2026-11-09T15:23:58.784Z"
+      },
+      {
+        "at": "2026-11-09T15:24:01.140Z",
+        "phase": "restored",
+        "states": [
+          {
+            "alias": "background-e889d562",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-ff59cc56",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-a7d65270",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-488ea115",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-e2be4830",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-5336624b",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-c8fc47b2",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          }
+        ],
+        "restored": true,
+        "failures": []
+      }
+    ],
+    "restored": true
+  },
+  "verification": {
+    "at": "2026-11-09T15:24:37.877Z",
+    "states": [
+      {
+        "alias": "background-e889d562",
+        "running": true,
+        "paused": false,
+        "status": "running"
+      },
+      {
+        "alias": "background-ff59cc56",
+        "running": true,
+        "paused": false,
+        "status": "running"
+      },
+      {
+        "alias": "background-a7d65270",
+        "running": true,
+        "paused": false,
+        "status": "running"
+      },
+      {
+        "alias": "background-488ea115",
+        "running": true,
+        "paused": false,
+        "status": "running"
+      },
+      {
+        "alias": "background-e2be4830",
+        "running": true,
+        "paused": false,
+        "status": "running"
+      },
+      {
+        "alias": "background-5336624b",
+        "running": true,
+        "paused": false,
+        "status": "running"
+      },
+      {
+        "alias": "background-c8fc47b2",
+        "running": true,
+        "paused": false,
+        "status": "running"
+      }
+    ],
+    "allRunning": true,
+    "preservedFiles": 4796,
+    "preservedWriteHashes": 847,
+    "originalsUnchanged": true,
+    "elapsedSeconds": 2340.62
+  }
+}

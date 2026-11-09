@@ -1,0 +1,25 @@
+{
+  "release": "https://github.com/MycroCosmo/loco/releases/tag/perf-stage2-p2-write-e24-20261110",
+  "measurementSource": "d3526bb8532ea0575680b43d6c0f43c6da3eb38e",
+  "redactionScannedFiles": 243,
+  "artifacts": [
+    {
+      "name": "p1-p2-write-e24-a1-20261110.tar.gz",
+      "sha256": "ee9d3a03a85f06bbb88c0bf59e7e0b9cc76fd0b4b177052901014c36a2f614fd",
+      "bytes": 848930,
+      "url": "https://github.com/MycroCosmo/loco/releases/download/perf-stage2-p2-write-e24-20261110/p1-p2-write-e24-a1-20261110.tar.gz"
+    },
+    {
+      "name": "p2-write-e24-b-20261110.tar.gz",
+      "sha256": "28d5303e12544825340bbe4c13d3aad4d1258eb1171b8d9132d0d9259392131a",
+      "bytes": 623826,
+      "url": "https://github.com/MycroCosmo/loco/releases/download/perf-stage2-p2-write-e24-20261110/p2-write-e24-b-20261110.tar.gz"
+    },
+    {
+      "name": "p2-write-e24-session-20261110.tar.gz",
+      "sha256": "b8c45f6c85a42c2728c76f4947b911a581bdcecc0beb63b177965ecb01e2a5d8",
+      "bytes": 126463,
+      "url": "https://github.com/MycroCosmo/loco/releases/download/perf-stage2-p2-write-e24-20261110/p2-write-e24-session-20261110.tar.gz"
+    }
+  ]
+}
