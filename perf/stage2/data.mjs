@@ -12,11 +12,13 @@ export function pairedThresholdFailure(exitCode, summary) {
   // k6 Rate "passes" counts true values: for http_req_failed those are failed requests.
   return exitCode===99 && (summary.metrics.business_failure?.values.count||0)<=(summary.metrics.http_req_failed?.values.passes||0);
 }
-export function stageSettings(stage = process.env.PERF_STAGE || 'p0') {
+export function stageSettings(stage = process.env.PERF_STAGE || 'p0', session = process.env.PERF_SESSION || '') {
   if (!['p0','p1','e15-a','e15-b','p2-a0','p2-a1','p2-b'].includes(stage)) throw Error('Unknown performance stage');
+  if (session && (session!=='write-retest1'||!stage.startsWith('p2-'))) throw Error('Unknown performance session');
+  const suffix=session?'-'+session:'';
   const mapped={'e15-a':'p0','e15-b':'p1','p2-a0':'p0','p2-a1':'p1','p2-b':'p2'};
   const images={'e15-a':'loco-perf-p0:local','p2-a0':'loco-perf-p0:local','p2-a1':'loco-perf-e15-b:local'};
-  return {stage:mapped[stage]||stage, project:`loco-perf-${stage}`, output:`apps/server-v3/build/perf-stage2${stage==='p0'?'':'-'+stage}`,
+  return {stage:mapped[stage]||stage, project:`loco-perf-${stage}${suffix}`, output:`apps/server-v3/build/perf-stage2${stage==='p0'?'':'-'+stage}${suffix}`,
     image:images[stage]||`loco-perf-${stage}:local`, paired:stage.startsWith('e15-')||stage.startsWith('p2-')};
 }
 export function measurementSpec(name,rate,viewport,mix,repeats) {

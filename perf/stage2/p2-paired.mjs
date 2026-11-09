@@ -3,10 +3,11 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {spawn,spawnSync} from 'node:child_process';
 import {stageSettings,hash} from './data.mjs';
-import {protocol,originalJars,readSchedule,writeSchedule,evaluate} from './p2-protocol.mjs';
+import {protocol,originalJars,readSchedule,writeSchedule,writeRetestSchedule,evaluate} from './p2-protocol.mjs';
 
-const mode=process.argv[2];assert.ok(['reads','writes','evaluate'].includes(mode),'Use reads | writes | evaluate');
-const output='apps/server-v3/build/perf-stage2-p2';fs.mkdirSync(output,{recursive:true});
+const mode=process.argv[2];assert.ok(['reads','writes','write-retest','evaluate'].includes(mode),'Use reads | writes | write-retest | evaluate');
+if(mode==='write-retest')process.env.PERF_SESSION='write-retest1';
+const output='apps/server-v3/build/perf-stage2-p2'+(mode==='write-retest'?'-write-retest1':'');fs.mkdirSync(output,{recursive:true});
 const cmd=(exe,args)=>{const r=spawnSync(exe,args,{encoding:'utf8',windowsHide:true});assert.equal(r.status,0,r.stderr);return r.stdout.trim();};
 async function run(side,script,...args) {
   console.log(`${new Date().toISOString()} ${side} ${args.join(' ')}`);
@@ -26,9 +27,15 @@ if(mode==='evaluate') {
   assert.equal(process.env.PERF_HEAVY_APPS_STATUS,'closed-user-confirmed','Obtain a fresh user environment confirmation after tests and push');
   assert.equal(cmd('git',['status','--porcelain']),'','Commit measured code first');
   const bJar=hash(fs.readFileSync('apps/server-v3/build/libs/loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar'));
-  const schedule=mode==='reads'?readSchedule():writeSchedule();
+  const schedule=mode==='reads'?readSchedule():mode==='write-retest'?writeRetestSchedule():writeSchedule();
   const session={startedAt:new Date().toISOString(),source:cmd('git',['rev-parse','HEAD']),implementation:'91d653a2b69a5f403f9969bd754f3c46eac76735',mode,protocol,userDeclaration:process.env.PERF_HEAVY_APPS_STATUS,confirmedConditions:'AC connected, Windows best performance, sleep disabled, Windows Update paused, no heavy applications until measurement ends',expectedJars:{...originalJars,b:bJar},schedule,runs:[]};
   fs.writeFileSync(file,JSON.stringify(session,null,2));
+  if(mode==='write-retest') {
+    session.confirmedConditions+=', including browsers closed and unused';
+    session.preservedOriginalSession='apps/server-v3/build/perf-stage2-p2/writes-session.json';
+    assert.equal(bJar,'639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e','Retest the unchanged P2 JAR');
+    fs.writeFileSync(file,JSON.stringify(session,null,2));
+  }
   for(const item of schedule) {
     for(const other of ['a0','a1','b'].filter(s=>s!==item.side))await run(other,'run','stop');
     await run(item.side,'run','up');

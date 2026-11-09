@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSchedule,writeSchedule,writeSpec,evaluate,fullViewportSchedule} from './p2-protocol.mjs';
+import {readSchedule,writeSchedule,writeRetestSchedule,writeSpec,evaluate,fullViewportSchedule} from './p2-protocol.mjs';
 import {stageSettings} from './data.mjs';
 
 test('original P0 is compared only at 1%, A1 only at 10%, AB/BA alternates',()=>{
@@ -17,6 +17,20 @@ test('write sampling retains five single-VU pairs and one exploratory pair per c
   assert.equal(writeSchedule().filter(r=>r.exploratory).length,8);
   for(const c of [1,2,4,8,16])assert.equal(writeSpec('example',c).measuredCycles,30*c);
   assert.throws(()=>writeSpec('example',3));assert.throws(()=>writeSpec('../old',1));
+});
+test('write retest preserves all five AB/BA pairs and 10+30 cycles in isolated outputs',()=>{
+  const runs=writeRetestSchedule();
+  assert.equal(runs.length,10);
+  assert.deepEqual(runs.map(r=>r.side),['a1','b','b','a1','a1','b','b','a1','a1','b']);
+  assert.deepEqual(runs.map(r=>r.pair),[1,1,2,2,3,3,4,4,5,5]);
+  for(const run of runs)assert.deepEqual(writeSpec(run.name,run.concurrency),{name:run.name,concurrency:1,warmupCycles:10,measuredCycles:30});
+  for(const side of ['a1','b']) {
+    const previous=stageSettings('p2-'+side,''),next=stageSettings('p2-'+side,'write-retest1');
+    assert.equal(next.image,previous.image);assert.equal(next.stage,previous.stage);
+    assert.notEqual(next.project,previous.project);assert.notEqual(next.output,previous.output);
+  }
+  assert.throws(()=>stageSettings('p2-b','../overwrite'));
+  assert.throws(()=>stageSettings('p0','write-retest1'));
 });
 test('full viewport follows the approved 16 req/s three-run contract, not the 1% load',()=>{
   assert.equal(fullViewportSchedule().length,3);

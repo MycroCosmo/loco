@@ -23,6 +23,7 @@ export function writeSchedule() {
 export function fullViewportSchedule() {
   return Array.from({length:3},(_,i)=>({name:'full-viewport-'+(i+1),rate:16,viewport:100}));
 }
+export const writeRetestSchedule=()=>writeSchedule().filter(r=>r.concurrency===1);
 export function writeSpec(name,concurrency) {
   assert.match(name||'',/^[a-z0-9-]+$/);concurrency=Number(concurrency);
   assert.ok([1,2,4,8,16].includes(concurrency),'Only approved write concurrency levels');
