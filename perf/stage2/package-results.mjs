@@ -19,7 +19,7 @@ const sums=[];
 function visit(relative='') {
   for(const entry of fs.readdirSync(path.join(base,relative),{withFileTypes:true})) {
     const target=path.join(relative,entry.name);
-    if(entry.name==='private'||entry.name==='preflight'||entry.name.endsWith('.jfr'))continue;
+    if(entry.name==='private'||entry.name==='preflight'||entry.name.endsWith('.jfr')||entry.name.endsWith('-jfr-events.json'))continue;
     if(entry.isDirectory()){visit(target);continue;}
     if(!/\.(json|jsonl|gz|log|md|txt)$/.test(entry.name))continue;
     let buffer=fs.readFileSync(path.join(base,target));
