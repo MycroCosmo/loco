@@ -1,0 +1,25 @@
+{
+  "release": "https://github.com/MycroCosmo/loco/releases/tag/perf-stage2-p2-write-retest1-20261109",
+  "measurementSource": "39dc2b4666d03c3a2ed2deeb9c27e89623e60a99",
+  "redactionScannedFiles": 239,
+  "artifacts": [
+    {
+      "name": "p1-p2-write-retest1-a1-20261109.tar.gz",
+      "sha256": "991af5535bcb1b36459eb7945108ea345486aa3640f058bc47ba0fbf36e7c752",
+      "bytes": 174391,
+      "url": "https://github.com/MycroCosmo/loco/releases/download/perf-stage2-p2-write-retest1-20261109/p1-p2-write-retest1-a1-20261109.tar.gz"
+    },
+    {
+      "name": "p2-write-retest1-b-20261109.tar.gz",
+      "sha256": "980903f0a25b254f006053dada10590b10ae3667b75c142e5132df578b0df436",
+      "bytes": 138164,
+      "url": "https://github.com/MycroCosmo/loco/releases/download/perf-stage2-p2-write-retest1-20261109/p2-write-retest1-b-20261109.tar.gz"
+    },
+    {
+      "name": "p2-write-retest1-session-20261109.tar.gz",
+      "sha256": "30ad6a8a9cf9e403785634deea48451a690a78bbadad1f8cbcf6c2f3897c8195",
+      "bytes": 97578,
+      "url": "https://github.com/MycroCosmo/loco/releases/download/perf-stage2-p2-write-retest1-20261109/p2-write-retest1-session-20261109.tar.gz"
+    }
+  ]
+}

@@ -281,3 +281,7 @@ P0의 낮은 주 조건 부하에서는 앱·DB CPU에 여유가 있고, JFR 샘
 - [k6 JSON 원본 출력](https://grafana.com/docs/k6/latest/results-output/real-time/json/): granular JSON/gzip 산출물. summary percentile만 남기는 방식과 구별한다.
 - [PostGIS ST_Intersects](https://postgis.net/docs/ST_Intersects.html): 공간 인덱스를 활용하는 bbox 사전 비교가 포함된다. 현재 반열림/ROUND/limit 계약과 동등하다는 보장은 아니므로 residual/경계 검사가 필요하다.
 - [PostgreSQL17 표현식 인덱스](https://www.postgresql.org/docs/17/indexes-expressional.html): 파생 표현식 인덱스와 쓰기 유지 비용. 실제 사용 여부는 우리 데이터의 plan으로 확인한다.
+
+## P2 쓰기 재측정 후 상태(2026-11-09)
+
+사용자가 읽기 E-16/E-21·전체 viewport를 유효 승인했다. 쓰기 전체5쌍을 새 세션에서 같은 프로토콜로 재측정한 결과20구간 모두 유효·HTTP1,200건 오류0·DB복원10/10이나 반복 편차10% 기준 미달로 **최종 채택 보류**다. 실행1,315.290초, 배경7개 복구 확인. 원본/기준/앱JAR 불변, P3 미진행. [수치·판정](../../perf/stage2/P2_WRITE_RETEST.md). READ_COMMITTED 명시로 발생하는 JDBC SHOW 요청당3회는 명시 제거를 검토할 후속 항목으로만 기록한다.

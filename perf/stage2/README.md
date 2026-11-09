@@ -159,3 +159,5 @@ P0는 현재 배포 기본 JVM/GC/풀 그대로의 **미튜닝 기준선**이다
 주 조건의 실행별 p95 범위가 중앙값의10%를 넘으면 변동 원인을 먼저 조사한다. k6/배경 부하·throttling·OOM·TCP 실패·dropped·업무 응답 오류를 원본과 함께 보고한다. 평균 percentile을 전체 p99라고 부르지 않는다. 원본 압축은 private/비밀·세션·쿠키·토큰을 제외하고, 다른 프로젝트 컨테이너 이름은 비식별 별칭으로 바꾼 사본만 Release에 올린다.
 
 기술 근거: [k6 constant arrival rate](https://grafana.com/docs/k6/latest/using-k6/scenarios/executors/constant-arrival-rate/), [k6 2.3.0](https://github.com/grafana/k6/releases/tag/v2.3.0), [Windows 최고 성능 overlay](https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/customize-power-slider).
+
+P2 쓰기 재측정: [P2_WRITE_RETEST.md](P2_WRITE_RETEST.md). 기존 읽기·전체viewport는 승인, 새 단일VU5쌍은 모두 유효하지만 반복 편차로 최종 채택 보류. 원본 분리·복구 완료·기준 변경 없음.
