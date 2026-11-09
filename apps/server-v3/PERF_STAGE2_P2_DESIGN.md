@@ -174,3 +174,13 @@ V7/V9 각각 재생성·원본 불변·실패 rollback·재실행0 검사를 통
 집중 검증: migration4·쓰기 정합성6·v2 비교100으로 고유110건. 첫 실행94.913초는 옛 중심 완전 일치 검사16건 실패,중심 전용 계약 반영 후101.445초 실행은109성공/1실패였다. 남은1건은 거절 검사에서 count를 원래 값1로 넣은 테스트 오류였고2로 수정해 해당 클래스2건을 재실행·통과했다. 전체 검증은 후속 통합 단계에서 실행한다.
 
 [DB gate 원본](../../perf/stage2/results/p2-implementation/write-race.json): N=2/4/8/16 각각 HTTP 성공N·오류0,최종 정밀도별 count `[1,N,N]`,stale셀1. 먼저 집계한 요청을 나중에 기록하도록 강제한 **E-6 B 잔존 경합**이다. SQL 결합을 동시 writer 직렬화로 포장하지 않는다. 성능 수치가 아닌 정합성 진단이다.
+
+### R — ROUND 지연·bounded 조회·snapshot
+
+`MarkerQueryRepository`의 후보301행 CTE는 실제 개별 응답인≤300일 때만 ROUND6 키를 계산한다. 시험용 PG 함수로 실제 HTTP SQL의 projection 호출을 세어300후보=600회,301후보=0회를 확인했다. 기본/동률/경계 배열 순서와 group·cluster의 V8 인덱스 경로를 유지한다.
+
+셀 SQL은 probe700·visible699·overflow1로 제한한다. Java 정렬 대상도≤699다. 0/698/699/700/701/50,000셀에서 실제 HTTP SQL을 JDBC로 다시 실행해 최대700행,표시 집합·순서·count·고정밀 가중 중심을 검사했다. 조회 probe에 test-only DB gate를 걸고 다른 연결에서 count를 변경해 진행 중 응답은 변경 전 snapshot,다음 문장은 변경 후 값임을 확인했다.
+
+초기 잔여 제외 `NOT EXISTS`는 통계가 오래된 테스트 DB에서 Nested Loop Anti(50,000×visible)로34,705,350행을 비교했다. 양쪽 셀 키의 NOT NULL을 근거로 tuple `NOT IN`으로 바꿔699키 hashed subplan을 사용한다. [실제 SQL·EXPLAIN](../../perf/stage2/results/p2-implementation/bounded-50000.json)은 JDBC700행·잔여49,301행·temporary block0이다. 2,944.665ms→66.220ms는 서로 다른 테스트 실행의 단회 진단으로,같은 세션 성능 채택 수치가 아니다.
+
+집중 회귀: root48·v2 비교147,총195성공/실패0/skip0,120.609초. 비교 부분의 알려진 차이는 기존 좌표·동률2건이며,E-20 중심 허용은 중심 필드에만 적용하고 다른 모든 값·순서는 정확 비교한다. 첫 조회 검사에서 중심 완전 일치4건이 실패한 기록과 수정 후 실행은 build 로그에 보존했다. 전체 allTests·기본 힙 부하·E-16/E-21 채택 검증은 통합 B 이후다.
