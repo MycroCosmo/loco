@@ -20,6 +20,9 @@ export function writeSchedule() {
   for(const [i,concurrency] of [2,4,8,16].entries())for(const side of i%2?['b','a1']:['a1','b'])result.push({pair:1,concurrency,side,name:`write-1-c${concurrency}-${side}`,exploratory:true});
   return result;
 }
+export function fullViewportSchedule() {
+  return Array.from({length:3},(_,i)=>({name:'full-viewport-'+(i+1),rate:16,viewport:100}));
+}
 export function writeSpec(name,concurrency) {
   assert.match(name||'',/^[a-z0-9-]+$/);concurrency=Number(concurrency);
   assert.ok([1,2,4,8,16].includes(concurrency),'Only approved write concurrency levels');

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readSchedule,writeSchedule,writeSpec,evaluate} from './p2-protocol.mjs';
+import {readSchedule,writeSchedule,writeSpec,evaluate,fullViewportSchedule} from './p2-protocol.mjs';
 import {stageSettings} from './data.mjs';
 
 test('original P0 is compared only at 1%, A1 only at 10%, AB/BA alternates',()=>{
@@ -17,6 +17,10 @@ test('write sampling retains five single-VU pairs and one exploratory pair per c
   assert.equal(writeSchedule().filter(r=>r.exploratory).length,8);
   for(const c of [1,2,4,8,16])assert.equal(writeSpec('example',c).measuredCycles,30*c);
   assert.throws(()=>writeSpec('example',3));assert.throws(()=>writeSpec('../old',1));
+});
+test('full viewport follows the approved 16 req/s three-run contract, not the 1% load',()=>{
+  assert.equal(fullViewportSchedule().length,3);
+  assert.ok(fullViewportSchedule().every(r=>r.rate===16&&r.viewport===100));
 });
 const readings=()=>readSchedule().map(r=>({run:r.name+'-1',validity:{valid:true},warmupValidity:{valid:true},http:{'p(95)':r.viewport===1?(r.side==='b'?10.9:10):(r.side==='b'?79:100),'p(99)':r.viewport===1?(r.side==='b'?10.9:10):110},checks:{fails:0},dropped:0,status:{200:100},collectorErrors:[]}));
 test('both fixed gates pass only with clean complete five-pair evidence',()=>{

@@ -3,9 +3,12 @@ import assert from 'node:assert/strict';
 import {spawn,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {withPausedBackground,restoreBackground} from './background-lease.mjs';
+import {fullViewportSchedule} from './p2-protocol.mjs';
 
 const base='apps/server-v3/build/perf-stage2-p2';
-const file=base+'/background-manifest.json';
+const mode=process.argv[2]||'all';
+const phase=mode==='watchdog'?(process.argv[4]||'all'):mode==='restore'?(fs.existsSync(base+'/background-remaining-manifest.json')?'remaining':'all'):mode;
+const file=base+'/background'+(phase==='remaining'?'-remaining':'')+'-manifest.json';
 const ids=JSON.parse(fs.readFileSync(base+'/private/approved-background.json'));
 const command=(exe,args)=>{const r=spawnSync(exe,args,{encoding:'utf8',windowsHide:true});assert.equal(r.status,0,(r.stderr||'').slice(-800));return r.stdout.trim();};
 const docker=(action,id)=>action==='inspect'?JSON.parse(command('docker',['inspect','--format','{{json .State}}',id])):command('docker',[action,id]);
@@ -15,8 +18,8 @@ function record(phase,data) {
   manifest.history.push({at:new Date().toISOString(),phase,...data});
   if(phase==='restored')manifest.restored=data.restored;
   fs.writeFileSync(file,JSON.stringify(manifest,null,2));
-  if(phase==='before'&&mode==='all') {
-    const monitor=spawn(process.execPath,[fileURLToPath(import.meta.url),'watchdog',String(process.pid)],{detached:true,stdio:'ignore',windowsHide:true});monitor.unref();
+  if(phase==='before'&&['all','remaining'].includes(mode)) {
+    const monitor=spawn(process.execPath,[fileURLToPath(import.meta.url),'watchdog',String(process.pid),mode],{detached:true,stdio:'ignore',windowsHide:true});monitor.unref();
   }
 }
 function stopOwnWorkloads() {
@@ -24,7 +27,6 @@ function stopOwnWorkloads() {
   const own=rows.filter(r=>/^loco-perf-p2-(a0|a1|b)-/.test(r.Names)).map(r=>r.ID);
   if(own.length)command('docker',['stop',...own]);
 }
-const mode=process.argv[2]||'all';
 if(mode==='watchdog') {
   const owner=Number(process.argv[3]);
   const timer=setInterval(()=>{
@@ -36,8 +38,9 @@ if(mode==='watchdog') {
 } else if(mode==='restore') {
   try {stopOwnWorkloads();} finally {restoreBackground(ids,docker,record);}
 } else {
-  assert.equal(mode,'all');assert.ok(!fs.existsSync(file),'Never overwrite a previous pause/restore manifest');
+  assert.ok(['all','remaining'].includes(mode));assert.ok(!fs.existsSync(file),'Never overwrite a previous pause/restore manifest');
   assert.equal(command('git',['status','--porcelain']),'','Commit the protocol before timing');
+  if(mode==='remaining')assert.equal(JSON.parse(fs.readFileSync(base+'/reads-session.json')).runs.length,20,'Preserve and complete all prescribed reads before resuming later phases');
   let child;
   async function run(script,args=[],side) {
     console.log(new Date().toISOString(),side||'session',script,...args);
@@ -54,11 +57,11 @@ if(mode==='watchdog') {
   try {
     await withPausedBackground(ids,docker,record,async()=>{
       try {
-        await run('p2-paired',['reads']);await run('p2-paired',['evaluate']);
-        for(let i=1;i<=3;i++) {
+        if(mode==='all'){await run('p2-paired',['reads']);await run('p2-paired',['evaluate']);}
+        for(const {name,rate,viewport} of fullViewportSchedule()) {
           await run('run',['up'],'b');
-          await run('run',['measure','full-viewport-'+i,'50','100','hot80','1'],'b');
-          await run('run',['snapshot','full-viewport-'+i+'-after.json'],'b');
+          await run('run',['measure',name,String(rate),String(viewport),'hot80','1'],'b');
+          await run('run',['snapshot',name+'-after.json'],'b');
           await run('run',['stop'],'b');
         }
         await run('p2-paired',['writes']);

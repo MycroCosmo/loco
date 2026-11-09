@@ -17,6 +17,10 @@ if(mode==='evaluate') {
   const readings=[];
   for(const side of ['a0','a1','b']) {await run(side,'summarize');readings.push(...JSON.parse(fs.readFileSync(stageSettings('p2-'+side).output+'/summary.json')));}
   const result=evaluate(readings);fs.writeFileSync(path.join(output,'read-evaluation.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
+  if(fs.existsSync(path.join(output,'read-handoff.json'))) {
+    console.log('Read phase complete. Controlled handoff restores backgrounds before the corrected, not-yet-run full viewport phase.');
+    process.exitCode=78;
+  }
 } else {
   const file=path.join(output,mode+'-session.json');assert.ok(!fs.existsSync(file),'Do not overwrite or silently resume a session');
   assert.equal(process.env.PERF_HEAVY_APPS_STATUS,'closed-user-confirmed','Obtain a fresh user environment confirmation after tests and push');
