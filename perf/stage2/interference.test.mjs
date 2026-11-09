@@ -10,6 +10,7 @@ test('power, memory, background containers and missing observation cannot silent
   let rows=samples();rows[5].ac=0;assert.equal(assessInterference(rows).valid,false);
   rows=samples();rows.forEach(r=>r.availablePhysicalBytes=1024);assert.ok(assessInterference(rows).reasons.includes('host-memory-pressure'));
   assert.equal(assessInterference(samples(),[{stats:[{name:'background-123'}]}]).valid,false);
+  assert.equal(assessInterference(samples(),[{stats:[{name:'background-123',paused:true}]}]).valid,true);
   assert.equal(assessInterference([]).valid,false);
   rows=samples();rows[4].processCount=3;assert.equal(assessInterference(rows).valid,false);
 });

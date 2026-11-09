@@ -18,7 +18,7 @@ export function assessInterference(host,resources=[]) {
   }
   for(const r of resources) {
     if(r.error)reasons.add('resource-collector-error');
-    if((r.stats||[]).some(s=>s.name.startsWith('background-')))reasons.add('unrelated-container-running');
+    if((r.stats||[]).some(s=>s.name.startsWith('background-')&&!s.paused))reasons.add('unrelated-container-running');
   }
   return {valid:reasons.size===0,reasons:[...reasons],policy:interferencePolicy,hostSamples:host.length};
 }

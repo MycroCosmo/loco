@@ -257,3 +257,11 @@ READ COMMITTED는 문장마다 snapshot을 정하므로 잠금 대기가 끝난 
 `interference.mjs`는 **본 측정 전에 고정한** 다음 관측을 `validity.json`의 무효 사유로 남긴다. VM/Docker backend/해당 수집기 PID 외 CPU합계>2 logical-core equivalent가10초 이상,가용물리메모리<2GiB가10초 이상,AC/최고성능 조건 변경,호스트 표본 간격>10초,자원 수집 오류,별도 프로젝트 컨테이너 실행이다. VM/backend 부하는 측정 자체일 수 있어 CPU 간섭 판정에서는 제외하지만 원본에는 남기며 별도 컨테이너 검사는 유지한다. P/E 코어가 혼합된 노트북에서 이 기준은 간섭의 보수적 징후이며 감지되지 않은 간섭이 없음을 증명하지 않는다. 짧게 종료된 프로세스·OS 내부 부하 등 관측 한계를 함께 기록한다.
 
 무효 회차와 warmup은 삭제·유리한 회차로 대체하지 않는다. 사전5쌍 수치표에 모두 남기고 한 회차라도 무효이면 해당 조건의 채택은 불가다. 환경 변경으로 실행이 중단되면 남은 회차/미검증을 명시한다. 지연·처리량·힙·SQL·응답 계약 기준은 변경하지 않는다. Node29건과 실제 Windows 수집 검사를 수행했으며,이번 변경은 Java/Gradle/운영 설정을 건드리지 않아 직전 전체 회귀 결과를 재사용한다.
+
+### 사용자 확정: 다른 프로젝트7개는 pause/unpause만
+
+추가 승인에 따라 다른 프로젝트7개는 `docker pause`로만 일시 정지하고 성공·실패·중단 모두 `docker unpause`로 복구한다. 이 컨테이너에 stop/rm/볼륨 변경은 하지 않는다. `background-lease.mjs`는 사전running 확인→pause→작업→finally unpause→7개 모두running/paused=false 검증을 수행한다. 일부 pause만 성공한 경우도 이미 정지된 대상만 복구한다. 실제 ID 목록은 gitignore된 private에만 두고 manifest에는 ID 기반 비식별 별칭과 상태만 쓴다.
+
+`p2-session.mjs`는 이 복구 경계 안에서 사전 읽기20회·전체viewport3회·쓰기18회·SQL진단·고정동시성JFR·탐색8회를 순서대로 실행한다. 중단 신호는 본인 측정 workload를 끝내고 복구하며,별도 세션 수명의 watchdog도 부모 비정상 종료를 감시해 복구한다. 일반 종료 후 watchdog은 자동 종료한다. 수동 복구 명령은 `node perf/stage2/p2-session.mjs restore`다. 외부 서비스는pause/unpause만 사용하며 내부의 기존 perf 프로젝트 기동/정지는 별도다.
+
+paused 컨테이너는 CPU 실행 간섭으로 분류하지 않되 매manifest/원본 자원표에 상태를 남긴다. 메모리는 해제되지 않으므로 호스트 가용메모리와 함께 해석하고,A0/A1/B에 같은 조건을 유지한다. 다시running이 된 배경 컨테이너는 무효 사유다. 복구 테스트는 정상 종료·작업 실패·부분pause 실패3건을 포함해 Node32건 성공(0.131초)이다. 측정 기준과JAR는 변경하지 않았다. 예상 총 시간은 앞서 고정한260~320분 범위로 기록하며 실제 단계별 시간을 원본에 남긴다.

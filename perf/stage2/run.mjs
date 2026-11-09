@@ -83,12 +83,13 @@ function environment() {
   const power=JSON.parse(command('pwsh',['-NoProfile','-Command',ps]));
   assert.equal(power.ac,1,'AC connection required'); assert.equal(power.overlay.toLowerCase(),'ded574b5-45a0-4f42-8737-46345c09c238','Best performance overlay required');
   const docker=JSON.parse(command('docker',['info','--format','{{json .}}']));
-  const containers=command('docker',['ps','--format','json']).split('\n').filter(Boolean).map(s=>JSON.parse(s));
+  const containers=command('docker',['ps','--no-trunc','--format','json']).split('\n').filter(Boolean).map(s=>JSON.parse(s));
   const processFile=path.join(output,'process-snapshot.jsonl');
   command('pwsh',['-NoProfile','-File','perf/stage2/host-sample.ps1','-OutputFile',processFile,'-Seconds','6']);
   const hostProcesses=JSON.parse(fs.readFileSync(processFile,'utf8').trim().split('\n').at(-1));
   assert.ok(hostProcesses.processCount>=10,'Host processes are sandbox-hidden; use the authorized host execution environment');
-  return {at:new Date().toISOString(),power,hostProcesses,docker:{version:docker.ServerVersion,cpus:docker.NCPU,memory:docker.MemTotal,os:docker.OperatingSystem},hybridCoreCaveat:'i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures',background:containers.filter(c=>!c.Names.startsWith(project)).map(c=>({alias:'background-'+hash(c.ID).slice(0,8)}))};
+  const background=containers.filter(c=>!c.Names.startsWith(project));
+  return {at:new Date().toISOString(),power,hostProcesses,docker:{version:docker.ServerVersion,cpus:docker.NCPU,memory:docker.MemTotal,os:docker.OperatingSystem},hybridCoreCaveat:'i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures',background:background.filter(c=>c.State!=='paused').map(c=>({alias:'background-'+hash(c.ID).slice(0,8),state:c.State})),pausedBackground:background.filter(c=>c.State==='paused').map(c=>({alias:'background-'+hash(c.ID).slice(0,8),state:c.State,note:'Memory retained; user-authorized pause only'}))};
 }
 function snapshot(name) {
   write(name,{environment:environment(),git:command('git',['rev-parse','HEAD']),dirty:command('git',['status','--porcelain']),jarSha256:command('docker',['exec',appContainer,'sha256sum','/app/app.jar']).split(/\s+/)[0],runtime:JSON.parse(fs.readFileSync(path.join(output,'runtime/runtime.json'))),sqlTrackingAtSnapshot:sql('SHOW pg_stat_statements.track;'),data:fingerprint(),images:query('SELECT extname FROM pg_extension'),containers:JSON.parse(command('docker',['inspect',...dc('ps','-q').split(/\s+/)])).map(c=>({id:c.Id,name:c.Name,image:c.Image,cpu:c.HostConfig.NanoCpus,memory:c.HostConfig.Memory,oomKilled:c.State.OOMKilled,network:Object.keys(c.NetworkSettings.Networks)}))});
@@ -108,6 +109,7 @@ async function observe(stream,signal) {
     try {
       const containers=await dockerGet('/containers/json');
       const stats=await Promise.all(containers.map(async c=>{
+        if(c.State==='paused')return {name:'background-'+hash(c.Id).slice(0,8),paused:true,state:'paused'};
         const s=await dockerGet(`/containers/${c.Id}/stats?stream=false&one-shot=true`),p=previous.get(c.Id);
         previous.set(c.Id,s);
         const cpu=p?(s.cpu_stats.cpu_usage.total_usage-p.cpu_stats.cpu_usage.total_usage)/(s.cpu_stats.system_cpu_usage-p.cpu_stats.system_cpu_usage)*(s.cpu_stats.online_cpus||32):null;
@@ -280,7 +282,7 @@ if(action==='up') {
   }
   await diagnostic([cases[0],cases[1],...cases.slice(-2)],name+'.json');
   console.log('Marker SQL and EXPLAIN captured outside measurement');
-} else if(action==='measure') {
+} else if(action==='measure'||action==='explore') {
   const [name,rateText='50',viewportText='1',requestMix='hot80',repeatsText='1']=args;
   const spec=measurementSpec(name,rateText,viewportText,requestMix,repeatsText);
   for(let i=1;i<=spec.repeats;i++)for(const suffix of ['', '-warmup'])
@@ -291,8 +293,8 @@ if(action==='up') {
   const before=fingerprint();snapshot(`${name}-manifest.json`);
   await diagnostic([cases[0],cases[1]],`${name}-sql.json`);
   for(let i=1;i<=spec.repeats;i++) {
-    const config={rate:spec.rate,hot80:spec.mix==='hot80',cases};
-    for(const [suffix,seconds] of [['-warmup',120],['',300]]) {
+    const config={exploratory:action==='explore',rate:spec.rate,hot80:spec.mix==='hot80',cases};
+    for(const [suffix,seconds] of [['-warmup',120],['',action==='explore'?60:300]]) {
       try {await runLoad({...config,run:`${name}-${i}${suffix}`,seconds,...(!suffix&&(settings.stage==='p1'||settings.paired)?{budgetMs:200}:{})});}
       catch(error) {
         if(!settings.paired)throw error;

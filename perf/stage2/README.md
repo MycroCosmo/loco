@@ -13,6 +13,8 @@
 
 P2는 역할별 `PERF_STAGE=p2-a0/p2-a1/p2-b`로 DB·출력 경로를 분리한다. A0=`loco-perf-p0:local`, A1=`loco-perf-e15-b:local`은 재빌드하지 않는다. B만 현재 perfBootJar로 `loco-perf-p2-b:local`에 빌드한다. 원래 P0/A1 JAR SHA는 설계 §8·프로토콜에 고정했다. 외부 API 키·개발 DB·기존 볼륨을 사용하지 않는다.
 
+이번 세션은 승인된7개의 ID를 `build/perf-stage2-p2/private/approved-background.json`에 둔 뒤 **`node perf/stage2/p2-session.mjs all`**로 실행한다. `background-lease.mjs`가 pause/unpause·복구 확인을 담당하며 부분 실패도 복구한다. `background-manifest.json`에 비식별 전/정지/복구 상태를 보존한다. 부모 비정상 종료 감시도 세션 수명으로 제한한다. 필요 시 `node perf/stage2/p2-session.mjs restore`로 같은7개만 복구한다. paused 메모리는 유지되며 running 배경 서비스가 다시 감지되면 회차를 무효로 표시한다. 아래 부분 명령은 전체 실행기가 내부에서 호출하는 절차다.
+
 ```powershell
 # 아래는 전체 검증·커밋·push 후 새 환경 확인을 받은 세션 전용이다.
 $env:PERF_HEAVY_APPS_STATUS='closed-user-confirmed'
