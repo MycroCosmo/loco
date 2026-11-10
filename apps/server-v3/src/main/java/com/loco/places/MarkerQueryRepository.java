@@ -66,6 +66,8 @@ public class MarkerQueryRepository {
         SELECT precision,"cellLatKey","cellLngKey",latitude,longitude,count,"exactKeyCount","groupKey","placeId","placeName"
         FROM place_marker_cells WHERE "mapId"=:map AND precision=:precision
           AND "maxLat">=:minLat AND "minLat"<=:maxLat AND "maxLng">=:minLng AND "minLng"<=:maxLng
+          AND ST_MakeEnvelope("minLng","minLat","maxLng","maxLat",4326)
+            && ST_MakeEnvelope(:minLng,:minLat,:maxLng,:maxLat,4326)
       ), probe AS MATERIALIZED (SELECT * FROM matching LIMIT 700),
       top_cells AS MATERIALIZED (
         SELECT * FROM matching WHERE (SELECT count(*) FROM probe)=700

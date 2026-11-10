@@ -272,13 +272,14 @@ class HealthIntegrationTest {
   }
 
   @Test
-  void databaseHasNoSpatialExtensions(@Autowired EntityManager entityManager) {
+  void databaseHasOnlyTheApprovedSpatialExtension(@Autowired EntityManager entityManager) {
     assertThat(
             entityManager
                 .createNativeQuery(
-                    "SELECT count(*) FROM pg_extension WHERE extname <> 'plpgsql'", Long.class)
+                    "SELECT extname::text FROM pg_extension WHERE extname <> 'plpgsql'",
+                    String.class)
                 .getSingleResult())
-        .isEqualTo(0L);
+        .isEqualTo("postgis");
   }
 
   private String url(String path) {

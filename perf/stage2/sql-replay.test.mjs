@@ -16,7 +16,7 @@ test('changed SQL, missing values and inconsistent bindings fail closed',()=>{
   assert.throws(()=>bindTemplate('SELECT $1,$1','SELECT 1,2',{}));
 });
 test('replays the real captured HTTP cell SQL against its source template',()=>{
-  const source=fs.readFileSync('apps/server-v3/src/main/java/com/loco/places/MarkerQueryRepository.java','utf8');
+  const source='String BOUNDED_CELLS = \"\"\"'+fs.readFileSync('apps/server-v3/src/test/resources/markers/p2-b-cells.sql','utf8').replace(/^--[^\n]*\n/,'')+'\"\"\";';
   const capture=JSON.parse(fs.readFileSync('perf/stage2/results/p2-implementation/bounded-50000.json'));
   let n=0;const observed=capture.sql.replaceAll('?',()=>'$'+(++n));assert.equal(n,6);
   const replay=bindTemplate(observed,javaSqlTemplate(source,'BOUNDED_CELLS'),{map:'example',precision:3,minLat:-90,maxLat:90,minLng:-180,maxLng:180});

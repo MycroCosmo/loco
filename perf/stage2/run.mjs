@@ -71,7 +71,7 @@ async function ready() {
 }
 function fingerprint() {
   const result={};
-  const tables=query("SELECT schemaname||'.'||tablename AS name FROM pg_tables WHERE schemaname IN ('public','cms') AND tablename<>'flyway_schema_history' ORDER BY 1").map(r=>r.name);
+  const tables=query("SELECT schemaname||'.'||tablename AS name FROM pg_tables WHERE schemaname IN ('public','cms') AND tablename NOT IN ('flyway_schema_history','spatial_ref_sys') ORDER BY 1").map(r=>r.name);
   for(const table of tables) {
     assert.match(table,/^(public|cms)\.[a-z_]+$/);
     result[table]=query(`SELECT count(*) AS rows,md5(string_agg(md5(row_to_json(t)::text),'' ORDER BY md5(row_to_json(t)::text))) AS hash FROM ${table} t`)[0];
@@ -161,6 +161,34 @@ async function runLoad(config) {
     ...(config.writeCycles?{workloadStartedAt:new Date(start).toISOString(),workloadEndedAt:new Date(workloadEndedAt).toISOString(),workloadElapsedSeconds:(workloadEndedAt-start)/1000,hostObservationBracketsWorkload:true}:{})};write(`${config.run}/execution.json`,result);
   console.log(JSON.stringify(result));
   if(code!==0) throw Error('k6 failed; raw results retained at '+folder);
+  if(settings.screening&&!validity.valid) throw Error('P3 screening invalid; stop without replacement');
+}
+async function observedCellPlan(name,bound) {
+  const folder=path.join(output,name);assert.ok(!fs.existsSync(folder),'Keep every plan observation');fs.mkdirSync(folder);
+  const hostFile=path.join(folder,'host.jsonl'),log=fs.openSync(path.join(folder,'host-collector.log'),'w');
+  const host=spawn('pwsh',['-NoProfile','-File','perf/stage2/host-sample.ps1','-OutputFile',hostFile,'-Seconds','120'],{cwd:root,stdio:['ignore',log,log],windowsHide:true});
+  const alive=()=>host.exitCode===null&&host.signalCode===null;
+  const lines=file=>{if(!fs.existsSync(file))return [];const content=fs.readFileSync(file,'utf8');return content.slice(0,content.lastIndexOf('\n')+1).split('\n').filter(Boolean).map(JSON.parse);};
+  const resources=fs.createWriteStream(path.join(folder,'resources.jsonl')),abort=new AbortController(),observing=observe(resources,abort.signal);
+  let plan,failure;
+  try {
+    await waitForHostCoverage(()=>lines(hostFile),{alive});
+    plan=JSON.parse(sql('EXPLAIN (ANALYZE,BUFFERS,VERBOSE,FORMAT JSON) '+bound));
+    await waitForHostCoverage(()=>lines(hostFile),{after:Date.now(),alive});
+  }catch(e){failure=e;}
+  finally {
+    abort.abort();await observing;await new Promise(resolve=>resources.end(resolve));
+    if(alive()){const ended=new Promise(resolve=>host.once('exit',resolve));host.kill();await ended;}fs.closeSync(log);
+  }
+  const samples=lines(path.join(folder,'resources.jsonl'));
+  const validity=assessInterference(lines(hostFile),samples);
+  if(samples.length===0){validity.valid=false;validity.reasons.push('resource-samples-missing');}
+  write(name+'/validity.json',validity);
+  if(failure)throw failure;
+  // Preserve the raw plan even if interference disqualifies it.
+  write(name+'/plan.json',plan);
+  assert.ok(validity.valid,'P3 EXPLAIN screening invalid; stop without replacement');
+  return plan;
 }
 async function markerCases(viewport, maps) {
   const selected=Array.from({length:maps},(_,i)=>i+1);
@@ -208,7 +236,9 @@ async function diagnostic(cases,name) {
     for(const s of statements) {
       let values;
       if(/^WITH (marker_candidates|matching) AS/.test(s.query)) {
-        const template=javaSqlTemplate(fs.readFileSync(path.join(root,'apps/server-v3/src/main/java/com/loco/places/MarkerQueryRepository.java'),'utf8'),s.query.startsWith('WITH marker_candidates')?'CANDIDATES':'BOUNDED_CELLS');
+        const sourcePath='apps/server-v3/src/main/java/com/loco/places/MarkerQueryRepository.java';
+        const source=settings.markerSourceRevision?command('git',['show',settings.markerSourceRevision+':'+sourcePath]):fs.readFileSync(path.join(root,sourcePath),'utf8');
+        const template=javaSqlTemplate(source,s.query.startsWith('WITH marker_candidates')?'CANDIDATES':'BOUNDED_CELLS');
         const parameters={map,precision:3,minLat:+q.get('swLat'),maxLat:+q.get('neLat'),minLng:+q.get('swLng'),maxLng:+q.get('neLng')};
         const bound=bindTemplate(s.query,template,parameters);
         explain.push({sql:s.query,parameters,plan:JSON.parse(sql('EXPLAIN (ANALYZE,BUFFERS,FORMAT JSON) '+bound))});
@@ -252,6 +282,22 @@ const [action,...args]=process.argv.slice(2);
 if(action==='up') {
   console.log(dc('up','-d','--wait','perf-db','perf-app'));await ready();
   sql("CREATE EXTENSION IF NOT EXISTS pg_stat_statements; ALTER SYSTEM SET pg_stat_statements.track='none'; SELECT pg_reload_conf();");await bootstrap();snapshot('environment-initial.json');
+} else if(action==='p3-cell-plan') {
+  assert.ok(settings.screening,'P3 isolated project required');
+  assert.match(args[0]||'',/^(plan-[123]|a-ext)$/);
+  assert.ok(!fs.existsSync(path.join(output,args[0]+'.json')),'Never overwrite plan evidence');
+  if(args[0]==='a-ext') {assert.equal(process.env.PERF_STAGE,'p3-a');sql('CREATE EXTENSION postgis;');}
+  const templatePath='apps/server-v3/src/main/java/com/loco/places/MarkerQueryRepository.java';
+  const source=settings.markerSourceRevision?command('git',['show',settings.markerSourceRevision+':'+templatePath]):fs.readFileSync(path.join(root,templatePath),'utf8');
+  const template=javaSqlTemplate(source,'BOUNDED_CELLS');
+  const u=new URL(markerPath(key('map',1),10),'http://local');
+  const parameters={map:key('map',1),precision:3,minLat:+u.searchParams.get('swLat'),maxLat:+u.searchParams.get('neLat'),minLng:+u.searchParams.get('swLng'),maxLng:+u.searchParams.get('neLng')};
+  const bound=template.replace(/:(map|precision|minLat|maxLat|minLng|maxLng)\b/g,(_,name)=>sqlString(parameters[name]));
+  const plan=await observedCellPlan(args[0],bound);
+  write(args[0]+'.json',{at:new Date().toISOString(),parameters,sql:bound,plan,role:args[0]==='a-ext'?'extension-only diagnostic, not gate':'E-32 gate plan',rootBuffers:plan[0].Plan['Shared Hit Blocks']+plan[0].Plan['Shared Read Blocks']});
+} else if(action==='p3-db-start') {
+  assert.ok(settings.screening);dc('start','perf-db');
+  for(let i=0;;i++){try{sql('SELECT 1');break;}catch(e){if(i>=30)throw e;await new Promise(r=>setTimeout(r,1000));}}
 } else if(action==='seed') {
   const [size='M',distribution='skew',processing='half']=args,start=Date.now();
   const script=datasetSql(size,distribution,processing);sql(script);

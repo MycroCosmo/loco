@@ -1,6 +1,6 @@
 # P3 설계 — PostGIS 표현식 GiST와 남은 DB 작업량
 
-2026-11-10. **E-25~E-32 승인, 구현·검증 후 선별 측정 환경 확인 대기.** 아래 과거 선택지는 이력이며 맨 위 확정 결정이 우선한다. 선별/정식 측정은 아직 실행하지 않았다. 브랜치는 `feature/perf-stage2`, 출발점은 `8f2c07c`의 P2 마감이다.
+2026-11-10. **E-25~E-32 승인·결정 커밋3208bb2, 구현 준비·Docker 없는 검증 완료, Docker 복구 대기.** 아래 과거 선택지는 이력이며 맨 위 확정 결정이 우선한다. 선별/정식 측정은 아직 실행하지 않았다. 브랜치는 `feature/perf-stage2`, 출발점은 `8f2c07c`의 P2 마감이다. 현재 검증 범위와 재개 지점은 §12를 따른다.
 
 ## 확정 결정 — 결과 전에 고정
 
@@ -122,7 +122,7 @@ E-24 상위 프로세스는 ChatGPT·codex·codex-computer-use·Installer·Chrom
 4. 승인된 배경7개는 동일 pause/unpause. 실행기 finally와 별도 watchdog이 성공/실패/중단 모두 복구하고 직접 inspect로7개 running을 확인한 뒤 완료 표식을 원자적으로 남긴다. stop/rm/볼륨변경 금지. watchdog은 Codex가 아닌 실행기 PID를 감시한다. 기동 전 정상/오류/강제 종료 복구를 작은 대역 테스트로 확인한다.
 5. 완료 후에만 Codex가 복구·유효성·원본을 읽는다. 기존 CPU>2코어10초·가용RAM<2GiB10초·표본간격>10초·전원변경·미승인 컨테이너 활동 등의 판정은 그대로다. ChatGPT/Chrome 등을 사후 정상부하 목록에 넣지 않는다. 무효가 재발하면 해당 회차 교체 없이 전체 결과를 보존하고 멈춘다.
 
-이번에는 분리 실행기를 구현하거나 이 절차로 측정하지 않았다.
+분리 실행기 준비 상태는 §12에 기록한다. 이 절차로 측정하지 않았다.
 
 ## 8. 측정 행렬과 사전 소요 시간
 
@@ -167,7 +167,7 @@ allTests build는 **측정 전 별도 약18~25분 추정**(이전1,032.436초 �
 
 E-25 B 선택 시 전체에도 §5의 동일20%·CPU10%·버퍼20% 목표를 적용한다. 10%는1회 탐색으로 내려가며10% 개선 주장을 하지 않는다. E-27 B를 선택해도 CPU/버퍼/SQL/EXPLAIN 원본은 빠짐없이 공개한다. 새로운 알고리즘·복합 GiST·서버 비용을 자동 승인하지 않는다.
 
-## 11. 선택 후 구현·검증 순서(이번에는 미실행)
+## 11. 선택 후 구현·검증 순서
 
 1. E-25~E-31 결정·산식·대조 JAR·행렬·예상시간을 커밋으로 고정. 분리 실행기와 복구·관측 대역 검증부터 준비한다.
 2. 다음 Flyway+표현식/predicate 구현. R 경계·순서·전체 비교, V1 baseline, 권한·rate limit·기존 알려진 차이16건 불변 검사.
@@ -176,3 +176,28 @@ E-25 B 선택 시 전체에도 §5의 동일20%·CPU10%·버퍼20% 목표를 적
 5. 저장소 요약·manifest·원본 Release·Notion WWHO에 같은 SHA를 연결하고 P3에서 멈춘다. P4/Redis는 결과 후 재결정한다.
 
 공간 근거: [PostGIS &&](https://postgis.net/docs/geometry_overlaps.html)는2D bbox 교차와 인덱스 지원, [ST_MakeEnvelope](https://postgis.net/docs/ST_MakeEnvelope.html)는min/max 직사각형·SRID 의미를 정의한다. [PG17 표현식 인덱스](https://www.postgresql.org/docs/17/indexes-expressional.html)는 표현식 일치와 INSERT/UPDATE 유지비를 설명한다. 현재 데이터·경계에서의 동치와 성능은 구현 후 검증 대상이며 문서만으로 통과를 주장하지 않는다.
+
+## 12. Docker 중단 중 준비 결과와 재개 지점 — 2026-11-10
+
+사용자 보고: Docker Desktop 4.88.1의 `dockerInference` 소켓 오류로 시작 불가. 사용자가 귀가 후 재부팅한다. 이 지시 이후 Docker 호출·복구 시도·측정은 하지 않았다. factory reset·purge·uninstall·이미지/볼륨 삭제 금지. A0/A1/B 측정 자산과 다른 프로젝트7개를 보존한다.
+
+작성한 파일과 목적:
+
+| 파일 | 필요한 이유·핵심 내용 |
+| --- | --- |
+| `V10__index_marker_cell_bbox.sql` | PostGIS 확장과 셀 bbox 표현식 GiST 1개를 선언한다. 기존 좌표·places 인덱스·V1~V9를 변경하지 않는다. 아직 실제 DB에 적용하지 않았다. |
+| `MarkerQueryRepository` | 셀 조회에 동일한 bbox 식의 `&&` 후보 조건을 추가하고 기존 네 숫자 조건을 유지한다. 중심점 포함 검사로 바꾸지 않는다. |
+| `MarkerSpatialOracleIntegrationTest` | 실제 HTTP에서 수집한 SQL을 고정된 P2 B SQL과 비교한다. 정밀도·점/선 퇴화·부호/경계·매우 큰 범위·699/700/701·5만 셀·삽입 순서·기존 HTTP 계약을 검증하도록 작성했다. 실행 대기다. |
+| `markers/p2-b-cells.sql` | 변경 전 P2 B 셀 SQL을 고정해 새 구현을 자기 자신과 비교하지 않도록 한다. 과거 측정 SQL replay도 이 원본을 사용한다. |
+| `MarkerSpatialMigrationIntegrationTest` | V9→V10 데이터 보존·재기동 멱등성·GiST 선택·bounds UPDATE/DELETE 반영과 PostGIS 참조 테이블 제외를 검증하도록 작성했다. 실행 대기다. |
+| 비교 하네스 | 양쪽 V1 생성 후 v3 앱은 호스트 후속 migration을 적용한다. v2 V1 기준은 그대로다. `spatial_ref_sys`는 업무 데이터가 아니므로 초기화/비교에서 제외한다. V1 baseline 전용 테스트의 `target("1")`은 유지한다. |
+| `p3-protocol.mjs`·단위 테스트 | E-32 두 조건의 AND·정확한0.80 경계·무효와 미달 구분·복구 후 완료·분리 자식 생존을 검사한다. |
+| `p3-screen-session.mjs`·`run.mjs` | A/B 독립 프로젝트, 고정 JAR 확인, 단일 세션, 앱 종료 유예90초, EXPLAIN/HTTP 간섭 수집, 배경7개 lease와 watchdog 복구를 준비했다. 정식 측정은 자동 시작하지 않는다. 실제 Docker 복구·launch 통합 검증은 대기다. |
+
+Docker 없는 최종 확인:
+
+- Node 도구 테스트 **55건 성공·0실패·0건너뜀**, 테스트 러너 **0.532초**, 명령 wall **0.642초**. `node --check` 두 실행기 통과.
+- Java `MarkerCenterContractTest` **2건 성공·0실패·0건너뜀**. `--offline spotlessApply spotlessCheck compileTestJava :test -x :cms-core:test --tests com.loco.places.MarkerCenterContractTest perfBootJar` 명령 wall **10.631초**. 컴파일·포맷·측정용 JAR 준비까지이며 `allTests build` 성공이 아니다.
+- 위 합계 **57건 성공**, 실제 PostGIS 정합성·인덱스 효과·전체 회귀는 미검증이다. Docker 장애 지시 전 대상 통합 테스트 실행은 **5개 클래스 초기화 오류**로 종료했으며 테스트 본문에 도달하지 않았다. 이를 성공 또는 SQL 정합성 실패로 집계하지 않는다.
+
+재개 순서: 사용자 재부팅·Docker 복구 확인 → 신규/기존 정합성 oracle와 migration 테스트 → `allTests build` 및 알려진 차이16건 확인 → B 이미지 준비·JAR hash 고정(`p3-artifacts.json`)·분리 실행/복구 검증 → 결과 커밋·push → 사용자 환경 확인 요청 → 선별 실행. 현재 `p3-artifacts.json`은 만들지 않았으므로 launch는 실행 자격을 갖추지 못했다. 선별/정식 수치·P3 채택 결론은 없다. E-28 READ_COMMITTED/SHOW 제거는 계속 별도 후속 작업이다.

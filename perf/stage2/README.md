@@ -163,3 +163,36 @@ P0는 현재 배포 기본 JVM/GC/풀 그대로의 **미튜닝 기준선**이다
 P2 쓰기 재측정: [P2_WRITE_RETEST.md](P2_WRITE_RETEST.md). 기존 읽기·전체viewport는 승인, 새 단일VU5쌍은 모두 유효하지만 반복 편차로 최종 채택 보류. 원본 분리·복구 완료·기준 변경 없음.
 
 [E-23 쓰기 본표본300 결과·E-24 선택지](P2_WRITE_E23.md): 19유효/1무효·HTTP9,300성공, 편차/간섭으로채택보류. 이전두쓰기세션 원본보존·7개복구.
+# P3 E-32 선별 실행 안내
+
+현재는 **Docker 장애로 준비만 완료, 실행 금지** 상태다. Docker 없는 검증 결과·재개 순서는 [P3 설계 §12](../../apps/server-v3/PERF_STAGE2_P3_DESIGN.md#12-docker-중단-중-준비-결과와-재개-지점--2026-11-10)에 있다. 이미지/볼륨과 다른 프로젝트7개는 삭제·초기화하지 않는다.
+
+E-25~E-32 기준은 [P3 설계](../../apps/server-v3/PERF_STAGE2_P3_DESIGN.md)에 있다. P2 A1이 아닌 **P2 B 원래 JAR를 P3의 A**로 사용한다. B는 셀 bbox GiST만 추가한다. READ_COMMITTED는 양쪽 그대로다.
+
+추가 파일의 역할:
+
+- `p3-protocol.mjs`: EXPLAIN3회 중앙값·HTTP 단회 p95가 각각0.80 이하인지 판정한다. 무효는 이점 없음과 구별하며 채택 판정을 하지 않는다.
+- `p3-screen-session.mjs`: 단일 세션·분리 실행·배경7개 복구·완료 표식을 관리한다. 90초 종료 준비 시간 뒤 앱 잔존을 확인하고 A/B 계획3쌍·HTTP1쌍·A-ext 진단을 수행한다.
+- `p3-protocol.test.mjs`: 경계값·둘 중 한 기준 미달·무효 처리·실패 복구 순서와 부모 종료 후 자식 생존을 검증한다.
+- `p3-artifacts.json`: 전체 검증 후 빌드한 JAR hash를 고정한다. 이 파일과 실제 B JAR가 일치하지 않으면 실행하지 않는다.
+
+**allTests build와 이미지 준비 완료 → 커밋·push → 사용자 환경 확인 후에만** 다음 명령을 사용한다. 앱 완전 종료·자동 업데이트 완료/중지를 확인하지 않고 환경변수를 임의로 설정하지 않는다.
+
+```powershell
+. ./apps/admin/prepare-node.ps1
+$env:PERF_HEAVY_APPS_STATUS='closed-user-confirmed'
+$env:PERF_APP_UPDATES_STATUS='completed-or-paused-user-confirmed'
+node perf/stage2/p3-screen-session.mjs launch
+```
+
+launch가 출력한 PID는 종료를 감시하는 Codex 폴링 용도가 아니다. 사용자는90초 안에 Codex/ChatGPT/Chrome을 완전히 종료한다. 실행기는 기존 수집기를 내부에서 실행하고, 다른 프로젝트7개는pause/unpause만 한다. **측정 중 Codex 상태 조회·파일 읽기·진행 메시지·빌드 금지.** 완료 예상시간24~31분 후 사용자가 앱을 다시 열어 재개하면 `build/perf-stage2-p3-screen/completed.json`과 복구 manifest를 확인한다. 미완료이면 사용자에게 완료까지 기다리도록 알리고 polling하지 않는다. 장애 시 복구만 필요하면 아래 명령을 사용한다.
+
+```powershell
+node perf/stage2/p3-screen-session.mjs restore
+```
+
+`completed.json`의 `backgroundRestored:true`와7개running 직접 검증이 모두 필요하다. watchdog은 부모가 비정상 종료하면 복구를 재시도하고, 복구 실패를 성공으로 표시하지 않는다. `launch.json`이 있으면 같은 세션을 다시 실행하지 않으며 임의 삭제해 우회하지 않는다. 실패 원본을 보존한다.
+
+앱 종료 사전 검사에서 실패해 lease를 얻기 전이면 배경 컨테이너를 조작하지 않는다. lease의 `before` 기록 후 일부 pause만 성공해도 복구 대상이다. EXPLAIN도 호스트 수집이 실행 전후를 감싸며 기존 간섭 기준으로 검사한다. 유효하지 않으면 원본을 남기고 중단한다.
+
+선별 통과는 정식 측정의 자격만 뜻한다. 이번 실행기는 정식 측정을 자동 시작하지 않는다. 유효한 미달은 정식/쓰기 측정 없이 현재 데이터·경로에서 B-tree로 충분하다고 기록한다. 간섭/오류 무효는 E-31에 따라 중단·VM 재검토하며 성능 미달 결론으로 바꾸지 않는다. 기존 P2 원본과 프로젝트에는 쓰지 않는다.

@@ -13,13 +13,13 @@ export function pairedThresholdFailure(exitCode, summary) {
   return exitCode===99 && (summary.metrics.business_failure?.values.count||0)<=(summary.metrics.http_req_failed?.values.passes||0);
 }
 export function stageSettings(stage = process.env.PERF_STAGE || 'p0', session = process.env.PERF_SESSION || '') {
-  if (!['p0','p1','e15-a','e15-b','p2-a0','p2-a1','p2-b'].includes(stage)) throw Error('Unknown performance stage');
+  if (!['p0','p1','e15-a','e15-b','p2-a0','p2-a1','p2-b','p3-a','p3-b'].includes(stage)) throw Error('Unknown performance stage');
   if (session && (!['write-retest1','write-e23','write-e24'].includes(session)||!stage.startsWith('p2-'))) throw Error('Unknown performance session');
   const suffix=session?'-'+session:'';
-  const mapped={'e15-a':'p0','e15-b':'p1','p2-a0':'p0','p2-a1':'p1','p2-b':'p2'};
-  const images={'e15-a':'loco-perf-p0:local','p2-a0':'loco-perf-p0:local','p2-a1':'loco-perf-e15-b:local'};
+  const mapped={'e15-a':'p0','e15-b':'p1','p2-a0':'p0','p2-a1':'p1','p2-b':'p2','p3-a':'p2','p3-b':'p3'};
+  const images={'e15-a':'loco-perf-p0:local','p2-a0':'loco-perf-p0:local','p2-a1':'loco-perf-e15-b:local','p3-a':'loco-perf-p2-b:local'};
   return {stage:mapped[stage]||stage, project:`loco-perf-${stage}${suffix}`, output:`apps/server-v3/build/perf-stage2${stage==='p0'?'':'-'+stage}${suffix}`,
-    image:images[stage]||`loco-perf-${stage}:local`, paired:stage.startsWith('e15-')||stage.startsWith('p2-')};
+    image:images[stage]||`loco-perf-${stage}:local`, paired:stage.startsWith('e15-')||stage.startsWith('p2-')||stage.startsWith('p3-'), screening:stage.startsWith('p3-'), markerSourceRevision:stage==='p3-a'?'91d653a2b69a5f403f9969bd754f3c46eac76735':null};
 }
 export function measurementSpec(name,rate,viewport,mix,repeats) {
   if(!/^[a-z0-9-]+$/.test(name||''))throw Error('Invalid run name');

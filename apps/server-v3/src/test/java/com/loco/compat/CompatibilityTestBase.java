@@ -26,9 +26,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 @ExtendWith(SharedHarness.class)
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = "spring.flyway.target=1")
+// SharedHarness creates both baselines at V1; only the v3 app applies its later migrations.
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import({HarnessControllers.class, HarnessImageTiming.class})
 public abstract class CompatibilityTestBase {
   private static final java.net.http.HttpClient HTTP =

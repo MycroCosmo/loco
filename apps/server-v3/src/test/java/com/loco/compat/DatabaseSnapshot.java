@@ -57,7 +57,10 @@ public final class DatabaseSnapshot {
         connection.getMetaData().getTables(null, "public", "%", new String[] {"TABLE"})) {
       while (result.next()) {
         String name = result.getString("TABLE_NAME");
-        if (!name.equals("flyway_schema_history")) names.add(name);
+        // PostGIS reference definitions are infrastructure, never seed/reset or compare as app
+        // data.
+        if (!name.equals("flyway_schema_history") && !name.equals("spatial_ref_sys"))
+          names.add(name);
       }
     }
     names.sort(String::compareTo);
