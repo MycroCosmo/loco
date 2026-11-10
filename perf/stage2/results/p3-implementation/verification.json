@@ -1,0 +1,234 @@
+{
+  "purpose": "P3 functional verification after Docker recovery; no screening or performance result",
+  "date": "2026-11-10",
+  "productionSource": "061bd5ee5d985dc77993093737b407143931e3d4",
+  "command": "spotlessApply spotlessCheck allTests build perfBootJar --console=plain",
+  "targeted": {
+    "corrected": {
+      "wallSeconds": 48.3547623,
+      "failed": 0,
+      "total": 32,
+      "passed": 32
+    },
+    "first": {
+      "wallSeconds": 54.6412681,
+      "failed": 1,
+      "reason": "Oracle incorrectly expected HTTP 200 for level=0; existing API returns 400",
+      "total": 32,
+      "passed": 31
+    }
+  },
+  "firstFullExecution": {
+    "source": "061bd5ee5d985dc77993093737b407143931e3d4",
+    "wallSeconds": 1286.2001967,
+    "tasks": {
+      "comparison": {
+        "skipped": 0,
+        "passed": 1156,
+        "failed": 2,
+        "total": 1158
+      },
+      "root": {
+        "skipped": 1,
+        "passed": 460,
+        "failed": 0,
+        "total": 461
+      },
+      "core": {
+        "skipped": 0,
+        "passed": 125,
+        "failed": 0,
+        "total": 125
+      }
+    },
+    "exitCode": 1,
+    "finishedAt": "2026-11-10T20:41:25.9337837+09:00"
+  },
+  "firstFullFailures": [
+    {
+      "test": "HarnessInfrastructureTest.writeRequestUsesIndependentDatabasesAndComparesNewIds",
+      "cause": "Test assumed one Flyway history row; changed to assert all history is preserved across reset"
+    },
+    {
+      "disposition": "Preserved original failure; no production retry or OS setting change. Entire suite rerun after harness correction.",
+      "cause": "Windows JDBC connect BindException: Address already in use: getsockopt",
+      "test": "PlaceImageRaceObservationTest upload-8"
+    }
+  ],
+  "finalExecution": {
+    "wallSeconds": 1280.0920827,
+    "finishedAt": "2026-11-10T21:03:52.4223707+09:00",
+    "tasks": {
+      "root": {
+        "total": 461,
+        "passed": 460,
+        "failed": 0,
+        "skipped": 1
+      },
+      "comparison": {
+        "total": 1158,
+        "passed": 1158,
+        "failed": 0,
+        "skipped": 0
+      },
+      "core": {
+        "total": 125,
+        "passed": 125,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "source": "061bd5ee5d985dc77993093737b407143931e3d4",
+    "exitCode": 0
+  },
+  "finalTotals": {
+    "skipped": 1,
+    "skipReason": "Existing HEIC shared codec limitation",
+    "failed": 0,
+    "total": 1744,
+    "passed": 1743
+  },
+  "coreExecution": "125 passed in first full run; unchanged core UP-TO-DATE in final run",
+  "spatial": {
+    "oracle": 9,
+    "migration": 1,
+    "failed": 0,
+    "passed": 10
+  },
+  "nodeTools": {
+    "skipped": 0,
+    "failed": 0,
+    "runnerSeconds": 0.6233299,
+    "total": 59,
+    "passed": 59
+  },
+  "artifactGuards": {
+    "wallSeconds": 4.3188116,
+    "failed": 0,
+    "total": 4,
+    "passed": 4
+  },
+  "knownDifferences": [
+    {
+      "case": "http.runtime-header",
+      "kind": "intentional",
+      "reason": "10-1 A: omit Express runtime identification only; parser-before-Helmet/CORS preserved",
+      "decision": null
+    },
+    {
+      "case": "kakao.failure-message",
+      "kind": "intentional",
+      "reason": "8-3 B: upstream details stay out of client responses; all external/parsing failures use fixed 500",
+      "decision": null
+    },
+    {
+      "case": "kakao.socket-timeout",
+      "kind": "intentional",
+      "reason": "8-2 B: connect/TLS 2s, response socket inactivity 5s, no overall deadline or retry",
+      "decision": null
+    },
+    {
+      "case": "maps.concurrent-public-join",
+      "kind": "improved",
+      "reason": "UNIQUE/ON CONFLICT keeps both requests successful",
+      "decision": null
+    },
+    {
+      "case": "maps.concurrent-code-join",
+      "kind": "improved",
+      "reason": "UNIQUE/ON CONFLICT keeps both requests successful",
+      "decision": null
+    },
+    {
+      "case": "maps.invite-code-generator",
+      "kind": "intentional",
+      "reason": null,
+      "decision": null
+    },
+    {
+      "case": "notifications.token-replacement",
+      "kind": "improved",
+      "reason": "9-6 B: conditional UPDATE preserves a replacement FCM token",
+      "decision": null
+    },
+    {
+      "case": "tokens.cleanup-timezone",
+      "kind": "intentional",
+      "reason": "9-5 B: Korean dawn intended; explicit Asia/Seoul 03:00 instead of UTC container 03:00",
+      "decision": null
+    },
+    {
+      "case": "markers.pg-derived-centers",
+      "kind": "intentional",
+      "reason": null,
+      "decision": "E-20 A: PG aggregate centers; only latitude/longitude centers may differ by <=1e-10; keys/counts/extents remain exact"
+    },
+    {
+      "case": "markers.pg-coordinate-rule",
+      "kind": "improved",
+      "reason": null,
+      "decision": "E-5 A: PostgreSQL numeric ROUND and normalized zero for stored keys and six-digit groups"
+    },
+    {
+      "case": "markers.deterministic-overflow",
+      "kind": "improved",
+      "reason": null,
+      "decision": "E-12 A: count DESC, cellLatKey C ASC, cellLngKey C ASC; physical reorder preserves visible 699 and overflow"
+    },
+    {
+      "case": "markers.refresh-serialization",
+      "kind": "improved",
+      "reason": null,
+      "decision": "E-22 B variant: separate map+precision lock statement then READ COMMITTED DML; all writers must participate"
+    },
+    {
+      "case": "images.concurrent-limit",
+      "kind": "improved",
+      "reason": null,
+      "decision": null
+    },
+    {
+      "case": "images.concurrent-delete",
+      "kind": "improved",
+      "reason": null,
+      "decision": null
+    },
+    {
+      "case": "images.concurrent-upload-delete",
+      "kind": "improved",
+      "reason": null,
+      "decision": null
+    },
+    {
+      "case": "markers.precision-commit",
+      "kind": "improved",
+      "reason": null,
+      "decision": "E-17 A: old/new cells commit together per precision; place remains committed"
+    }
+  ],
+  "knownDifferenceComparison": {
+    "improved": 10,
+    "baseline": "perf/stage2/results/p2-implementation/e22-verification.json",
+    "unchanged": true,
+    "intentional": 6,
+    "fields": [
+      "case",
+      "kind"
+    ]
+  },
+  "assets": {
+    "existingMeasurementImagesUnchanged": 3,
+    "backgroundAlreadyExited": 2,
+    "newImage": "loco-perf-p3-b:local",
+    "backgroundActions": "none",
+    "existingMeasurementVolumesPresent": 13,
+    "backgroundRunning": 5
+  },
+  "limitations": [
+    "Functional tests are not performance evidence",
+    "Forced child termination and seven-container recovery verified with a Docker adapter double; actual measurement lifecycle remains unexecuted",
+    "Whole-application closure is a user precondition, not proven by the detached Node child test",
+    "Earlier failed full run and corrected full run are retained separately under build/performance"
+  ],
+  "measurementStarted": false
+}

@@ -1,5 +1,5 @@
 import {stageSettings} from './data.mjs';
-const {output}=stageSettings();
+const output=process.argv[2]||stageSettings().output;
 import {spawnSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';

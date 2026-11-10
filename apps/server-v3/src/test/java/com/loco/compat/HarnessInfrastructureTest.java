@@ -28,6 +28,16 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
   @Test
   @DisplayName("하네스 자체 검증: HTTP 쓰기 → 생성 ID 제외 → DB 상태 비교")
   void writeRequestUsesIndependentDatabasesAndComparesNewIds() throws Exception {
+    var histories = new java.util.EnumMap<SharedHarness.Side, String>(SharedHarness.Side.class);
+    String history =
+        "SELECT json_agg(h ORDER BY installed_rank)::text FROM flyway_schema_history h";
+    for (var side : SharedHarness.Side.values()) {
+      try (var connection = environment().connect(side);
+          var result = connection.createStatement().executeQuery(history)) {
+        result.next();
+        histories.put(side, result.getString(1));
+      }
+    }
     for (String path : List.of("/api/feedback")) {
       assertThat(request(v3Url(), path, HttpMethod.POST, null, Map.of()).getStatusCode().value())
           .isEqualTo(401);
@@ -63,11 +73,13 @@ class HarnessInfrastructureTest extends CompatibilityTestBase {
                   .createStatement()
                   .executeQuery(
                       "SELECT (SELECT count(*) FROM feedbacks), (SELECT count(*) FROM users), "
-                          + "(SELECT version FROM flyway_schema_history WHERE success)")) {
+                          + "("
+                          + history
+                          + ")")) {
         result.next();
         assertThat(result.getInt(1)).isZero();
         assertThat(result.getInt(2)).isEqualTo(1);
-        assertThat(result.getString(3)).isEqualTo("1");
+        assertThat(result.getString(3)).isEqualTo(histories.get(side));
       }
     }
   }

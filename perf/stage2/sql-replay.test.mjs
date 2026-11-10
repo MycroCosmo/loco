@@ -23,3 +23,13 @@ test('replays the real captured HTTP cell SQL against its source template',()=>{
   assert.match(replay,/"mapId" = 'example'/);assert.match(replay,/precision = '3'/);
   assert.match(replay,/"maxLat" >= '-90'/);assert.doesNotMatch(replay,/\$\d/);
 });
+
+test('replays the P3 HTTP bbox SQL with longitude/latitude order and both SRIDs intact',()=>{
+  const capture=JSON.parse(fs.readFileSync('perf/stage2/results/p3-implementation/cell-sql.json','utf8'));
+  const source=fs.readFileSync('apps/server-v3/src/main/java/com/loco/places/MarkerQueryRepository.java','utf8');
+  let n=0;const observed=capture.sql.replaceAll('?',()=>'$'+(++n));assert.equal(n,10);
+  const replay=bindTemplate(observed,javaSqlTemplate(source,'BOUNDED_CELLS'),{map:'example',precision:3,minLat:37,maxLat:38,minLng:127,maxLng:129});
+  assert.match(replay,/ST_MakeEnvelope \( '127' , '37' , '129' , '38' , 4326 \)/i);
+  assert.equal((replay.match(/4326/g)||[]).length,2);
+  assert.doesNotMatch(replay,/\$\d/);
+});

@@ -2,7 +2,7 @@ import fs from 'node:fs';import path from 'node:path';import assert from 'node:a
 import {spawn,spawnSync} from 'node:child_process';import {fileURLToPath} from 'node:url';
 import {stageSettings,hash} from './data.mjs';
 import {withPausedBackground,restoreBackground} from './background-lease.mjs';
-import {screeningProtocol,p2Jar,screeningPlans,evaluateScreening,screeningLifecycle,backgroundRecoveryRequired} from './p3-protocol.mjs';
+import {screeningProtocol,p2Jar,screeningPlans,evaluateScreening,screeningLifecycle,backgroundRecoveryRequired,recoverExitedOwner} from './p3-protocol.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');process.chdir(root);
 const base='apps/server-v3/build/perf-stage2-p3-screen',script=fileURLToPath(import.meta.url),mode=process.argv[2];
@@ -21,8 +21,7 @@ const backgroundsSafe=()=>!backgroundRecoveryRequired(lease())||lease().restored
 function restore(){if(!backgroundRecoveryRequired(lease()))return;try{stopProjects();}finally{restoreBackground(ids(),docker,record);}}
 function watch(owner){return setInterval(()=>{
   if(fs.existsSync(base+'/completed.json')&&read(base+'/completed.json').backgroundRestored===true)process.exit(0);
-  try{process.kill(owner,0);return;}catch{}
-  try{restore();atomic('completed.json',{at:new Date().toISOString(),ok:false,error:'Detached owner exited; watchdog restored backgrounds',backgroundRestored:true});process.exit(0);}catch(e){record('recovery-failed',{error:e.message});}
+  try{if(recoverExitedOwner({ownerAlive:()=>{try{process.kill(owner,0);return true;}catch{return false;}},recover:restore,complete:()=>atomic('completed.json',{at:new Date().toISOString(),ok:false,error:'Detached owner exited; watchdog restored backgrounds',backgroundRestored:true,backgroundLeaseAcquired:backgroundRecoveryRequired(lease())})}))process.exit(0);}catch(e){record('recovery-failed',{error:e.message});}
 },5000);}
 if(mode==='restore'){restore();process.exit(0);}
 if(mode==='watchdog'){watch(Number(process.argv[3]));}

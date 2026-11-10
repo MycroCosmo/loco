@@ -165,7 +165,7 @@ P2 쓰기 재측정: [P2_WRITE_RETEST.md](P2_WRITE_RETEST.md). 기존 읽기·�
 [E-23 쓰기 본표본300 결과·E-24 선택지](P2_WRITE_E23.md): 19유효/1무효·HTTP9,300성공, 편차/간섭으로채택보류. 이전두쓰기세션 원본보존·7개복구.
 # P3 E-32 선별 실행 안내
 
-현재는 **Docker 장애로 준비만 완료, 실행 금지** 상태다. Docker 없는 검증 결과·재개 순서는 [P3 설계 §12](../../apps/server-v3/PERF_STAGE2_P3_DESIGN.md#12-docker-중단-중-준비-결과와-재개-지점--2026-11-10)에 있다. 이미지/볼륨과 다른 프로젝트7개는 삭제·초기화하지 않는다.
+현재는 **Docker 복구 후 allTests build·이미지 준비 완료, 선별 측정 전 환경 확인 대기** 상태다. [P3 설계 §13](../../apps/server-v3/PERF_STAGE2_P3_DESIGN.md#13-docker-복구-후-검증--2026-11-10)에 실패 이력을 포함한 검증 결과와 재개 순서를 남겼다. 이미지/볼륨과 다른 프로젝트7개는 삭제·초기화하지 않는다. 복구 후 배경7개 중2개가 이미exited였으므로, 기존7개running 전제도 환경 확인 때 먼저 해결한다. 실행기가 임의로 시작하지 않는다.
 
 E-25~E-32 기준은 [P3 설계](../../apps/server-v3/PERF_STAGE2_P3_DESIGN.md)에 있다. P2 A1이 아닌 **P2 B 원래 JAR를 P3의 A**로 사용한다. B는 셀 bbox GiST만 추가한다. READ_COMMITTED는 양쪽 그대로다.
 

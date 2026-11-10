@@ -5,6 +5,12 @@ export const p2Jar='639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175c
 export const screeningPlans=()=>Array.from({length:3},(_,i)=>['a','b'].map(side=>({side,name:'plan-'+(i+1)}))).flat();
 // A preflight failure has not acquired the seven-container lease.
 export const backgroundRecoveryRequired=manifest=>manifest?.history?.some(entry=>entry.phase==='before')===true;
+export function recoverExitedOwner({ownerAlive,recover,complete}) {
+  if(ownerAlive())return false;
+  recover();
+  complete();
+  return true;
+}
 export function evaluateScreening({a,b}) {
   for(const side of [a,b]) {
     assert.equal(side.buffers.length,3,'Keep all three prescribed plans');

@@ -191,7 +191,9 @@ class MarkerSpatialOracleIntegrationTest extends MarkerTestSupport {
               HttpMethod.GET,
               token,
               null);
-      assertThat(normal.getStatusCode().value()).isEqualTo(200);
+      assertThat(normal.getStatusCode().value()).isEqualTo(level == 0 ? 400 : 200);
+      if (level == 0)
+        assertThat(normal.getBody().path("message").asText()).isEqualTo("level은 숫자여야 합니다.");
       assertThat(reversed.getStatusCode()).isEqualTo(normal.getStatusCode());
       assertThat(reversed.getBody()).isEqualTo(normal.getBody());
     }

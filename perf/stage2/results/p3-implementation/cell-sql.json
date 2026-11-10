@@ -1,0 +1,16 @@
+{
+  "sql": "WITH matching AS NOT MATERIALIZED (\n  SELECT precision,\"cellLatKey\",\"cellLngKey\",latitude,longitude,count,\"exactKeyCount\",\"groupKey\",\"placeId\",\"placeName\"\n  FROM place_marker_cells WHERE \"mapId\"=? AND precision=?\n    AND \"maxLat\">=? AND \"minLat\"<=? AND \"maxLng\">=? AND \"minLng\"<=?\n    AND ST_MakeEnvelope(\"minLng\",\"minLat\",\"maxLng\",\"maxLat\",4326)\n      && ST_MakeEnvelope(?,?,?,?,4326)\n), probe AS MATERIALIZED (SELECT * FROM matching LIMIT 700),\ntop_cells AS MATERIALIZED (\n  SELECT * FROM matching WHERE (SELECT count(*) FROM probe)=700\n  ORDER BY count DESC,\"cellLatKey\" COLLATE \"C\",\"cellLngKey\" COLLATE \"C\" LIMIT 699\n), visible AS MATERIALIZED (\n  SELECT * FROM probe WHERE (SELECT count(*) FROM probe)<700\n  UNION ALL SELECT * FROM top_cells\n)\nSELECT visible.*,false AS \"isOverflow\" FROM visible\nUNION ALL\nSELECT NULL,NULL,NULL,\n  COALESCE(SUM(m.latitude::numeric*m.count)/NULLIF(SUM(m.count),0),0)::float8,\n  COALESCE(SUM(m.longitude::numeric*m.count)/NULLIF(SUM(m.count),0),0)::float8,\n  SUM(m.count)::bigint,NULL,NULL,NULL,NULL,true\nFROM matching m WHERE (SELECT count(*) FROM probe)=700\n  AND (m.\"cellLatKey\",m.\"cellLngKey\") NOT IN (SELECT v.\"cellLatKey\",v.\"cellLngKey\" FROM visible v)\nHAVING count(*)>0\n",
+  "params": [
+    "aaaaaaaa-aaaa-4aaa-8aaa-000000000001",
+    3,
+    37.0,
+    38.0,
+    127.0,
+    129.0,
+    127.0,
+    37.0,
+    129.0,
+    38.0
+  ],
+  "purpose": "Actual HTTP cell SQL captured by MarkerSqlIntegrationTest; functional replay only, not M screening measurement"
+}

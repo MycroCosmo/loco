@@ -5,7 +5,7 @@ import {spawnSync,spawn} from 'node:child_process';
 import {randomBytes,createHmac} from 'node:crypto';
 import http from 'node:http';
 import assert from 'node:assert/strict';
-import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measurementSpec,stageSettings,pairedThresholdFailure} from './data.mjs';
+import {key,hash,datasetSql,markerPath,canonical,sqlString,bindObservedSql,measurementSpec,stageSettings,pairedThresholdFailure,markerCellCoordinate} from './data.mjs';
 import {overflowMatches} from './overflow-contract.js';
 import {bindTemplate,javaSqlTemplate} from './sql-replay.mjs';
 import {writeSpec} from './p2-protocol.mjs';
@@ -209,7 +209,7 @@ async function markerCases(viewport, maps) {
     if(settings.paired && viewport===10 && body.some(m=>m.id==='overflow')) {
       const cells=query(`SELECT "placeId" AS id,"placeName" AS name,latitude,longitude,count FROM place_marker_cells WHERE "mapId"=${sqlString(id)} AND precision=3 AND "maxLat">=${minLat} AND "minLat"<=${maxLat} AND "maxLng">=${minLng} AND "minLng"<=${maxLng}`);
       assert.ok(cells.every(c=>c.count===1),'Overflow contract only covers the approved all-singleton M seed');
-      const places=Object.fromEntries(cells.map(c=>[c.id,{name:c.name,latitude:settings.stage==='p2'?c.latitude:Number(c.latitude.toPrecision(16)),longitude:settings.stage==='p2'?c.longitude:Number(c.longitude.toPrecision(16))}]));
+      const places=Object.fromEntries(cells.map(c=>[c.id,{name:c.name,latitude:markerCellCoordinate(c.latitude,settings.stage),longitude:markerCellCoordinate(c.longitude,settings.stage)}]));
       entry.overflow={places,count:cells.length,latSum:Object.values(places).reduce((n,c)=>n+c.latitude,0),lngSum:Object.values(places).reduce((n,c)=>n+c.longitude,0)};
       assert.ok(overflowMatches(body,entry.overflow),'Preflight must satisfy the full known-difference contract');
       if(settings.stage==='p0') delete entry.hash;

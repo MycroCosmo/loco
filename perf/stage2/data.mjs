@@ -8,6 +8,8 @@ export const key = (kind, i) => {
 export const hash = value => createHash('sha256').update(value).digest('hex');
 export const sqlKey = (kind, expr) => `md5('${seed}/${kind}/'||(${expr})::text)::uuid::text`;
 export const sqlString = value => `'${String(value).replaceAll("'", "''")}'`;
+// P2 and P3 share the approved PG-derived center contract; only older apps round via Prisma.
+export const markerCellCoordinate = (value, stage) => ['p2','p3'].includes(stage) ? value : Number(value.toPrecision(16));
 export function pairedThresholdFailure(exitCode, summary) {
   // k6 Rate "passes" counts true values: for http_req_failed those are failed requests.
   return exitCode===99 && (summary.metrics.business_failure?.values.count||0)<=(summary.metrics.http_req_failed?.values.passes||0);

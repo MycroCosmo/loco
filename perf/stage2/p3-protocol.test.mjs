@@ -1,9 +1,29 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {evaluateScreening,screeningPlans,screeningLifecycle,backgroundRecoveryRequired} from './p3-protocol.mjs';
-import {stageSettings} from './data.mjs';
-import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawnSync} from 'node:child_process';
+import {evaluateScreening,screeningPlans,screeningLifecycle,backgroundRecoveryRequired,recoverExitedOwner} from './p3-protocol.mjs';
+import {restoreBackground} from './background-lease.mjs';
+import {stageSettings,markerCellCoordinate} from './data.mjs';
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawn,spawnSync} from 'node:child_process';
 
 const side=(p95=100,buffers=[100,100,100])=>({p95,buffers,valid:true});
+test('killed owner triggers seven-container recovery before watchdog completion',async()=>{
+  const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore',windowsHide:true});
+  await new Promise((resolve,reject)=>{child.once('spawn',resolve);child.once('error',reject);});
+  const ids=Array.from({length:7},(_,i)=>'test-'+i),paused=new Set(ids),events=[];
+  const docker=(action,id)=>{if(action==='inspect')return {Running:true,Paused:paused.has(id),Status:paused.has(id)?'paused':'running'};assert.equal(action,'unpause');paused.delete(id);};
+  const callbacks={ownerAlive:()=>{try{process.kill(child.pid,0);return true;}catch{return false;}},recover:()=>restoreBackground(ids,docker,(phase,data)=>{assert.equal(data.restored,true);events.push(phase);}),complete:()=>{assert.equal(paused.size,0);events.push('complete');}};
+  try {assert.equal(recoverExitedOwner(callbacks),false);}
+  finally {const done=new Promise(resolve=>child.once('exit',resolve));child.kill();await done;}
+  assert.equal(recoverExitedOwner(callbacks),true);assert.deepEqual(events,['restored','complete']);
+});
+test('watchdog does not write completion after a failed recovery',()=>{
+  assert.throws(()=>recoverExitedOwner({ownerAlive:()=>false,recover:()=>{throw Error('recovery failed');},complete:()=>assert.fail('premature completion')}),/recovery failed/);
+});
+test('P3 A and B both preserve PG cell coordinates without reintroducing legacy rounding',()=>{
+  const coordinate=37.123456789012344;
+  assert.notEqual(coordinate,Number(coordinate.toPrecision(16)));
+  for(const side of ['p3-a','p3-b'])assert.equal(markerCellCoordinate(coordinate,stageSettings(side).stage),coordinate);
+  assert.equal(markerCellCoordinate(coordinate,'p1'),Number(coordinate.toPrecision(16)));
+});
 test('preflight failures leave unrelated containers untouched; partial pause still requires recovery',()=>{
   assert.equal(backgroundRecoveryRequired(undefined),false);
   assert.equal(backgroundRecoveryRequired({history:[{phase:'recovery-failed'}]}),false);
