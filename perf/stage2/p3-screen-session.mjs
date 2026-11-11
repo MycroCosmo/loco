@@ -5,7 +5,9 @@ import {withPausedBackground,restoreBackground} from './background-lease.mjs';
 import {screeningProtocol,p2Jar,screeningPlans,evaluateScreening,screeningLifecycle,backgroundRecoveryRequired,recoverExitedOwner} from './p3-protocol.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');process.chdir(root);
-const base='apps/server-v3/build/perf-stage2-p3-screen',script=fileURLToPath(import.meta.url),mode=process.argv[2];
+const sessionName=process.env.PERF_SESSION||'';
+stageSettings('p3-a',sessionName); // Validate before creating paths; old sessions remain immutable.
+const base='apps/server-v3/build/perf-stage2-p3-screen'+(sessionName?'-'+sessionName:''),script=fileURLToPath(import.meta.url),mode=process.argv[2];
 assert.ok(['launch','run','watchdog','restore'].includes(mode));
 fs.mkdirSync(base,{recursive:true});
 const read=p=>JSON.parse(fs.readFileSync(p));
@@ -32,7 +34,7 @@ else if(mode==='launch'){
   assert.ok(!fs.existsSync(base+'/launch.json'),'Single session only; never silently retry');
   for(const side of ['a','b'])assert.ok(!fs.existsSync(stageSettings('p3-'+side).output),'Use untouched P3 output projects');
   const artifact=read('perf/stage2/p3-artifacts.json');assert.equal(artifact.aJar,p2Jar);assert.equal(artifact.bJar,hash(fs.readFileSync('apps/server-v3/build/libs/loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar')));
-  atomic('launch.json',{at:new Date().toISOString(),source:command('git',['rev-parse','HEAD']),protocol:screeningProtocol,artifact,countdownSeconds:90,userConfirmation:{heavyApps:process.env.PERF_HEAVY_APPS_STATUS,updates:process.env.PERF_APP_UPDATES_STATUS},note:'Close Codex/ChatGPT/Chrome completely during countdown; agent does not poll until completion.'});
+  atomic('launch.json',{at:new Date().toISOString(),source:command('git',['rev-parse','HEAD']),protocol:screeningProtocol,sessionName,artifact,countdownSeconds:90,userConfirmation:{heavyApps:process.env.PERF_HEAVY_APPS_STATUS,updates:process.env.PERF_APP_UPDATES_STATUS},note:'Close Codex/ChatGPT/Chrome completely during countdown; agent does not poll until completion.'});
   const log=fs.openSync(base+'/driver.log','wx');const child=spawn(process.execPath,[script,'run'],{detached:true,stdio:['ignore',log,log],windowsHide:true});child.unref();fs.closeSync(log);
   console.log(JSON.stringify({pid:child.pid,completion:base+'/completed.json',countdownSeconds:90,note:'Detached. Close apps; no Codex polling.'}));
 }else if(mode==='run'){
@@ -40,8 +42,8 @@ else if(mode==='launch'){
   const launch=read(base+'/launch.json');assert.equal(command('git',['rev-parse','HEAD']),launch.source);
   const session={startedAt:new Date().toISOString(),source:launch.source,protocol:screeningProtocol,runs:[],plans:[]};atomic('session.json',session);
   const watchdog=spawn(process.execPath,[script,'watchdog',String(process.pid)],{detached:true,stdio:'ignore',windowsHide:true});watchdog.unref();
-  async function run(side,...args){console.log(new Date().toISOString(),side,args.join(' '));const child=spawn(process.execPath,['perf/stage2/run.mjs',...args],{env:{...process.env,PERF_STAGE:'p3-'+side,PERF_SESSION:''},stdio:'inherit',windowsHide:true});assert.equal(await new Promise((resolve,reject)=>{child.once('exit',resolve);child.once('error',reject);}),0,'Screen step failed; retain original, no retry');}
-  const summarize=side=>{const r=spawnSync(process.execPath,['perf/stage2/summarize.mjs'],{env:{...process.env,PERF_STAGE:'p3-'+side,PERF_SESSION:''},encoding:'utf8',windowsHide:true});assert.equal(r.status,0,r.stderr);};
+  async function run(side,...args){console.log(new Date().toISOString(),side,args.join(' '));const child=spawn(process.execPath,['perf/stage2/run.mjs',...args],{env:{...process.env,PERF_STAGE:'p3-'+side,PERF_SESSION:sessionName},stdio:'inherit',windowsHide:true});assert.equal(await new Promise((resolve,reject)=>{child.once('exit',resolve);child.once('error',reject);}),0,'Screen step failed; retain original, no retry');}
+  const summarize=side=>{const r=spawnSync(process.execPath,['perf/stage2/summarize.mjs'],{env:{...process.env,PERF_STAGE:'p3-'+side,PERF_SESSION:sessionName},encoding:'utf8',windowsHide:true});assert.equal(r.status,0,r.stderr);};
   const sideResult=side=>{const dir=stageSettings('p3-'+side).output,rows=read(dir+'/summary.json');assert.equal(rows.length,2);const main=rows.find(x=>x.run==='screen-1');assert.ok(main);return {buffers:[1,2,3].map(n=>read(dir+'/plan-'+n+'.json').rootBuffers),p95:main.http['p(95)'],valid:read(dir+'/screen-1-db-check.json').unchanged&&rows.every(r=>r.validity?.valid===true&&r.execution.exitCode===0&&r.checks.fails===0&&r.dropped===0&&r.collectorErrors.length===0&&Object.keys(r.status).every(s=>s==='200'))};};
   try{await screeningLifecycle({
     work:async()=>{

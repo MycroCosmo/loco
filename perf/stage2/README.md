@@ -165,6 +165,14 @@ P2 쓰기 재측정: [P2_WRITE_RETEST.md](P2_WRITE_RETEST.md). 기존 읽기·�
 [E-23 쓰기 본표본300 결과·E-24 선택지](P2_WRITE_E23.md): 19유효/1무효·HTTP9,300성공, 편차/간섭으로채택보류. 이전두쓰기세션 원본보존·7개복구.
 # P3 E-32 선별 실행 안내
 
+2026-11-11 사용자 승인 재측정은 `PERF_SESSION=screen-retest1`로 분리한다. A/B 각3회 EXPLAIN과 각1회 HTTP(예열120초+본300초), 예상24~31분, E-32 기준은 그대로다. 이전 세션의 출력·DB·볼륨을 재사용하거나 삭제하지 않는다. 새 driver/watchdog/수집기/복구가 같은 세션 이름을 상속한다. Node61건 성공·0실패(0.478초), 실행기 문법 검사 통과. 운영 앱 변경은 없어 Java 회귀는 반복하지 않았다.
+
+환경 확인 후 시작 및 필요 시 복구 명령 모두 아래 환경변수를 먼저 설정한다. 새 완료 표식은 `build/perf-stage2-p3-screen-screen-retest1/completed.json`이다. 기존 세션의 완료 파일과 혼동하지 않는다.
+
+```powershell
+$env:PERF_SESSION='screen-retest1'
+```
+
 2026-11-11 도구의 `&&` 재생 오류 수정 후 Node60건·실제 DB5건 통과. 측정은 여전히 중단 상태이며 결과를 대체하지 않았다. 아래 독립 검사는 새 UUID 이름의 tmpfs 테스트 DB만 만들고 정리한다. 기존 측정 프로젝트는 사용하지 않는다.
 
 ```powershell

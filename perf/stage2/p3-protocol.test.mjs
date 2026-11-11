@@ -5,6 +5,16 @@ import {stageSettings,markerCellCoordinate} from './data.mjs';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawn,spawnSync} from 'node:child_process';
 
 const side=(p95=100,buffers=[100,100,100])=>({p95,buffers,valid:true});
+test('authorized P3 retest keeps old output and volumes separate with identical artifacts',()=>{
+  for(const side of ['p3-a','p3-b']) {
+    const old=stageSettings(side,''),next=stageSettings(side,'screen-retest1');
+    assert.notEqual(next.project,old.project);assert.notEqual(next.output,old.output);
+    for(const field of ['image','stage','markerSourceRevision'])assert.equal(next[field],old[field]);
+    assert.throws(()=>stageSettings(side,'write-e24'));
+  }
+  assert.throws(()=>stageSettings('p2-b','screen-retest1'));
+  assert.throws(()=>stageSettings('p3-b','../escape'));
+});
 test('killed owner triggers seven-container recovery before watchdog completion',async()=>{
   const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'ignore',windowsHide:true});
   await new Promise((resolve,reject)=>{child.once('spawn',resolve);child.once('error',reject);});
