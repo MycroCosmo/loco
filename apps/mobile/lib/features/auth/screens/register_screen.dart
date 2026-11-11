@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -47,8 +48,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('회원가입 실패: $e'),
-            backgroundColor: Colors.red,
+            content: Text(userErrorMessage(e, action: '회원가입하지 못했어요.')),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -64,6 +65,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       appBar: AppBar(
         title: const Text('회원가입'),
         leading: IconButton(
+          tooltip: '로그인으로 돌아가기',
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/login'),
         ),
@@ -77,16 +79,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 12),
-                const Icon(Icons.map_rounded,
-                    size: 52, color: Color(0xFF2563EB)),
+                Icon(Icons.map_rounded,
+                    size: 52, color: Theme.of(context).colorScheme.primary),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'LOCO 시작하기',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2563EB),
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -99,7 +101,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) =>
-                      v == null || !v.contains('@') ? '올바른 이메일을 입력하세요' : null,
+                      v == null || !v.contains('@') ? '올바른 이메일을 입력해 주세요' : null,
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
@@ -110,8 +112,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) {
-                    if (v == null || v.trim().length < 2) return '2자 이상 입력하세요';
-                    if (v.trim().length > 30) return '30자 이하로 입력하세요';
+                    if (v == null || v.trim().length < 2) return '2자 이상 입력해 주세요';
+                    if (v.trim().length > 30) return '30자 이하로 입력해 주세요';
                     return null;
                   },
                 ),
@@ -124,13 +126,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     prefixIcon: const Icon(Icons.lock_outline),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
+                      tooltip: _obscure ? '비밀번호 보기' : '비밀번호 숨기기',
                       icon: Icon(
                           _obscure ? Icons.visibility_off : Icons.visibility),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
                   validator: (v) =>
-                      v == null || v.length < 6 ? '6자 이상 입력하세요' : null,
+                      v == null || v.length < 6 ? '6자 이상 입력해 주세요' : null,
                 ),
                 const SizedBox(height: 14),
                 TextFormField(
@@ -142,14 +145,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (v) =>
-                      v != _passwordCtrl.text ? '비밀번호가 일치하지 않습니다' : null,
+                      v != _passwordCtrl.text ? '비밀번호가 달라요. 다시 확인해 주세요.' : null,
                 ),
                 const SizedBox(height: 28),
                 FilledButton(
                   onPressed: _loading ? null : _submit,
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
                   child: _loading
                       ? const SizedBox(
@@ -164,8 +167,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text('이미 계정이 있으신가요?',
-                        style: TextStyle(color: Colors.grey)),
+                    Text('이미 계정이 있으신가요?',
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                     TextButton(
                       onPressed: () => context.go('/login'),
                       child: const Text('로그인'),

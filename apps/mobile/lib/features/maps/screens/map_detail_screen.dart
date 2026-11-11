@@ -1,4 +1,5 @@
-﻿import 'dart:async';
+import '../../../core/utils/user_message.dart';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -112,11 +113,11 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
           if (otherCount > 0)
             TextButton(
               onPressed: () => Navigator.pop(ctx, 'force'),
-              child: const Text('강제 삭제', style: TextStyle(color: Colors.red)),
+              child: Text('강제 삭제', style: TextStyle(color: Theme.of(context).colorScheme.error)),
             ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'normal'),
-            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+            child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -133,7 +134,7 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('삭제 실패: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text(userErrorMessage(e, action: '삭제하지 못했어요.')), backgroundColor: Theme.of(context).colorScheme.error),
       );
     }
   }
@@ -187,8 +188,8 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('장소 불러오기 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '장소를 불러오지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -250,8 +251,8 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('장소 묶음 불러오기 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '장소 목록을 불러오지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -290,8 +291,8 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('클러스터 불러오기 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '모아 둔 장소를 불러오지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -344,7 +345,7 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
                     Text(
                       description,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   ],
@@ -427,8 +428,8 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
       setState(() => _deletingPlaceImage = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('사진 삭제 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '사진을 삭제하지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -502,8 +503,8 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('초대 코드 재생성 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '초대 코드를 바꾸지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -524,7 +525,7 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (error, _) => Scaffold(
-        body: Center(child: Text('오류: $error')),
+        body: Center(child: Text(userErrorMessage(error, action: '내용을 불러오지 못했어요.'))),
       ),
       data: (map) {
         final currentUserId = userAsync.valueOrNull?.id;
@@ -626,13 +627,13 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
                         title: Text('지도방 수정'),
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: ListTile(
                         dense: true,
                         contentPadding: EdgeInsets.zero,
-                        leading: Icon(Icons.delete_outline, color: Colors.red),
-                        title: Text('삭제', style: TextStyle(color: Colors.red)),
+                        leading: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+                        title: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error)),
                       ),
                     ),
                   ],
@@ -694,7 +695,7 @@ class _MapDetailScreenState extends ConsumerState<MapDetailScreen> {
                             loading: () => const Center(
                                 child: CircularProgressIndicator()),
                             error: (error, _) =>
-                                Center(child: Text('장소 불러오기 실패: $error')),
+                                Center(child: Text(userErrorMessage(error, action: '장소를 불러오지 못했어요.'))),
                             data: (placeState) {
                               final places = placeState.items;
                               return _PlacesListPanel(
@@ -972,8 +973,8 @@ class _PlacesListPanel extends ConsumerWidget {
                                     if (!context.mounted) return;
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('지도방 가입 실패: $error'),
-                                        backgroundColor: Colors.red,
+                                        content: Text(userErrorMessage(error, action: '지도방에 참여하지 못했어요.')),
+                                        backgroundColor: Theme.of(context).colorScheme.error,
                                       ),
                                     );
                                   }
@@ -1002,6 +1003,7 @@ class _PlacesListPanel extends ConsumerWidget {
                             suffixIcon: searchText.isEmpty
                                 ? null
                                 : IconButton(
+                      tooltip: '검색어 지우기',
                                     icon: const Icon(Icons.clear),
                                     onPressed: onClearSearch,
                                   ),
@@ -1057,12 +1059,12 @@ class _PlacesListPanel extends ConsumerWidget {
             ),
           ),
           if (places.isEmpty)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               hasScrollBody: false,
               child: Center(
                 child: Text(
                   '아직 추가된 장소가 없어요.',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ),
             )
@@ -1136,7 +1138,7 @@ class _MapBottomSheet extends StatelessWidget {
             width: 42,
             height: 4,
             decoration: BoxDecoration(
-              color: Color(0xFFD1D5DB),
+              color: const Color(0xFFD1D5DB),
               borderRadius: BorderRadius.circular(999),
             ),
           ),
@@ -1240,9 +1242,9 @@ class _MapImagePreview extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       place.roadAddress ?? place.address,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white70,
-                        fontSize: 12,
+                        fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1313,7 +1315,7 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
     final content = _reviewCtrl.text.trim();
     if (content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('리뷰 내용을 입력해주세요.')),
+        const SnackBar(content: Text('리뷰 내용을 입력해 주세요.')),
       );
       return;
     }
@@ -1331,7 +1333,7 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('리뷰 저장 실패: $error')),
+          SnackBar(content: Text(userErrorMessage(error, action: '리뷰를 저장하지 못했어요.'))),
         );
       }
     } finally {
@@ -1362,7 +1364,7 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+            child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -1381,8 +1383,8 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('장소 삭제 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '장소를 삭제하지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -1401,7 +1403,7 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+            child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -1417,8 +1419,8 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('리뷰 삭제 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '리뷰를 삭제하지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -1481,7 +1483,7 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
     if (reason.length < 5) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('신고 사유를 5자 이상 입력해주세요.')),
+        const SnackBar(content: Text('신고 사유를 5자 이상 입력해 주세요.')),
       );
       return;
     }
@@ -1500,8 +1502,8 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('신고 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '신고를 보내지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -1564,13 +1566,13 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
                       ),
                     ),
                   if (canDeletePlace)
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: ListTile(
                         dense: true,
                         contentPadding: EdgeInsets.zero,
-                        leading: Icon(Icons.delete_outline, color: Colors.red),
-                        title: Text('삭제', style: TextStyle(color: Colors.red)),
+                        leading: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+                        title: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error)),
                       ),
                     ),
                   if (canReportPlace)
@@ -1619,7 +1621,7 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
                   runSpacing: 6,
                   children: widget.place.tags.map((tag) {
                     return Chip(
-                      label: Text(tag, style: const TextStyle(fontSize: 11)),
+                      label: Text(tag, style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize)),
                       visualDensity: VisualDensity.compact,
                       padding: EdgeInsets.zero,
                     );
@@ -1631,7 +1633,7 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
               const SizedBox(height: 16),
               reviewsAsync.when(
                 loading: () => const LinearProgressIndicator(),
-                error: (error, _) => Text('리뷰 불러오기 실패: $error'),
+                error: (error, _) => Text(userErrorMessage(error, action: '리뷰를 불러오지 못했어요.')),
                 data: (summary) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1665,7 +1667,7 @@ class _PlaceDetailPanelState extends ConsumerState<_PlaceDetailPanel> {
                                 const EdgeInsets.fromLTRB(12, 12, 84, 12),
                             filled: !canReview,
                             fillColor:
-                                !canReview ? const Color(0xFFF3F4F6) : null,
+                                !canReview ? Theme.of(context).colorScheme.surfaceContainerLow : null,
                           ),
                         ),
                         Positioned(
@@ -1823,8 +1825,8 @@ class _PlaceLocationSection extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.place_outlined,
-                  size: 20, color: Color(0xFF2563EB)),
+              Icon(Icons.place_outlined,
+                  size: 20, color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
@@ -1838,7 +1840,7 @@ class _PlaceLocationSection extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         secondaryAddress,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ],
@@ -1909,9 +1911,9 @@ class _PlaceAuthor extends StatelessWidget {
           child: imageProvider == null
               ? Text(
                   nickname.isNotEmpty ? nickname[0].toUpperCase() : '?',
-                  style: const TextStyle(
-                    color: Color(0xFF2563EB),
-                    fontSize: 11,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
                     fontWeight: FontWeight.w700,
                   ),
                 )
@@ -1920,7 +1922,7 @@ class _PlaceAuthor extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           '$nickname 등록',
-          style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+          style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize, color: Colors.grey[700]),
         ),
       ],
     );
@@ -1947,7 +1949,7 @@ class _ReviewsSummary extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           '리뷰 ${summary.reviewCount}',
-          style: TextStyle(color: Colors.grey[600]),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -1989,7 +1991,7 @@ class _ReviewsSection extends StatelessWidget {
             ),
             child: Text(
               '아직 리뷰가 없습니다.',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           )
         else
@@ -2056,7 +2058,7 @@ class _ReviewTile extends StatelessWidget {
                     visualDensity: VisualDensity.compact,
                     iconSize: 18,
                     onPressed: onDelete,
-                    icon: const Icon(Icons.delete_outline, color: Colors.red),
+                    icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   ),
                 ],
               ],
@@ -2120,7 +2122,7 @@ class _ImageMosaic extends StatelessWidget {
       return _MosaicTile(
         imageUrl: imageUrls.first,
         fit: BoxFit.contain,
-        backgroundColor: const Color(0xFFF3F4F6),
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
         onTap: () => _openCarousel(context, 0),
         onDelete: canDelete ? () => onDelete?.call(imageUrls.first) : null,
       );
@@ -2342,6 +2344,7 @@ class _ImageCarouselDialogState extends State<_ImageCarouselDialog> {
             top: 36,
             left: 16,
             child: IconButton(
+                      tooltip: '닫기',
               onPressed: () => Navigator.of(context).pop(),
               icon: const Icon(Icons.close, color: Colors.white),
             ),
@@ -2432,7 +2435,7 @@ class _PlaceListItem extends StatelessWidget {
                           Chip(
                             label: Text(
                               place.category!,
-                              style: const TextStyle(fontSize: 11),
+                              style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize),
                             ),
                             visualDensity: VisualDensity.compact,
                             padding: EdgeInsets.zero,
@@ -2443,7 +2446,7 @@ class _PlaceListItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       place.roadAddress ?? place.address,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                      style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize, color: Colors.grey[700]),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -2469,7 +2472,7 @@ class _PlaceListItem extends StatelessWidget {
                               return Chip(
                                 label: Text(
                                   '+${place.tags.length - 3}',
-                                  style: const TextStyle(fontSize: 11),
+                                  style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize),
                                 ),
                                 visualDensity: VisualDensity.compact,
                                 padding: EdgeInsets.zero,
@@ -2479,7 +2482,7 @@ class _PlaceListItem extends StatelessWidget {
                             return Chip(
                               label: Text(
                                 place.tags[index],
-                                style: const TextStyle(fontSize: 11),
+                                style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize),
                               ),
                               visualDensity: VisualDensity.compact,
                               padding: EdgeInsets.zero,
@@ -2520,15 +2523,15 @@ class _PlaceRatingSummary extends StatelessWidget {
         Text(
           hasReviews ? averageRating.toStringAsFixed(1) : '아직 별점 없음',
           style: TextStyle(
-            fontSize: 12,
+            fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
             fontWeight: FontWeight.w700,
-            color: hasReviews ? const Color(0xFF111827) : Colors.grey[600],
+            color: hasReviews ? const Color(0xFF111827) : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(width: 6),
         Text(
           '리뷰 $reviewCount',
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -2572,9 +2575,9 @@ class _PlaceThumbnail extends StatelessWidget {
               ),
               child: Text(
                 '+${place.imageUrls.length - 1}',
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 11,
+                  fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -2593,7 +2596,7 @@ class _PlaceImageFallback extends StatelessWidget {
     return Container(
       color: const Color(0xFFEFF6FF),
       alignment: Alignment.center,
-      child: const Icon(Icons.place, color: Color(0xFF2563EB)),
+      child: Icon(Icons.place, color: Theme.of(context).colorScheme.primary),
     );
   }
 }
@@ -2651,7 +2654,7 @@ class _MembersSheetState extends ConsumerState<_MembersSheet> {
             child: const Text('취소'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('내보내기'),
           ),
@@ -2675,8 +2678,8 @@ class _MembersSheetState extends ConsumerState<_MembersSheet> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('내보내기 실패: $e'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(e, action: '멤버를 내보내지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -2739,7 +2742,7 @@ class _MembersSheetState extends ConsumerState<_MembersSheet> {
     if (reason.length < 5) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('신고 사유를 5자 이상 입력해주세요.')),
+        const SnackBar(content: Text('신고 사유를 5자 이상 입력해 주세요.')),
       );
       return;
     }
@@ -2758,8 +2761,8 @@ class _MembersSheetState extends ConsumerState<_MembersSheet> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('신고 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '신고를 보내지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -2848,8 +2851,8 @@ class _MembersSheetState extends ConsumerState<_MembersSheet> {
                                     member.nickname.isNotEmpty
                                         ? member.nickname[0].toUpperCase()
                                         : '?',
-                                    style: const TextStyle(
-                                      color: Color(0xFF2563EB),
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   )
@@ -2867,11 +2870,11 @@ class _MembersSheetState extends ConsumerState<_MembersSheet> {
                                     color: const Color(0xFFEFF6FF),
                                     borderRadius: BorderRadius.circular(999),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     '방장',
                                     style: TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xFF2563EB),
+                                      fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+                                      color: Theme.of(context).colorScheme.primary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -2883,14 +2886,14 @@ class _MembersSheetState extends ConsumerState<_MembersSheet> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFF3F4F6),
+                                    color: Theme.of(context).colorScheme.surfaceContainerLow,
                                     borderRadius: BorderRadius.circular(999),
                                   ),
-                                  child: const Text(
+                                  child: Text(
                                     '나',
                                     style: TextStyle(
-                                      fontSize: 11,
-                                      color: Color(0xFF6B7280),
+                                      fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+                                      color: const Color(0xFF6B7280),
                                     ),
                                   ),
                                 ),
@@ -2899,15 +2902,15 @@ class _MembersSheetState extends ConsumerState<_MembersSheet> {
                           ),
                           subtitle: Text(
                             '${member.joinedAt.year}.${member.joinedAt.month.toString().padLeft(2, '0')}.${member.joinedAt.day.toString().padLeft(2, '0')} 가입',
-                            style: const TextStyle(fontSize: 12),
+                            style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize),
                           ),
                           trailing: isSelf
                               ? null
                               : isOwner && !member.isOwner
                                   ? IconButton(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.person_remove_outlined,
-                                        color: Colors.red,
+                                        color: Theme.of(context).colorScheme.error,
                                       ),
                                       tooltip: '내보내기',
                                       onPressed: () => _kickMember(member),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../oauth/oauth_config.dart';
 import '../providers/auth_provider.dart';
+import '../../../core/utils/user_message.dart';
 
 class OAuthCallbackScreen extends ConsumerStatefulWidget {
   final String provider;
@@ -39,16 +40,13 @@ class _OAuthCallbackScreenState extends ConsumerState<OAuthCallbackScreen> {
   Future<void> _completeLogin() async {
     final code = widget.code;
     if (widget.error != null || code == null || code.isEmpty) {
-      _fail('간편 로그인이 취소되었거나 실패했습니다. error=${widget.error ?? 'none'}');
+      _fail('간편 로그인을 마치지 못했어요. 로그인 화면에서 다시 시작해 주세요.');
       return;
     }
 
     if (!OAuthConfig.verifyState(widget.provider, widget.state)) {
       _fail(
-        '간편 로그인 요청을 확인할 수 없습니다. '
-        'provider=${widget.provider}, '
-        'callbackState=${widget.state ?? 'none'}, '
-        'savedState=${OAuthConfig.savedState(widget.provider) ?? 'none'}',
+        '간편 로그인 요청을 확인하지 못했어요. 로그인 화면에서 다시 시작해 주세요.',
       );
       return;
     }
@@ -71,7 +69,7 @@ class _OAuthCallbackScreenState extends ConsumerState<OAuthCallbackScreen> {
       if (!mounted) return;
       context.go('/maps');
     } catch (error) {
-      _fail('간편 로그인 실패: $error');
+      _fail(userErrorMessage(error, action: '간편 로그인하지 못했어요.', context: ErrorContext.oauth));
     }
   }
 
@@ -101,10 +99,10 @@ class _OAuthCallbackScreenState extends ConsumerState<OAuthCallbackScreen> {
               : Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.error_outline,
                       size: 48,
-                      color: Colors.red,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(height: 12),
                     Text(

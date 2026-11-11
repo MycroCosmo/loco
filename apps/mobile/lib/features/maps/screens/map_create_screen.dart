@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,8 +101,8 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(_isEditMode ? '수정 실패: $e' : '생성 실패: $e'),
-            backgroundColor: Colors.red,
+            content: Text(_isEditMode ? userErrorMessage(e, action: '변경 내용을 저장하지 못했어요.') : userErrorMessage(e, action: '지도방을 만들지 못했어요.')),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -122,10 +123,10 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
         SnackBar(
           content: Text(
             _isEditMode
-                ? '지도방은 수정됐지만 썸네일 업로드에 실패했습니다: $e'
-                : '지도방은 생성됐지만 썸네일 업로드에 실패했습니다: $e',
+                ? mapCoverUpdatePartialSuccess
+                : mapCoverCreatePartialSuccess,
           ),
-          backgroundColor: Colors.orange,
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
         ),
       );
     }
@@ -152,7 +153,7 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
         ),
         error: (error, _) => Scaffold(
           appBar: AppBar(title: const Text('지도방 수정')),
-          body: Center(child: Text('지도방 불러오기 실패: $error')),
+          body: Center(child: Text(userErrorMessage(error, action: '지도방을 불러오지 못했어요.'))),
         ),
         data: (map) {
           _initializeEditForm(map);
@@ -166,7 +167,7 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
 
   Widget _buildForm(BuildContext context, {String? currentCoverImageUrl}) {
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditMode ? '지도방 수정' : '지도 만들기')),
+      appBar: AppBar(title: Text(_isEditMode ? '지도방 수정' : '지도방 만들기')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -175,15 +176,15 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // 커버 이미지 선택
-              GestureDetector(
+              Semantics(button: true, label: '표지 사진 선택', child: Tooltip(message: '표지 사진 선택', child: InkWell(
                 onTap: _loading ? null : _pickCoverImage,
                 child: Container(
                   height: 160,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: _coverImageBytes != null
@@ -194,7 +195,7 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
                             Positioned(
                               right: 8,
                               top: 8,
-                              child: GestureDetector(
+                              child: Semantics(button: true, label: '선택한 표지 사진 지우기', child: Tooltip(message: '선택한 표지 사진 지우기', child: InkWell(
                                 onTap: () => setState(() {
                                   _coverImage = null;
                                   _coverImageBytes = null;
@@ -207,7 +208,7 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
                                   ),
                                   child: const Icon(Icons.close, color: Colors.white, size: 16),
                                 ),
-                              ),
+                              ))),
                             ),
                           ],
                         )
@@ -225,13 +226,13 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
                                       Icon(
                                         Icons.image_not_supported_outlined,
                                         size: 40,
-                                        color: Colors.grey.shade400,
+                                        color: Theme.of(context).colorScheme.outline,
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        '썸네일을 불러올 수 없습니다.',
+                                        '표지 사진을 불러오지 못했어요. 다시 선택해 주세요.',
                                         style: TextStyle(
-                                          color: Colors.grey.shade500,
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                                           fontSize: 13,
                                         ),
                                       ),
@@ -246,16 +247,16 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
                                       color: Colors.black54,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: const Padding(
-                                      padding: EdgeInsets.symmetric(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
                                         vertical: 4,
                                       ),
                                       child: Text(
-                                        '현재 썸네일',
+                                        '현재 표지 사진',
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 12,
+                                          fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
                                         ),
                                       ),
                                     ),
@@ -267,25 +268,25 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.add_photo_alternate_outlined,
-                                size: 40, color: Colors.grey.shade400),
+                                size: 40, color: Theme.of(context).colorScheme.outline),
                             const SizedBox(height: 8),
                             Text(
-                              _isEditMode ? '썸네일 교체 (선택)' : '표지 이미지 추가 (선택)',
-                              style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                              _isEditMode ? '표지 사진 교체 (선택)' : '표지 사진 추가 (선택)',
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                             ),
                           ],
                         ),
                 ),
-              ),
+              ))),
               const SizedBox(height: 20),
               TextFormField(
                 controller: _titleCtrl,
                 decoration: const InputDecoration(
-                  labelText: '지도 이름 *',
+                  labelText: '지도방 이름 *',
                   border: OutlineInputBorder(),
                 ),
                 validator: (v) =>
-                    v == null || v.trim().isEmpty ? '지도 이름을 입력하세요' : null,
+                    v == null || v.trim().isEmpty ? '지도방 이름을 입력해 주세요' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -325,19 +326,17 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
                 onSelectionChanged: (v) =>
                     setState(() => _visibility = v.first),
               ),
-              if (_visibility == 'PRIVATE') ...[
-                const SizedBox(height: 8),
-                const Text(
-                  '비공개 지도는 초대 코드로만 참여할 수 있어요.',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+              const SizedBox(height: 8),
+              Text(_visibility == 'PUBLIC'
+                ? 'LOCO에 로그인한 누구나 이 지도방과 장소를 볼 수 있어요.'
+                : '참여한 사람만 지도방과 장소를 볼 수 있어요. 초대 코드를 받은 사람은 참여할 수 있어요.',
+                style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 32),
               FilledButton(
                 onPressed: _loading ? null : _submit,
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 child: _loading
                     ? const SizedBox(
@@ -346,7 +345,7 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
                     : Text(
-                        _isEditMode ? '수정 저장' : '지도 만들기',
+                        _isEditMode ? '수정 저장' : '지도방 만들기',
                         style: const TextStyle(fontSize: 16),
                       ),
               ),

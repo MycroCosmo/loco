@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -44,14 +45,14 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       if (!mounted) return;
       setState(() => _step = _ForgotStep.code);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이메일로 인증 코드를 전송했습니다.')),
+        const SnackBar(content: Text('재설정 코드 발송을 요청했어요. 받은편지함과 스팸함을 확인해 주세요.')),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('전송 실패: $e'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(e, action: '코드 발송을 요청하지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -73,15 +74,15 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('비밀번호가 재설정되었습니다. 다시 로그인해주세요.')),
+        const SnackBar(content: Text('비밀번호를 바꿨어요. 다시 로그인해 주세요.')),
       );
       context.go('/login');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('재설정 실패: $e'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(e, action: '비밀번호를 바꾸지 못했어요.', context: ErrorContext.passwordReset)),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -103,7 +104,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
               children: [
                 if (_step == _ForgotStep.email) ...[
                   const Text(
-                    '가입한 이메일을 입력하면\n6자리 인증 코드를 보내드립니다.',
+                    '가입에 사용한 이메일을 입력해 주세요.\n재설정할 수 있는 계정이면 코드를 보내드려요.',
                     style: TextStyle(fontSize: 15, height: 1.6),
                   ),
                   const SizedBox(height: 24),
@@ -116,7 +117,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) =>
-                        v == null || !v.contains('@') ? '올바른 이메일을 입력하세요' : null,
+                        v == null || !v.contains('@') ? '올바른 이메일을 입력해 주세요' : null,
                   ),
                   const SizedBox(height: 24),
                   FilledButton(
@@ -134,9 +135,9 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         : const Text('인증 코드 받기'),
                   ),
                 ] else ...[
-                  Text(
-                    '${_emailCtrl.text.trim()}으로\n전송된 6자리 코드를 입력하세요.',
-                    style: const TextStyle(fontSize: 15, height: 1.6),
+                  const Text(
+                    '받은편지함과 스팸함에서 6자리 코드를 확인해 주세요.\n코드는 15분 동안 유효해요',
+                    style: TextStyle(fontSize: 15, height: 1.6),
                   ),
                   const SizedBox(height: 24),
                   TextFormField(
@@ -149,7 +150,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) =>
-                        v == null || v.length != 6 ? '6자리 코드를 입력하세요' : null,
+                        v == null || v.length != 6 ? '6자리 코드를 입력해 주세요' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -160,6 +161,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       prefixIcon: const Icon(Icons.lock_outline),
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
+                        tooltip: _obscure ? '비밀번호 보기' : '비밀번호 숨기기',
                         icon: Icon(
                             _obscure ? Icons.visibility_off : Icons.visibility),
                         onPressed: () =>
@@ -167,7 +169,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       ),
                     ),
                     validator: (v) =>
-                        v == null || v.length < 6 ? '6자 이상 입력하세요' : null,
+                        v == null || v.length < 6 ? '6자 이상 입력해 주세요' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -179,7 +181,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) =>
-                        v != _passwordCtrl.text ? '비밀번호가 일치하지 않습니다' : null,
+                        v != _passwordCtrl.text ? '비밀번호가 달라요. 다시 확인해 주세요.' : null,
                   ),
                   const SizedBox(height: 24),
                   FilledButton(

@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,7 +36,7 @@ class _MyMapsScreenState extends ConsumerState<MyMapsScreen> {
               child: const Text('취소'),
             ),
             FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: const Text('나가기'),
             ),
@@ -62,8 +63,8 @@ class _MyMapsScreenState extends ConsumerState<MyMapsScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('지도방 나가기 실패: $error'),
-          backgroundColor: Colors.red,
+          content: Text(userErrorMessage(error, action: '지도방에서 나가지 못했어요.')),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -82,13 +83,13 @@ class _MyMapsScreenState extends ConsumerState<MyMapsScreen> {
       appBar: AppBar(title: Text(title)),
       body: mapsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('불러오기 실패: $error')),
+        error: (error, _) => Center(child: Text(userErrorMessage(error, action: '내용을 불러오지 못했어요.'))),
         data: (maps) {
           if (maps.isEmpty) {
             return Center(
               child: Text(
                 _isJoined ? '참여 중인 지도방이 없습니다.' : '만든 지도방이 없습니다.',
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             );
           }
@@ -119,8 +120,8 @@ class _MyMapsScreenState extends ConsumerState<MyMapsScreen> {
                               : const Icon(Icons.logout, size: 16),
                           label: Text(isLeaving ? '나가는 중' : '나가기'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
+                            foregroundColor: Theme.of(context).colorScheme.error,
+                            side: BorderSide(color: Theme.of(context).colorScheme.error),
                             minimumSize: const Size(82, 34),
                             padding: const EdgeInsets.symmetric(horizontal: 10),
                             visualDensity: VisualDensity.compact,

@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +60,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
             void submit() {
               final inviteCode = controller.text.trim().toUpperCase();
               if (inviteCode.isEmpty) {
-                setDialogState(() => errorText = '초대 코드를 입력해주세요.');
+                setDialogState(() => errorText = '초대 코드를 입력해 주세요.');
                 return;
               }
 
@@ -126,7 +126,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(_inviteCodeErrorMessage(error)),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       setState(() => _joiningByInviteCode = false);
@@ -134,17 +134,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
   }
 
   String _inviteCodeErrorMessage(Object error) {
-    if (error is DioException) {
-      final data = error.response?.data;
-      if (data is Map<String, dynamic>) {
-        final message = data['message'];
-        if (message is String) return message;
-        if (message is List && message.isNotEmpty) {
-          return message.join('\n');
-        }
-      }
-    }
-    return '초대 코드 확인에 실패했습니다.';
+    return userErrorMessage(error, action: '초대 코드로 참여하지 못했어요. 코드를 확인해 주세요.');
   }
 
   Widget _buildSearchHeader() {
@@ -200,7 +190,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
           icon: const Icon(Icons.lock_open_outlined, size: 18),
           label: _joiningByInviteCode
               ? const Text('참여 중...')
-              : const Text('초대 코드로 비공개방 참여'),
+              : const Text('초대 코드로 비공개 지도방 참여'),
         ),
       ),
     );
@@ -219,7 +209,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
     return mapsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _MapListError(
-        message: '불러오기 실패: $error',
+        message: userErrorMessage(error, action: '내용을 불러오지 못했어요.'),
         onRetry: () =>
             ref.read(mapsListProvider(visibility).notifier).refresh(),
       ),
@@ -329,10 +319,12 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
               const Text('LOCO', style: TextStyle(fontWeight: FontWeight.bold)),
           actions: [
             IconButton(
+              tooltip: '즐겨찾기',
               icon: const Icon(Icons.bookmark_outline),
               onPressed: () => context.push('/favorites'),
             ),
             IconButton(
+              tooltip: '내 정보',
               icon: const Icon(Icons.person_outline),
               onPressed: () => context.push('/profile'),
             ),
@@ -343,8 +335,8 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
             _buildSearchHeader(),
             const TabBar(
               tabs: [
-                Tab(text: '공개방'),
-                Tab(text: '비공개방'),
+                Tab(text: '공개 지도방'),
+                Tab(text: '비공개 지도방'),
               ],
             ),
             Expanded(
@@ -354,7 +346,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
                     mapsAsync: publicMapsAsync,
                     visibility: MapVisibilityFilter.public,
                     emptyMessage: '아직 공개 지도방이 없어요.\n+ 버튼으로 첫 지도방을 만들어 보세요.',
-                    emptySearchMessage: '공개방 검색 결과가 없습니다.',
+                    emptySearchMessage: '공개 지도방 검색 결과가 없어요. 다른 검색어를 입력해 주세요.',
                     showInviteCodeButton: false,
                     currentUserId: currentUserId,
                     sort: _publicMapSort,
@@ -365,7 +357,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
                     mapsAsync: privateMapsAsync,
                     visibility: MapVisibilityFilter.private,
                     emptyMessage: '참여 중인 비공개 지도방이 없어요.\n초대 코드로 참여해 보세요.',
-                    emptySearchMessage: '비공개방 검색 결과가 없습니다.',
+                    emptySearchMessage: '비공개 지도방 검색 결과가 없어요. 다른 검색어를 입력해 주세요.',
                     showInviteCodeButton: true,
                     currentUserId: currentUserId,
                     sort: _privateMapSort,
@@ -378,6 +370,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          tooltip: '지도방 만들기',
           onPressed: () async {
             await context.push('/maps/create');
             ref
@@ -387,7 +380,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
                 .read(mapsListProvider(MapVisibilityFilter.private).notifier)
                 .refresh();
           },
-          backgroundColor: const Color(0xFF2563EB),
+          backgroundColor: Theme.of(context).colorScheme.primary,
           child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
@@ -412,7 +405,7 @@ class _MapListError extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 8),
             Text(message, textAlign: TextAlign.center),
             TextButton(
@@ -442,12 +435,12 @@ class _EmptyMapListMessage extends StatelessWidget {
       child: Center(
         child: Column(
           children: [
-            Icon(icon, size: 56, color: Colors.grey),
+            Icon(icon, size: 56, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),

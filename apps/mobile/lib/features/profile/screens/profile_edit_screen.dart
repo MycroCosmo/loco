@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('수정 실패: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(userErrorMessage(e, action: '변경 내용을 저장하지 못했어요.')), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -120,10 +121,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                               (user?.nickname.isNotEmpty ?? false)
                                   ? user!.nickname[0].toUpperCase()
                                   : '?',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 34,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF2563EB),
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             )
                           : null,
@@ -157,8 +158,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 ),
                 validator: (value) {
                   final nickname = value?.trim() ?? '';
-                  if (nickname.length < 2) return '2자 이상 입력하세요.';
-                  if (nickname.length > 30) return '30자 이하로 입력하세요.';
+                  if (nickname.length < 2) return '2자 이상 입력해 주세요.';
+                  if (nickname.length > 30) return '30자 이하로 입력해 주세요.';
                   return null;
                 },
               ),
@@ -167,7 +168,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 onPressed: _loading ? null : _submit,
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 child: _loading
                     ? const SizedBox(

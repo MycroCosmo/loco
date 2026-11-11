@@ -1,4 +1,5 @@
-﻿import 'dart:typed_data';
+import '../../../core/utils/user_message.dart';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,7 +85,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('검색 실패: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(userErrorMessage(e, action: '검색하지 못했어요.')), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -158,7 +159,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('사진 삭제 실패: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(userErrorMessage(e, action: '사진을 삭제하지 못했어요.')), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -169,7 +170,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
   Future<void> _submit() async {
     if (!_isEditMode && _selectedResult == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('장소를 검색해서 선택해주세요.')),
+        const SnackBar(content: Text('장소를 검색해서 선택해 주세요.')),
       );
       return;
     }
@@ -190,11 +191,21 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
           'tags': List<String>.from(_tags),
         });
 
+        var imageUploadFailed = false;
         for (final image in _images) {
-          await PlacesService().uploadPlaceImage(widget.initialPlace!.id, image);
+          try {
+            await PlacesService().uploadPlaceImage(widget.initialPlace!.id, image);
+          } catch (_) {
+            imageUploadFailed = true;
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text(placePhotoPartialSuccess)),
+              );
+            }
+            break;
+          }
         }
-
-        if (mounted) context.pop(true);
+        if (mounted) context.pop(!imageUploadFailed);
         return;
       }
 
@@ -229,8 +240,8 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('장소는 생성됐지만 일부 사진 업로드에 실패했습니다: $e'),
-                backgroundColor: Colors.orange,
+                content: const Text(placePhotoPartialSuccess),
+                backgroundColor: Theme.of(context).colorScheme.tertiary,
               ),
             );
           }
@@ -244,7 +255,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('추가 실패: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(userErrorMessage(e, action: '장소를 저장하지 못했어요.')), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -264,12 +275,12 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
             borderRadius: BorderRadius.circular(8),
             child: bytes != null
                 ? Image.memory(bytes, width: 72, height: 72, fit: BoxFit.cover)
-                : Container(width: 72, height: 72, color: Colors.grey.shade200),
+                : Container(width: 72, height: 72, color: Theme.of(context).colorScheme.surfaceContainerHigh),
           ),
           Positioned(
             top: 2,
             right: 2,
-            child: GestureDetector(
+            child: Semantics(button: true, label: '추가할 사진 지우기', child: Tooltip(message: '추가할 사진 지우기', child: InkWell(
               onTap: () => _removeImage(index),
               child: Container(
                 padding: const EdgeInsets.all(2),
@@ -279,7 +290,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                 ),
                 child: const Icon(Icons.close, color: Colors.white, size: 14),
               ),
-            ),
+            ))),
           ),
           if (index == 0)
             Positioned(
@@ -319,7 +330,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
               errorBuilder: (_, __, ___) => Container(
                 width: 72,
                 height: 72,
-                color: Colors.grey.shade200,
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
                 child: const Icon(Icons.broken_image_outlined),
               ),
             ),
@@ -327,7 +338,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
           Positioned(
             top: 2,
             right: 2,
-            child: GestureDetector(
+            child: Semantics(button: true, label: '저장된 사진 삭제', child: Tooltip(message: '저장된 사진 삭제', child: InkWell(
               onTap: _submitting ? null : () => _removeExistingImage(index),
               child: Container(
                 padding: const EdgeInsets.all(2),
@@ -337,7 +348,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                 ),
                 child: const Icon(Icons.close, color: Colors.white, size: 14),
               ),
-            ),
+            ))),
           ),
           if (index == 0)
             Positioned(
@@ -427,13 +438,13 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                       ),
                     ],
                   )
-                : const ColoredBox(
-                    color: Color(0xFFE5E7EB),
+                : ColoredBox(
+                    color: const Color(0xFFE5E7EB),
                     child: Center(
                       child: Text(
                         '장소를 검색하면\n지도에 표시됩니다.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ),
                   ),
@@ -465,7 +476,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                           FilledButton(
                             onPressed: _searching ? null : _search,
                             style: FilledButton.styleFrom(
-                              backgroundColor: const Color(0xFF2563EB),
+                              backgroundColor: Theme.of(context).colorScheme.primary,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 16,
@@ -489,7 +500,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                       const SizedBox(height: 4),
                       Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: ListView.separated(
@@ -511,14 +522,14 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                                 result.roadAddressName.isNotEmpty
                                     ? result.roadAddressName
                                     : result.addressName,
-                                style: const TextStyle(fontSize: 12),
+                                style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize),
                               ),
                               trailing: result.categoryName.isNotEmpty
                                   ? Text(
                                       result.categoryName.split('>').last.trim(),
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey,
+                                      style: TextStyle(
+                                        fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                                       ),
                                     )
                                   : null,
@@ -544,9 +555,9 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                           children: [
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.check_circle,
-                                  color: Color(0xFF2563EB),
+                                  color: Theme.of(context).colorScheme.primary,
                                   size: 16,
                                 ),
                                 const SizedBox(width: 6),
@@ -565,9 +576,9 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                                 padding: const EdgeInsets.only(top: 4, left: 22),
                                 child: Text(
                                   _selectedResult!.roadAddressName,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                  style: TextStyle(
+                                    fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
@@ -576,9 +587,9 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                                 padding: const EdgeInsets.only(top: 2, left: 22),
                                 child: Text(
                                   _selectedResult!.phone,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                  style: TextStyle(
+                                    fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
@@ -595,7 +606,7 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                       ),
                       validator: (value) =>
                           value == null || value.trim().isEmpty
-                              ? '이름을 입력하세요'
+                              ? '이름을 입력해 주세요'
                               : null,
                     ),
                     const SizedBox(height: 12),
@@ -620,9 +631,9 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                         const SizedBox(width: 6),
                         Text(
                           '(${_existingImageUrls.length + _images.length}/3)',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
+                          style: TextStyle(
+                            fontSize: Theme.of(context).textTheme.bodySmall!.fontSize,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -639,29 +650,29 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                           (index) => _buildImageThumbnail(index),
                         ),
                         if (_existingImageUrls.length + _images.length < 3)
-                          GestureDetector(
+                          Semantics(button: true, label: '사진 추가', child: Tooltip(message: '사진 추가', child: InkWell(
                             onTap: _submitting ? null : _pickImage,
                             child: Container(
                               width: 72,
                               height: 72,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF3F4F6),
+                                color: Theme.of(context).colorScheme.surfaceContainerLow,
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.grey.shade300),
+                                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                               ),
                               child: Icon(
                                 Icons.add_a_photo_outlined,
-                                color: Colors.grey.shade400,
+                                color: Theme.of(context).colorScheme.outline,
                               ),
                             ),
-                          ),
+                          ))),
                       ],
                     ),
                     const SizedBox(height: 28),
                     FilledButton(
                       onPressed: _submitting ? null : _submit,
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: _submitting

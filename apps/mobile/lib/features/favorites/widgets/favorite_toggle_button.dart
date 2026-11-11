@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,7 +38,7 @@ class _FavoriteToggleButtonState extends ConsumerState<FavoriteToggleButton> {
       tooltip: isFavorite ? '즐겨찾기 해제' : '즐겨찾기 추가',
       icon: Icon(
         isFavorite ? Icons.bookmark : Icons.bookmark_outline,
-        color: isFavorite ? const Color(0xFF2563EB) : null,
+        color: isFavorite ? Theme.of(context).colorScheme.primary : null,
       ),
       onPressed: _loading
           ? null
@@ -55,15 +56,15 @@ class _FavoriteToggleButtonState extends ConsumerState<FavoriteToggleButton> {
                 ref.invalidate(mapsListProvider(MapVisibilityFilter.private));
                 ref.invalidate(mapDetailProvider(widget.mapId));
               } catch (error) {
-                if (!mounted) return;
+                if (!context.mounted) return;
                 messenger.showSnackBar(
                   SnackBar(
                     content: Text(
                       isFavorite
-                          ? '즐겨찾기 해제 실패: $error'
-                          : '즐겨찾기 추가 실패: $error',
+                          ? userErrorMessage(error, action: '즐겨찾기를 해제하지 못했어요.')
+                          : userErrorMessage(error, action: '즐겨찾기에 추가하지 못했어요.'),
                     ),
-                    backgroundColor: Colors.red,
+                    backgroundColor: Theme.of(context).colorScheme.error,
                   ),
                 );
               } finally {
