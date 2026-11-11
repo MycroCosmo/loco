@@ -182,12 +182,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 13),
                                       backgroundColor: const Color(0xFFFEE500),
-                                      foregroundColor: const Color(0xFF191919),
+                                      foregroundColor: const Color(0xD9000000),
                                       side: BorderSide.none,
                                     ),
                                     child: const _OAuthButtonLabel(
                                       label: '카카오로 계속하기',
-                                      color: Color(0xFF191919),
+                                      color: Color(0xD9000000),
                                     ),
                                   ),
                                   const SizedBox(height: 10),
@@ -198,13 +198,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     style: OutlinedButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 13),
-                                      backgroundColor: const Color(0xFF03C75A),
-                                      foregroundColor: const Color(0xFF102A18),
+                                      backgroundColor: const Color(0xFF03A94D),
+                                      foregroundColor: Colors.white,
                                       side: BorderSide.none,
                                     ),
                                     child: const _OAuthButtonLabel(
                                       label: '네이버로 계속하기',
-                                      color: Color(0xFF102A18),
+                                      color: Colors.white,
                                     ),
                                   ),
                                   // TODO: Google 로그인 버튼

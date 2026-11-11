@@ -62,4 +62,18 @@ void main() {
     expect(find.textContaining('발송을 요청했어요'), findsOneWidget);
     expect(find.textContaining('전송했습니다'), findsNothing);
   });
+  testWidgets('간편 로그인은 공식 배경과 글자색을 표시한다', (tester) async {
+    await tester.pumpWidget(const ProviderScope(
+        child: MaterialApp(home: LoginScreen())));
+    await tester.pumpAndSettle();
+    for (final entry in [
+      ('카카오로 계속하기', const Color(0xFFFEE500), const Color(0xD9000000)),
+      ('네이버로 계속하기', const Color(0xFF03A94D), Colors.white),
+    ]) {
+      final button = tester.widget<OutlinedButton>(find.widgetWithText(OutlinedButton, entry.$1));
+      expect(button.style!.backgroundColor!.resolve({}), entry.$2);
+      expect(button.style!.foregroundColor!.resolve({}), entry.$3);
+      expect(tester.widget<Text>(find.text(entry.$1)).style!.color, entry.$3);
+    }
+  });
 }

@@ -11,6 +11,10 @@ class LocoApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
     final colors = ColorScheme.fromSeed(
       seedColor: const Color(0xFF2563EB), brightness: Brightness.light,
+    ).copyWith(
+      primary: const Color(0xFF2563EB),
+      onPrimary: Colors.white,
+      surface: Colors.white,
     );
 
     return MaterialApp.router(
@@ -21,6 +25,7 @@ class LocoApp extends ConsumerWidget {
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: ThemeData(
         colorScheme: colors,
+        scaffoldBackgroundColor: colors.surface,
         appBarTheme: AppBarTheme(
           elevation: 0,
           backgroundColor: colors.surface,
