@@ -57,8 +57,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _loading = true);
+    var nicknameSaved = false;
     try {
       await UserService().updateMe(nickname: _nicknameCtrl.text.trim());
+      nicknameSaved = true;
       final selectedImage = _selectedImage;
       if (selectedImage != null) {
         await UserService().uploadProfileImage(selectedImage);
@@ -68,13 +70,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       if (mounted) {
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('프로필이 수정되었습니다.')),
+          const SnackBar(content: Text('프로필을 수정했어요.')),
         );
       }
     } catch (e) {
+      if (nicknameSaved) ref.invalidate(userProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(userErrorMessage(e, action: '변경 내용을 저장하지 못했어요.')), backgroundColor: Theme.of(context).colorScheme.error),
+          SnackBar(content: Text(nicknameSaved ? '닉네임은 저장됐어요. 프로필 사진을 올리지 못했어요. 현재 사진을 확인한 뒤 다시 선택해 주세요.' : userErrorMessage(e, action: '변경 내용을 저장하지 못했어요.')), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -114,7 +117,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                   children: [
                     CircleAvatar(
                       radius: 48,
-                      backgroundColor: const Color(0xFF2563EB).withOpacity(0.1),
+                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                       backgroundImage: profileImage,
                       child: profileImage == null
                           ? Text(
@@ -171,11 +174,11 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                   backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 child: _loading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           strokeWidth: 2,
                         ),
                       )

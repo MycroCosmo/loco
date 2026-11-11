@@ -79,7 +79,7 @@ class _MyPageScreenState extends ConsumerState<MyPageScreen> {
                       CircleAvatar(
                         radius: 36,
                         backgroundColor:
-                            const Color(0xFF2563EB).withOpacity(0.1),
+                            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                         backgroundImage: profileImage,
                         child: profileImage == null
                             ? Text(

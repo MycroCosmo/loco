@@ -24,7 +24,7 @@ class MyPlacesScreen extends ConsumerWidget {
           if (places.isEmpty) {
             return Center(
               child: Text(
-                '등록한 장소가 없습니다.',
+                '등록한 장소가 없어요.',
                 style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             );
@@ -71,13 +71,13 @@ class _MyPlaceCard extends StatelessWidget {
             height: 58,
             child: imageUrl == null
                 ? ColoredBox(
-                    color: const Color(0xFFEFF6FF),
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     child: Icon(Icons.place, color: Theme.of(context).colorScheme.primary),
                   )
                 : CachedImage(
                     url: ApiConstants.imageUrl(imageUrl),
                     errorWidget: ColoredBox(
-                      color: const Color(0xFFEFF6FF),
+                      color: Theme.of(context).colorScheme.primaryContainer,
                       child: Icon(Icons.place, color: Theme.of(context).colorScheme.primary),
                     ),
                   ),

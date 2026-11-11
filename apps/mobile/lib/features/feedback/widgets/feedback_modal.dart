@@ -46,7 +46,7 @@ class _FeedbackModalState extends State<FeedbackModal> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('피드백이 제출되었습니다. 감사합니다!')),
+          const SnackBar(content: Text('의견을 보냈어요. 고마워요!')),
         );
       }
     } catch (e) {
@@ -105,11 +105,11 @@ class _FeedbackModalState extends State<FeedbackModal> {
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             child: _loading
-                ? const SizedBox(
+                ? SizedBox(
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2))
+                        color: Theme.of(context).colorScheme.onPrimary, strokeWidth: 2))
                 : const Text('제출하기', style: TextStyle(fontSize: 16)),
           ),
         ],

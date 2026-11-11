@@ -10,6 +10,9 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:loco_mobile/core/network/dio_client.dart';
 import 'package:loco_mobile/features/maps/screens/map_create_screen.dart';
+import 'package:loco_mobile/features/profile/screens/profile_edit_screen.dart';
+import 'package:loco_mobile/features/profile/providers/user_provider.dart';
+import 'package:loco_mobile/shared/models/user_model.dart';
 
 class _Picker extends ImagePickerPlatform {
   @override
@@ -23,10 +26,11 @@ class _Adapter implements HttpClientAdapter {
   @override
   Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? stream, Future<void>? cancelFuture) async {
     requests.add(options);
-    final saved = options.path == '/maps';
-    return ResponseBody.fromString(jsonEncode(saved
-      ? {'id':'map-fixture', 'ownerId':'user-fixture', 'title':'샘플 지도방', 'visibility':'PUBLIC', 'createdAt':'2026-11-11T00:00:00Z'}
-      : {'message':'SECRET image processor trace'}), saved ? 201 : 500,
+    final saved = options.path == '/maps' || options.path == '/users/me';
+    return ResponseBody.fromString(jsonEncode(options.path == '/users/me'
+      ? {'id':'user-fixture', 'email':'sample@example.test', 'nickname':'바꾼 이름', 'provider':'LOCAL'}
+      : saved ? {'id':'map-fixture', 'ownerId':'user-fixture', 'title':'샘플 지도방', 'visibility':'PUBLIC', 'createdAt':'2026-11-11T00:00:00Z'}
+      : {'message':'SECRET image processor trace'}), saved ? (options.method == 'PUT' ? 200 : 201) : 500,
       headers: {Headers.contentTypeHeader: [Headers.jsonContentType]});
   }
   @override
@@ -60,4 +64,26 @@ void main() {
     expect(find.textContaining('SECRET'), findsNothing);
     expect(find.textContaining('만들지 못했어요'), findsNothing);
   });
+  testWidgets('닉네임 저장 뒤 사진 실패도 부분 성공으로 안내한다', (tester) async {
+    FlutterSecureStorage.setMockInitialValues({});
+    dotenv.testLoad(fileInput: '');
+    final adapter = _Adapter(), previousAdapter = DioClient().dio.httpClientAdapter;
+    final previousPicker = ImagePickerPlatform.instance;
+    DioClient().dio.httpClientAdapter = adapter;
+    ImagePickerPlatform.instance = _Picker();
+    addTearDown(() { DioClient().dio.httpClientAdapter = previousAdapter; ImagePickerPlatform.instance = previousPicker; });
+    await tester.pumpWidget(ProviderScope(overrides: [
+      userProvider.overrideWith((ref) async => const UserModel(id:'user-fixture', email:'sample@example.test', nickname:'샘플 회원', provider:'LOCAL')),
+    ], child: const MaterialApp(home:ProfileEditScreen())));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('사진 선택')); await tester.pumpAndSettle();
+    await tester.enterText(find.widgetWithText(TextFormField, '닉네임'), '바꾼 이름');
+    await tester.ensureVisible(find.widgetWithText(FilledButton,'저장'));
+    await tester.tap(find.widgetWithText(FilledButton,'저장')); await tester.pumpAndSettle();
+    expect(adapter.requests.map((r)=>r.path), ['/users/me','/users/me/profile-image']);
+    expect(find.textContaining('닉네임은 저장됐어요.'), findsOneWidget);
+    expect(find.textContaining('SECRET'), findsNothing);
+    expect(find.textContaining('변경 내용을 저장하지 못했어요.'), findsNothing);
+  });
+
 }

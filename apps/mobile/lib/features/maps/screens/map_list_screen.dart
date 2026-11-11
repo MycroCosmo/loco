@@ -151,6 +151,7 @@ class _MapListScreenState extends ConsumerState<MapListScreen> {
                 suffixIcon: _draftQuery.isEmpty
                     ? null
                     : IconButton(
+                        tooltip: '검색어 지우기',
                         icon: const Icon(Icons.clear),
                         onPressed: _clearSearch,
                       ),

@@ -61,7 +61,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: const Text('회원가입'),
         leading: IconButton(
@@ -155,11 +155,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
                   child: _loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2),
+                              color: Theme.of(context).colorScheme.onPrimary, strokeWidth: 2),
                         )
                       : const Text('가입하기', style: TextStyle(fontSize: 16)),
                 ),

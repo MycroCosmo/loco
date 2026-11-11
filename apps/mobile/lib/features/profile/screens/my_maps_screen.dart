@@ -57,7 +57,7 @@ class _MyMapsScreenState extends ConsumerState<MyMapsScreen> {
       ref.invalidate(mapMembershipProvider(map.id));
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('지도방에서 나갔습니다.')),
+        const SnackBar(content: Text('지도방에서 나왔어요.')),
       );
     } catch (error) {
       if (!mounted) return;
@@ -88,7 +88,7 @@ class _MyMapsScreenState extends ConsumerState<MyMapsScreen> {
           if (maps.isEmpty) {
             return Center(
               child: Text(
-                _isJoined ? '참여 중인 지도방이 없습니다.' : '만든 지도방이 없습니다.',
+                _isJoined ? '참여 중인 지도방이 없어요.' : '만든 지도방이 없어요.',
                 style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             );

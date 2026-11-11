@@ -31,6 +31,7 @@ try {
       const url = new URL(route.request().url())
       if (url.pathname === '/api/auth/forgot-password') return route.fulfill({ json: { message: '이메일로 재설정 코드를 전송했습니다.' } })
       if (url.pathname === '/api/users/me') return route.fulfill({ json: { id: '00000000-0000-4000-8000-000000000001', nickname: '샘플 회원', email: 'sample@example.test', provider: 'LOCAL' } })
+      if (['/api/maps/me','/api/places/me','/api/places/reviews/me','/api/favorites'].includes(url.pathname)) return route.fulfill({ json: [] })
       if (url.pathname === '/api/maps') return route.fulfill({ json: { items: [], nextCursor: null, hasNext: false } })
       if (url.hostname === 'fonts.gstatic.com') return route.fulfill({ body: font, contentType: 'font/ttf' })
       if (url.origin === origin) return route.continue()
@@ -73,6 +74,26 @@ try {
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(1500)
     await page.screenshot({ path: resolve(output, `flutter-withdraw-${width}.png`) })
+    if (width === 390) {
+      for (const [name, path] of [
+        ['map-list', '/maps'], ['profile', '/profile'], ['profile-edit', '/profile/edit'],
+        ['owned-maps', '/profile/maps/owned'], ['joined-maps', '/profile/maps/joined'],
+        ['my-places', '/profile/places'], ['my-reviews', '/profile/reviews'], ['favorites', '/favorites'],
+        ['place-add', '/maps/fixture/places/add'],
+      ]) {
+        await page.goto(origin + path)
+        await page.locator('flt-semantics-placeholder').dispatchEvent('click')
+        await page.waitForLoadState('networkidle')
+        await page.waitForTimeout(1500)
+        await page.screenshot({ path: resolve(output, `flutter-${name}-${width}.png`) })
+      }
+      await page.evaluate(() => localStorage.clear())
+      await page.goto(origin + '/register')
+      await page.locator('flt-semantics-placeholder').dispatchEvent('click')
+      await page.waitForLoadState('networkidle')
+      await page.waitForTimeout(1500)
+      await page.screenshot({ path: resolve(output, `flutter-register-${width}.png`) })
+    }
     await page.close()
   }
 } finally {

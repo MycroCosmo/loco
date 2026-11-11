@@ -9,6 +9,9 @@ class LocoApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final colors = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF2563EB), brightness: Brightness.light,
+    );
 
     return MaterialApp.router(
       title: 'LOCO',
@@ -17,14 +20,11 @@ class LocoApp extends ConsumerWidget {
       supportedLocales: const [Locale('ko', 'KR')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2563EB),
-          brightness: Brightness.light,
-        ),
-        appBarTheme: const AppBarTheme(
+        colorScheme: colors,
+        appBarTheme: AppBarTheme(
           elevation: 0,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
+          backgroundColor: colors.surface,
+          foregroundColor: colors.onSurface,
           surfaceTintColor: Colors.transparent,
         ),
         cardTheme: CardThemeData(

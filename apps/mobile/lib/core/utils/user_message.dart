@@ -27,7 +27,7 @@ String userErrorMessage(
     switch (error.response?.statusCode) {
       case 400:
       case 422:
-        return '$action 입력 내용과 파일 조건을 확인해 주세요.';
+        return '$action 입력 내용을 확인해 주세요.';
       case 401:
         return switch (context) {
           ErrorContext.login => '로그인하지 못했어요. 이메일과 비밀번호를 확인해 주세요.',

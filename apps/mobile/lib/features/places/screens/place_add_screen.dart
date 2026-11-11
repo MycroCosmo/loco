@@ -439,10 +439,10 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                     ],
                   )
                 : ColoredBox(
-                    color: const Color(0xFFE5E7EB),
+                    color: Theme.of(context).colorScheme.outlineVariant,
                     child: Center(
                       child: Text(
-                        '장소를 검색하면\n지도에 표시됩니다.',
+                        '장소를 검색하면\n지도에 표시돼요.',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
@@ -483,11 +483,11 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                               ),
                             ),
                             child: _searching
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 18,
                                     height: 18,
                                     child: CircularProgressIndicator(
-                                      color: Colors.white,
+                                      color: Theme.of(context).colorScheme.onPrimary,
                                       strokeWidth: 2,
                                     ),
                                   )
@@ -544,10 +544,10 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2563EB).withOpacity(0.06),
+                          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.06),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: const Color(0xFF2563EB).withOpacity(0.3),
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Column(
@@ -676,11 +676,11 @@ class _PlaceAddScreenState extends ConsumerState<PlaceAddScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: _submitting
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                                 strokeWidth: 2,
                               ),
                             )

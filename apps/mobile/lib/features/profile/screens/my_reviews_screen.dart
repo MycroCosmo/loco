@@ -22,7 +22,7 @@ class MyReviewsScreen extends ConsumerWidget {
           if (reviews.isEmpty) {
             return Center(
               child: Text(
-                '작성한 리뷰가 없습니다.',
+                '작성한 리뷰가 없어요.',
                 style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             );
@@ -85,7 +85,7 @@ class _MyReviewCard extends StatelessWidget {
                             ? Icons.star
                             : Icons.star_border,
                         size: 16,
-                        color: const Color(0xFFF59E0B),
+                        color: Theme.of(context).colorScheme.tertiary,
                       );
                     }),
                   ),

@@ -138,11 +138,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           vertical: 14),
                                     ),
                                     child: authState.isLoading
-                                        ? const SizedBox(
+                                        ? SizedBox(
                                             height: 20,
                                             width: 20,
                                             child: CircularProgressIndicator(
-                                                color: Colors.white,
+                                                color: Theme.of(context).colorScheme.onPrimary,
                                                 strokeWidth: 2))
                                         : const Text('로그인',
                                             style: TextStyle(fontSize: 16)),

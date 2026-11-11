@@ -7,7 +7,7 @@
 | 위치 | 이전 | 이후 |
 |---|---|---|
 | 오류 | `로그인 실패: $e` 등 예외 원문 | 인증·권한·연결·입력·요청 제한을 구분한 원인과 다음 행동. 서버 본문·OAuth state를 표시하지 않음 |
-| 사진 부분 성공 | 생성 실패와 혼동 가능한 예외, 수정 후 사진 실패는 일반 실패 | “장소는 저장됐어요. 일부 사진을 올리지 못했어요. 저장된 사진을 확인한 뒤 다시 추가해 주세요.” 지도방은 생성/수정 성공 후 표지 사진만 실패했음을 별도 표시 |
+| 사진 부분 성공 | 생성 실패와 혼동 가능한 예외, 수정 후 사진 실패는 일반 실패 | “장소는 저장됐어요. 일부 사진을 올리지 못했어요. 저장된 사진을 확인한 뒤 다시 추가해 주세요.” 지도방은 생성/수정 성공 후 표지 사진만 실패했음을 별도 표시. 프로필도 닉네임 저장 후 사진 실패를 별도 안내 |
 | 지도방 생성 | 지도 만들기 / 지도 이름 | 지도방 만들기 / 지도방 이름 |
 | 표지 | 썸네일 / 표지 이미지 | 표지 사진 |
 | 공개 설정 | 비공개 설명만 제공 | 공개: 로그인한 누구나 조회. 비공개: 참여자만 조회하며 초대 코드를 받은 사람이 참여 가능 |
@@ -25,11 +25,11 @@
 
 ### 검증과 캡처
 
-- Flutter 3.44.8 / Dart 3.12.2. 기존 렌더링 테스트 포함 **15 성공 / 0 실패**, **6.85초**. 오류 원문 배제, 320×568·글씨 2배·키보드 표시, 중립 재설정 안내/15분, 실제 지도방 생성→표지 사진 500의 부분 성공을 검증한다. API는 테스트 대역만 사용한다.
-- `flutter analyze` 실행. 오류·경고 0; 기존 `dart:html`, `withOpacity`, splash const 관련 info는 범위 밖으로 남긴다. info가 있는 기본 analyze의 종료 코드는 1이므로 이를 무경고 통과로 표기하지 않는다.
-- `flutter build web --profile --no-web-resources-cdn --dart-define=API_BASE_URL=http://localhost:8081/api --dart-define=SERVER_URL=http://localhost:8081` 성공: **40.3초**. JS 웹 빌드 기준이며 기존 secure-storage의 Wasm dry-run 경고는 별도 이관 후보다.
+- Flutter 3.44.8 / Dart 3.12.2. 기존 렌더링 테스트 포함 **16 성공 / 0 실패**, **6.40초**. 오류 원문 배제, 320×568·글씨 2배·키보드 표시, 중립 재설정 안내/15분, 실제 지도방 생성→표지 사진 500과 닉네임 저장→사진 500의 부분 성공을 검증한다. API는 테스트 대역만 사용한다.
+- `flutter analyze` 실행. 오류·경고 0, info 11건(분석 6.0초); 기존 `dart:html`, `withOpacity`, splash const 관련 info는 범위 밖으로 남긴다. info가 있는 기본 analyze의 종료 코드는 1이므로 이를 무경고 통과로 표기하지 않는다.
+- `flutter build web --profile --no-web-resources-cdn --dart-define=API_BASE_URL=http://localhost:8081/api --dart-define=SERVER_URL=http://localhost:8081` 성공: **41.1초**. JS 웹 빌드 기준이며 기존 secure-storage의 Wasm dry-run 경고는 별도 이관 후보다.
 - before: e9bce8e의 앱을 임시 복사본에서 CardThemeData·웹 진입 파일만 호환 수정한 빌드. after: 이 브랜치의 실제 앱 빌드. 390×844 / 1280×720, 같은 가짜 회원/API 응답. 실제 사용자 계정·외부 API를 쓰지 않는다.
-- [before 이미지](docs/ux-copy/before) / [after 이미지](docs/ux-copy/after): 로그인, 재설정 코드, 지도방 생성, 비공개 설정, 탈퇴 확인. 웹 캔버스에서 한글 폰트가 빠지지 않도록 캡처 도구만 로컬 `malgun.ttf`를 제공한다. 폰트 파일은 커밋하지 않는다. `UX_CAPTURE_FONT`로 로컬 대체 경로를 지정할 수 있다.
+- [before 이미지](docs/ux-copy/before) / [after 이미지](docs/ux-copy/after): 로그인, 재설정 코드, 지도방 생성, 비공개 설정, 탈퇴 확인은 양쪽 폭에서 촬영했다. 390px에서는 회원가입·지도방 목록·프로필·프로필 수정·내 지도방 2종·내 장소·내 리뷰·즐겨찾기·장소 추가도 촬영했다. Flutter 총 40장, CMS 총 12장이다. 웹 캔버스에서 한글 폰트가 빠지지 않도록 캡처 도구만 로컬 `malgun.ttf`를 제공한다. 폰트 파일은 커밋하지 않는다. `UX_CAPTURE_FONT`로 로컬 대체 경로를 지정할 수 있다.
 - 재실행: `apps/admin`에서 고정 Node 환경을 준비한 뒤 `node scripts/capture-flutter.mjs ../mobile/build/web after`. 캡처의 브라우저는 실제 미리보기 브라우저와 분리되어 있다.
 
 ## CMS
@@ -59,6 +59,41 @@
 - 별도 회차에서 기존 호스트 `/reset`이 검사 시작 전 500을 반환했다(12 성공·1 실패, 61.235초). 호스트가 예외를 기록하지 않아 세부 원인은 확인하지 못했다. 자동 재시도나 검사 제외 없이 새 호스트에서 전체 13건을 다시 실행해 위 결과를 얻었다. 서버 테스트 호스트 수정은 이번 범위에 넣지 않았다.
 - 서버 파일 변경은 0건이다. 서버 allTests는 실행하지 않았다. 요청한 프런트 검증과 기존 격리 CMS E2E를 수행했다.
 
+## 화면 전후 비교 (390px)
+
+1280px 앱 주요 화면과 CMS는 위 이미지 폴더에도 포함되어 있다. 아래 화면은 같은 가짜 데이터로 비교한다.
+
+| 화면 | 변경 전 | 변경 후 |
+|---|---|---|
+| 로그인 | [before](docs/ux-copy/before/flutter-login-390.png) | [after](docs/ux-copy/after/flutter-login-390.png) |
+| 재설정 코드 | [before](docs/ux-copy/before/flutter-reset-390.png) | [after](docs/ux-copy/after/flutter-reset-390.png) |
+| 회원가입 | [before](docs/ux-copy/before/flutter-register-390.png) | [after](docs/ux-copy/after/flutter-register-390.png) |
+| 지도방 목록 | [before](docs/ux-copy/before/flutter-map-list-390.png) | [after](docs/ux-copy/after/flutter-map-list-390.png) |
+| 지도방 생성 | [before](docs/ux-copy/before/flutter-map-create-390.png) | [after](docs/ux-copy/after/flutter-map-create-390.png) |
+| 비공개 설정 | [before](docs/ux-copy/before/flutter-map-private-390.png) | [after](docs/ux-copy/after/flutter-map-private-390.png) |
+| 내 정보 | [before](docs/ux-copy/before/flutter-profile-390.png) | [after](docs/ux-copy/after/flutter-profile-390.png) |
+| 프로필 수정 | [before](docs/ux-copy/before/flutter-profile-edit-390.png) | [after](docs/ux-copy/after/flutter-profile-edit-390.png) |
+| 탈퇴 확인 | [before](docs/ux-copy/before/flutter-withdraw-390.png) | [after](docs/ux-copy/after/flutter-withdraw-390.png) |
+| 만든 지도방 | [before](docs/ux-copy/before/flutter-owned-maps-390.png) | [after](docs/ux-copy/after/flutter-owned-maps-390.png) |
+| 참여 지도방 | [before](docs/ux-copy/before/flutter-joined-maps-390.png) | [after](docs/ux-copy/after/flutter-joined-maps-390.png) |
+| 등록한 장소 | [before](docs/ux-copy/before/flutter-my-places-390.png) | [after](docs/ux-copy/after/flutter-my-places-390.png) |
+| 작성한 리뷰 | [before](docs/ux-copy/before/flutter-my-reviews-390.png) | [after](docs/ux-copy/after/flutter-my-reviews-390.png) |
+| 즐겨찾기 | [before](docs/ux-copy/before/flutter-favorites-390.png) | [after](docs/ux-copy/after/flutter-favorites-390.png) |
+| 장소 추가 | [before](docs/ux-copy/before/flutter-place-add-390.png) | [after](docs/ux-copy/after/flutter-place-add-390.png) |
+| CMS 로그인 | [before](docs/ux-copy/before/cms-login-390.png) | [after](docs/ux-copy/after/cms-login-390.png) |
+| CMS 회원 조회 | [before](docs/ux-copy/before/cms-users-390.png) | [after](docs/ux-copy/after/cms-users-390.png) |
+| CMS 신고 처리 | [before](docs/ux-copy/before/cms-report-390.png) | [after](docs/ux-copy/after/cms-report-390.png) |
+
+## 커밋 단위와 검증 범위
+
+1. `19e06ed`: Flutter 오류·말투·용어·로그인·접근성, 첫 15건 검증과 주요 화면 캡처.
+2. `99551ab`: CMS 문구·조회 상태·조건·종결 버튼, Vitest 및 Chromium 회귀와 캡처.
+3. 후속 마무리: 앱의 남은 완료·빈 상태 문구, ThemeData 역할, 프로필 부분 성공, 접근성 이름 및 캡처 확대. API와 저장 순서는 유지한다.
+
+원문 예외를 화면에 넣는 `$e`/`$error`/서버 message 직접 표시 경로를 소스로 재검색했다. 서버 코드와 `/api/**` 계약 파일은 변경하지 않았다. 캡처에는 가짜 계정만 사용하며 실제 메일·OAuth·카카오 검색·FCM을 호출하지 않는다. Flutter 지도 배경 자체의 외부 SDK 렌더링은 이번 캡처 검증 대상이 아니다. Impeccable hook·Live·Apply는 사용하지 않았다.
+
 ## 범위 밖 후속 제안
 
 큰 화면 파일 분해, 다크 모드, 새 UI/상태 관리 라이브러리, 코드 재전송은 구현하지 않았다. Flutter 웹 전용 API의 장기 대체와 실제 모바일 기기·스크린리더 검증은 후속 작업이다.
+
+프로필 수정 화면에 직접 주소로 진입할 때 기존 닉네임이 비어 보이는 현상은 before/after 양쪽에서 관찰했다. 비동기 사용자 정보의 초기 폼 반영은 후속 검토 후보이며 이번 문구 변경으로 해결했다고 주장하지 않는다.

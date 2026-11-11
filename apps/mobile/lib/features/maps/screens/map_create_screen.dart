@@ -339,11 +339,11 @@ class _MapCreateScreenState extends ConsumerState<MapCreateScreen> {
                   backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 child: _loading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2))
+                            color: Theme.of(context).colorScheme.onPrimary, strokeWidth: 2))
                     : Text(
                         _isEditMode ? '수정 저장' : '지도방 만들기',
                         style: const TextStyle(fontSize: 16),

@@ -126,11 +126,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: _loading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2),
+                                color: Theme.of(context).colorScheme.onPrimary, strokeWidth: 2),
                           )
                         : const Text('인증 코드 받기'),
                   ),
@@ -190,11 +190,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: _loading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 20,
                             width: 20,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2),
+                                color: Theme.of(context).colorScheme.onPrimary, strokeWidth: 2),
                           )
                         : const Text('비밀번호 재설정'),
                   ),
