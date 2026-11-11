@@ -120,9 +120,7 @@ class MarkerBoundedReadIntegrationTest extends MarkerTestSupport {
   }
 
   static void bindCells(PreparedStatement stmt) throws Exception {
-    Object[] values = {
-      PlaceObservationTest.map(1), 3, -90d, 90d, -180d, 180d, -180d, -90d, 180d, 90d
-    };
+    Object[] values = {PlaceObservationTest.map(1), 3, -90d, 90d, -180d, 180d};
     for (int i = 0; i < values.length; i++) stmt.setObject(i + 1, values[i]);
   }
 

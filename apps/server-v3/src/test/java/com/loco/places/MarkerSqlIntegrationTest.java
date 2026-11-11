@@ -58,8 +58,7 @@ class MarkerSqlIntegrationTest extends MarkerTestSupport {
           String sql = sqls.get(i);
           List<Object> params;
           if (api.equals("markers-places")) params = List.of(map, 37d, 38d, 127d, 129d);
-          else if (api.equals("markers-cells"))
-            params = List.of(map, 3, 37d, 38d, 127d, 129d, 127d, 37d, 129d, 38d);
+          else if (api.equals("markers-cells")) params = List.of(map, 3, 37d, 38d, 127d, 129d);
           else if (api.equals("marker-group")) params = List.of(map, 37.4444, 127.8888);
           else if (i == 2) params = List.of(map, 3, "37.444", "127.889");
           else if (i == 3) params = List.of(map, "37.444", "127.889");
