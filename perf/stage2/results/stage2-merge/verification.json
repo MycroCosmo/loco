@@ -1,0 +1,167 @@
+{
+  "purpose": "Functional merge verification, not performance remeasurement",
+  "restorationCommit": "8cc0a3fff9df312408934d469b0c5c4a37ac4dab",
+  "mainMergeCommit": "124c21ec85af92424e0f07eaff86b45e7f54b438",
+  "mergedMain": "b12942cb8a6d43dfe6078c3e69a0d9c1a0c3f677",
+  "p2Reference": "8f2c07cef0fcb4dfc276d560deaedc76ba1a2fa2",
+  "p3ArchiveTag": "perf-stage2-p3-e33-20261111",
+  "execution": {
+    "exitCode": 0,
+    "wallSeconds": 1245.0522335,
+    "finishedAt": "2026-11-11T14:08:19.1871943+09:00",
+    "command": "spotlessApply allTests build",
+    "testSubnet": "10.253.30.0/24"
+  },
+  "javaTests": [
+    {
+      "task": "test",
+      "execution": "executed",
+      "tests": 451,
+      "passed": 450,
+      "failed": 0,
+      "skipped": 1
+    },
+    {
+      "task": "comparisonTest",
+      "execution": "executed",
+      "tests": 1158,
+      "passed": 1158,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "task": "cms-core:test",
+      "execution": "UP-TO-DATE, unchanged core",
+      "tests": 125,
+      "passed": 125,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "totals": {
+    "tests": 1734,
+    "passed": 1733,
+    "failed": 0,
+    "skipped": 1,
+    "reusedCore": 125,
+    "skipReason": "Existing shared HEIC codec limitation"
+  },
+  "knownDifferencesUnchanged": true,
+  "knownDifferenceBaseline": "perf/stage2/results/p2-implementation/e22-verification.json",
+  "knownDifferences": [
+    {
+      "case": "http.runtime-header",
+      "kind": "intentional",
+      "reason": "10-1 A: omit Express runtime identification only; parser-before-Helmet/CORS preserved"
+    },
+    {
+      "case": "images.concurrent-delete",
+      "kind": "improved",
+      "reason": null
+    },
+    {
+      "case": "images.concurrent-limit",
+      "kind": "improved",
+      "reason": null
+    },
+    {
+      "case": "images.concurrent-upload-delete",
+      "kind": "improved",
+      "reason": null
+    },
+    {
+      "case": "kakao.failure-message",
+      "kind": "intentional",
+      "reason": "8-3 B: upstream details stay out of client responses; all external/parsing failures use fixed 500"
+    },
+    {
+      "case": "kakao.socket-timeout",
+      "kind": "intentional",
+      "reason": "8-2 B: connect/TLS 2s, response socket inactivity 5s, no overall deadline or retry"
+    },
+    {
+      "case": "maps.concurrent-code-join",
+      "kind": "improved",
+      "reason": "UNIQUE/ON CONFLICT keeps both requests successful"
+    },
+    {
+      "case": "maps.concurrent-public-join",
+      "kind": "improved",
+      "reason": "UNIQUE/ON CONFLICT keeps both requests successful"
+    },
+    {
+      "case": "maps.invite-code-generator",
+      "kind": "intentional",
+      "reason": null
+    },
+    {
+      "case": "markers.deterministic-overflow",
+      "kind": "improved",
+      "reason": null
+    },
+    {
+      "case": "markers.pg-coordinate-rule",
+      "kind": "improved",
+      "reason": null
+    },
+    {
+      "case": "markers.pg-derived-centers",
+      "kind": "intentional",
+      "reason": null
+    },
+    {
+      "case": "markers.precision-commit",
+      "kind": "improved",
+      "reason": null
+    },
+    {
+      "case": "markers.refresh-serialization",
+      "kind": "improved",
+      "reason": null
+    },
+    {
+      "case": "notifications.token-replacement",
+      "kind": "improved",
+      "reason": "9-6 B: conditional UPDATE preserves a replacement FCM token"
+    },
+    {
+      "case": "tokens.cleanup-timezone",
+      "kind": "intentional",
+      "reason": "9-5 B: Korean dawn intended; explicit Asia/Seoul 03:00 instead of UTC container 03:00"
+    }
+  ],
+  "checks": {
+    "latestFlywayVersion": 9,
+    "nonPlpgsqlExtensions": 0,
+    "databaseAssertion": "HealthIntegrationTest.databaseHasNoSpatialExtensions",
+    "productionMatchesP2": true,
+    "spatialProductionReferences": 0,
+    "spatialJarDependencies": 0,
+    "v10Packaged": false,
+    "conflictsDuringMainMerge": 0
+  },
+  "jar": {
+    "path": "apps/server-v3/build/libs/loco-server-v3-0.0.1-SNAPSHOT.jar",
+    "sha256": "394f0b23ffe313f3786381e772e9935c6b3850175d2e00dcc79401bc9f0972c8",
+    "hostMigrations": [
+      "BOOT-INF/classes/db/migration/V1__baseline.sql",
+      "BOOT-INF/classes/db/migration/V6__loco_report_processing.sql",
+      "BOOT-INF/classes/db/migration/V7__rebuild_marker_coordinate_keys.sql",
+      "BOOT-INF/classes/db/migration/V8__index_marker_round_lookups.sql",
+      "BOOT-INF/classes/db/migration/V9__rebuild_marker_centers.sql"
+    ]
+  },
+  "harness": {
+    "v2Builds": 1,
+    "v2Starts": 1,
+    "v2Restarts": 17,
+    "authWaitMillis": 0,
+    "subnetScope": "optional SharedHarness-only; default unchanged"
+  },
+  "notRun": [
+    "Browser E2E",
+    "External APIs",
+    "Performance remeasurement",
+    "Archived P3 tool oracle against current V9 source"
+  ]
+}

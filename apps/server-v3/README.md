@@ -116,6 +116,7 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21' # 설치 위치가 다르면 변
 ```
 
 Linux/macOS에서는 Java 21을 설정하고 `./gradlew`로 같은 작업을 실행한다.
+Docker 기본 주소 풀이 소진된 로컬 환경은 사용하지 않는 CIDR을 `LOCO_TEST_NETWORK_SUBNET` 환경변수로 지정할 수 있다(예: PowerShell `$env:LOCO_TEST_NETWORK_SUBNET = '10.253.30.0/24'`). 비교 하네스의 임시 네트워크에만 적용하며 미지정 시 기존 자동 할당을 사용한다. 기존 컨테이너·네트워크·볼륨을 삭제할 필요가 없고 운영 Compose에는 영향을 주지 않는다.
 `test`는 `v2-comparison` 태그를 제외하고, `comparisonTest`는 해당 태그만 실행한다. 새 v2 HTTP·라이브러리·Prisma 비교 클래스에는 `@Tag("v2-comparison")`을 붙인다.
 `allTests`는 두 작업을 순서대로 실행하며 `check`와 `build`도 양쪽 검증을 포함한다. 이미 통과한 작업을 실제로 다시 측정하려면 `test --rerun`, `comparisonTest --rerun`, 전체는 `allTests --rerun-tasks`를 사용한다.
 기본 테스트도 v3 통합 검증용 PostgreSQL 컨테이너는 필요하지만 v2·Mailpit·Prisma CLI는 준비하지 않는다. OAuth는 외부 API를 mock으로 대체한다.
