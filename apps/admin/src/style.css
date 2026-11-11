@@ -13,3 +13,14 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f4f6f7; paddi
 fieldset { border: 1px solid #bacbd0; margin: 1rem 0; } dialog { max-width: min(95vw, 42rem); border: 1px solid #68828b; border-radius: .5rem; } dialog::backdrop { background: #0007; }
 .skip { position: absolute; left: -10000px; } .skip:focus { left: 1rem; top: 1rem; background: white; padding: 1rem; z-index: 10; }
 @media(max-width: 600px) { main { margin: .5rem; padding: 1rem; } header { padding: 1rem; } }
+
+/* Keep primary filters and results together; detailed identifiers remain available. */
+.query-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .4rem 1rem; }
+.query-field { min-width: 0; }
+.query-field input, .query-field select { width: 100%; }
+.applied-query { padding: .75rem; background: #edf5f7; overflow-wrap: anywhere; }
+details { margin: .5rem 0 1rem; }
+summary { cursor: pointer; font-weight: 600; padding: .5rem 0; }
+[role=alert]:empty, [role=status]:empty { display: none; }
+
+.table-scroll th, .table-scroll td { min-width: 6rem; }
