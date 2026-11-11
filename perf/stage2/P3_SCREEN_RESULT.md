@@ -1,5 +1,15 @@
 # P3 E-32 선별 — 실행 도구 오류로 판정 불가
 
+## 2026-11-11 실제 기동·진단 사전 검증 완료 (측정 아님)
+
+기존32개 네트워크와 Windows IPv4 경로를 읽어 충돌하지 않는 `10.253.20.0/24`~`10.253.23.0/24`를 새 P3 전용으로 지정했다. Docker 전체 주소 풀 변경·재시작·기존 자산 삭제 없이 Compose [ipam.subnet](https://docs.docker.com/reference/compose-file/networks/) override를 사용한다. `readiness` A/B는20/21, 다음 `screen-retest2` A/B는22/23을 사용한다. 다음 측정용 내부 네트워크2개도 실제 생성해 확보했다. 기존 세션은 자동 주소 할당 그대로이며 변경하지 않는다. IP 대역만 분리하고 internal bridge·CPU·메모리·이미지·부하·판정 규칙은 유지한다.
+
+[검증 기록](results/p3-screen/readiness-verification.json): Node62건 성공·실패0(0.484초). 실제 A/B 기능 검증 총 **248.330초**, A120.487초/B127.840초. 각 앱 기동·CMS 초기 인증 준비·장소10만 건 시드·좌표/셀 검증·1,000개 지도방 응답·hot/other2종 실제 SQL 수집/재생 EXPLAIN·k6 기능 요청을 모두 통과했다. k6는각6건 성공·실패0·dropped0, 양쪽업무DB불변. 5초 기능 요청이며 예열120초+본300초 선별 결과가 아니고 지연 수치는 채택 근거로 쓰지 않는다.
+
+이전 B 오류 지점은 이번에 실제 B 앱·M seed·수집 SQL로 통과했다. 종료 후 readiness A/B 앱·DB 모두 정지, 배경7개running·paused0 확인. 기존32개 네트워크에 새4개를 더해36개이며 삭제는 없다. 전용 검증 데이터·로그도 보존한다. 운영 Java 변경이 없어 Java allTests/build는 반복하지 않았다.
+
+`screen-retest2` 시작 조건에 readiness 성공·동일 JAR hash·검증용 컨테이너 정지·실제 확보된 네트워크의 서브넷/internal/프로젝트/빈 연결 검사를 추가했다. `check` 모드는 같은 조건을 확인하되 실행기·pause·측정을 시작하지 않는다. 앱 종료·간섭·전원·사용자 환경 확인은 실제 launch에서 계속 요구한다. 이 준비가 미래의 장비/간섭 오류까지 보장하지는 않는다. 새 세션 시작과 성능 판정은 아직 하지 않았다.
+
 ## 최신 상태: 2026-11-11 승인 재측정의 네트워크 준비 실패
 
 `screen-retest1`, source `2ec7f2d`, 한국시간11:30:12~11:31:53(**100.906초**). 앱 종료 사전 검사·배경7개 pause 후 A 프로젝트 기동에서 Docker가 `all predefined address pools have been fully subnetted`로 새 네트워크 생성을 거절했다. **EXPLAIN0회·HTTP 측정0회**로 성능 결과가 아니다. [실패 집계](results/p3-screen/retest1-network-failure.json).
@@ -35,3 +45,5 @@
 - UUID 이름·네트워크 없는 tmpfs 전용 DB를 사용하고 그 컨테이너만 정리했다. 기존 측정 DB·원본·이미지·볼륨과 배경7개는 변경하지 않았다.
 
 검증 범위는 **오류가 난 SQL 진단 경로의 실제 DB 실행**이다. HTTP 앱 전체 실행기·k6·정식 측정은 재실행하지 않았으며 기존 선별 실패 판정은 그대로다. 도구만 변경해 Java allTests/build를 반복하지 않았다. 다음 측정은 별도 환경 확인 후 A/B 전체 새 세션으로 실행해야 하며, 기존 `launch.json`이나 원본을 삭제해 재시도하지 않는다.
+
+2026-11-11 후속 확인: 커밋된 실행기의 `screen-retest2 check`도 통과했다. 실제 확보 네트워크·JAR·readiness 결과·정지 상태를 검사했고 driver 생성·pause·측정은 없었다.

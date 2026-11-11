@@ -7,8 +7,9 @@ import {screeningProtocol,p2Jar,screeningPlans,evaluateScreening,screeningLifecy
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');process.chdir(root);
 const sessionName=process.env.PERF_SESSION||'';
 stageSettings('p3-a',sessionName); // Validate before creating paths; old sessions remain immutable.
+assert.notEqual(sessionName,'readiness','Readiness is not a screening session');
 const base='apps/server-v3/build/perf-stage2-p3-screen'+(sessionName?'-'+sessionName:''),script=fileURLToPath(import.meta.url),mode=process.argv[2];
-assert.ok(['launch','run','watchdog','restore'].includes(mode));
+assert.ok(['check','launch','run','watchdog','restore'].includes(mode));
 fs.mkdirSync(base,{recursive:true});
 const read=p=>JSON.parse(fs.readFileSync(p));
 const atomic=(name,data)=>{const p=base+'/'+name;fs.writeFileSync(p+'.tmp',JSON.stringify(data,null,2));fs.renameSync(p+'.tmp',p);};
@@ -17,7 +18,7 @@ const ids=()=>read('apps/server-v3/build/perf-stage2-p2/private/approved-backgro
 const docker=(action,id)=>action==='inspect'?JSON.parse(command('docker',['inspect','--format','{{json .State}}',id])):command('docker',[action,id]);
 function record(phase,data){const p=base+'/background-manifest.json',m=fs.existsSync(p)?read(p):{startedAt:new Date().toISOString(),history:[]};m.history.push({at:new Date().toISOString(),phase,...data});if(phase==='restored')m.restored=data.restored;atomic('background-manifest.json',m);}
 // Compose interpolation needs the project's private credentials, even for stop.
-function stopProjects(){for(const side of ['a','b']){const settings=stageSettings('p3-'+side),p=settings.output+'/private/secrets.json';if(!fs.existsSync(p))continue;const sec=read(p);const r=spawnSync('docker',['compose','-p',settings.project,'-f','perf/stage2/compose.yml','stop'],{env:{...process.env,PERF_DB_PASSWORD:sec.db,PERF_JWT_SECRET:sec.jwt},encoding:'utf8',windowsHide:true});assert.equal(r.status,0,'Own workload stop failed');}}
+function stopProjects(){for(const side of ['a','b']){const settings=stageSettings('p3-'+side),p=settings.output+'/private/secrets.json';if(!fs.existsSync(p))continue;const sec=read(p);const r=spawnSync('docker',['compose','-p',settings.project,'-f','perf/stage2/compose.yml',...(settings.networkSubnet?['-f','perf/stage2/compose.p3-network.yml']:[]),'stop'],{env:{...process.env,PERF_NETWORK_SUBNET:settings.networkSubnet||'',PERF_DB_PASSWORD:sec.db,PERF_JWT_SECRET:sec.jwt},encoding:'utf8',windowsHide:true});assert.equal(r.status,0,'Own workload stop failed');}}
 const lease=()=>fs.existsSync(base+'/background-manifest.json')?read(base+'/background-manifest.json'):undefined;
 const backgroundsSafe=()=>!backgroundRecoveryRequired(lease())||lease().restored===true;
 function restore(){if(!backgroundRecoveryRequired(lease()))return;try{stopProjects();}finally{restoreBackground(ids(),docker,record);}}
@@ -27,13 +28,26 @@ function watch(owner){return setInterval(()=>{
 },5000);}
 if(mode==='restore'){restore();process.exit(0);}
 if(mode==='watchdog'){watch(Number(process.argv[3]));}
-else if(mode==='launch'){
-  assert.equal(process.env.PERF_HEAVY_APPS_STATUS,'closed-user-confirmed');
-  assert.equal(process.env.PERF_APP_UPDATES_STATUS,'completed-or-paused-user-confirmed');
+else if(mode==='launch'||mode==='check'){
+  if(mode==='launch') {
+    assert.equal(process.env.PERF_HEAVY_APPS_STATUS,'closed-user-confirmed');
+    assert.equal(process.env.PERF_APP_UPDATES_STATUS,'completed-or-paused-user-confirmed');
+  }
   assert.equal(command('git',['status','--porcelain']),'','Commit all implementation and evidence first');
   assert.ok(!fs.existsSync(base+'/launch.json'),'Single session only; never silently retry');
   for(const side of ['a','b'])assert.ok(!fs.existsSync(stageSettings('p3-'+side).output),'Use untouched P3 output projects');
   const artifact=read('perf/stage2/p3-artifacts.json');assert.equal(artifact.aJar,p2Jar);assert.equal(artifact.bJar,hash(fs.readFileSync('apps/server-v3/build/libs/loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar')));
+  if(sessionName==='screen-retest2')for(const side of ['a','b']) {
+    const ready=stageSettings('p3-'+side,'readiness'),check=read(ready.output+'/readiness-result.json');
+    assert.equal(check.mapsChecked,1000);assert.equal(check.databaseUnchanged,true);assert.equal(check.k6ExitCode,0);
+    assert.equal(read(ready.output+'/environment-initial.json').jarSha256,artifact[side+'Jar']);
+    const settings=stageSettings('p3-'+side),net=JSON.parse(command('docker',['network','inspect',settings.project+'_default']))[0];
+    assert.equal(net.Internal,true);assert.equal(net.IPAM.Config[0].Subnet,settings.networkSubnet);
+    assert.equal(net.Labels['com.docker.compose.project'],settings.project);
+    assert.equal(Object.keys(net.Containers).length,0,'Reserved measurement network must be unused');
+    assert.equal(command('docker',['ps','-q','--filter','label=com.docker.compose.project='+ready.project]),'','Stop readiness workloads before screening');
+  }
+  if(mode==='check'){console.log('Launch prerequisites passed; no driver spawned, no lease acquired');process.exit(0);}
   atomic('launch.json',{at:new Date().toISOString(),source:command('git',['rev-parse','HEAD']),protocol:screeningProtocol,sessionName,artifact,countdownSeconds:90,userConfirmation:{heavyApps:process.env.PERF_HEAVY_APPS_STATUS,updates:process.env.PERF_APP_UPDATES_STATUS},note:'Close Codex/ChatGPT/Chrome completely during countdown; agent does not poll until completion.'});
   const log=fs.openSync(base+'/driver.log','wx');const child=spawn(process.execPath,[script,'run'],{detached:true,stdio:['ignore',log,log],windowsHide:true});child.unref();fs.closeSync(log);
   console.log(JSON.stringify({pid:child.pid,completion:base+'/completed.json',countdownSeconds:90,note:'Detached. Close apps; no Codex polling.'}));

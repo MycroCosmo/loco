@@ -165,6 +165,16 @@ P2 쓰기 재측정: [P2_WRITE_RETEST.md](P2_WRITE_RETEST.md). 기존 읽기·�
 [E-23 쓰기 본표본300 결과·E-24 선택지](P2_WRITE_E23.md): 19유효/1무효·HTTP9,300성공, 편차/간섭으로채택보류. 이전두쓰기세션 원본보존·7개복구.
 # P3 E-32 선별 실행 안내
 
+최신 준비: `readiness` A/B 실제 앱·M seed·1,000지도방·SQL 진단·k6 기능 검사 완료. 다음 세션은 `screen-retest2`이며 전용 내부 네트워크를 미리 확보했다. 기존 세션/DB는 보존한다. [검증 기록](P3_SCREEN_RESULT.md)을 확인하고 아래로 **측정 없는 시작 조건 검사**를 실행할 수 있다. 실제 launch는 다시 환경 확인 후 사용한다.
+
+```powershell
+. ./apps/admin/prepare-node.ps1
+$env:PERF_SESSION='screen-retest2'
+node perf/stage2/p3-screen-session.mjs check
+```
+
+`compose.p3-network.yml`은 새 readiness/retest2 프로젝트에만 명시적 서브넷을 지정한다. `p3-readiness`는 readiness 세션에서만 허용되는 독립 기능 검증이며 `up → seed M skew → verify-seed → p3-readiness → stop` 순서다. 실패해도 해당 readiness 앱/DB는 finally에서 정지하고 기록을 남겨야 한다. 측정·진단 결과를 덮어쓰지 않는다.
+
 **현재 중단:** `screen-retest1`은 Docker 주소 풀 할당 실패로 네트워크 생성 단계에서 종료됐다(측정0회). [최신 실패 기록](P3_SCREEN_RESULT.md)을 확인한다. 기존 세션을 재실행하거나 자산을 삭제하지 않는다. 아래 실행 설명은 해당 실패 이전 준비 기록이다.
 
 2026-11-11 사용자 승인 재측정은 `PERF_SESSION=screen-retest1`로 분리한다. A/B 각3회 EXPLAIN과 각1회 HTTP(예열120초+본300초), 예상24~31분, E-32 기준은 그대로다. 이전 세션의 출력·DB·볼륨을 재사용하거나 삭제하지 않는다. 새 driver/watchdog/수집기/복구가 같은 세션 이름을 상속한다. Node61건 성공·0실패(0.478초), 실행기 문법 검사 통과. 운영 앱 변경은 없어 Java 회귀는 반복하지 않았다.

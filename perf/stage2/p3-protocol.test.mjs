@@ -5,6 +5,17 @@ import {stageSettings,markerCellCoordinate} from './data.mjs';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawn,spawnSync} from 'node:child_process';
 
 const side=(p95=100,buffers=[100,100,100])=>({p95,buffers,valid:true});
+test('readiness and retest2 use four distinct explicit subnets without changing old projects',()=>{
+  const networks=new Set(),projects=new Set();
+  for(const session of ['readiness','screen-retest2'])for(const side of ['p3-a','p3-b']){
+    const next=stageSettings(side,session),old=stageSettings(side,'');
+    assert.match(next.networkSubnet,/^10\.253\.2[0-3]\.0\/24$/);
+    networks.add(next.networkSubnet);projects.add(next.project);
+    assert.equal(next.image,old.image);assert.equal(old.networkSubnet,null);
+  }
+  assert.equal(networks.size,4);assert.equal(projects.size,4);
+  assert.throws(()=>stageSettings('p2-b','readiness'));
+});
 test('authorized P3 retest keeps old output and volumes separate with identical artifacts',()=>{
   for(const side of ['p3-a','p3-b']) {
     const old=stageSettings(side,''),next=stageSettings(side,'screen-retest1');

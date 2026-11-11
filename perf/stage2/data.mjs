@@ -16,11 +16,12 @@ export function pairedThresholdFailure(exitCode, summary) {
 }
 export function stageSettings(stage = process.env.PERF_STAGE || 'p0', session = process.env.PERF_SESSION || '') {
   if (!['p0','p1','e15-a','e15-b','p2-a0','p2-a1','p2-b','p3-a','p3-b'].includes(stage)) throw Error('Unknown performance stage');
-  if (session && !(stage.startsWith('p2-') && ['write-retest1','write-e23','write-e24'].includes(session)) && !(stage.startsWith('p3-') && session==='screen-retest1')) throw Error('Unknown performance session');
+  if (session && !(stage.startsWith('p2-') && ['write-retest1','write-e23','write-e24'].includes(session)) && !(stage.startsWith('p3-') && ['screen-retest1','readiness','screen-retest2'].includes(session))) throw Error('Unknown performance session');
   const suffix=session?'-'+session:'';
   const mapped={'e15-a':'p0','e15-b':'p1','p2-a0':'p0','p2-a1':'p1','p2-b':'p2','p3-a':'p2','p3-b':'p3'};
   const images={'e15-a':'loco-perf-p0:local','p2-a0':'loco-perf-p0:local','p2-a1':'loco-perf-e15-b:local','p3-a':'loco-perf-p2-b:local'};
-  return {stage:mapped[stage]||stage, project:`loco-perf-${stage}${suffix}`, output:`apps/server-v3/build/perf-stage2${stage==='p0'?'':'-'+stage}${suffix}`,
+  const networkSubnet=['readiness','screen-retest2'].includes(session)?`10.253.${(session==='readiness'?20:22)+(stage==='p3-b'?1:0)}.0/24`:null;
+  return {networkSubnet,stage:mapped[stage]||stage, project:`loco-perf-${stage}${suffix}`, output:`apps/server-v3/build/perf-stage2${stage==='p0'?'':'-'+stage}${suffix}`,
     image:images[stage]||`loco-perf-${stage}:local`, paired:stage.startsWith('e15-')||stage.startsWith('p2-')||stage.startsWith('p3-'), screening:stage.startsWith('p3-'), markerSourceRevision:stage==='p3-a'?'91d653a2b69a5f403f9969bd754f3c46eac76735':null};
 }
 export function measurementSpec(name,rate,viewport,mix,repeats) {

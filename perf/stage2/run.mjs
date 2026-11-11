@@ -20,8 +20,8 @@ fs.mkdirSync(privateDir,{recursive:true}); fs.mkdirSync(path.join(output,'runtim
 const secretsFile=path.join(privateDir,'secrets.json');
 if(!fs.existsSync(secretsFile)) fs.writeFileSync(secretsFile,JSON.stringify({db:randomBytes(24).toString('hex'),jwt:randomBytes(48).toString('hex'),password:randomBytes(24).toString('hex'),nextPassword:randomBytes(24).toString('hex')}));
 const secrets=JSON.parse(fs.readFileSync(secretsFile));
-const env={...process.env,PERF_DB_PASSWORD:secrets.db,PERF_JWT_SECRET:secrets.jwt,PERF_OUTPUT_DIR:output.replaceAll('\\','/'),PERF_APP_IMAGE:settings.image};
-const compose=['compose','-p',project,'-f','perf/stage2/compose.yml'];
+const env={...process.env,PERF_NETWORK_SUBNET:settings.networkSubnet||'',PERF_DB_PASSWORD:secrets.db,PERF_JWT_SECRET:secrets.jwt,PERF_OUTPUT_DIR:output.replaceAll('\\','/'),PERF_APP_IMAGE:settings.image};
+const compose=['compose','-p',project,'-f','perf/stage2/compose.yml',...(settings.networkSubnet?['-f','perf/stage2/compose.p3-network.yml']:[])];
 const write=(name,value)=>fs.writeFileSync(path.join(output,name),JSON.stringify(value,null,2));
 function command(executable,args,input) {
   const r=spawnSync(executable,args,{cwd:root,env,input,encoding:'utf8',maxBuffer:64*1024*1024,windowsHide:true});
@@ -342,6 +342,18 @@ if(action==='up') {
   }
   await diagnostic([cases[0],cases[1],...cases.slice(-2)],name+'.json');
   console.log('Marker SQL and EXPLAIN captured outside measurement');
+} else if(action==='p3-readiness') {
+  assert.equal(process.env.PERF_SESSION,'readiness','Functional checks use their own DB and output');
+  assert.ok(!fs.existsSync(path.join(output,'readiness-result.json')),'Preserve prior checks');
+  const before=fingerprint(),cases=await markerCases(10,1000);
+  await diagnostic([cases[0],cases[1]],'readiness-sql.json');
+  write('readiness-config.json',{run:'readiness-smoke',rate:1,seconds:5,hot80:true,cases});
+  fs.mkdirSync(path.join(output,'readiness-smoke'));
+  // Exercise the real k6 image/DNS/JWT/hash path; no timing adoption or interference verdict.
+  dc('run','--rm','-T','-e','CONFIG=/results/readiness-config.json','load','run','--quiet','--no-usage-report','/scripts/load.js');
+  assert.deepEqual(fingerprint(),before,'Readiness must preserve business data');
+  write('readiness-result.json',{purpose:'Functional only, not E-32',mapsChecked:cases.length,diagnosticCases:2,k6ExitCode:0,databaseUnchanged:true});
+  console.log('P3 readiness passed: 1000 map responses, captured SQL EXPLAIN, k6 smoke, DB unchanged');
 } else if(action==='measure'||action==='explore') {
   const [name,rateText='50',viewportText='1',requestMix='hot80',repeatsText='1']=args;
   const spec=measurementSpec(name,rateText,viewportText,requestMix,repeatsText);
