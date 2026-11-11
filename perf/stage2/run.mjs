@@ -282,7 +282,7 @@ const [action,...args]=process.argv.slice(2);
 if(action==='up') {
   console.log(dc('up','-d','--wait','perf-db','perf-app'));await ready();
   sql("CREATE EXTENSION IF NOT EXISTS pg_stat_statements; ALTER SYSTEM SET pg_stat_statements.track='none'; SELECT pg_reload_conf();");await bootstrap();snapshot('environment-initial.json');
-} else if(action==='p3-cell-plan') {
+} else if(action==='p3-cell-plan'||action==='p3-e33-cell-plan') {
   assert.ok(settings.screening,'P3 isolated project required');
   assert.match(args[0]||'',/^(plan-[123]|a-ext)$/);
   assert.ok(!fs.existsSync(path.join(output,args[0]+'.json')),'Never overwrite plan evidence');
@@ -293,8 +293,12 @@ if(action==='up') {
   const u=new URL(markerPath(key('map',1),10),'http://local');
   const parameters={map:key('map',1),precision:3,minLat:+u.searchParams.get('swLat'),maxLat:+u.searchParams.get('neLat'),minLng:+u.searchParams.get('swLng'),maxLng:+u.searchParams.get('neLng')};
   const bound=template.replace(/:(map|precision|minLat|maxLat|minLng|maxLng)\b/g,(_,name)=>sqlString(parameters[name]));
-  const plan=await observedCellPlan(args[0],bound);
-  write(args[0]+'.json',{at:new Date().toISOString(),parameters,sql:bound,plan,role:args[0]==='a-ext'?'extension-only diagnostic, not gate':'E-32 gate plan',rootBuffers:plan[0].Plan['Shared Hit Blocks']+plan[0].Plan['Shared Read Blocks']});
+  const e33=action==='p3-e33-cell-plan';
+  if(e33){assert.equal(process.env.PERF_SESSION,'screen-retest2');assert.notEqual(args[0],'a-ext');}
+  const before=e33?fingerprint():null;
+  const plan=e33?JSON.parse(sql('EXPLAIN (ANALYZE,BUFFERS,VERBOSE,FORMAT JSON) '+bound)):await observedCellPlan(args[0],bound);
+  if(e33)assert.deepEqual(fingerprint(),before,'EXPLAIN must preserve business data');
+  write(args[0]+'.json',{at:new Date().toISOString(),parameters,sql:bound,plan,role:e33?'E-33 buffer-only, CPU interference is not a gate; SQL time not used':args[0]==='a-ext'?'extension-only diagnostic, not gate':'E-32 gate plan',...(e33?{databaseUnchanged:true}:{}),rootBuffers:plan[0].Plan['Shared Hit Blocks']+plan[0].Plan['Shared Read Blocks']});
 } else if(action==='p3-db-start') {
   assert.ok(settings.screening);dc('start','perf-db');
   for(let i=0;;i++){try{sql('SELECT 1');break;}catch(e){if(i>=30)throw e;await new Promise(r=>setTimeout(r,1000));}}

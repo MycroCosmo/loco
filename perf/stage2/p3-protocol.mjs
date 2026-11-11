@@ -3,6 +3,15 @@ import assert from 'node:assert/strict';
 export const screeningProtocol=Object.freeze({decision:'E-32',viewport:10,rate:16,warmupSeconds:120,measuredSeconds:300,planRepeats:3,httpRepeats:1,maxRatio:.8,expectedMinutes:[24,31],formalAutomaticallyStarts:false});
 export const p2Jar='639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e';
 export const screeningPlans=()=>Array.from({length:3},(_,i)=>['a','b'].map(side=>({side,name:'plan-'+(i+1)}))).flat();
+export function evaluateBufferScreen(a,b) {
+  for(const values of [a,b]) {
+    assert.equal(values.length,3,'E-33 requires all three new plans per side');
+    assert.ok(values.every(x=>Number.isFinite(x)&&x>0));
+  }
+  const median=v=>[...v].sort((x,y)=>x-y)[1],ratio=median(b)/median(a);
+  return {aMedian:median(a),bMedian:median(b),ratio,loadEligible:ratio<=.8,adoption:false,
+    outcome:ratio>.8?'CLOSED: 이 데이터·경로에서 공간 인덱스 이점 작음, 기존 B-tree로 충분':'WAIT: confirm app closure before p95 screening'};
+}
 // A preflight failure has not acquired the seven-container lease.
 export const backgroundRecoveryRequired=manifest=>manifest?.history?.some(entry=>entry.phase==='before')===true;
 export function recoverExitedOwner({ownerAlive,recover,complete}) {

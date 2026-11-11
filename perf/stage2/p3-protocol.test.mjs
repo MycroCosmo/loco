@@ -1,10 +1,17 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {evaluateScreening,screeningPlans,screeningLifecycle,backgroundRecoveryRequired,recoverExitedOwner} from './p3-protocol.mjs';
+import {evaluateBufferScreen,evaluateScreening,screeningPlans,screeningLifecycle,backgroundRecoveryRequired,recoverExitedOwner} from './p3-protocol.mjs';
 import {restoreBackground} from './background-lease.mjs';
 import {stageSettings,markerCellCoordinate} from './data.mjs';
 import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import {spawn,spawnSync} from 'node:child_process';
 
 const side=(p95=100,buffers=[100,100,100])=>({p95,buffers,valid:true});
+test('E-33 uses three fresh buffer totals and only qualifies load at or below 0.80',()=>{
+  assert.equal(evaluateBufferScreen([100,99,101],[80,79,81]).loadEligible,true);
+  const rejected=evaluateBufferScreen([100,100,100],[81,82,80]);
+  assert.equal(rejected.loadEligible,false);assert.equal(rejected.adoption,false);
+  assert.throws(()=>evaluateBufferScreen([100,100],[80,80,80]));
+  assert.throws(()=>evaluateBufferScreen([100,100,100],[80,NaN,80]));
+});
 test('readiness and retest2 use four distinct explicit subnets without changing old projects',()=>{
   const networks=new Set(),projects=new Set();
   for(const session of ['readiness','screen-retest2'])for(const side of ['p3-a','p3-b']){
