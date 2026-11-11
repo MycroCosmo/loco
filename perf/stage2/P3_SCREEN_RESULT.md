@@ -1,5 +1,13 @@
 # P3 E-32 선별 — 실행 도구 오류로 판정 불가
 
+## 최신 상태: 2026-11-11 승인 재측정의 네트워크 준비 실패
+
+`screen-retest1`, source `2ec7f2d`, 한국시간11:30:12~11:31:53(**100.906초**). 앱 종료 사전 검사·배경7개 pause 후 A 프로젝트 기동에서 Docker가 `all predefined address pools have been fully subnetted`로 새 네트워크 생성을 거절했다. **EXPLAIN0회·HTTP 측정0회**로 성능 결과가 아니다. [실패 집계](results/p3-screen/retest1-network-failure.json).
+
+결과 확인 시 Docker 네트워크32개를 관측했다. 이 개수를 Docker의 보편적인 최대치로 해석하지 않는다. 오류가 직접 확인한 것은 현재 기본 주소 풀의 자동 할당 실패다. 배경7개는 자동 unpause 후 running으로 복구됐고 현재도running7·paused0이다. 기존 네트워크·이미지·볼륨 삭제, Docker 설정 변경, 추가 재시도는 하지 않았다.
+
+출력·프로젝트 이름의 충돌 여부만 확인하고 실제 네트워크 생성 가능 여부를 사용자 앱 종료 전에 검증하지 못했다. 다음 실행을 제안하기 전 주소 충돌과 사용 가능 범위를 확인하고 네트워크 준비까지 별도 검증해야 한다. 기존 자산 보존 원칙과 E-32 기준은 유지하며 이 오류를 PostGIS 성능 미달 또는 앱 간섭으로 분류하지 않는다. 원본은 `apps/server-v3/build/perf-stage2-p3-screen-screen-retest1`과 `perf-stage2-p3-a-screen-retest1`에 보존한다. 아래 기록은 이전 세션이며 대체하지 않는다.
+
 2026-11-11 확인. 실행 source `7fde566`, 한국시간 11월10일23:52:06부터 11월11일00:08:40까지 **993.654초(16분34초)**. 앱 종료 사전 검사와 배경7개 pause를 통과했다. [집계 원본](results/p3-screen/incomplete.json).
 
 | 항목 | 관측 | 해석 |
