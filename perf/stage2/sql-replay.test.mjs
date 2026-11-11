@@ -31,5 +31,12 @@ test('replays the P3 HTTP bbox SQL with longitude/latitude order and both SRIDs 
   const replay=bindTemplate(observed,javaSqlTemplate(source,'BOUNDED_CELLS'),{map:'example',precision:3,minLat:37,maxLat:38,minLng:127,maxLng:129});
   assert.match(replay,/ST_MakeEnvelope \( '127' , '37' , '129' , '38' , 4326 \)/i);
   assert.equal((replay.match(/4326/g)||[]).length,2);
+  assert.match(replay,/\) && ST_MakeEnvelope/);
   assert.doesNotMatch(replay,/\$\d/);
+});
+
+test('bbox operator survives replay while a split or substituted operator is rejected',()=>{
+  assert.equal(bindTemplate('SELECT a && b', 'SELECT a && b', {}),'SELECT a && b');
+  for(const observed of ['SELECT a & & b','SELECT a & b'])
+    assert.throws(()=>bindTemplate(observed,'SELECT a && b',{}));
 });

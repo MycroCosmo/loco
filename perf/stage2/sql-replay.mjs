@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {sqlString} from './data.mjs';
 
-const tokens=sql=>sql.match(/"(?:[^"]|"")*"|'(?:[^']|'')*'|\$\d+|::|:[a-zA-Z_]\w*|[a-zA-Z_]\w*|\d+(?:\.\d+)?|>=|<=|<>|!=|\S/g)||[];
+const tokens=sql=>sql.match(/"(?:[^"]|"")*"|'(?:[^']|'')*'|\$\d+|::|:[a-zA-Z_]\w*|[a-zA-Z_]\w*|\d+(?:\.\d+)?|>=|<=|<>|!=|&&|\S/g)||[];
 
 // Replay only the SQL shape actually observed. Literal positions come from the source,
 // not guessed pg_stat_statements parameter numbers; all request values are explicit.

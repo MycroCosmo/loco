@@ -165,6 +165,16 @@ P2 쓰기 재측정: [P2_WRITE_RETEST.md](P2_WRITE_RETEST.md). 기존 읽기·�
 [E-23 쓰기 본표본300 결과·E-24 선택지](P2_WRITE_E23.md): 19유효/1무효·HTTP9,300성공, 편차/간섭으로채택보류. 이전두쓰기세션 원본보존·7개복구.
 # P3 E-32 선별 실행 안내
 
+2026-11-11 도구의 `&&` 재생 오류 수정 후 Node60건·실제 DB5건 통과. 측정은 여전히 중단 상태이며 결과를 대체하지 않았다. 아래 독립 검사는 새 UUID 이름의 tmpfs 테스트 DB만 만들고 정리한다. 기존 측정 프로젝트는 사용하지 않는다.
+
+```powershell
+. ./apps/admin/prepare-node.ps1
+node --test perf/stage2/*.test.mjs
+node perf/stage2/sql-replay.integration.mjs
+```
+
+통합 검사는 `pg_stat_statements`의 실제 정규화 SQL로 바인딩·EXPLAIN·결과 동치를 검사한다. 출력 파일이 필요하면 마지막 인자로 새 파일 경로를 전달한다. HTTP 부하나 성능 판정은 하지 않는다.
+
 **2026-11-11: 선별 실행 중 도구 오류로 중단, 재실행 금지 상태.** [부분 결과와 원인](P3_SCREEN_RESULT.md)을 먼저 확인한다. 기존 launch와 모든 원본은 보존하며 아래 명령으로 덮어쓰거나 자동 재시도하지 않는다. 아래 준비 안내는 실행 전 기록이다.
 
 현재는 **Docker 복구 후 allTests build·이미지 준비 완료, 선별 측정 전 환경 확인 대기** 상태다. [P3 설계 §13](../../apps/server-v3/PERF_STAGE2_P3_DESIGN.md#13-docker-복구-후-검증--2026-11-10)에 실패 이력을 포함한 검증 결과와 재개 순서를 남겼다. 이미지/볼륨과 다른 프로젝트7개는 삭제·초기화하지 않는다. 복구 후 배경7개 중2개가 이미exited였으므로, 기존7개running 전제도 환경 확인 때 먼저 해결한다. 실행기가 임의로 시작하지 않는다.

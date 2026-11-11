@@ -16,3 +16,14 @@
 **결론: 실행 도구 오류로 선별 미완료·P3 채택 판정 불가.** 부분 버퍼 수치만으로 E-32의 유효한 미달 결론인 “B-tree로 충분”을 확정하지 않는다. 오류 원본을 보존하며 기준·힙·부하 변경이나 B만 대체 실행은 하지 않는다. E-31의 중단 원칙에 따라 다음 실행은 별도 확인이 필요하다. 이번 실패는 앱 간섭 재발로 확인된 것이 아니므로 VM 전환으로 이 버그가 해결된다고 주장하지 않는다.
 
 로컬 원본은 `apps/server-v3/build/perf-stage2-p3-screen`, `perf-stage2-p3-a`, `perf-stage2-p3-b`에 남아 있다. 앞선 측정0회 사전 검사 실패도 `perf-stage2-p3-screen-preflight-failed-20261110-220102`에 별도 보존했다. 이번 커밋은 공개 집계·원인 문서만 포함하며 전체 원본 Release 업로드는 수행하지 않았다.
+
+## 2026-11-11 실행 도구 수정·검증 (측정 재실행 아님)
+
+사용자 승인으로 토큰 분리 정규식에 `&&`를 추가했다. 연산자를 공백으로 나눈 관측 SQL이나 단일 `&`로 바뀐 SQL은 거절한다. 운영 앱·JAR·migration·판정 기준은 변경하지 않았다.
+
+- Node 도구 테스트 **60성공·0실패**, runner **0.517초**.
+- `sql-replay.integration.mjs` 실제 PostgreSQL17/PostGIS3.6 검사 **5성공·0실패**, **10.816초**(임시 DB 시작·정리 포함). 접촉/비접촉 bbox의 참·거짓, 2개/701개 데이터 각각의 CANDIDATES/BOUNDED_CELLS를 검증했다.
+- 실제 DB의 `pg_stat_statements`가 정규화한 SQL을 가져와 실패 경로와 같은 `bindTemplate`으로 바인딩한 뒤 `EXPLAIN(ANALYZE,BUFFERS)`을 실행했다. 원본 SQL과 행 전체가 일치하며, 701개 셀에서 표시699개+overflow1개 및 overflow count2를 확인했다. [검증 기록](results/p3-screen/replay-fix-verification.json).
+- UUID 이름·네트워크 없는 tmpfs 전용 DB를 사용하고 그 컨테이너만 정리했다. 기존 측정 DB·원본·이미지·볼륨과 배경7개는 변경하지 않았다.
+
+검증 범위는 **오류가 난 SQL 진단 경로의 실제 DB 실행**이다. HTTP 앱 전체 실행기·k6·정식 측정은 재실행하지 않았으며 기존 선별 실패 판정은 그대로다. 도구만 변경해 Java allTests/build를 반복하지 않았다. 다음 측정은 별도 환경 확인 후 A/B 전체 새 세션으로 실행해야 하며, 기존 `launch.json`이나 원본을 삭제해 재시도하지 않는다.

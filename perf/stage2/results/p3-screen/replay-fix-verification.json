@@ -1,0 +1,53 @@
+{
+  "purpose": "Functional B diagnostic replay verification; no load/adoption",
+  "image": "postgis/postgis:17-3.6@sha256:1ac10b2551ba84ae05db8e7da477afcd0a3fede99bcb7705da2ee157390cb095",
+  "checks": 5,
+  "passed": 5,
+  "failed": 0,
+  "wallSeconds": 10.816481900000001,
+  "results": [
+    {
+      "check": "bbox touching and disjoint behavior",
+      "passed": true
+    },
+    {
+      "check": "CANDIDATES",
+      "seedCount": 2,
+      "rows": 2,
+      "normalizedSql": "WITH marker_candidates AS MATERIALIZED (\r\n        SELECT id,name,latitude,longitude,\"createdAt\" FROM places\r\n        WHERE \"mapId\"=$1 AND latitude>=$2 AND latitude<=$3 AND longitude>=$4 AND longitude<=$5\r\n        ORDER BY \"createdAt\" DESC,id DESC LIMIT $6\r\n      )\r\n      SELECT id,name,latitude,longitude,\r\n        CASE WHEN (SELECT count(*) FROM marker_candidates)<=$7 THEN ROUND(latitude::numeric,$8)::text END AS \"latKey\",\r\n        CASE WHEN (SELECT count(*) FROM marker_candidates)<=$9 THEN ROUND(longitude::numeric,$10)::text END AS \"lngKey\"\r\n      FROM marker_candidates ORDER BY \"createdAt\" DESC,id DESC",
+      "replayedSql": "WITH marker_candidates AS MATERIALIZED ( SELECT id , name , latitude , longitude , \"createdAt\" FROM places WHERE \"mapId\" = 'map' AND latitude >= '37' AND latitude <= '38' AND longitude >= '127' AND longitude <= '129' ORDER BY \"createdAt\" DESC , id DESC LIMIT 301 ) SELECT id , name , latitude , longitude , CASE WHEN ( SELECT count ( * ) FROM marker_candidates ) <= 300 THEN ROUND ( latitude :: numeric , 6 ) :: text END AS \"latKey\" , CASE WHEN ( SELECT count ( * ) FROM marker_candidates ) <= 300 THEN ROUND ( longitude :: numeric , 6 ) :: text END AS \"lngKey\" FROM marker_candidates ORDER BY \"createdAt\" DESC , id DESC",
+      "passed": true
+    },
+    {
+      "check": "BOUNDED_CELLS",
+      "seedCount": 2,
+      "rows": 2,
+      "normalizedSql": "WITH matching AS NOT MATERIALIZED (\r\n        SELECT precision,\"cellLatKey\",\"cellLngKey\",latitude,longitude,count,\"exactKeyCount\",\"groupKey\",\"placeId\",\"placeName\"\r\n        FROM place_marker_cells WHERE \"mapId\"=$1 AND precision=$2\r\n          AND \"maxLat\">=$3 AND \"minLat\"<=$4 AND \"maxLng\">=$5 AND \"minLng\"<=$6\r\n          AND ST_MakeEnvelope(\"minLng\",\"minLat\",\"maxLng\",\"maxLat\",$7)\r\n            && ST_MakeEnvelope($8,$9,$10,$11,$12)\r\n      ), probe AS MATERIALIZED (SELECT * FROM matching LIMIT $13),\r\n      top_cells AS MATERIALIZED (\r\n        SELECT * FROM matching WHERE (SELECT count(*) FROM probe)=$14\r\n        ORDER BY count DESC,\"cellLatKey\" COLLATE \"C\",\"cellLngKey\" COLLATE \"C\" LIMIT $15\r\n      ), visible AS MATERIALIZED (\r\n        SELECT * FROM probe WHERE (SELECT count(*) FROM probe)<$16\r\n        UNION ALL SELECT * FROM top_cells\r\n      )\r\n      SELECT visible.*,$17 AS \"isOverflow\" FROM visible\r\n      UNION ALL\r\n      SELECT $18,$19,$20,\r\n        COALESCE(SUM(m.latitude::numeric*m.count)/NULLIF(SUM(m.count),$21),$22)::float8,\r\n        COALESCE(SUM(m.longitude::numeric*m.count)/NULLIF(SUM(m.count),$23),$24)::float8,\r\n        SUM(m.count)::bigint,$25,$26,$27,$28,$29\r\n      FROM matching m WHERE (SELECT count(*) FROM probe)=$30\r\n        AND (m.\"cellLatKey\",m.\"cellLngKey\") NOT IN (SELECT v.\"cellLatKey\",v.\"cellLngKey\" FROM visible v)\r\n      HAVING count(*)>$31",
+      "replayedSql": "WITH matching AS NOT MATERIALIZED ( SELECT precision , \"cellLatKey\" , \"cellLngKey\" , latitude , longitude , count , \"exactKeyCount\" , \"groupKey\" , \"placeId\" , \"placeName\" FROM place_marker_cells WHERE \"mapId\" = 'map' AND precision = '3' AND \"maxLat\" >= '37' AND \"minLat\" <= '38' AND \"maxLng\" >= '127' AND \"minLng\" <= '129' AND ST_MakeEnvelope ( \"minLng\" , \"minLat\" , \"maxLng\" , \"maxLat\" , 4326 ) && ST_MakeEnvelope ( '127' , '37' , '129' , '38' , 4326 ) ) , probe AS MATERIALIZED ( SELECT * FROM matching LIMIT 700 ) , top_cells AS MATERIALIZED ( SELECT * FROM matching WHERE ( SELECT count ( * ) FROM probe ) = 700 ORDER BY count DESC , \"cellLatKey\" COLLATE \"C\" , \"cellLngKey\" COLLATE \"C\" LIMIT 699 ) , visible AS MATERIALIZED ( SELECT * FROM probe WHERE ( SELECT count ( * ) FROM probe ) < 700 UNION ALL SELECT * FROM top_cells ) SELECT visible . * , false AS \"isOverflow\" FROM visible UNION ALL SELECT NULL , NULL , NULL , COALESCE ( SUM ( m . latitude :: numeric * m . count ) / NULLIF ( SUM ( m . count ) , 0 ) , 0 ) :: float8 , COALESCE ( SUM ( m . longitude :: numeric * m . count ) / NULLIF ( SUM ( m . count ) , 0 ) , 0 ) :: float8 , SUM ( m . count ) :: bigint , NULL , NULL , NULL , NULL , true FROM matching m WHERE ( SELECT count ( * ) FROM probe ) = 700 AND ( m . \"cellLatKey\" , m . \"cellLngKey\" ) NOT IN ( SELECT v . \"cellLatKey\" , v . \"cellLngKey\" FROM visible v ) HAVING count ( * ) > 0",
+      "passed": true
+    },
+    {
+      "check": "CANDIDATES",
+      "seedCount": 701,
+      "rows": 301,
+      "normalizedSql": "WITH marker_candidates AS MATERIALIZED (\r\n        SELECT id,name,latitude,longitude,\"createdAt\" FROM places\r\n        WHERE \"mapId\"=$1 AND latitude>=$2 AND latitude<=$3 AND longitude>=$4 AND longitude<=$5\r\n        ORDER BY \"createdAt\" DESC,id DESC LIMIT $6\r\n      )\r\n      SELECT id,name,latitude,longitude,\r\n        CASE WHEN (SELECT count(*) FROM marker_candidates)<=$7 THEN ROUND(latitude::numeric,$8)::text END AS \"latKey\",\r\n        CASE WHEN (SELECT count(*) FROM marker_candidates)<=$9 THEN ROUND(longitude::numeric,$10)::text END AS \"lngKey\"\r\n      FROM marker_candidates ORDER BY \"createdAt\" DESC,id DESC",
+      "replayedSql": "WITH marker_candidates AS MATERIALIZED ( SELECT id , name , latitude , longitude , \"createdAt\" FROM places WHERE \"mapId\" = 'map' AND latitude >= '37' AND latitude <= '38' AND longitude >= '127' AND longitude <= '129' ORDER BY \"createdAt\" DESC , id DESC LIMIT 301 ) SELECT id , name , latitude , longitude , CASE WHEN ( SELECT count ( * ) FROM marker_candidates ) <= 300 THEN ROUND ( latitude :: numeric , 6 ) :: text END AS \"latKey\" , CASE WHEN ( SELECT count ( * ) FROM marker_candidates ) <= 300 THEN ROUND ( longitude :: numeric , 6 ) :: text END AS \"lngKey\" FROM marker_candidates ORDER BY \"createdAt\" DESC , id DESC",
+      "passed": true
+    },
+    {
+      "check": "BOUNDED_CELLS",
+      "seedCount": 701,
+      "rows": 700,
+      "normalizedSql": "WITH matching AS NOT MATERIALIZED (\r\n        SELECT precision,\"cellLatKey\",\"cellLngKey\",latitude,longitude,count,\"exactKeyCount\",\"groupKey\",\"placeId\",\"placeName\"\r\n        FROM place_marker_cells WHERE \"mapId\"=$1 AND precision=$2\r\n          AND \"maxLat\">=$3 AND \"minLat\"<=$4 AND \"maxLng\">=$5 AND \"minLng\"<=$6\r\n          AND ST_MakeEnvelope(\"minLng\",\"minLat\",\"maxLng\",\"maxLat\",$7)\r\n            && ST_MakeEnvelope($8,$9,$10,$11,$12)\r\n      ), probe AS MATERIALIZED (SELECT * FROM matching LIMIT $13),\r\n      top_cells AS MATERIALIZED (\r\n        SELECT * FROM matching WHERE (SELECT count(*) FROM probe)=$14\r\n        ORDER BY count DESC,\"cellLatKey\" COLLATE \"C\",\"cellLngKey\" COLLATE \"C\" LIMIT $15\r\n      ), visible AS MATERIALIZED (\r\n        SELECT * FROM probe WHERE (SELECT count(*) FROM probe)<$16\r\n        UNION ALL SELECT * FROM top_cells\r\n      )\r\n      SELECT visible.*,$17 AS \"isOverflow\" FROM visible\r\n      UNION ALL\r\n      SELECT $18,$19,$20,\r\n        COALESCE(SUM(m.latitude::numeric*m.count)/NULLIF(SUM(m.count),$21),$22)::float8,\r\n        COALESCE(SUM(m.longitude::numeric*m.count)/NULLIF(SUM(m.count),$23),$24)::float8,\r\n        SUM(m.count)::bigint,$25,$26,$27,$28,$29\r\n      FROM matching m WHERE (SELECT count(*) FROM probe)=$30\r\n        AND (m.\"cellLatKey\",m.\"cellLngKey\") NOT IN (SELECT v.\"cellLatKey\",v.\"cellLngKey\" FROM visible v)\r\n      HAVING count(*)>$31",
+      "replayedSql": "WITH matching AS NOT MATERIALIZED ( SELECT precision , \"cellLatKey\" , \"cellLngKey\" , latitude , longitude , count , \"exactKeyCount\" , \"groupKey\" , \"placeId\" , \"placeName\" FROM place_marker_cells WHERE \"mapId\" = 'map' AND precision = '3' AND \"maxLat\" >= '37' AND \"minLat\" <= '38' AND \"maxLng\" >= '127' AND \"minLng\" <= '129' AND ST_MakeEnvelope ( \"minLng\" , \"minLat\" , \"maxLng\" , \"maxLat\" , 4326 ) && ST_MakeEnvelope ( '127' , '37' , '129' , '38' , 4326 ) ) , probe AS MATERIALIZED ( SELECT * FROM matching LIMIT 700 ) , top_cells AS MATERIALIZED ( SELECT * FROM matching WHERE ( SELECT count ( * ) FROM probe ) = 700 ORDER BY count DESC , \"cellLatKey\" COLLATE \"C\" , \"cellLngKey\" COLLATE \"C\" LIMIT 699 ) , visible AS MATERIALIZED ( SELECT * FROM probe WHERE ( SELECT count ( * ) FROM probe ) < 700 UNION ALL SELECT * FROM top_cells ) SELECT visible . * , false AS \"isOverflow\" FROM visible UNION ALL SELECT NULL , NULL , NULL , COALESCE ( SUM ( m . latitude :: numeric * m . count ) / NULLIF ( SUM ( m . count ) , 0 ) , 0 ) :: float8 , COALESCE ( SUM ( m . longitude :: numeric * m . count ) / NULLIF ( SUM ( m . count ) , 0 ) , 0 ) :: float8 , SUM ( m . count ) :: bigint , NULL , NULL , NULL , NULL , true FROM matching m WHERE ( SELECT count ( * ) FROM probe ) = 700 AND ( m . \"cellLatKey\" , m . \"cellLngKey\" ) NOT IN ( SELECT v . \"cellLatKey\" , v . \"cellLngKey\" FROM visible v ) HAVING count ( * ) > 0",
+      "passed": true
+    }
+  ],
+  "nodeUnitTests": {
+    "runnerSeconds": 0.5172757,
+    "passed": 60,
+    "failed": 0,
+    "total": 60
+  },
+  "scope": "Actual normalized pg_stat_statements query -> bindTemplate -> EXPLAIN + result comparison; full HTTP runner and performance measurement not rerun"
+}
