@@ -1,0 +1,6 @@
+**
+!apps/
+!apps/server-v3/
+!apps/server-v3/build/
+!apps/server-v3/build/libs/
+!apps/server-v3/build/libs/*-perf-local-only.jar

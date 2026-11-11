@@ -1,0 +1,11 @@
+{
+  "filename": "p3-e33-raw-20261111.zip",
+  "sha256": "af3eaa9aa8132af453c42b0bf78451cef8de50800ce51e18e575624d0cd4ad81",
+  "bytes": 30144,
+  "files": 10,
+  "contents": "Six complete EXPLAIN plans, session, result, anonymized background restoration, direct recovery check",
+  "excluded": "private credentials, host process lists, application environment, tokens",
+  "source": "6637fff63805c7a56c4c5dab65d8fc4d65e9ffd0",
+  "release": "https://github.com/MycroCosmo/loco/releases/tag/perf-stage2-p3-e33-20261111",
+  "download": "https://github.com/MycroCosmo/loco/releases/download/perf-stage2-p3-e33-20261111/p3-e33-raw-20261111.zip"
+}

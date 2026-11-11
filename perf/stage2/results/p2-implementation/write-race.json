@@ -1,0 +1,57 @@
+{
+  "kind": "correctness diagnostic, not load measurement",
+  "runs": [
+    {
+      "expectedCount": 2,
+      "staleCells": 1,
+      "counts": [
+        1,
+        2,
+        2
+      ],
+      "requests": 2,
+      "errors": 0,
+      "limit": "E-6 B: aggregate snapshot can precede the conflicting writer; no serialization promised",
+      "success": 2
+    },
+    {
+      "expectedCount": 4,
+      "staleCells": 1,
+      "counts": [
+        1,
+        4,
+        4
+      ],
+      "requests": 4,
+      "errors": 0,
+      "limit": "E-6 B: aggregate snapshot can precede the conflicting writer; no serialization promised",
+      "success": 4
+    },
+    {
+      "expectedCount": 8,
+      "staleCells": 1,
+      "counts": [
+        1,
+        8,
+        8
+      ],
+      "requests": 8,
+      "errors": 0,
+      "limit": "E-6 B: aggregate snapshot can precede the conflicting writer; no serialization promised",
+      "success": 8
+    },
+    {
+      "expectedCount": 16,
+      "staleCells": 1,
+      "counts": [
+        1,
+        16,
+        16
+      ],
+      "requests": 16,
+      "errors": 0,
+      "limit": "E-6 B: aggregate snapshot can precede the conflicting writer; no serialization promised",
+      "success": 16
+    }
+  ]
+}

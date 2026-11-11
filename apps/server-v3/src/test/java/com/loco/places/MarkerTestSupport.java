@@ -7,6 +7,29 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 
 abstract class MarkerTestSupport extends CompatibilityTestBase {
+  // Call only for cell-derived marker responses, never individual/group lookup APIs.
+  static void compareCellResponses(
+      com.fasterxml.jackson.databind.JsonNode expected,
+      com.fasterxml.jackson.databind.JsonNode actual) {
+    org.assertj.core.api.Assertions.assertThat(expected.isArray() && actual.isArray()).isTrue();
+    org.assertj.core.api.Assertions.assertThat(actual.size()).isEqualTo(expected.size());
+    var checked = actual.deepCopy();
+    for (int i = 0; i < actual.size(); i++) {
+      org.assertj.core.api.Assertions.assertThat(actual.get(i).isObject()).isTrue();
+      for (String field : List.of("latitude", "longitude")) {
+        var left = expected.get(i).path(field);
+        var right = actual.get(i).path(field);
+        org.assertj.core.api.Assertions.assertThat(left.isNumber() && right.isNumber()).isTrue();
+        org.assertj.core.api.Assertions.assertThat(left.asDouble()).isFinite();
+        org.assertj.core.api.Assertions.assertThat(right.asDouble())
+            .isFinite()
+            .isCloseTo(left.asDouble(), org.assertj.core.data.Offset.offset(1e-10));
+        ((com.fasterxml.jackson.databind.node.ObjectNode) checked.get(i)).set(field, left);
+      }
+    }
+    JsonComparison.compare(expected, checked, Map.of());
+  }
+
   static String path(String api) {
     return "/api/maps/" + PlaceObservationTest.map(1) + "/places/" + api;
   }

@@ -1,0 +1,172 @@
+{
+  "purpose": "Functional readiness; not performance evidence",
+  "at": "2026-11-11T04:02:33.334Z",
+  "session": {
+    "purpose": "Functional readiness only; no E-32 measurement",
+    "wallSeconds": 248.3303921,
+    "sides": [
+      {
+        "side": "a",
+        "passed": true,
+        "wallSeconds": 120.4866606
+      },
+      {
+        "side": "b",
+        "passed": true,
+        "wallSeconds": 127.8395512
+      }
+    ]
+  },
+  "unitTests": {
+    "passed": 62,
+    "failed": 0,
+    "runnerSeconds": 0.4842639
+  },
+  "networkReservations": [
+    {
+      "project": "loco-perf-p3-a-screen-retest2",
+      "network": "loco-perf-p3-a-screen-retest2_default",
+      "subnet": "10.253.22.0/24",
+      "internal": true,
+      "id": "95edca7dc9839652113a20f3f6230114945f1d84b591137adaaa834a2fcf1041"
+    },
+    {
+      "project": "loco-perf-p3-b-screen-retest2",
+      "network": "loco-perf-p3-b-screen-retest2_default",
+      "subnet": "10.253.23.0/24",
+      "internal": true,
+      "id": "4b9a5ec68e9c15606892ae3d96b5544471e7b1d0e9d5b35367a5030f917ccffb"
+    }
+  ],
+  "restoration": {
+    "backgroundRunning": 7,
+    "backgroundPaused": 0,
+    "readinessStopped": [
+      "a",
+      "b"
+    ],
+    "networks": 36
+  },
+  "sides": [
+    {
+      "side": "a",
+      "jarSha256": "639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e",
+      "runtime": {
+        "java": "21.0.13+9-LTS",
+        "cpuCount": 2,
+        "maxHeapBytes": 389283840,
+        "jvmArguments": [],
+        "gc": [
+          "Copy",
+          "MarkSweepCompact"
+        ],
+        "hikariMaximum": 10,
+        "hikariMinimum": 10,
+        "hikariConnectionTimeoutMs": 30000,
+        "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+        "shared_buffers": "1GB",
+        "work_mem": "4MB",
+        "max_connections": "100",
+        "pg_stat_statements.track": "top"
+      },
+      "seed": {
+        "places": 100000,
+        "coordinateKeyChecks": 600000,
+        "mismatches": 0,
+        "totals": [
+          {
+            "precision": 1,
+            "places": 100000,
+            "cells": 49773
+          },
+          {
+            "precision": 2,
+            "places": 100000,
+            "cells": 60138
+          },
+          {
+            "precision": 3,
+            "places": 100000,
+            "cells": 100000
+          }
+        ]
+      },
+      "readiness": {
+        "purpose": "Functional only, not E-32",
+        "mapsChecked": 1000,
+        "diagnosticCases": 2,
+        "k6ExitCode": 0,
+        "databaseUnchanged": true
+      },
+      "k6": {
+        "passed": 6,
+        "failed": 0,
+        "dropped": 0
+      },
+      "diagnosticCases": 2
+    },
+    {
+      "side": "b",
+      "jarSha256": "abaac593062419fcc99b657f2c60cffbb3924a081722f9dcdb19a649e38f1caf",
+      "runtime": {
+        "java": "21.0.13+9-LTS",
+        "cpuCount": 2,
+        "maxHeapBytes": 389283840,
+        "jvmArguments": [],
+        "gc": [
+          "Copy",
+          "MarkSweepCompact"
+        ],
+        "hikariMaximum": 10,
+        "hikariMinimum": 10,
+        "hikariConnectionTimeoutMs": 30000,
+        "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+        "shared_buffers": "1GB",
+        "work_mem": "4MB",
+        "max_connections": "100",
+        "pg_stat_statements.track": "top"
+      },
+      "seed": {
+        "places": 100000,
+        "coordinateKeyChecks": 600000,
+        "mismatches": 0,
+        "totals": [
+          {
+            "precision": 1,
+            "places": 100000,
+            "cells": 49773
+          },
+          {
+            "precision": 2,
+            "places": 100000,
+            "cells": 60138
+          },
+          {
+            "precision": 3,
+            "places": 100000,
+            "cells": 100000
+          }
+        ]
+      },
+      "readiness": {
+        "purpose": "Functional only, not E-32",
+        "mapsChecked": 1000,
+        "diagnosticCases": 2,
+        "k6ExitCode": 0,
+        "databaseUnchanged": true
+      },
+      "k6": {
+        "passed": 6,
+        "failed": 0,
+        "dropped": 0
+      },
+      "diagnosticCases": 2
+    }
+  ],
+  "launchCheck": {
+    "driverSpawned": false,
+    "backgroundLeaseAcquired": false,
+    "session": "screen-retest2",
+    "passed": true
+  }
+}

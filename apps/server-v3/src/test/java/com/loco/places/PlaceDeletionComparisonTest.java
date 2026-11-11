@@ -126,7 +126,7 @@ class PlaceDeletionComparisonTest extends CompatibilityTestBase {
                         ? 10
                         : expected == 403
                             ? 3
-                            : expected == 404 ? 2 : precision == 0 ? 4 : 4 + precision * 2);
+                            : expected == 404 ? 2 : precision == 0 ? 4 : 4 + 2 * precision);
           boolean removed = expected == 200 || precision > 0;
           if (!removed) seeded.assertUnchanged(DatabaseSnapshot.capture(db, rules));
           try (var rows =

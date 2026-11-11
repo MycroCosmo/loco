@@ -59,19 +59,9 @@ class PlaceCreateFailureComparisonTest extends CompatibilityTestBase {
       }
     try (var left = environment().connect(SharedHarness.Side.V2);
         var right = environment().connect(SharedHarness.Side.V3)) {
-      assertThat(
-              DatabaseSnapshot.capture(left, rules)
-                  .normalized(before.seedIds(), rules)
-                  .get("place_marker_cells"))
-          .isEqualTo(
-              DatabaseSnapshot.capture(right, rules)
-                  .normalized(before.seedIds(), rules)
-                  .get("place_marker_cells"));
-      DatabaseSnapshot.compare(
-          DatabaseSnapshot.capture(left, rules),
-          DatabaseSnapshot.capture(right, rules),
-          before.seedIds(),
-          rules);
+      PlaceWriteSupport.compareCenters(
+          DatabaseSnapshot.capture(left, rules).normalized(before.seedIds(), rules),
+          DatabaseSnapshot.capture(right, rules).normalized(before.seedIds(), rules));
     }
   }
 }

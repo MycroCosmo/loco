@@ -276,6 +276,13 @@ class HealthIntegrationTest {
     assertThat(
             entityManager
                 .createNativeQuery(
+                    "SELECT max(version::integer) FROM flyway_schema_history WHERE success AND version IS NOT NULL",
+                    Integer.class)
+                .getSingleResult())
+        .isEqualTo(9);
+    assertThat(
+            entityManager
+                .createNativeQuery(
                     "SELECT count(*) FROM pg_extension WHERE extname <> 'plpgsql'", Long.class)
                 .getSingleResult())
         .isEqualTo(0L);

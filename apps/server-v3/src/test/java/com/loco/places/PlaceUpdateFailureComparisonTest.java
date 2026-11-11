@@ -85,13 +85,25 @@ class PlaceUpdateFailureComparisonTest extends CompatibilityTestBase {
               while (rows.next()) {
                 int p = rows.getInt(1);
                 found++;
+                boolean combined = side == SharedHarness.Side.V3;
                 assertThat(rows.getString(2))
-                    .isEqualTo(CoordinateKeys.fixed(phase.equals("new") ? 38 : 37.4444, p));
+                    .isEqualTo(
+                        CoordinateKeys.fixed(
+                            combined
+                                ? (p < precision ? 38 : 37.4444)
+                                : (phase.equals("new") ? 38 : 37.4444),
+                            p));
                 assertThat(rows.getInt(3)).isEqualTo(1);
-                if (phase.equals("old")) assertThat(p).isGreaterThanOrEqualTo(precision);
-                else assertThat(p).isLessThan(precision);
+                if (!combined) {
+                  if (phase.equals("old")) assertThat(p).isGreaterThanOrEqualTo(precision);
+                  else assertThat(p).isLessThan(precision);
+                }
               }
-              assertThat(found).isEqualTo(phase.equals("old") ? 4 - precision : precision - 1);
+              assertThat(found)
+                  .isEqualTo(
+                      side == SharedHarness.Side.V3
+                          ? 3
+                          : phase.equals("old") ? 4 - precision : precision - 1);
             }
           }
         } finally {
@@ -101,11 +113,28 @@ class PlaceUpdateFailureComparisonTest extends CompatibilityTestBase {
       }
     try (var left = environment().connect(SharedHarness.Side.V2);
         var right = environment().connect(SharedHarness.Side.V3)) {
-      DatabaseSnapshot.compare(
-          DatabaseSnapshot.capture(left, rules),
-          DatabaseSnapshot.capture(right, rules),
-          before.seedIds(),
-          rules);
+      var v2 = DatabaseSnapshot.capture(left, rules).normalized(before.seedIds(), rules);
+      var v3 = DatabaseSnapshot.capture(right, rules).normalized(before.seedIds(), rules);
+      if (!phase.equals("place")) {
+        var oldCells = v2.remove("place_marker_cells");
+        var newCells = v3.remove("place_marker_cells");
+        if (phase.equals("new") && precision == 2)
+          environment()
+              .knownDifferences
+              .add(
+                  java.util.Map.of(
+                      "case",
+                      "markers.precision-commit",
+                      "kind",
+                      "improved",
+                      "decision",
+                      "E-17 A: old/new cells commit together per precision; place remains committed",
+                      "v2",
+                      oldCells,
+                      "v3",
+                      newCells));
+      }
+      assertThat(v3).as("All state outside separately verified cells remains exact").isEqualTo(v2);
     }
   }
 }

@@ -1,0 +1,6 @@
+# Only the new P3 readiness/retest projects use explicit, pre-checked subnets.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${PERF_NETWORK_SUBNET:?P3 subnet required}

@@ -1,0 +1,26 @@
+{
+  "session": "screen-retest1",
+  "source": "2ec7f2da209e049d4877152ec4e4e1f482afd547",
+  "startedAt": "2026-11-11T02:30:12.755Z",
+  "finishedAt": "2026-11-11T02:31:53.661Z",
+  "wallSeconds": 100.906,
+  "plansCompleted": 0,
+  "httpRunsCompleted": 0,
+  "verdict": "PRE_MEASUREMENT_DOCKER_NETWORK_CREATION_FAILURE",
+  "error": "all predefined address pools have been fully subnetted",
+  "dockerNetworkCountAtReview": 32,
+  "backgroundAtReview": {
+    "paused": 0,
+    "running": 7
+  },
+  "completion": {
+    "error": "Screen step failed; retain original, no retry\n\n1 !== 0\n",
+    "ok": false,
+    "at": "2026-11-11T02:31:53.661Z",
+    "backgroundRestored": true,
+    "backgroundLeaseAcquired": true,
+    "formalStarted": false
+  },
+  "retryStarted": false,
+  "networkOrAssetDeletion": false
+}

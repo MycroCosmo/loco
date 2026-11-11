@@ -1,0 +1,688 @@
+{
+  "purpose": "P2 formal measurement. Invalid runs retained; adoption blocked by mandatory write interference.",
+  "applicationCommit": "91d653a2b69a5f403f9969bd754f3c46eac76735",
+  "readDriverCommit": "4bf7edc52c17874d0ea17b1c17399f70c3cd547f",
+  "remainingDriverCommit": "7a843c7244c55e698a37205f9359c69905c1a2fb",
+  "jarSha256": {
+    "a0": "c1a5293f1dc59a6ee0e648548e92695857a0357c57d10e45f06704a96952158f",
+    "a1": "da87c44168c321d1b05c5d3bbf61a459284c937fdd145c93aa6e940fff1d1a60",
+    "b": "639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e"
+  },
+  "protocol": {
+    "warmupSeconds": 120,
+    "measuredSeconds": 300,
+    "pairs": 5,
+    "heapBytes": 389283840,
+    "p95BudgetMs": 200,
+    "maxRegressionPercent": 10,
+    "minImprovementPercent": 20,
+    "maxRangePercent": 10,
+    "expectedMinutes": [
+      260,
+      320
+    ],
+    "note": "Laptop relative comparison, not production capacity; do not change gates after measuring"
+  },
+  "userDeclaration": "AC connected, Windows best performance, sleep disabled, Windows Update paused, no heavy applications until measurement ends",
+  "environmentAtFirstRead": {
+    "at": "2026-11-09T07:09:51.113Z",
+    "power": {
+      "cpu": {
+        "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+        "NumberOfCores": 24,
+        "NumberOfLogicalProcessors": 32
+      },
+      "wslConfigExists": false,
+      "ac": 1,
+      "memory": 34049220608,
+      "powerRead": true,
+      "overlay": "ded574b5-45a0-4f42-8737-46345c09c238"
+    },
+    "hostProcesses": {
+      "topCpu": [
+        {
+          "cpuCores": 0.35740427283956266,
+          "expectedWorkload": false,
+          "pid": 14832,
+          "name": "Docker Desktop",
+          "workingSetBytes": 209702912
+        },
+        {
+          "cpuCores": 0.1388264530864417,
+          "expectedWorkload": false,
+          "pid": 46900,
+          "name": "ChatGPT",
+          "workingSetBytes": 1072439296
+        },
+        {
+          "cpuCores": 0.059075086419762425,
+          "expectedWorkload": true,
+          "pid": 34408,
+          "name": "com.docker.backend",
+          "workingSetBytes": 1040596992
+        },
+        {
+          "cpuCores": 0.05316757777778618,
+          "expectedWorkload": true,
+          "pid": 31772,
+          "name": "pwsh",
+          "workingSetBytes": 183820288
+        },
+        {
+          "cpuCores": 0.0413525604938337,
+          "expectedWorkload": false,
+          "pid": 32532,
+          "name": "ChatGPT",
+          "workingSetBytes": 283848704
+        },
+        {
+          "cpuCores": 0.02658378888889309,
+          "expectedWorkload": false,
+          "pid": 53928,
+          "name": "CCDaemon",
+          "workingSetBytes": 10366976
+        },
+        {
+          "cpuCores": 0.011815017283952485,
+          "expectedWorkload": false,
+          "pid": 46284,
+          "name": "RexpertPrintStartup",
+          "workingSetBytes": 13295616
+        },
+        {
+          "cpuCores": 0.005907508641976243,
+          "expectedWorkload": false,
+          "pid": 61584,
+          "name": "raonk.moni",
+          "workingSetBytes": 6651904
+        },
+        {
+          "cpuCores": 0.005907508641976243,
+          "expectedWorkload": false,
+          "pid": 12344,
+          "name": "ChatGPT",
+          "workingSetBytes": 402378752
+        },
+        {
+          "cpuCores": 0.0029537543209881213,
+          "expectedWorkload": false,
+          "pid": 29048,
+          "name": "claude",
+          "workingSetBytes": 270413824
+        }
+      ],
+      "cpuPercent": 6.274400446179584,
+      "availablePhysicalBytes": 9722793984,
+      "nonWorkloadCpuCores": 0.6173346530865172,
+      "at": "2026-11-09T07:09:45.9919753+00:00",
+      "topMemory": [
+        {
+          "cpuCores": 0,
+          "expectedWorkload": true,
+          "pid": 59880,
+          "name": "vmmemWSL",
+          "workingSetBytes": 4155473920
+        },
+        {
+          "cpuCores": 0.1388264530864417,
+          "expectedWorkload": false,
+          "pid": 46900,
+          "name": "ChatGPT",
+          "workingSetBytes": 1072439296
+        },
+        {
+          "cpuCores": 0.059075086419762425,
+          "expectedWorkload": true,
+          "pid": 34408,
+          "name": "com.docker.backend",
+          "workingSetBytes": 1040596992
+        },
+        {
+          "cpuCores": 0,
+          "expectedWorkload": false,
+          "pid": 3848,
+          "name": "Memory Compression",
+          "workingSetBytes": 958251008
+        },
+        {
+          "cpuCores": 0.0029537543209881213,
+          "expectedWorkload": false,
+          "pid": 11356,
+          "name": "claude",
+          "workingSetBytes": 850706432
+        },
+        {
+          "cpuCores": 0,
+          "expectedWorkload": false,
+          "pid": 34524,
+          "name": "java",
+          "workingSetBytes": 792440832
+        },
+        {
+          "cpuCores": 0,
+          "expectedWorkload": false,
+          "pid": 15312,
+          "name": "ChatGPT",
+          "workingSetBytes": 652226560
+        },
+        {
+          "cpuCores": 0,
+          "expectedWorkload": false,
+          "pid": 25292,
+          "name": "ChatGPT",
+          "workingSetBytes": 558927872
+        },
+        {
+          "cpuCores": 0,
+          "expectedWorkload": false,
+          "pid": 48012,
+          "name": "MsMpEng",
+          "workingSetBytes": 405942272
+        },
+        {
+          "cpuCores": 0.005907508641976243,
+          "expectedWorkload": false,
+          "pid": 12344,
+          "name": "ChatGPT",
+          "workingSetBytes": 402378752
+        }
+      ],
+      "processCount": 660,
+      "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+      "memoryLoadPercent": 71,
+      "ac": 1
+    },
+    "docker": {
+      "version": "28.1.1",
+      "cpus": 32,
+      "memory": 16609128448,
+      "os": "Docker Desktop"
+    },
+    "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+    "background": [],
+    "pausedBackground": [
+      {
+        "alias": "background-e889d562",
+        "state": "paused",
+        "note": "Memory retained; user-authorized pause only"
+      },
+      {
+        "alias": "background-ff59cc56",
+        "state": "paused",
+        "note": "Memory retained; user-authorized pause only"
+      },
+      {
+        "alias": "background-a7d65270",
+        "state": "paused",
+        "note": "Memory retained; user-authorized pause only"
+      },
+      {
+        "alias": "background-488ea115",
+        "state": "paused",
+        "note": "Memory retained; user-authorized pause only"
+      },
+      {
+        "alias": "background-e2be4830",
+        "state": "paused",
+        "note": "Memory retained; user-authorized pause only"
+      },
+      {
+        "alias": "background-5336624b",
+        "state": "paused",
+        "note": "Memory retained; user-authorized pause only"
+      },
+      {
+        "alias": "background-c8fc47b2",
+        "state": "paused",
+        "note": "Memory retained; user-authorized pause only"
+      }
+    ]
+  },
+  "execution": {
+    "read": {
+      "started": "2026-11-09T16:09:18.9345091+09:00",
+      "finished": "2026-11-09T19:09:39.2412217+09:00",
+      "elapsedSeconds": 10820.3067729,
+      "exitCode": 1
+    },
+    "remaining": {
+      "exitCode": 0,
+      "started": "2026-11-09T19:13:01.4150379+09:00",
+      "finished": "2026-11-09T21:29:40.9259506+09:00",
+      "elapsedSeconds": 8199.5109127
+    },
+    "wallSeconds": 19221.991
+  },
+  "backgroundRead": {
+    "startedAt": "2026-11-09T07:09:19.491Z",
+    "source": "4bf7edc52c17874d0ea17b1c17399f70c3cd547f",
+    "history": [
+      {
+        "at": "2026-11-09T07:09:19.528Z",
+        "phase": "before",
+        "states": [
+          {
+            "alias": "background-e889d562",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-ff59cc56",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-a7d65270",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-488ea115",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-e2be4830",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-5336624b",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-c8fc47b2",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          }
+        ]
+      },
+      {
+        "at": "2026-11-09T07:09:20.619Z",
+        "phase": "paused",
+        "states": [
+          {
+            "alias": "background-e889d562",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-ff59cc56",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-a7d65270",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-488ea115",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-e2be4830",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-5336624b",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-c8fc47b2",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          }
+        ]
+      },
+      {
+        "at": "2026-11-09T10:09:39.229Z",
+        "phase": "restored",
+        "states": [
+          {
+            "alias": "background-e889d562",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-ff59cc56",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-a7d65270",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-488ea115",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-e2be4830",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-5336624b",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-c8fc47b2",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          }
+        ],
+        "restored": true,
+        "failures": []
+      },
+      {
+        "at": "2026-11-09T10:09:39.230Z",
+        "phase": "measurement-failed",
+        "error": "Measurement step failed; original evidence preserved\n\n78 !== 0\n"
+      }
+    ],
+    "restored": true
+  },
+  "backgroundRemaining": {
+    "startedAt": "2026-11-09T10:13:01.990Z",
+    "source": "7a843c7244c55e698a37205f9359c69905c1a2fb",
+    "history": [
+      {
+        "at": "2026-11-09T10:13:02.030Z",
+        "phase": "before",
+        "states": [
+          {
+            "alias": "background-e889d562",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-ff59cc56",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-a7d65270",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-488ea115",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-e2be4830",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-5336624b",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-c8fc47b2",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          }
+        ]
+      },
+      {
+        "at": "2026-11-09T10:13:03.091Z",
+        "phase": "paused",
+        "states": [
+          {
+            "alias": "background-e889d562",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-ff59cc56",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-a7d65270",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-488ea115",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-e2be4830",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-5336624b",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          },
+          {
+            "alias": "background-c8fc47b2",
+            "running": true,
+            "paused": true,
+            "status": "paused"
+          }
+        ]
+      },
+      {
+        "at": "2026-11-09T12:29:39.052Z",
+        "phase": "measurement-complete",
+        "completedAt": "2026-11-09T12:29:39.052Z"
+      },
+      {
+        "at": "2026-11-09T12:29:40.910Z",
+        "phase": "restored",
+        "states": [
+          {
+            "alias": "background-e889d562",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-ff59cc56",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-a7d65270",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-488ea115",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-e2be4830",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-5336624b",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          },
+          {
+            "alias": "background-c8fc47b2",
+            "running": true,
+            "paused": false,
+            "status": "running"
+          }
+        ],
+        "restored": true,
+        "failures": []
+      }
+    ],
+    "restored": true
+  },
+  "restoration": {
+    "read": {
+      "at": "2026-11-09T10:10:00.4247318+00:00",
+      "allRunning": true,
+      "states": [
+        {
+          "alias": "background-e889d562",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-ff59cc56",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-a7d65270",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-488ea115",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-e2be4830",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-5336624b",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-c8fc47b2",
+          "status": "running",
+          "running": true,
+          "paused": false
+        }
+      ]
+    },
+    "final": {
+      "at": "2026-11-09T12:30:01.1532217+00:00",
+      "states": [
+        {
+          "alias": "background-e889d562",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-ff59cc56",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-a7d65270",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-488ea115",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-e2be4830",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-5336624b",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-c8fc47b2",
+          "status": "running",
+          "running": true,
+          "paused": false
+        }
+      ],
+      "allRunning": true
+    }
+  },
+  "invalid": [
+    {
+      "side": "b",
+      "run": "explore-5-1-warmup",
+      "reasons": [
+        "sustained-background-cpu"
+      ]
+    },
+    {
+      "side": "b",
+      "run": "write-2-c1-b",
+      "reasons": [
+        "sustained-background-cpu"
+      ]
+    }
+  ],
+  "originalRelease": "https://github.com/MycroCosmo/loco/releases/tag/perf-stage2-p2-20261109-formal",
+  "privacy": "Only pseudonymous background container aliases; no credentials, command lines or environment values."
+}

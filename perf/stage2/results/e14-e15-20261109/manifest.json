@@ -1,0 +1,593 @@
+{
+  "sourceCommit": "8e1a9dda944b60951eb5b68dfb7a7c6e3bc8a8b4",
+  "originalP0MeasurementCommit": "c7320e6e763f1aa3791b8dff5702a6c2e1f67e87",
+  "branch": "feature/perf-stage2",
+  "session": {
+    "startedAt": "2026-11-08T23:23:06.502Z",
+    "finishedAt": "2026-11-09T02:04:36.637Z",
+    "spanSeconds": 9690.135,
+    "expectedLoadSeconds": 8400,
+    "expectedTotalMinutes": [
+      180,
+      210
+    ],
+    "userDeclaration": "closed-user-confirmed",
+    "protocol": "Each side has its own fresh M-skew database. Stop the inactive project, start active JVM from scratch; identical preflight then 120s target warmup + 300s measured. AB/BA alternate by pair. No favorable retry. P0 original image and default heap unchanged.",
+    "schedule": [
+      {
+        "pair": 1,
+        "viewport": 1,
+        "rate": 50,
+        "side": "A",
+        "name": "pair-1-v1-a"
+      },
+      {
+        "pair": 1,
+        "viewport": 1,
+        "rate": 50,
+        "side": "B",
+        "name": "pair-1-v1-b"
+      },
+      {
+        "pair": 1,
+        "viewport": 10,
+        "rate": 16,
+        "side": "A",
+        "name": "pair-1-v10-a"
+      },
+      {
+        "pair": 1,
+        "viewport": 10,
+        "rate": 16,
+        "side": "B",
+        "name": "pair-1-v10-b"
+      },
+      {
+        "pair": 2,
+        "viewport": 1,
+        "rate": 50,
+        "side": "B",
+        "name": "pair-2-v1-b"
+      },
+      {
+        "pair": 2,
+        "viewport": 1,
+        "rate": 50,
+        "side": "A",
+        "name": "pair-2-v1-a"
+      },
+      {
+        "pair": 2,
+        "viewport": 10,
+        "rate": 16,
+        "side": "B",
+        "name": "pair-2-v10-b"
+      },
+      {
+        "pair": 2,
+        "viewport": 10,
+        "rate": 16,
+        "side": "A",
+        "name": "pair-2-v10-a"
+      },
+      {
+        "pair": 3,
+        "viewport": 1,
+        "rate": 50,
+        "side": "A",
+        "name": "pair-3-v1-a"
+      },
+      {
+        "pair": 3,
+        "viewport": 1,
+        "rate": 50,
+        "side": "B",
+        "name": "pair-3-v1-b"
+      },
+      {
+        "pair": 3,
+        "viewport": 10,
+        "rate": 16,
+        "side": "A",
+        "name": "pair-3-v10-a"
+      },
+      {
+        "pair": 3,
+        "viewport": 10,
+        "rate": 16,
+        "side": "B",
+        "name": "pair-3-v10-b"
+      },
+      {
+        "pair": 4,
+        "viewport": 1,
+        "rate": 50,
+        "side": "B",
+        "name": "pair-4-v1-b"
+      },
+      {
+        "pair": 4,
+        "viewport": 1,
+        "rate": 50,
+        "side": "A",
+        "name": "pair-4-v1-a"
+      },
+      {
+        "pair": 4,
+        "viewport": 10,
+        "rate": 16,
+        "side": "B",
+        "name": "pair-4-v10-b"
+      },
+      {
+        "pair": 4,
+        "viewport": 10,
+        "rate": 16,
+        "side": "A",
+        "name": "pair-4-v10-a"
+      },
+      {
+        "pair": 5,
+        "viewport": 1,
+        "rate": 50,
+        "side": "A",
+        "name": "pair-5-v1-a"
+      },
+      {
+        "pair": 5,
+        "viewport": 1,
+        "rate": 50,
+        "side": "B",
+        "name": "pair-5-v1-b"
+      },
+      {
+        "pair": 5,
+        "viewport": 10,
+        "rate": 16,
+        "side": "A",
+        "name": "pair-5-v10-a"
+      },
+      {
+        "pair": 5,
+        "viewport": 10,
+        "rate": 16,
+        "side": "B",
+        "name": "pair-5-v10-b"
+      }
+    ]
+  },
+  "audit": {
+    "pairedSpanSeconds": 9690.135,
+    "allClean": true,
+    "allAc": true,
+    "allBestPerformance": true,
+    "jarHashes": [
+      "c1a5293f1dc59a6ee0e648548e92695857a0357c57d10e45f06704a96952158f",
+      "da87c44168c321d1b05c5d3bbf61a459284c937fdd145c93aa6e940fff1d1a60"
+    ],
+    "runtimes": [
+      {
+        "java": "21.0.13+9-LTS",
+        "cpuCount": 2,
+        "maxHeapBytes": 389283840,
+        "jvmArguments": [],
+        "gc": [
+          "Copy",
+          "MarkSweepCompact"
+        ],
+        "hikariMaximum": 10,
+        "hikariMinimum": 10,
+        "hikariConnectionTimeoutMs": 30000,
+        "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+        "shared_buffers": "1GB",
+        "work_mem": "4MB",
+        "max_connections": "100",
+        "pg_stat_statements.track": "none"
+      }
+    ],
+    "allLimitsCorrect": true,
+    "allDbUnchanged": true
+  },
+  "environment": {
+    "at": "2026-11-08T23:23:44.088Z",
+    "power": {
+      "powerRead": true,
+      "memory": 34049220608,
+      "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+      "cpu": {
+        "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+        "NumberOfCores": 24,
+        "NumberOfLogicalProcessors": 32
+      },
+      "ac": 1,
+      "wslConfigExists": false
+    },
+    "docker": {
+      "version": "28.1.1",
+      "cpus": 32,
+      "memory": 16609128448,
+      "os": "Docker Desktop"
+    },
+    "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+    "background": [
+      {
+        "alias": "background-bb89aed8"
+      },
+      {
+        "alias": "background-c4a2e818"
+      },
+      {
+        "alias": "background-893207ea"
+      },
+      {
+        "alias": "background-ddce412a"
+      },
+      {
+        "alias": "background-95b31c2c"
+      },
+      {
+        "alias": "background-13993ca1"
+      },
+      {
+        "alias": "background-08b4c2e9"
+      }
+    ]
+  },
+  "runtime": {
+    "java": "21.0.13+9-LTS",
+    "cpuCount": 2,
+    "maxHeapBytes": 389283840,
+    "jvmArguments": [],
+    "gc": [
+      "Copy",
+      "MarkSweepCompact"
+    ],
+    "hikariMaximum": 10,
+    "hikariMinimum": 10,
+    "hikariConnectionTimeoutMs": 30000,
+    "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "shared_buffers": "1GB",
+    "work_mem": "4MB",
+    "max_connections": "100",
+    "pg_stat_statements.track": "none"
+  },
+  "artifacts": {
+    "A": {
+      "jarSha256": "c1a5293f1dc59a6ee0e648548e92695857a0357c57d10e45f06704a96952158f",
+      "containers": [
+        {
+          "id": "d83e8691640fe4c9571e131e01ccd91aea035f7ee3c3073c9003b618416a3fc2",
+          "name": "/loco-perf-e15-a-perf-app-1",
+          "image": "sha256:985c8f260403246086c1063fb04abc5951303af3d2419706d6e305a13b5a7306",
+          "cpu": 2000000000,
+          "memory": 1610612736,
+          "oomKilled": false,
+          "network": [
+            "loco-perf-e15-a_default"
+          ]
+        },
+        {
+          "id": "c674e1327d87898141e1c9566c74852a612a9897ff0ecca63538b9fb82e31920",
+          "name": "/loco-perf-e15-a-perf-db-1",
+          "image": "sha256:9fa71488d8990a73e5bef7575ba1dec17c69958f8e1bedc23597eba7eda67e96",
+          "cpu": 2000000000,
+          "memory": 4294967296,
+          "oomKilled": false,
+          "network": [
+            "loco-perf-e15-a_default"
+          ]
+        }
+      ],
+      "seed": {
+        "size": "M",
+        "distribution": "skew",
+        "processing": "half",
+        "seed": "loco-perf-20261108",
+        "sqlSha256": "307615a566e2a2f52a9c6b6e3eee3d9ebaa415e884f6868ebf835cac3cf7aef7",
+        "preparedSeconds": 7.287,
+        "data": {
+          "cms.admin_account": {
+            "rows": 1,
+            "hash": "5ae99ba13773250ccb243d06c715730b"
+          },
+          "cms.admin_account_role": {
+            "rows": 1,
+            "hash": "92d69e5034caf691a9e0c69153965e6b"
+          },
+          "cms.admin_role": {
+            "rows": 1,
+            "hash": "6d950d8bda889fb522138b2b6765f83e"
+          },
+          "cms.administration_state": {
+            "rows": 1,
+            "hash": "15478b7e4046697b421bdc16e99f77ab"
+          },
+          "cms.change_history": {
+            "rows": 2,
+            "hash": "7ce97c567fcee4c146c0dd84dd32beb3"
+          },
+          "cms.loco_report_processing": {
+            "rows": 50000,
+            "hash": "af35f0ac7bad3e754c90c17341ceb5c3"
+          },
+          "cms.menu_node": {
+            "rows": 0,
+            "hash": null
+          },
+          "cms.menu_tree_revision": {
+            "rows": 1,
+            "hash": "b0384dccd782893bdb3a6ec9a0c04bf6"
+          },
+          "cms.role_permission": {
+            "rows": 0,
+            "hash": null
+          },
+          "cms.stored_file": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.favorites": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.feedbacks": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.map_members": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.maps": {
+            "rows": 1000,
+            "hash": "4fe0ccbf6ab685a941d07a6783b2b5f0"
+          },
+          "public.password_reset_tokens": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.place_marker_cells": {
+            "rows": 209911,
+            "hash": "e8c55ba0a4d2df42b9e120d1ac53b871"
+          },
+          "public.place_reviews": {
+            "rows": 2000,
+            "hash": "869eeb42a06f0e88ad309bc6af9bb043"
+          },
+          "public.places": {
+            "rows": 100000,
+            "hash": "20f94cc714af58e3402d6980799d8296"
+          },
+          "public.refresh_tokens": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.reports": {
+            "rows": 100000,
+            "hash": "4cb06e6fa8c35c4406bd636e7251a01f"
+          },
+          "public.users": {
+            "rows": 100000,
+            "hash": "8b0265fb87bdfb7044448d9e59fdd766"
+          }
+        },
+        "mapDistribution": [
+          {
+            "min": 50,
+            "max": 50000,
+            "places": 100000,
+            "maps": 1000
+          }
+        ]
+      },
+      "seedVerification": {
+        "places": 100000,
+        "coordinateKeyChecks": 600000,
+        "mismatches": 0,
+        "totals": [
+          {
+            "precision": 1,
+            "places": 100000,
+            "cells": 49773
+          },
+          {
+            "precision": 2,
+            "places": 100000,
+            "cells": 60138
+          },
+          {
+            "precision": 3,
+            "places": 100000,
+            "cells": 100000
+          }
+        ]
+      }
+    },
+    "B": {
+      "jarSha256": "da87c44168c321d1b05c5d3bbf61a459284c937fdd145c93aa6e940fff1d1a60",
+      "containers": [
+        {
+          "id": "35021eba53eed9dcfa646e30402d5eb7b993e621a3d174df77463311642ff83d",
+          "name": "/loco-perf-e15-b-perf-app-1",
+          "image": "sha256:c05c7dbe577a2d22250e985a5c44396b91d955e04ae3d658bc8c6e183290d83c",
+          "cpu": 2000000000,
+          "memory": 1610612736,
+          "oomKilled": false,
+          "network": [
+            "loco-perf-e15-b_default"
+          ]
+        },
+        {
+          "id": "bf8153ac87777424fe63a1dd3d0040ef57ccb6a0b9199b1d5eeeb3647e258383",
+          "name": "/loco-perf-e15-b-perf-db-1",
+          "image": "sha256:9fa71488d8990a73e5bef7575ba1dec17c69958f8e1bedc23597eba7eda67e96",
+          "cpu": 2000000000,
+          "memory": 4294967296,
+          "oomKilled": false,
+          "network": [
+            "loco-perf-e15-b_default"
+          ]
+        }
+      ],
+      "seed": {
+        "size": "M",
+        "distribution": "skew",
+        "processing": "half",
+        "seed": "loco-perf-20261108",
+        "sqlSha256": "307615a566e2a2f52a9c6b6e3eee3d9ebaa415e884f6868ebf835cac3cf7aef7",
+        "preparedSeconds": 8.751,
+        "data": {
+          "cms.admin_account": {
+            "rows": 1,
+            "hash": "9e86eba663b0fcfda2a8c6bc0b9b6909"
+          },
+          "cms.admin_account_role": {
+            "rows": 1,
+            "hash": "085de051da872166a4cb9219c1436e1d"
+          },
+          "cms.admin_role": {
+            "rows": 1,
+            "hash": "6d950d8bda889fb522138b2b6765f83e"
+          },
+          "cms.administration_state": {
+            "rows": 1,
+            "hash": "15478b7e4046697b421bdc16e99f77ab"
+          },
+          "cms.change_history": {
+            "rows": 2,
+            "hash": "1eda460e8cc10f0d3b8ab727c7131206"
+          },
+          "cms.loco_report_processing": {
+            "rows": 50000,
+            "hash": "d76ac0b155629c43f030d3704c5650c1"
+          },
+          "cms.menu_node": {
+            "rows": 0,
+            "hash": null
+          },
+          "cms.menu_tree_revision": {
+            "rows": 1,
+            "hash": "b0384dccd782893bdb3a6ec9a0c04bf6"
+          },
+          "cms.role_permission": {
+            "rows": 0,
+            "hash": null
+          },
+          "cms.stored_file": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.favorites": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.feedbacks": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.map_members": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.maps": {
+            "rows": 1000,
+            "hash": "4fe0ccbf6ab685a941d07a6783b2b5f0"
+          },
+          "public.password_reset_tokens": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.place_marker_cells": {
+            "rows": 209911,
+            "hash": "e8c55ba0a4d2df42b9e120d1ac53b871"
+          },
+          "public.place_reviews": {
+            "rows": 2000,
+            "hash": "869eeb42a06f0e88ad309bc6af9bb043"
+          },
+          "public.places": {
+            "rows": 100000,
+            "hash": "20f94cc714af58e3402d6980799d8296"
+          },
+          "public.refresh_tokens": {
+            "rows": 0,
+            "hash": null
+          },
+          "public.reports": {
+            "rows": 100000,
+            "hash": "4cb06e6fa8c35c4406bd636e7251a01f"
+          },
+          "public.users": {
+            "rows": 100000,
+            "hash": "8b0265fb87bdfb7044448d9e59fdd766"
+          }
+        },
+        "mapDistribution": [
+          {
+            "min": 50,
+            "max": 50000,
+            "places": 100000,
+            "maps": 1000
+          }
+        ]
+      },
+      "seedVerification": {
+        "places": 100000,
+        "coordinateKeyChecks": 600000,
+        "mismatches": 0,
+        "totals": [
+          {
+            "precision": 1,
+            "places": 100000,
+            "cells": 49773
+          },
+          {
+            "precision": 2,
+            "places": 100000,
+            "cells": 60138
+          },
+          {
+            "precision": 3,
+            "places": 100000,
+            "cells": 100000
+          }
+        ]
+      }
+    }
+  },
+  "loadLimits": {
+    "image": "sha256:fc863de07aa1dbdd9f797fd561ca8614777a1c8dde0b021d97dc863127b6203e",
+    "cpu": 2000000000,
+    "memory": 2147483648
+  },
+  "windowsTcpEvents": {
+    "querySucceeded": true,
+    "startUtc": "2026-11-08T23:23:06.0000000Z",
+    "endUtc": "2026-11-09T02:04:37.0000000Z",
+    "count": 0,
+    "events": []
+  },
+  "release": "https://github.com/MycroCosmo/loco/releases/tag/perf-stage2-p1-e14-e15-20261109",
+  "limitations": [
+    "Laptop relative comparison, not production absolute performance",
+    "1% p95 and p99 regression exceeds 10%; no performance adoption",
+    "10% B p95 range/median 45.33%; no maximum-throughput claim",
+    "Full viewport not remeasured; prior OOM unresolved",
+    "Single-VU write-cost exploration; 150 samples per operation per side",
+    "JFR is a separate diagnostic run; SQL replay excludes JDBC/network/Java"
+  ],
+  "archives": [
+    {
+      "file": "p0-e15-a-20261109.tar.gz",
+      "bytes": 27001359,
+      "sha256": "785c4bf14c53eefa3267dfbd020796b539e8bd3fd8e5cd99fa899fa28929f9f5",
+      "url": "https://github.com/MycroCosmo/loco/releases/download/perf-stage2-p1-e14-e15-20261109/p0-e15-a-20261109.tar.gz"
+    },
+    {
+      "file": "p1-e15-b-20261109.tar.gz",
+      "bytes": 27657536,
+      "sha256": "0c7d38432b3728976014ea2d694d6fb1cbe925a5ce0683bf463efe11d7d3c480",
+      "url": "https://github.com/MycroCosmo/loco/releases/download/perf-stage2-p1-e14-e15-20261109/p1-e15-b-20261109.tar.gz"
+    }
+  ]
+}

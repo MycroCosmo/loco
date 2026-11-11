@@ -105,7 +105,7 @@ class MarkerEdgeComparisonTest extends MarkerTestSupport {
       } else assertThat(last.path("id").asText()).isNotEqualTo("overflow");
       if (side == SharedHarness.Side.V3) assertThat(SqlQueryCounter.statements()).hasSize(3);
     }
-    JsonComparison.compare(bodies.get(0), bodies.get(1), Map.of());
+    compareCellResponses(bodies.get(0), bodies.get(1));
   }
 
   @ParameterizedTest
@@ -146,7 +146,34 @@ class MarkerEdgeComparisonTest extends MarkerTestSupport {
     var v3 =
         request(v3Url(), path(api), HttpMethod.GET, PlaceWriteSupport.token(environment()), null);
     assertThat(v3.getStatusCode()).isEqualTo(v2.getStatusCode());
-    JsonComparison.compare(v2.getBody(), v3.getBody(), Map.of());
+    if (api.equals("markers?swLat=-90&neLat=90&swLng=-180&neLng=180&level=5")) {
+      // E-5: negative zero joins zero; the positive six-digit half boundary rounds up in PG.
+      assertThat(v2.getBody().get(0).path("type").asText()).isEqualTo("place");
+      assertThat(v2.getBody().get(1).path("groupKey").asText()).isEqualTo("37.000000:0.000000");
+      String expected =
+          "[{\"type\":\"group\",\"id\":\"0.000000:0.000000\",\"name\":\"2개 장소\",\"latitude\":-0.000000005,\"longitude\":0,\"count\":2,\"groupKey\":\"0.000000:0.000000\"},"
+              + "{\"type\":\"place\",\"id\":\""
+              + PlaceObservationTest.place(1)
+              + "\",\"name\":\"Alpha\",\"latitude\":37.00000049,\"longitude\":0,\"count\":1},"
+              + "{\"type\":\"place\",\"id\":\""
+              + PlaceObservationTest.place(2)
+              + "\",\"name\":\"Beta\",\"latitude\":37.0000005,\"longitude\":0,\"count\":1}]";
+      JsonComparison.compare(mapper.readTree(expected), v3.getBody(), Map.of());
+    } else if (api.equals("marker-group?lat=37.0000005&lng=0")) {
+      assertThat(v2.getBody().get(0).path("id").asText()).isEqualTo(PlaceObservationTest.place(1));
+      var canonical =
+          request(
+              v2Url(),
+              path("marker-group?groupKey=37.000001:0.000000"),
+              HttpMethod.GET,
+              PlaceWriteSupport.token(environment()),
+              null);
+      JsonComparison.compare(canonical.getBody(), v3.getBody(), Map.of());
+      assertThat(v3.getBody().size()).isEqualTo(1);
+      assertThat(v3.getBody().get(0).path("id").asText()).isEqualTo(PlaceObservationTest.place(2));
+    } else if (api.equals("markers?swLat=-90&neLat=90&swLng=-180&neLng=180&level=6")) {
+      compareCellResponses(v2.getBody(), v3.getBody());
+    } else JsonComparison.compare(v2.getBody(), v3.getBody(), Map.of());
     assertThat(SqlQueryCounter.statements()).hasSize(3);
   }
 }

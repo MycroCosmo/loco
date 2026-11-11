@@ -1,0 +1,1229 @@
+{
+  "purpose": "P1 local relative measurement, not production capacity or performance adoption.",
+  "sourceCodeSha": "54ef4b313554cd06b50f7b7ae2be4709a8413473",
+  "runnerSha": "c34fc3be13f85e8daf0aa20252e0c79efd7bd6d3",
+  "primary": {
+    "environment": {
+      "at": "2026-11-08T15:10:20.723Z",
+      "power": {
+        "memory": 34049220608,
+        "ac": 1,
+        "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+        "cpu": {
+          "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+          "NumberOfCores": 24,
+          "NumberOfLogicalProcessors": 32
+        },
+        "wslConfigExists": false,
+        "powerRead": true
+      },
+      "docker": {
+        "version": "28.1.1",
+        "cpus": 32,
+        "memory": 16609128448,
+        "os": "Docker Desktop"
+      },
+      "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+      "background": [
+        {
+          "alias": "background-bb89aed8"
+        },
+        {
+          "alias": "background-c4a2e818"
+        },
+        {
+          "alias": "background-893207ea"
+        },
+        {
+          "alias": "background-ddce412a"
+        },
+        {
+          "alias": "background-95b31c2c"
+        },
+        {
+          "alias": "background-13993ca1"
+        },
+        {
+          "alias": "background-08b4c2e9"
+        }
+      ]
+    },
+    "git": "c34fc3be13f85e8daf0aa20252e0c79efd7bd6d3",
+    "dirty": "",
+    "jarSha256": "323871a2472a386d6b48189d1b667217a1c95718a34303739ff59bd4a998d5f5",
+    "runtime": {
+      "java": "21.0.13+9-LTS",
+      "cpuCount": 2,
+      "maxHeapBytes": 389283840,
+      "jvmArguments": [],
+      "gc": [
+        "Copy",
+        "MarkSweepCompact"
+      ],
+      "hikariMaximum": 10,
+      "hikariMinimum": 10,
+      "hikariConnectionTimeoutMs": 30000,
+      "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+      "shared_buffers": "1GB",
+      "work_mem": "4MB",
+      "max_connections": "100",
+      "pg_stat_statements.track": "none"
+    },
+    "sqlTrackingAtSnapshot": "none",
+    "data": {
+      "cms.admin_account": {
+        "rows": 1,
+        "hash": "f53fd08c7c46c8ab9e758466453c64b2"
+      },
+      "cms.admin_account_role": {
+        "rows": 1,
+        "hash": "cf2c3e538423264d76bc3216e6e14ab9"
+      },
+      "cms.admin_role": {
+        "rows": 1,
+        "hash": "6d950d8bda889fb522138b2b6765f83e"
+      },
+      "cms.administration_state": {
+        "rows": 1,
+        "hash": "15478b7e4046697b421bdc16e99f77ab"
+      },
+      "cms.change_history": {
+        "rows": 2,
+        "hash": "28bbb3cee12566d91df8280530454498"
+      },
+      "cms.loco_report_processing": {
+        "rows": 50000,
+        "hash": "36ed99434f4a6d2276c5261e24d9c29f"
+      },
+      "cms.menu_node": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.menu_tree_revision": {
+        "rows": 1,
+        "hash": "b0384dccd782893bdb3a6ec9a0c04bf6"
+      },
+      "cms.role_permission": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.stored_file": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.favorites": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.feedbacks": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.map_members": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.maps": {
+        "rows": 1000,
+        "hash": "4fe0ccbf6ab685a941d07a6783b2b5f0"
+      },
+      "public.password_reset_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.place_marker_cells": {
+        "rows": 209911,
+        "hash": "e8c55ba0a4d2df42b9e120d1ac53b871"
+      },
+      "public.place_reviews": {
+        "rows": 2000,
+        "hash": "869eeb42a06f0e88ad309bc6af9bb043"
+      },
+      "public.places": {
+        "rows": 100000,
+        "hash": "20f94cc714af58e3402d6980799d8296"
+      },
+      "public.refresh_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.reports": {
+        "rows": 100000,
+        "hash": "4cb06e6fa8c35c4406bd636e7251a01f"
+      },
+      "public.users": {
+        "rows": 100000,
+        "hash": "8b0265fb87bdfb7044448d9e59fdd766"
+      }
+    },
+    "images": [
+      {
+        "extname": "plpgsql"
+      },
+      {
+        "extname": "pg_stat_statements"
+      }
+    ],
+    "containers": [
+      {
+        "id": "09ba761f2c774327ac00a0c21bcc0f4bd9eb117c9942308fb84b05c17ba02518",
+        "name": "/loco-perf-p1-perf-app-1",
+        "image": "sha256:21c7fec39cc50df98968bec46995be2421d9ce5e7fc37d56c5a8a05e34928272",
+        "cpu": 2000000000,
+        "memory": 1610612736,
+        "oomKilled": false,
+        "network": [
+          "loco-perf-p1_default"
+        ]
+      },
+      {
+        "id": "f559d3a368b4177b9093dd45a18d3211a58874eb29613bd39bdcace56d8610bf",
+        "name": "/loco-perf-p1-perf-db-1",
+        "image": "sha256:9fa71488d8990a73e5bef7575ba1dec17c69958f8e1bedc23597eba7eda67e96",
+        "cpu": 2000000000,
+        "memory": 4294967296,
+        "oomKilled": false,
+        "network": [
+          "loco-perf-p1_default"
+        ]
+      }
+    ]
+  },
+  "regression": {
+    "environment": {
+      "at": "2026-11-08T16:12:15.445Z",
+      "power": {
+        "cpu": {
+          "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+          "NumberOfCores": 24,
+          "NumberOfLogicalProcessors": 32
+        },
+        "overlay": "ded574b5-45a0-4f42-8737-46345c09c238",
+        "ac": 1,
+        "wslConfigExists": false,
+        "powerRead": true,
+        "memory": 34049220608
+      },
+      "docker": {
+        "version": "28.1.1",
+        "cpus": 32,
+        "memory": 16609128448,
+        "os": "Docker Desktop"
+      },
+      "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+      "background": [
+        {
+          "alias": "background-bb89aed8"
+        },
+        {
+          "alias": "background-c4a2e818"
+        },
+        {
+          "alias": "background-893207ea"
+        },
+        {
+          "alias": "background-ddce412a"
+        },
+        {
+          "alias": "background-95b31c2c"
+        },
+        {
+          "alias": "background-13993ca1"
+        },
+        {
+          "alias": "background-08b4c2e9"
+        }
+      ]
+    },
+    "git": "c34fc3be13f85e8daf0aa20252e0c79efd7bd6d3",
+    "dirty": "M perf/stage2/P1_RESULTS.md",
+    "jarSha256": "323871a2472a386d6b48189d1b667217a1c95718a34303739ff59bd4a998d5f5",
+    "runtime": {
+      "java": "21.0.13+9-LTS",
+      "cpuCount": 2,
+      "maxHeapBytes": 389283840,
+      "jvmArguments": [],
+      "gc": [
+        "Copy",
+        "MarkSweepCompact"
+      ],
+      "hikariMaximum": 10,
+      "hikariMinimum": 10,
+      "hikariConnectionTimeoutMs": 30000,
+      "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+      "shared_buffers": "1GB",
+      "work_mem": "4MB",
+      "max_connections": "100",
+      "pg_stat_statements.track": "none"
+    },
+    "sqlTrackingAtSnapshot": "none",
+    "data": {
+      "cms.admin_account": {
+        "rows": 1,
+        "hash": "f53fd08c7c46c8ab9e758466453c64b2"
+      },
+      "cms.admin_account_role": {
+        "rows": 1,
+        "hash": "cf2c3e538423264d76bc3216e6e14ab9"
+      },
+      "cms.admin_role": {
+        "rows": 1,
+        "hash": "6d950d8bda889fb522138b2b6765f83e"
+      },
+      "cms.administration_state": {
+        "rows": 1,
+        "hash": "15478b7e4046697b421bdc16e99f77ab"
+      },
+      "cms.change_history": {
+        "rows": 2,
+        "hash": "28bbb3cee12566d91df8280530454498"
+      },
+      "cms.loco_report_processing": {
+        "rows": 50000,
+        "hash": "36ed99434f4a6d2276c5261e24d9c29f"
+      },
+      "cms.menu_node": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.menu_tree_revision": {
+        "rows": 1,
+        "hash": "b0384dccd782893bdb3a6ec9a0c04bf6"
+      },
+      "cms.role_permission": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.stored_file": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.favorites": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.feedbacks": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.map_members": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.maps": {
+        "rows": 1000,
+        "hash": "4fe0ccbf6ab685a941d07a6783b2b5f0"
+      },
+      "public.password_reset_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.place_marker_cells": {
+        "rows": 209911,
+        "hash": "e8c55ba0a4d2df42b9e120d1ac53b871"
+      },
+      "public.place_reviews": {
+        "rows": 2000,
+        "hash": "869eeb42a06f0e88ad309bc6af9bb043"
+      },
+      "public.places": {
+        "rows": 100000,
+        "hash": "20f94cc714af58e3402d6980799d8296"
+      },
+      "public.refresh_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.reports": {
+        "rows": 100000,
+        "hash": "4cb06e6fa8c35c4406bd636e7251a01f"
+      },
+      "public.users": {
+        "rows": 100000,
+        "hash": "8b0265fb87bdfb7044448d9e59fdd766"
+      }
+    },
+    "images": [
+      {
+        "extname": "plpgsql"
+      },
+      {
+        "extname": "pg_stat_statements"
+      }
+    ],
+    "containers": [
+      {
+        "id": "09ba761f2c774327ac00a0c21bcc0f4bd9eb117c9942308fb84b05c17ba02518",
+        "name": "/loco-perf-p1-perf-app-1",
+        "image": "sha256:21c7fec39cc50df98968bec46995be2421d9ce5e7fc37d56c5a8a05e34928272",
+        "cpu": 2000000000,
+        "memory": 1610612736,
+        "oomKilled": false,
+        "network": [
+          "loco-perf-p1_default"
+        ]
+      },
+      {
+        "id": "f559d3a368b4177b9093dd45a18d3211a58874eb29613bd39bdcace56d8610bf",
+        "name": "/loco-perf-p1-perf-db-1",
+        "image": "sha256:9fa71488d8990a73e5bef7575ba1dec17c69958f8e1bedc23597eba7eda67e96",
+        "cpu": 2000000000,
+        "memory": 4294967296,
+        "oomKilled": false,
+        "network": [
+          "loco-perf-p1_default"
+        ]
+      }
+    ]
+  },
+  "final": {
+    "environment": {
+      "at": "2026-11-08T16:58:45.081Z",
+      "power": {
+        "powerRead": true,
+        "ac": 1,
+        "cpu": {
+          "Name": "13th Gen Intel(R) Core(TM) i9-13900HX",
+          "NumberOfCores": 24,
+          "NumberOfLogicalProcessors": 32
+        },
+        "wslConfigExists": false,
+        "memory": 34049220608,
+        "overlay": "ded574b5-45a0-4f42-8737-46345c09c238"
+      },
+      "docker": {
+        "version": "28.1.1",
+        "cpus": 32,
+        "memory": 16609128448,
+        "os": "Docker Desktop"
+      },
+      "hybridCoreCaveat": "i9-13900HX P/E hybrid, no CPU pinning; laptop relative comparison, not production absolute figures",
+      "background": [
+        {
+          "alias": "background-bb89aed8"
+        },
+        {
+          "alias": "background-c4a2e818"
+        },
+        {
+          "alias": "background-893207ea"
+        },
+        {
+          "alias": "background-ddce412a"
+        },
+        {
+          "alias": "background-95b31c2c"
+        },
+        {
+          "alias": "background-13993ca1"
+        },
+        {
+          "alias": "background-08b4c2e9"
+        }
+      ]
+    },
+    "git": "c34fc3be13f85e8daf0aa20252e0c79efd7bd6d3",
+    "dirty": "M perf/stage2/P1_RESULTS.md",
+    "jarSha256": "323871a2472a386d6b48189d1b667217a1c95718a34303739ff59bd4a998d5f5",
+    "runtime": {
+      "java": "21.0.13+9-LTS",
+      "cpuCount": 2,
+      "maxHeapBytes": 389283840,
+      "jvmArguments": [],
+      "gc": [
+        "Copy",
+        "MarkSweepCompact"
+      ],
+      "hikariMaximum": 10,
+      "hikariMinimum": 10,
+      "hikariConnectionTimeoutMs": 30000,
+      "postgres": "PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+      "shared_buffers": "1GB",
+      "work_mem": "4MB",
+      "max_connections": "100",
+      "pg_stat_statements.track": "none"
+    },
+    "sqlTrackingAtSnapshot": "none",
+    "data": {
+      "cms.admin_account": {
+        "rows": 1,
+        "hash": "f53fd08c7c46c8ab9e758466453c64b2"
+      },
+      "cms.admin_account_role": {
+        "rows": 1,
+        "hash": "cf2c3e538423264d76bc3216e6e14ab9"
+      },
+      "cms.admin_role": {
+        "rows": 1,
+        "hash": "6d950d8bda889fb522138b2b6765f83e"
+      },
+      "cms.administration_state": {
+        "rows": 1,
+        "hash": "15478b7e4046697b421bdc16e99f77ab"
+      },
+      "cms.change_history": {
+        "rows": 2,
+        "hash": "28bbb3cee12566d91df8280530454498"
+      },
+      "cms.loco_report_processing": {
+        "rows": 50000,
+        "hash": "36ed99434f4a6d2276c5261e24d9c29f"
+      },
+      "cms.menu_node": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.menu_tree_revision": {
+        "rows": 1,
+        "hash": "b0384dccd782893bdb3a6ec9a0c04bf6"
+      },
+      "cms.role_permission": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.stored_file": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.favorites": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.feedbacks": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.map_members": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.maps": {
+        "rows": 1000,
+        "hash": "4fe0ccbf6ab685a941d07a6783b2b5f0"
+      },
+      "public.password_reset_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.place_marker_cells": {
+        "rows": 209911,
+        "hash": "e8c55ba0a4d2df42b9e120d1ac53b871"
+      },
+      "public.place_reviews": {
+        "rows": 2000,
+        "hash": "869eeb42a06f0e88ad309bc6af9bb043"
+      },
+      "public.places": {
+        "rows": 100000,
+        "hash": "20f94cc714af58e3402d6980799d8296"
+      },
+      "public.refresh_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.reports": {
+        "rows": 100000,
+        "hash": "4cb06e6fa8c35c4406bd636e7251a01f"
+      },
+      "public.users": {
+        "rows": 100000,
+        "hash": "8b0265fb87bdfb7044448d9e59fdd766"
+      }
+    },
+    "images": [
+      {
+        "extname": "plpgsql"
+      },
+      {
+        "extname": "pg_stat_statements"
+      }
+    ],
+    "containers": [
+      {
+        "id": "09ba761f2c774327ac00a0c21bcc0f4bd9eb117c9942308fb84b05c17ba02518",
+        "name": "/loco-perf-p1-perf-app-1",
+        "image": "sha256:21c7fec39cc50df98968bec46995be2421d9ce5e7fc37d56c5a8a05e34928272",
+        "cpu": 2000000000,
+        "memory": 1610612736,
+        "oomKilled": false,
+        "network": [
+          "loco-perf-p1_default"
+        ]
+      },
+      {
+        "id": "f559d3a368b4177b9093dd45a18d3211a58874eb29613bd39bdcace56d8610bf",
+        "name": "/loco-perf-p1-perf-db-1",
+        "image": "sha256:9fa71488d8990a73e5bef7575ba1dec17c69958f8e1bedc23597eba7eda67e96",
+        "cpu": 2000000000,
+        "memory": 4294967296,
+        "oomKilled": false,
+        "network": [
+          "loco-perf-p1_default"
+        ]
+      }
+    ]
+  },
+  "dataset": {
+    "size": "M",
+    "distribution": "skew",
+    "processing": "half",
+    "seed": "loco-perf-20261108",
+    "sqlSha256": "307615a566e2a2f52a9c6b6e3eee3d9ebaa415e884f6868ebf835cac3cf7aef7",
+    "preparedSeconds": 9.752,
+    "data": {
+      "cms.admin_account": {
+        "rows": 1,
+        "hash": "f53fd08c7c46c8ab9e758466453c64b2"
+      },
+      "cms.admin_account_role": {
+        "rows": 1,
+        "hash": "cf2c3e538423264d76bc3216e6e14ab9"
+      },
+      "cms.admin_role": {
+        "rows": 1,
+        "hash": "6d950d8bda889fb522138b2b6765f83e"
+      },
+      "cms.administration_state": {
+        "rows": 1,
+        "hash": "15478b7e4046697b421bdc16e99f77ab"
+      },
+      "cms.change_history": {
+        "rows": 2,
+        "hash": "28bbb3cee12566d91df8280530454498"
+      },
+      "cms.loco_report_processing": {
+        "rows": 50000,
+        "hash": "36ed99434f4a6d2276c5261e24d9c29f"
+      },
+      "cms.menu_node": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.menu_tree_revision": {
+        "rows": 1,
+        "hash": "b0384dccd782893bdb3a6ec9a0c04bf6"
+      },
+      "cms.role_permission": {
+        "rows": 0,
+        "hash": null
+      },
+      "cms.stored_file": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.favorites": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.feedbacks": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.map_members": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.maps": {
+        "rows": 1000,
+        "hash": "4fe0ccbf6ab685a941d07a6783b2b5f0"
+      },
+      "public.password_reset_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.place_marker_cells": {
+        "rows": 209911,
+        "hash": "e8c55ba0a4d2df42b9e120d1ac53b871"
+      },
+      "public.place_reviews": {
+        "rows": 2000,
+        "hash": "869eeb42a06f0e88ad309bc6af9bb043"
+      },
+      "public.places": {
+        "rows": 100000,
+        "hash": "20f94cc714af58e3402d6980799d8296"
+      },
+      "public.refresh_tokens": {
+        "rows": 0,
+        "hash": null
+      },
+      "public.reports": {
+        "rows": 100000,
+        "hash": "4cb06e6fa8c35c4406bd636e7251a01f"
+      },
+      "public.users": {
+        "rows": 100000,
+        "hash": "8b0265fb87bdfb7044448d9e59fdd766"
+      }
+    },
+    "mapDistribution": [
+      {
+        "min": 50,
+        "max": 50000,
+        "places": 100000,
+        "maps": 1000
+      }
+    ]
+  },
+  "sameSeedAndSqlAsP0": true,
+  "seedVerification": {
+    "places": 100000,
+    "coordinateKeyChecks": 600000,
+    "mismatches": 0,
+    "totals": [
+      {
+        "precision": 1,
+        "places": 100000,
+        "cells": 49773
+      },
+      {
+        "precision": 2,
+        "places": 100000,
+        "cells": 60138
+      },
+      {
+        "precision": 3,
+        "places": 100000,
+        "cells": 100000
+      }
+    ]
+  },
+  "artifactChecks": {
+    "checks": 4,
+    "results": [
+      {
+        "artifact": "loco-server-v3-0.0.1-SNAPSHOT.jar",
+        "profile": "perf",
+        "rejectedBeforeDatabase": true,
+        "status": 1
+      },
+      {
+        "artifact": "loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar",
+        "profile": "production",
+        "rejectedBeforeDatabase": true,
+        "status": 1
+      },
+      {
+        "artifact": "loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar",
+        "profile": "perf,production",
+        "rejectedBeforeDatabase": true,
+        "status": 1
+      }
+    ],
+    "normalJarExcludesPerf": true
+  },
+  "knownDifferences": {
+    "total": 13,
+    "intentional": 5,
+    "improved": 8,
+    "deferred": 0
+  },
+  "gates": {
+    "correctnessPassed": true,
+    "primaryFiveBudgetPassed": true,
+    "primaryP95RangeWithin10Percent": false,
+    "regressionWithin10Percent": false,
+    "maximumSustainableThroughputConfirmed": false,
+    "fullViewportOomZero": false
+  },
+  "protocol": {
+    "primary": "1 req/s 120 s then (16 req/s warmup120 + measurement300) x5; retained all runs.",
+    "regression": "App restart; P0-matching 1/5/10/25/50/100 req/s 60 s pilots; (50 req/s warmup120 + measurement300) x5.",
+    "stress": "50 req/s, full viewport,120 s; JVM heap OOM retained.",
+    "diagnostics": "JFR and pg_stat_statements/EXPLAIN outside representative load; SQL tracking none during every load."
+  },
+  "archive": {
+    "release": "https://github.com/MycroCosmo/loco/releases/tag/perf-stage2-p1-20261109",
+    "asset": "p1-20261109-local.tar.gz",
+    "sha256": "1111b6e0589802ac25ff0e39a74a6c36aad4210a31b0256719a13aafddf03dd3",
+    "bytes": 38205685,
+    "sourceFiles": 562,
+    "checksumMetadata": "SHA256SUMS.txt and REDACTION.txt are additional archive metadata.",
+    "redaction": "Private credentials, preflight cache and binary JFR omitted; background container names pseudonymized. Secret/JWT/cookie scan passed."
+  },
+  "measuredJar": {
+    "containerJarSha256": "323871a2472a386d6b48189d1b667217a1c95718a34303739ff59bd4a998d5f5",
+    "match": true,
+    "builtJarSha256": "323871a2472a386d6b48189d1b667217a1c95718a34303739ff59bd4a998d5f5"
+  },
+  "shutdown": [
+    {
+      "name": "/loco-perf-p1-perf-app-1",
+      "status": "exited",
+      "oomKilled": false,
+      "finishedAt": "2026-11-08T16:58:55.166131636Z",
+      "image": "sha256:21c7fec39cc50df98968bec46995be2421d9ce5e7fc37d56c5a8a05e34928272"
+    },
+    {
+      "name": "/loco-perf-p1-perf-db-1",
+      "status": "exited",
+      "oomKilled": false,
+      "finishedAt": "2026-11-08T16:58:55.434113546Z",
+      "image": "sha256:9fa71488d8990a73e5bef7575ba1dec17c69958f8e1bedc23597eba7eda67e96"
+    }
+  ],
+  "windowsNetworkEvents": {
+    "startUtc": "2026-11-08T14:08:52.4960000Z",
+    "count": 0,
+    "endUtc": "2026-11-08T16:57:54.7810000Z",
+    "ids": [
+      4227,
+      4231
+    ],
+    "events": []
+  },
+  "finalSqlPlans": [
+    {
+      "name": "markers-hot",
+      "sqlCount": 4,
+      "plans": [
+        {
+          "executionMs": 2.053,
+          "nodes": [
+            {
+              "type": "Index Scan",
+              "parallel": false,
+              "index": "place_marker_cells_mapId_precision_minLat_maxLat_minLng_max_idx",
+              "relation": "place_marker_cells",
+              "rows": 515,
+              "loops": 1
+            }
+          ]
+        },
+        {
+          "executionMs": 1.784,
+          "nodes": [
+            {
+              "type": "Bitmap Heap Scan",
+              "parallel": false,
+              "relation": "places",
+              "rows": 515,
+              "loops": 1
+            },
+            {
+              "type": "Bitmap Index Scan",
+              "parallel": false,
+              "index": "places_mapId_latitude_longitude_idx",
+              "rows": 515,
+              "loops": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "markers-other",
+      "sqlCount": 3,
+      "plans": [
+        {
+          "executionMs": 0.084,
+          "nodes": [
+            {
+              "type": "Index Scan",
+              "parallel": false,
+              "index": "places_mapId_latitude_longitude_idx",
+              "relation": "places",
+              "rows": 1,
+              "loops": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "marker-group",
+      "sqlCount": 3,
+      "plans": [
+        {
+          "executionMs": 12.801,
+          "nodes": [
+            {
+              "type": "Seq Scan",
+              "parallel": true,
+              "relation": "places",
+              "rows": 0,
+              "loops": 3,
+              "removed": 33333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "marker-cluster",
+      "sqlCount": 5,
+      "plans": [
+        {
+          "executionMs": 0.05,
+          "nodes": [
+            {
+              "type": "Index Scan",
+              "parallel": false,
+              "index": "place_marker_cells_pkey",
+              "relation": "place_marker_cells",
+              "rows": 1,
+              "loops": 1
+            }
+          ]
+        },
+        {
+          "executionMs": 24.364,
+          "nodes": [
+            {
+              "type": "Seq Scan",
+              "parallel": true,
+              "relation": "places",
+              "rows": 0,
+              "loops": 3,
+              "removed": 33333
+            }
+          ]
+        },
+        {
+          "executionMs": 0.17,
+          "nodes": [
+            {
+              "type": "Index Scan",
+              "parallel": false,
+              "index": "places_pkey",
+              "relation": "places",
+              "rows": 1,
+              "loops": 1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "jfr": {
+    "wide": {
+      "windowSeconds": 60,
+      "gcCount": 195,
+      "gcSeconds": 46.853714737999994,
+      "pauseSeconds": 46.853714737999994,
+      "gcNames": {
+        "SerialOld": 149,
+        "DefNew": 46
+      },
+      "heapAfterMax": 268872448,
+      "executionSamples": 717,
+      "leaf": [
+        [
+          "java/util/HashMap.getNode",
+          220
+        ],
+        [
+          "java/util/HashMap.putVal",
+          47
+        ],
+        [
+          "java/math/BigDecimal.<init>",
+          34
+        ],
+        [
+          "java/lang/String.hashCode",
+          32
+        ],
+        [
+          "java/math/MutableBigInteger.normalize",
+          23
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serializeFields",
+          16
+        ],
+        [
+          "java/math/BigDecimal.compactValFor",
+          14
+        ],
+        [
+          "java/lang/String.<init>",
+          14
+        ],
+        [
+          "java/math/MutableBigInteger.getLowestSetBit",
+          13
+        ],
+        [
+          "java/math/BigInteger.trustedStripLeadingZeroInts",
+          13
+        ],
+        [
+          "java/math/BigInteger.pow",
+          11
+        ],
+        [
+          "java/math/MutableBigInteger.divideMagnitude",
+          11
+        ],
+        [
+          "java/util/HashMap.resize",
+          11
+        ],
+        [
+          "ch/qos/logback/classic/Logger.isInfoEnabled",
+          10
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.cells",
+          10
+        ]
+      ],
+      "stack": [
+        [
+          "com/loco/places/MarkerQueryRepository.cells",
+          260
+        ],
+        [
+          "java/util/HashMap.getNode",
+          221
+        ],
+        [
+          "org/hibernate/jpa/spi/NativeQueryTupleTransformer$NativeTupleImpl.get",
+          221
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.markers",
+          167
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.number",
+          148
+        ],
+        [
+          "java/util/LinkedHashMap.get",
+          141
+        ],
+        [
+          "java/util/HashMap.put",
+          99
+        ],
+        [
+          "org/hibernate/jpa/spi/NativeQueryTupleTransformer$NativeTupleImpl.<init>",
+          94
+        ],
+        [
+          "org/hibernate/jpa/spi/NativeQueryTupleTransformer.transformTuple",
+          89
+        ],
+        [
+          "java/math/BigDecimal.<init>",
+          86
+        ],
+        [
+          "java/util/HashMap.containsKey",
+          79
+        ],
+        [
+          "java/util/HashMap.putVal",
+          62
+        ],
+        [
+          "com/loco/places/PrismaFloats.input",
+          59
+        ],
+        [
+          "java/math/MutableBigInteger.divideKnuth",
+          48
+        ],
+        [
+          "java/math/MutableBigInteger.divide",
+          48
+        ]
+      ],
+      "applicationStack": [
+        [
+          "com/loco/places/MarkerQueryRepository.cells",
+          260
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.markers",
+          167
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.number",
+          148
+        ],
+        [
+          "com/loco/places/PrismaFloats.input",
+          59
+        ],
+        [
+          "com/loco/places/PlaceResponses.text",
+          23
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.text",
+          23
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.marker",
+          4
+        ],
+        [
+          "com/loco/web/GlobalHttpFilter.doFilterInternal",
+          3
+        ],
+        [
+          "com/loco/security/RateLimitInterceptor.preHandle",
+          2
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.individual",
+          1
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.rows",
+          1
+        ],
+        [
+          "com/loco/config/ApiWebConfig$1.preHandle",
+          1
+        ]
+      ]
+    },
+    "regression": {
+      "durationSeconds": 60,
+      "counts": {
+        "jdk.CPULoad": 60,
+        "jdk.ExecutionSample": 245,
+        "jdk.GCHeapSummary": 548,
+        "jdk.GarbageCollection": 274,
+        "jdk.Compilation": 1
+      },
+      "gc": {
+        "count": 274,
+        "totalDurationMs": 431.9533819999998,
+        "totalPauseMs": 431.9533819999998,
+        "maxPauseMs": 3.612282,
+        "names": {
+          "DefNew": 274
+        }
+      },
+      "topLeafMethods": [
+        [
+          "java/util/HashMap.getNode",
+          15
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serializeFields",
+          15
+        ],
+        [
+          "java/lang/String.hashCode",
+          9
+        ],
+        [
+          "java/util/HashMap.putVal",
+          9
+        ],
+        [
+          "java/lang/StringLatin1.hashCode",
+          7
+        ],
+        [
+          "java/lang/StringLatin1.toLowerCase",
+          6
+        ],
+        [
+          "java/lang/String.<init>",
+          6
+        ],
+        [
+          "org/springframework/web/util/pattern/LiteralPathElement.matches",
+          6
+        ],
+        [
+          "java/math/MutableBigInteger.normalize",
+          6
+        ],
+        [
+          "ch/qos/logback/classic/Logger.isInfoEnabled",
+          5
+        ],
+        [
+          "java/util/concurrent/ConcurrentHashMap.get",
+          5
+        ],
+        [
+          "java/lang/Class.reflectionData",
+          5
+        ],
+        [
+          "org/springframework/util/ObjectUtils.nullSafeEquals",
+          5
+        ],
+        [
+          "java/util/HashMap.resize",
+          4
+        ],
+        [
+          "org/hibernate/type/descriptor/jdbc/BasicExtractor.extract",
+          4
+        ]
+      ],
+      "appFrames": [
+        [
+          "com/loco/places/MarkerQueryRepository.cells",
+          14
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.markers",
+          11
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.number",
+          8
+        ],
+        [
+          "com/loco/places/PlaceResponses.text",
+          5
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.text",
+          5
+        ],
+        [
+          "com/loco/places/PrismaFloats.input",
+          5
+        ],
+        [
+          "com/loco/config/ApiWebConfig$1.preHandle",
+          2
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.marker",
+          2
+        ],
+        [
+          "com/loco/security/JwtAuthenticationFilter.doFilterInternal",
+          2
+        ],
+        [
+          "com/loco/config/ApiWebConfig$1.lambda$preHandle$0",
+          2
+        ],
+        [
+          "com/loco/places/MarkerController$$SpringCGLIB$$0.markers",
+          1
+        ],
+        [
+          "com/loco/config/ApiWebConfig.isApi",
+          1
+        ],
+        [
+          "com/loco/security/RateLimitInterceptor.preHandle",
+          1
+        ],
+        [
+          "com/loco/places/MarkerInputs.trim",
+          1
+        ],
+        [
+          "com/loco/places/MarkerInputs.number",
+          1
+        ]
+      ]
+    }
+  }
+}

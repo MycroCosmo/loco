@@ -1,0 +1,15 @@
+{
+  "purpose": "E-32 pre-screen artifact freeze; not a measurement result or adoption decision",
+  "frozenAt": "2026-11-10",
+  "aSource": "91d653a2b69a5f403f9969bd754f3c46eac76735",
+  "bProductionSource": "061bd5ee5d985dc77993093737b407143931e3d4",
+  "sourceNote": "The verification commit adds test/tool fixes and evidence; production Java and migrations are unchanged from bProductionSource. The launcher records the final clean checkout SHA.",
+  "aImage": "loco-perf-p2-b:local",
+  "aImageId": "sha256:96f1e30f49d25b32c1fd58a6bd3903c194035bcbe0cd2d8aa226c8591d4adcdb",
+  "aJar": "639c3956667040fde1072d922d614c4b8a96c7c78c554957d9042c89175cef5e",
+  "bImage": "loco-perf-p3-b:local",
+  "bImageId": "sha256:deb6e82419e2cfdf274a4fa04cddc096087a30e818387337d41b90d3430e496d",
+  "bJar": "abaac593062419fcc99b657f2c60cffbb3924a081722f9dcdb19a649e38f1caf",
+  "hashVerification": "sha256sum /app/app.jar in network-disabled temporary containers; B also matches the local perf JAR",
+  "measurementStarted": false
+}

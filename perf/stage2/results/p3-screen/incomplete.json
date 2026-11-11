@@ -1,0 +1,107 @@
+{
+  "source": "7fde566e27046e166f92635850cfc742ab45f4a7",
+  "startedAt": "2026-11-10T14:52:06.909Z",
+  "finishedAt": "2026-11-10T15:08:40.563Z",
+  "wallSeconds": 993.654,
+  "verdict": "INCOMPLETE_TOOL_ERROR_NO_ADOPTION",
+  "completed": {
+    "error": "Screen step failed; retain original, no retry\n\n1 !== 0\n",
+    "ok": false,
+    "at": "2026-11-10T15:08:40.563Z",
+    "backgroundRestored": true,
+    "backgroundLeaseAcquired": true,
+    "formalStarted": false
+  },
+  "plans": [
+    {
+      "side": "a",
+      "run": 1,
+      "rootBuffers": 3081,
+      "valid": true,
+      "reasons": []
+    },
+    {
+      "side": "a",
+      "run": 2,
+      "rootBuffers": 3081,
+      "valid": true,
+      "reasons": []
+    },
+    {
+      "side": "a",
+      "run": 3,
+      "rootBuffers": 3081,
+      "valid": true,
+      "reasons": []
+    },
+    {
+      "side": "b",
+      "run": 1,
+      "rootBuffers": 2626,
+      "valid": true,
+      "reasons": []
+    },
+    {
+      "side": "b",
+      "run": 2,
+      "rootBuffers": 2626,
+      "valid": true,
+      "reasons": []
+    },
+    {
+      "side": "b",
+      "run": 3,
+      "rootBuffers": 2626,
+      "valid": true,
+      "reasons": []
+    }
+  ],
+  "aHttp": [
+    {
+      "run": "screen-1",
+      "p95Ms": 20.420946,
+      "p99Ms": 22.107601,
+      "status": {
+        "200": 4801
+      },
+      "dropped": 0,
+      "valid": true,
+      "reasons": [],
+      "exitCode": 0
+    },
+    {
+      "run": "screen-1-warmup",
+      "p95Ms": 21.676444,
+      "p99Ms": 25.377657399999997,
+      "status": {
+        "200": 1921
+      },
+      "dropped": 0,
+      "valid": true,
+      "reasons": [],
+      "exitCode": 0
+    }
+  ],
+  "aDatabaseUnchanged": true,
+  "bHttpMeasuredRuns": 0,
+  "bufferMedianRatio": 0.8523206751054853,
+  "bufferReductionPercent": 14.767932489451475,
+  "bufferThresholdRatio": 0.8,
+  "warning": "Buffer observation alone is not a valid completed E-32 verdict; B HTTP and A-ext are absent.",
+  "rootCause": "sql-replay.mjs tokens split PostgreSQL && into & and &; join inserts a space. diagnostic EXPLAIN fails before B k6 warmup. Existing replay test checked bindings/SRID but not executable operator preservation.",
+  "minimalReproduction": {
+    "input": "SELECT a && b",
+    "output": "SELECT a & & b"
+  },
+  "background": {
+    "automaticRecovery": true,
+    "atResultReview": {
+      "running": 7,
+      "paused": 0
+    }
+  },
+  "retryStarted": false,
+  "sourceModified": false,
+  "rawLocation": "apps/server-v3/build/perf-stage2-p3-{screen,a,b}",
+  "previousPreflightPreserved": "apps/server-v3/build/perf-stage2-p3-screen-preflight-failed-20261110-220102"
+}

@@ -1,0 +1,2046 @@
+{
+  "verdict": "E14 correctness/index validation passed; E15 regression reproduced; adoption withheld; P2/P3 not started",
+  "aggregation": "Median of five per-run percentiles, not pooled percentile. Pair order AB/BA alternates; no favorable retries.",
+  "conditions": {
+    "1": {
+      "p(95)": {
+        "before": {
+          "values": [
+            7.255445,
+            7.373686,
+            7.120972,
+            7.3389064999999984,
+            7.212115
+          ],
+          "median": 7.255445,
+          "min": 7.120972,
+          "max": 7.373686,
+          "rangePercent": 3.4830944208108545
+        },
+        "after": {
+          "values": [
+            8.217909,
+            8.023287,
+            8.154602,
+            8.104863,
+            8.114647
+          ],
+          "median": 8.114647,
+          "min": 8.023287,
+          "max": 8.217909,
+          "rangePercent": 2.3984037752967042
+        },
+        "medianRegressionPercent": 11.84216819230246,
+        "pairedRegressionPercent": [
+          13.265402742354194,
+          8.809718775657105,
+          14.51529369866924,
+          10.43692953439319,
+          12.514109938624095
+        ]
+      },
+      "p(99)": {
+        "before": {
+          "values": [
+            8.955437,
+            8.937767,
+            8.774249,
+            8.971741190000001,
+            8.916989
+          ],
+          "median": 8.937767,
+          "min": 8.774249,
+          "max": 8.971741190000001,
+          "rangePercent": 2.2096368142065237
+        },
+        "after": {
+          "values": [
+            10.449033,
+            9.984413,
+            10.208839,
+            10.075416,
+            10.301701
+          ],
+          "median": 10.208839,
+          "min": 9.984413,
+          "max": 10.449033,
+          "rangePercent": 4.551154151809036
+        },
+        "medianRegressionPercent": 14.221359764692899,
+        "pairedRegressionPercent": [
+          16.67809175587971,
+          11.710374638318498,
+          16.350003288030692,
+          12.301679090232408,
+          15.528919010666042
+        ]
+      },
+      "valid": true,
+      "withinTenPercent": false,
+      "runs": {
+        "A": [
+          {
+            "run": "pair-1-v1-a-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "p(99)": 8.955437,
+              "max": 15.671372,
+              "avg": 4.6387480267982255,
+              "min": 0.877287,
+              "med": 4.893136,
+              "p(95)": 7.255445
+            },
+            "status": {
+              "200": 15001
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 15001,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12001,
+                "mean": 5.4063900701608425,
+                "p50": 5.097329,
+                "p95": 7.537994,
+                "p99": 9.237736,
+                "max": 15.671372,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.5679239726666665,
+                "p50": 1.4680555,
+                "p95": 2.247101249999999,
+                "p99": 3.783114739999991,
+                "max": 10.098634,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0093959731543618,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.017,
+              "max": 1.018
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-1-v1-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.814
+            }
+          },
+          {
+            "run": "pair-2-v1-a-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "p(99)": 8.937767,
+              "max": 14.55087,
+              "avg": 4.765336145656946,
+              "min": 0.905346,
+              "med": 5.023095,
+              "p(95)": 7.373686
+            },
+            "status": {
+              "200": 15001
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 15001,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12001,
+                "mean": 5.522416309807512,
+                "p50": 5.220992,
+                "p95": 7.595631,
+                "p99": 9.253093,
+                "max": 14.55087,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.7367631290000038,
+                "p50": 1.6196685,
+                "p95": 2.4414591,
+                "p99": 4.981364529999999,
+                "max": 9.942257,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 297,
+              "mean": 1.0096296296296288,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.018,
+              "max": 1.019
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-2-v1-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 300.874
+            }
+          },
+          {
+            "run": "pair-3-v1-a-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "min": 0.066291,
+              "med": 4.838226,
+              "p(95)": 7.120972,
+              "p(99)": 8.774249,
+              "max": 14.331755,
+              "avg": 4.596968332844463
+            },
+            "status": {
+              "200": 15001
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 15001,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12001,
+                "mean": 5.332783405049559,
+                "p50": 5.032241,
+                "p95": 7.344271,
+                "p99": 8.930905,
+                "max": 14.331755,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.6534627723333317,
+                "p50": 1.569563,
+                "p95": 2.31851015,
+                "p99": 4.091461959999999,
+                "max": 8.682505,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 297,
+              "mean": 1.010188552188552,
+              "p50": 1.012,
+              "p95": 1.016,
+              "p99": 1.01708,
+              "max": 1.022
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-3-v1-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.042
+            }
+          },
+          {
+            "run": "pair-4-v1-a-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "max": 18.128515,
+              "avg": 4.683419776600016,
+              "min": 0.968732,
+              "med": 4.8877495,
+              "p(95)": 7.3389064999999984,
+              "p(99)": 8.971741190000001
+            },
+            "status": {
+              "200": 15000
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 15000,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12000,
+                "mean": 5.430455839166679,
+                "p50": 5.1009899999999995,
+                "p95": 7.581589399999999,
+                "p99": 9.214332050000001,
+                "max": 18.128515,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.695275526333334,
+                "p50": 1.5865844999999998,
+                "p95": 2.3289562499999983,
+                "p99": 5.175444659999995,
+                "max": 8.906705,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 297,
+              "mean": 1.0101043771043767,
+              "p50": 1.012,
+              "p95": 1.016,
+              "p99": 1.017,
+              "max": 1.018
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-4-v1-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.015
+            }
+          },
+          {
+            "run": "pair-5-v1-a-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "avg": 4.639421365308969,
+              "min": 0.957327,
+              "med": 4.878472,
+              "p(95)": 7.212115,
+              "p(99)": 8.916989,
+              "max": 16.69768
+            },
+            "status": {
+              "200": 15001
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 15001,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12001,
+                "mean": 5.380916610532449,
+                "p50": 5.080236,
+                "p95": 7.459879,
+                "p99": 9.128081,
+                "max": 16.69768,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.6731932193333405,
+                "p50": 1.57403,
+                "p95": 2.359152899999994,
+                "p99": 4.3500570100000004,
+                "max": 9.010932,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.009359060402684,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.01803,
+              "max": 1.02
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-5-v1-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.798
+            }
+          }
+        ],
+        "B": [
+          {
+            "run": "pair-1-v1-b-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "min": 0.894985,
+              "med": 5.698779,
+              "p(95)": 8.217909,
+              "p(99)": 10.449033,
+              "max": 25.245504,
+              "avg": 5.342032384241045
+            },
+            "status": {
+              "200": 15001
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 15001,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12001,
+                "mean": 6.270941770769079,
+                "p50": 5.928147,
+                "p95": 8.491392,
+                "p99": 10.9903,
+                "max": 25.245504,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.6260852016666671,
+                "p50": 1.5328605,
+                "p95": 2.3176901499999993,
+                "p99": 3.8415358599999965,
+                "max": 8.588653,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 297,
+              "mean": 1.009478114478114,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.018,
+              "max": 1.02
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-1-v1-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 300.827
+            }
+          },
+          {
+            "run": "pair-2-v1-b-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "p(99)": 9.984413,
+              "max": 17.639287,
+              "avg": 5.2531572734484255,
+              "min": 0.960148,
+              "med": 5.620745,
+              "p(95)": 8.023287
+            },
+            "status": {
+              "200": 15001
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 15001,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12001,
+                "mean": 6.153434174402113,
+                "p50": 5.839299,
+                "p95": 8.276508,
+                "p99": 10.332976,
+                "max": 17.639287,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.6517495773333295,
+                "p50": 1.552462,
+                "p95": 2.2818417999999987,
+                "p99": 3.9796615499999652,
+                "max": 9.3611,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 297,
+              "mean": 1.0098754208754197,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.01804,
+              "max": 1.026
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-2-v1-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 300.941
+            }
+          },
+          {
+            "run": "pair-3-v1-b-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "avg": 5.339222962135863,
+              "min": 0.933577,
+              "med": 5.706953,
+              "p(95)": 8.154602,
+              "p(99)": 10.208839,
+              "max": 17.643436
+            },
+            "status": {
+              "200": 15001
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 15001,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12001,
+                "mean": 6.260041095158733,
+                "p50": 5.931479,
+                "p95": 8.403064,
+                "p99": 10.576623,
+                "max": 17.643436,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.6556434906666708,
+                "p50": 1.553469,
+                "p95": 2.27673825,
+                "p99": 4.53747638999999,
+                "max": 8.96092,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 297,
+              "mean": 1.0102390572390567,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.017,
+              "max": 1.018
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-3-v1-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.046
+            }
+          },
+          {
+            "run": "pair-4-v1-b-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "p(99)": 10.075416,
+              "max": 16.483009,
+              "avg": 5.268865540430656,
+              "min": 0.881158,
+              "med": 5.605991,
+              "p(95)": 8.104863
+            },
+            "status": {
+              "200": 15001
+            },
+            "checks": {
+              "passes": 15001,
+              "fails": 0,
+              "rate": 1
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12001,
+                "mean": 6.178690902758113,
+                "p50": 5.842396,
+                "p95": 8.410653,
+                "p99": 10.365879,
+                "max": 16.483009,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.6292608160000004,
+                "p50": 1.5121665,
+                "p95": 2.3220636999999997,
+                "p99": 4.195983959999986,
+                "max": 7.899307,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 297,
+              "mean": 1.0095824915824902,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.01704,
+              "max": 1.031
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-4-v1-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 300.852
+            }
+          },
+          {
+            "run": "pair-5-v1-b-1",
+            "rate": 50,
+            "seconds": 300,
+            "http": {
+              "p(95)": 8.114647,
+              "p(99)": 10.301701,
+              "max": 17.801859,
+              "avg": 5.313852413705746,
+              "min": 0.854301,
+              "med": 5.670566
+            },
+            "status": {
+              "200": 15001
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 15001,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 12001,
+                "mean": 6.230588227981001,
+                "p50": 5.899635,
+                "p95": 8.348019,
+                "p99": 10.789124,
+                "max": 17.801859,
+                "p99SampleSufficient": true
+              },
+              "markers-other": {
+                "n": 3000,
+                "mean": 1.6466035779999997,
+                "p50": 1.5462060000000002,
+                "p95": 2.3241350499999998,
+                "p99": 3.707779499999985,
+                "max": 8.826209,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0094328859060397,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.016,
+              "max": 1.017
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-5-v1-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.817
+            }
+          }
+        ]
+      }
+    },
+    "10": {
+      "p(95)": {
+        "before": {
+          "values": [
+            105.8306111,
+            109.845257,
+            105.404092,
+            104.34626,
+            103.969711
+          ],
+          "median": 105.404092,
+          "min": 103.969711,
+          "max": 109.845257,
+          "rangePercent": 5.574305407421943
+        },
+        "after": {
+          "values": [
+            116.015902,
+            69.03477960000009,
+            121.624366,
+            115.994757,
+            116.524195
+          ],
+          "median": 116.015902,
+          "min": 69.03477960000009,
+          "max": 121.624366,
+          "rangePercent": 45.329636276930295
+        },
+        "medianRegressionPercent": 10.067740064588747,
+        "pairedRegressionPercent": [
+          9.624144464568808,
+          -37.15269872781117,
+          15.388656827478764,
+          11.163310501018442,
+          12.075135998021569
+        ]
+      },
+      "p(99)": {
+        "before": {
+          "values": [
+            118.44879178000004,
+            120.902069,
+            116.87375,
+            113.888168,
+            114.805957
+          ],
+          "median": 116.87375,
+          "min": 113.888168,
+          "max": 120.902069,
+          "rangePercent": 6.001262901207503
+        },
+        "after": {
+          "values": [
+            126.651108,
+            130.44877459,
+            137.100574,
+            126.520991,
+            127.21457
+          ],
+          "median": 127.21457,
+          "min": 126.520991,
+          "max": 137.100574,
+          "rangePercent": 8.31632964683212
+        },
+        "medianRegressionPercent": 8.847855057273325,
+        "pairedRegressionPercent": [
+          6.924778291731726,
+          7.896230121587089,
+          17.306558572818954,
+          11.092305040853766,
+          10.808335494298426
+        ]
+      },
+      "valid": true,
+      "withinTenPercent": false,
+      "runs": {
+        "A": [
+          {
+            "run": "pair-1-v10-a-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "p(95)": 105.8306111,
+              "p(99)": 118.44879178000004,
+              "max": 141.989018,
+              "avg": 31.11261385333329,
+              "min": 1.049523,
+              "med": 25.664496999999997
+            },
+            "status": {
+              "200": 4800
+            },
+            "checks": {
+              "fails": 0,
+              "rate": 1,
+              "passes": 4800
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3840,
+                "mean": 37.669917712239574,
+                "p50": 27.22723,
+                "p95": 108.38644584999999,
+                "p99": 120.05325958000006,
+                "max": 141.989018,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 4.883398417708334,
+                "p50": 2.522449,
+                "p95": 31.070574849999986,
+                "p99": 51.21347890999999,
+                "max": 59.809488,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0098053691275164,
+              "p50": 1.012,
+              "p95": 1.016,
+              "p99": 1.019,
+              "max": 1.02
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-1-v10-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.937
+            }
+          },
+          {
+            "run": "pair-2-v10-a-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "p(95)": 109.845257,
+              "p(99)": 120.902069,
+              "max": 155.853213,
+              "avg": 32.28070784898966,
+              "min": 1.106902,
+              "med": 26.287308
+            },
+            "status": {
+              "200": 4801
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 4801,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3841,
+                "mean": 39.10158832803949,
+                "p50": 27.902422,
+                "p95": 112.429257,
+                "p99": 122.076404,
+                "max": 155.853213,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 4.990080848958337,
+                "p50": 2.5189915000000003,
+                "p95": 15.884197649999978,
+                "p99": 59.964690959999984,
+                "max": 83.093445,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.009520134228188,
+              "p50": 1.01,
+              "p95": 1.016,
+              "p99": 1.019,
+              "max": 1.03
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-2-v10-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.835
+            }
+          },
+          {
+            "run": "pair-3-v10-a-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "p(99)": 116.87375,
+              "max": 152.191036,
+              "avg": 30.14550524849,
+              "min": 1.183256,
+              "med": 25.349097,
+              "p(95)": 105.404092
+            },
+            "status": {
+              "200": 4801
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 4801,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3841,
+                "mean": 36.453630816454144,
+                "p50": 26.904846,
+                "p95": 107.738656,
+                "p99": 117.82126079999998,
+                "max": 152.191036,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 4.9064320125000025,
+                "p50": 2.4805425000000003,
+                "p95": 21.60084389999955,
+                "p99": 53.89068690999998,
+                "max": 76.322002,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0096308724832208,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.017,
+              "max": 1.018
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-3-v10-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.886
+            }
+          },
+          {
+            "run": "pair-4-v10-a-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "avg": 29.71783162007917,
+              "min": 1.404682,
+              "med": 24.964766,
+              "p(95)": 104.34626,
+              "p(99)": 113.888168,
+              "max": 140.577955
+            },
+            "status": {
+              "200": 4801
+            },
+            "checks": {
+              "fails": 0,
+              "rate": 1,
+              "passes": 4801
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3841,
+                "mean": 36.029326411351136,
+                "p50": 26.59311,
+                "p95": 106.144861,
+                "p99": 115.24789559999999,
+                "max": 140.577955,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 4.465277981249989,
+                "p50": 2.423636,
+                "p95": 10.573085949999903,
+                "p99": 51.74380602999999,
+                "max": 55.298228,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.009580536912751,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.019,
+              "max": 1.024
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-4-v10-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.866
+            }
+          },
+          {
+            "run": "pair-5-v10-a-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "min": 1.184295,
+              "med": 25.040326,
+              "p(95)": 103.969711,
+              "p(99)": 114.805957,
+              "max": 141.362551,
+              "avg": 29.847507465111477
+            },
+            "status": {
+              "200": 4801
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 4801,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3841,
+                "mean": 36.162321282999265,
+                "p50": 26.664958,
+                "p95": 106.073687,
+                "p99": 116.4381896,
+                "max": 141.362551,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 4.581674262499996,
+                "p50": 2.470009,
+                "p95": 10.747204799999988,
+                "p99": 51.40753581999999,
+                "max": 62.291923,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0093422818791942,
+              "p50": 1.011,
+              "p95": 1.01515,
+              "p99": 1.017,
+              "max": 1.018
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-5-v10-a-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.799
+            }
+          }
+        ],
+        "B": [
+          {
+            "run": "pair-1-v10-b-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "avg": 39.96424077650496,
+              "min": 1.017433,
+              "med": 34.32551,
+              "p(95)": 116.015902,
+              "p(99)": 126.651108,
+              "max": 146.420344
+            },
+            "status": {
+              "200": 4801
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 4801,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3841,
+                "mean": 48.72471127258527,
+                "p50": 36.152166,
+                "p95": 118.013677,
+                "p99": 127.8947008,
+                "max": 146.420344,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 4.913233302083331,
+                "p50": 2.4137245,
+                "p95": 10.556436299999977,
+                "p99": 65.9895068599999,
+                "max": 75.532243,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0101107382550334,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.018,
+              "max": 1.019
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-1-v10-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 302.025
+            }
+          },
+          {
+            "run": "pair-2-v10-b-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "min": 1.293168,
+              "med": 28.383945,
+              "p(95)": 69.03477960000009,
+              "p(99)": 130.44877459,
+              "max": 148.073222,
+              "avg": 30.632356643541605
+            },
+            "status": {
+              "200": 4800
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 4800,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3840,
+                "mean": 37.2309727893229,
+                "p50": 30.0335015,
+                "p95": 98.52887139999987,
+                "p99": 131.82685054,
+                "max": 148.073222,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 4.237892060416667,
+                "p50": 2.4585999999999997,
+                "p95": 5.186641299999993,
+                "p99": 67.38832299999996,
+                "max": 89.226357,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0096677852348983,
+              "p50": 1.011,
+              "p95": 1.015,
+              "p99": 1.017,
+              "max": 1.029
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-2-v10-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.886
+            }
+          },
+          {
+            "run": "pair-3-v10-b-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "p(95)": 121.624366,
+              "p(99)": 137.100574,
+              "max": 158.251361,
+              "avg": 34.71618922995205,
+              "min": 1.15491,
+              "med": 28.753286
+            },
+            "status": {
+              "200": 4801
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 4801,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3841,
+                "mean": 42.410389935173086,
+                "p50": 32.848835,
+                "p95": 125.702065,
+                "p99": 137.9037228,
+                "max": 158.251361,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 3.9313716166666715,
+                "p50": 2.469212,
+                "p95": 7.70149185,
+                "p99": 60.40966342999996,
+                "max": 65.976547,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0094093959731538,
+              "p50": 1.011,
+              "p95": 1.015,
+              "p99": 1.0170299999999999,
+              "max": 1.025
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-3-v10-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 301.818
+            }
+          },
+          {
+            "run": "pair-4-v10-b-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "min": 1.433447,
+              "med": 34.161493,
+              "p(95)": 115.994757,
+              "p(99)": 126.520991,
+              "max": 152.335837,
+              "avg": 39.58881593522186
+            },
+            "status": {
+              "200": 4801
+            },
+            "checks": {
+              "rate": 1,
+              "passes": 4801,
+              "fails": 0
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3841,
+                "mean": 48.24011149284042,
+                "p50": 35.907848,
+                "p95": 117.650236,
+                "p99": 127.497463,
+                "max": 152.335837,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 4.974621938541671,
+                "p50": 2.4655815,
+                "p95": 14.648055299999992,
+                "p99": 58.03083468999997,
+                "max": 90.486373,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0100771812080531,
+              "p50": 1.011,
+              "p95": 1.016,
+              "p99": 1.0170299999999999,
+              "max": 1.025
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-4-v10-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 302.009
+            }
+          },
+          {
+            "run": "pair-5-v10-b-1",
+            "rate": 16,
+            "seconds": 300,
+            "http": {
+              "med": 33.498448,
+              "p(95)": 116.524195,
+              "p(99)": 127.21457,
+              "max": 161.546539,
+              "avg": 39.520323597792235,
+              "min": 1.2255
+            },
+            "status": {
+              "200": 4801
+            },
+            "checks": {
+              "fails": 0,
+              "rate": 1,
+              "passes": 4801
+            },
+            "dropped": 0,
+            "endpoints": {
+              "markers-hot": {
+                "n": 3841,
+                "mean": 48.01482972507174,
+                "p50": 35.326691,
+                "p95": 118.887624,
+                "p99": 128.3719022,
+                "max": 161.546539,
+                "p99SampleSufficient": false
+              },
+              "markers-other": {
+                "n": 960,
+                "mean": 5.533450644791663,
+                "p50": 2.4816665,
+                "p95": 39.153574299999974,
+                "p99": 62.33848566999996,
+                "max": 87.93352,
+                "p99SampleSufficient": false
+              }
+            },
+            "sampleGapSeconds": {
+              "n": 298,
+              "mean": 1.0100704697986564,
+              "p50": 1.012,
+              "p95": 1.016,
+              "p99": 1.018,
+              "max": 1.023
+            },
+            "collectorErrors": [],
+            "execution": {
+              "run": "pair-5-v10-b-1",
+              "exitCode": 0,
+              "elapsedSeconds": 302.016
+            }
+          }
+        ]
+      }
+    }
+  },
+  "resources": {
+    "1": {
+      "A": {
+        "requests": 75004,
+        "medianP50Ms": 4.8877495,
+        "executionSeconds": 1506.543,
+        "maxSampleGapSeconds": 1.022,
+        "resource": {
+          "app": {
+            "medianMeanCpuCores": 0.12902557121792427,
+            "peakWorkingSetMiB": 438.5234375,
+            "throttledSeconds": 0
+          },
+          "db": {
+            "medianMeanCpuCores": 0.1163373754335959,
+            "peakWorkingSetMiB": 212.40234375,
+            "throttledSeconds": 0
+          }
+        }
+      },
+      "B": {
+        "requests": 75005,
+        "medianP50Ms": 5.670566,
+        "executionSeconds": 1505.4830000000002,
+        "maxSampleGapSeconds": 1.031,
+        "resource": {
+          "app": {
+            "medianMeanCpuCores": 0.1345335226291058,
+            "peakWorkingSetMiB": 438.87109375,
+            "throttledSeconds": 0
+          },
+          "db": {
+            "medianMeanCpuCores": 0.1442324374217714,
+            "peakWorkingSetMiB": 209.796875,
+            "throttledSeconds": 0
+          }
+        }
+      }
+    },
+    "10": {
+      "A": {
+        "requests": 24004,
+        "medianP50Ms": 25.349097,
+        "executionSeconds": 1509.3229999999999,
+        "maxSampleGapSeconds": 1.03,
+        "resource": {
+          "app": {
+            "medianMeanCpuCores": 0.34637636465630695,
+            "peakWorkingSetMiB": 455.56640625,
+            "throttledSeconds": 0
+          },
+          "db": {
+            "medianMeanCpuCores": 0.12880111439226163,
+            "peakWorkingSetMiB": 220.26953125,
+            "throttledSeconds": 0
+          }
+        }
+      },
+      "B": {
+        "requests": 24004,
+        "medianP50Ms": 33.498448,
+        "executionSeconds": 1509.7540000000001,
+        "maxSampleGapSeconds": 1.029,
+        "resource": {
+          "app": {
+            "medianMeanCpuCores": 0.3709971266254599,
+            "peakWorkingSetMiB": 512.1328125,
+            "throttledSeconds": 0
+          },
+          "db": {
+            "medianMeanCpuCores": 0.22674870966779365,
+            "peakWorkingSetMiB": 220.34765625,
+            "throttledSeconds": 0
+          }
+        }
+      }
+    }
+  },
+  "sqlContrast": [
+    {
+      "kind": "candidate",
+      "variant": "a",
+      "n": 500,
+      "pairMediansMs": [
+        0.433,
+        0.43,
+        0.429,
+        0.426,
+        0.43
+      ],
+      "medianMs": 0.43
+    },
+    {
+      "kind": "candidate",
+      "variant": "b",
+      "n": 500,
+      "pairMediansMs": [
+        0.87,
+        0.873,
+        0.849,
+        0.867,
+        0.863
+      ],
+      "medianMs": 0.867
+    },
+    {
+      "kind": "cells",
+      "variant": "a",
+      "n": 500,
+      "pairMediansMs": [
+        1.02,
+        0.995,
+        1.028,
+        1.032,
+        1.027
+      ],
+      "medianMs": 1.027
+    },
+    {
+      "kind": "cells",
+      "variant": "b",
+      "n": 500,
+      "pairMediansMs": [
+        1.375,
+        1.335,
+        1.41,
+        1.449,
+        1.379
+      ],
+      "medianMs": 1.379
+    }
+  ],
+  "jfr": {
+    "a": {
+      "durationSeconds": 60,
+      "gcCount": 276,
+      "oldGc": 0,
+      "totalPauseMs": 424.37158600000004,
+      "maxPauseMs": 2.771414,
+      "executionSamples": 183,
+      "topFrames": [
+        [
+          "java/util/HashMap.getNode",
+          13
+        ],
+        [
+          "java/util/HashMap.putVal",
+          11
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serializeFields",
+          10
+        ],
+        [
+          "java/lang/String.<init>",
+          5
+        ],
+        [
+          "java/math/BigInteger.multiplyToLen",
+          5
+        ],
+        [
+          "java/math/BigDecimal.<init>",
+          4
+        ],
+        [
+          "java/math/MutableBigInteger.divideKnuth",
+          4
+        ],
+        [
+          "java/lang/StringLatin1.toLowerCase",
+          4
+        ],
+        [
+          "ch/qos/logback/classic/LoggerContext.getTurboFilterChainDecision_0_3OrMore",
+          3
+        ],
+        [
+          "io/micrometer/core/instrument/ImmutableTag.equals",
+          3
+        ],
+        [
+          "org/apache/tomcat/util/net/NioEndpoint$Poller.run",
+          3
+        ],
+        [
+          "jdk/internal/math/DoubleToDecimal.removeTrailingZeroes",
+          3
+        ],
+        [
+          "java/lang/reflect/Method.invoke",
+          3
+        ],
+        [
+          "java/lang/String.hashCode",
+          3
+        ],
+        [
+          "java/util/HashMap.resize",
+          3
+        ]
+      ],
+      "inclusiveFrames": [
+        [
+          "java/util/HashMap.getNode",
+          21
+        ],
+        [
+          "org/hibernate/jpa/spi/NativeQueryTupleTransformer$NativeTupleImpl.<init>",
+          16
+        ],
+        [
+          "org/hibernate/jpa/spi/NativeQueryTupleTransformer.transformTuple",
+          16
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serialize",
+          15
+        ],
+        [
+          "java/util/HashMap.put",
+          15
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serializeFields",
+          14
+        ],
+        [
+          "java/util/HashMap.putVal",
+          14
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serializeWithoutTypeInfo",
+          13
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/impl/IndexedListSerializer.serializeContents",
+          13
+        ],
+        [
+          "java/math/BigDecimal.<init>",
+          12
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.cells",
+          12
+        ],
+        [
+          "org/hibernate/jpa/spi/NativeQueryTupleTransformer$NativeTupleImpl.get",
+          11
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.markers",
+          10
+        ],
+        [
+          "java/util/LinkedHashMap.get",
+          10
+        ],
+        [
+          "java/math/MutableBigInteger.divideKnuth",
+          7
+        ]
+      ],
+      "socketReadEvents": 0,
+      "heapUsedPeakBytes": 96043840,
+      "heapUsedAfterGcMedianBytes": 54934456
+    },
+    "b": {
+      "durationSeconds": 60,
+      "gcCount": 281,
+      "oldGc": 0,
+      "totalPauseMs": 426.55118899999997,
+      "maxPauseMs": 3.124285,
+      "executionSamples": 236,
+      "topFrames": [
+        [
+          "java/util/HashMap.getNode",
+          24
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serializeFields",
+          12
+        ],
+        [
+          "java/math/MutableBigInteger.normalize",
+          11
+        ],
+        [
+          "java/util/HashMap.putVal",
+          9
+        ],
+        [
+          "org/springframework/util/ObjectUtils.nullSafeEquals",
+          6
+        ],
+        [
+          "java/lang/StringLatin1.toLowerCase",
+          6
+        ],
+        [
+          "org/hibernate/type/descriptor/jdbc/BasicExtractor.extract",
+          5
+        ],
+        [
+          "java/math/BigDecimal.divideAndRound",
+          5
+        ],
+        [
+          "java/util/concurrent/ConcurrentHashMap.get",
+          5
+        ],
+        [
+          "ch/qos/logback/classic/Logger.isInfoEnabled",
+          5
+        ],
+        [
+          "java/math/BigInteger.trustedStripLeadingZeroInts",
+          5
+        ],
+        [
+          "com/fasterxml/jackson/core/json/UTF8JsonGenerator.writeString",
+          4
+        ],
+        [
+          "java/lang/String.<init>",
+          4
+        ],
+        [
+          "java/math/MutableBigInteger.divideMagnitude",
+          4
+        ],
+        [
+          "java/lang/String.hashCode",
+          4
+        ]
+      ],
+      "inclusiveFrames": [
+        [
+          "java/util/HashMap.getNode",
+          32
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serializeFields",
+          17
+        ],
+        [
+          "org/hibernate/jpa/spi/NativeQueryTupleTransformer$NativeTupleImpl.get",
+          17
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serializeWithoutTypeInfo",
+          16
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/std/MapSerializer.serialize",
+          16
+        ],
+        [
+          "java/math/MutableBigInteger.divideMagnitude",
+          15
+        ],
+        [
+          "java/math/MutableBigInteger.divideKnuth",
+          15
+        ],
+        [
+          "java/math/MutableBigInteger.divide",
+          15
+        ],
+        [
+          "com/loco/places/MarkerQueryRepository.cells",
+          13
+        ],
+        [
+          "org/hibernate/type/descriptor/jdbc/BasicExtractor.extract",
+          12
+        ],
+        [
+          "org/hibernate/sql/results/jdbc/internal/JdbcValuesResultSetImpl.getCurrentRowValue",
+          12
+        ],
+        [
+          "java/math/BigDecimal.<init>",
+          12
+        ],
+        [
+          "com/fasterxml/jackson/databind/ser/impl/IndexedListSerializer.serializeContents",
+          12
+        ],
+        [
+          "java/util/LinkedHashMap.get",
+          12
+        ],
+        [
+          "java/util/HashMap.get",
+          12
+        ]
+      ],
+      "socketReadEvents": 0,
+      "heapUsedPeakBytes": 96274448,
+      "heapUsedAfterGcMedianBytes": 54841496
+    }
+  },
+  "writeCost": {
+    "http": {
+      "noindex": {
+        "place-create": {
+          "n": 150,
+          "p50Median": 131.912046,
+          "p95Median": 144.43515779999998,
+          "p95s": [
+            151.77662879999997,
+            145.00909359999997,
+            140.50483605,
+            140.26981579999998,
+            144.43515779999998
+          ]
+        },
+        "place-update": {
+          "n": 150,
+          "p50Median": 255.24282699999998,
+          "p95Median": 274.42976045,
+          "p95s": [
+            280.6535879499999,
+            282.79366884999996,
+            274.42976045,
+            265.09260545,
+            270.77090175
+          ]
+        },
+        "place-delete": {
+          "n": 150,
+          "p50Median": 129.9895545,
+          "p95Median": 147.5588774,
+          "p95s": [
+            176.50023504999984,
+            147.5588774,
+            150.40335015,
+            136.31259724999998,
+            137.46072130000002
+          ]
+        }
+      },
+      "indexed": {
+        "place-create": {
+          "n": 150,
+          "p50Median": 131.02456899999999,
+          "p95Median": 142.53403755,
+          "p95s": [
+            150.13255045,
+            142.53403755,
+            141.32703784999998,
+            151.46519549999996,
+            140.83528534999996
+          ]
+        },
+        "place-update": {
+          "n": 150,
+          "p50Median": 254.98076049999997,
+          "p95Median": 279.14126955,
+          "p95s": [
+            279.14126955,
+            280.6755515,
+            268.36177555,
+            279.2843423,
+            265.43016294999995
+          ]
+        },
+        "place-delete": {
+          "n": 150,
+          "p50Median": 128.745528,
+          "p95Median": 137.16080324999996,
+          "p95s": [
+            145.38256589999997,
+            135.2407589,
+            136.08172960000002,
+            139.11131855,
+            137.16080324999996
+          ]
+        }
+      }
+    },
+    "sql": {
+      "noindex": {
+        "create": {
+          "entries": [
+            {
+              "totalMs": 115.72977999999999,
+              "dmlMs": 0.10351199999999999,
+              "calls": 20,
+              "walBytes": 7593
+            },
+            {
+              "totalMs": 113.25085899999999,
+              "dmlMs": 0.090729,
+              "calls": 21,
+              "walBytes": 17803
+            },
+            {
+              "totalMs": 117.417514,
+              "dmlMs": 0.07702600000000001,
+              "calls": 20,
+              "walBytes": 8217
+            },
+            {
+              "totalMs": 116.19842299999999,
+              "dmlMs": 0.094515,
+              "calls": 20,
+              "walBytes": 8945
+            },
+            {
+              "totalMs": 148.57209899999998,
+              "dmlMs": 0.09794800000000001,
+              "calls": 20,
+              "walBytes": 10245
+            }
+          ],
+          "medianTotalMs": 116.19842299999999,
+          "medianDmlMs": 0.094515,
+          "medianWalBytes": 8945
+        },
+        "update": {
+          "entries": [
+            {
+              "totalMs": 228.57189999999997,
+              "dmlMs": 0.038955000000000004,
+              "calls": 26,
+              "walBytes": 3462
+            },
+            {
+              "totalMs": 221.105006,
+              "dmlMs": 0.062321,
+              "calls": 26,
+              "walBytes": 3204
+            },
+            {
+              "totalMs": 225.28501,
+              "dmlMs": 0.038454999999999996,
+              "calls": 26,
+              "walBytes": 3204
+            },
+            {
+              "totalMs": 244.28038199999997,
+              "dmlMs": 0.049444,
+              "calls": 26,
+              "walBytes": 3204
+            },
+            {
+              "totalMs": 249.75555699999995,
+              "dmlMs": 0.053146000000000006,
+              "calls": 27,
+              "walBytes": 3204
+            }
+          ],
+          "medianTotalMs": 228.57189999999997,
+          "medianDmlMs": 0.049444,
+          "medianWalBytes": 3204
+        },
+        "delete": {
+          "entries": [
+            {
+              "totalMs": 112.41025499999998,
+              "dmlMs": 0.037513,
+              "calls": 16,
+              "walBytes": 216
+            },
+            {
+              "totalMs": 116.729305,
+              "dmlMs": 0.035386,
+              "calls": 15,
+              "walBytes": 216
+            },
+            {
+              "totalMs": 122.02688900000003,
+              "dmlMs": 0.049726,
+              "calls": 15,
+              "walBytes": 216
+            },
+            {
+              "totalMs": 118.18480999999998,
+              "dmlMs": 0.036977,
+              "calls": 15,
+              "walBytes": 216
+            },
+            {
+              "totalMs": 125.69069400000001,
+              "dmlMs": 0.051417,
+              "calls": 15,
+              "walBytes": 216
+            }
+          ],
+          "medianTotalMs": 118.18480999999998,
+          "medianDmlMs": 0.037513,
+          "medianWalBytes": 216
+        }
+      },
+      "indexed": {
+        "create": {
+          "entries": [
+            {
+              "totalMs": 116.023337,
+              "dmlMs": 0.29861299999999996,
+              "calls": 20,
+              "walBytes": 8873
+            },
+            {
+              "totalMs": 114.671472,
+              "dmlMs": 0.201593,
+              "calls": 20,
+              "walBytes": 9919
+            },
+            {
+              "totalMs": 121.435072,
+              "dmlMs": 0.20783100000000002,
+              "calls": 20,
+              "walBytes": 11889
+            },
+            {
+              "totalMs": 119.73711499999999,
+              "dmlMs": 0.127125,
+              "calls": 20,
+              "walBytes": 9549
+            },
+            {
+              "totalMs": 111.49356800000001,
+              "dmlMs": 0.169306,
+              "calls": 20,
+              "walBytes": 34241
+            }
+          ],
+          "medianTotalMs": 116.023337,
+          "medianDmlMs": 0.201593,
+          "medianWalBytes": 9919
+        },
+        "update": {
+          "entries": [
+            {
+              "totalMs": 225.39980200000002,
+              "dmlMs": 0.107191,
+              "calls": 26,
+              "walBytes": 3875
+            },
+            {
+              "totalMs": 233.68823099999997,
+              "dmlMs": 0.095913,
+              "calls": 26,
+              "walBytes": 3652
+            },
+            {
+              "totalMs": 235.219453,
+              "dmlMs": 0.087834,
+              "calls": 26,
+              "walBytes": 3766
+            },
+            {
+              "totalMs": 241.595805,
+              "dmlMs": 0.113097,
+              "calls": 26,
+              "walBytes": 3652
+            },
+            {
+              "totalMs": 227.10737600000004,
+              "dmlMs": 0.090325,
+              "calls": 26,
+              "walBytes": 32098
+            }
+          ],
+          "medianTotalMs": 233.68823099999997,
+          "medianDmlMs": 0.095913,
+          "medianWalBytes": 3766
+        },
+        "delete": {
+          "entries": [
+            {
+              "totalMs": 120.00103499999999,
+              "dmlMs": 0.042962,
+              "calls": 15,
+              "walBytes": 216
+            },
+            {
+              "totalMs": 123.81126,
+              "dmlMs": 0.033585,
+              "calls": 15,
+              "walBytes": 216
+            },
+            {
+              "totalMs": 117.58743900000002,
+              "dmlMs": 0.032018,
+              "calls": 15,
+              "walBytes": 216
+            },
+            {
+              "totalMs": 116.887571,
+              "dmlMs": 0.034888999999999996,
+              "calls": 15,
+              "walBytes": 216
+            },
+            {
+              "totalMs": 117.07657099999999,
+              "dmlMs": 0.04426,
+              "calls": 15,
+              "walBytes": 216
+            }
+          ],
+          "medianTotalMs": 117.58743900000002,
+          "medianDmlMs": 0.034888999999999996,
+          "medianWalBytes": 216
+        }
+      }
+    },
+    "indexBytes": 24379392,
+    "indexBuildSeconds": [
+      0.817,
+      0.807,
+      0.845,
+      0.819,
+      0.801
+    ],
+    "indexes": [
+      {
+        "indexrelname": "places_map_round1_text_idx",
+        "bytes": 3801088
+      },
+      {
+        "indexrelname": "places_map_round2_text_idx",
+        "bytes": 5054464
+      },
+      {
+        "indexrelname": "places_map_round3_text_idx",
+        "bytes": 7766016
+      },
+      {
+        "indexrelname": "places_map_round6_idx",
+        "bytes": 7757824
+      }
+    ]
+  },
+  "tests": {
+    "command": "allTests build perfBootJar + Spotless",
+    "scope": "core + root fast + v2 comparison + build",
+    "total": 1695,
+    "passed": 1694,
+    "failed": 0,
+    "skipped": 1,
+    "skipReason": "existing HEIC limitation",
+    "knownDifferences": 13,
+    "seconds": 1118.136291,
+    "core": 125,
+    "fast": 417,
+    "comparison": 1153,
+    "nodeTests": 18,
+    "nodeSeconds": 0.1322826,
+    "jarIsolationChecks": 4,
+    "focusedSeconds": 36.5287764
+  }
+}

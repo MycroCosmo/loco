@@ -116,6 +116,7 @@ $env:JAVA_HOME = 'C:/Program Files/Java/jdk-21' # 설치 위치가 다르면 변
 ```
 
 Linux/macOS에서는 Java 21을 설정하고 `./gradlew`로 같은 작업을 실행한다.
+Docker 기본 주소 풀이 소진된 로컬 환경은 사용하지 않는 CIDR을 `LOCO_TEST_NETWORK_SUBNET` 환경변수로 지정할 수 있다(예: PowerShell `$env:LOCO_TEST_NETWORK_SUBNET = '10.253.30.0/24'`). 비교 하네스의 임시 네트워크에만 적용하며 미지정 시 기존 자동 할당을 사용한다. 기존 컨테이너·네트워크·볼륨을 삭제할 필요가 없고 운영 Compose에는 영향을 주지 않는다.
 `test`는 `v2-comparison` 태그를 제외하고, `comparisonTest`는 해당 태그만 실행한다. 새 v2 HTTP·라이브러리·Prisma 비교 클래스에는 `@Tag("v2-comparison")`을 붙인다.
 `allTests`는 두 작업을 순서대로 실행하며 `check`와 `build`도 양쪽 검증을 포함한다. 이미 통과한 작업을 실제로 다시 측정하려면 `test --rerun`, `comparisonTest --rerun`, 전체는 `allTests --rerun-tasks`를 사용한다.
 기본 테스트도 v3 통합 검증용 PostgreSQL 컨테이너는 필요하지만 v2·Mailpit·Prisma CLI는 준비하지 않는다. OAuth는 외부 API를 mock으로 대체한다.
@@ -482,6 +483,12 @@ JWT 필터에 모든 요청의 회원 조회를 추가하지 않는다. 새 v2�
 `KAKAO_SEARCH_BASE_URL`, `KAKAO_CONNECT_TIMEOUT_MS`, `KAKAO_RESPONSE_TIMEOUT_MS`로 설정을 변경한다. 전체 수신 시간 제한은 없다. 외부 본문이 계속 조금씩 오면 서버 호출은 5초를 넘길 수 있으며, Flutter의 첫 응답 대기 약 10초가 서버 호출을 취소하거나 서버의 전체 시간 상한이 되지는 않는다. 전체 deadline·취소 전파는 이관 후 개선 후보로 남긴다.
 
 ### 이미지 쓰기 전환 주의사항
+
+P2/E-22 이후 장소·마커 갱신은 지도방 UUID hash+정밀도 transaction advisory lock을 **별도 문장으로 먼저 획득**한 뒤 READ COMMITTED 집계를 실행한다(6SQL·3커밋). 모든 writer가 이 규약을 따라야 한다. v2·구버전 v3 writer나 직접 SQL을 같은 DB에 섞으면 교착 방지·최종 집계 정합성 보장이 깨진다. 기존 writer 중지 → 새 앱 V9 파생 셀 재생성 → 셀 검증 → 새 v3만 쓰기 재개 순서다. V9는 원본 places를 변경하지 않으며 실패 시 롤백된다. 해시 충돌은 관계없는 지도방의 과직렬화만 유발한다. 자세한 범위·실패 시 부분 커밋은 [E-22 계약](PERF_STAGE2_P2_DESIGN.md#12-e-22-b-변형-확정--별도-잠금-문장과-최신-집계)을 따른다.
+
+P1 이후 장소·마커 쓰기도 한쪽 서버로 전환해야 한다. V7은 PG numeric ROUND·0 정규화 규칙으로 파생 셀을 재생성한다. v2/이전 v3 쓰기 중지 → 새 앱 Flyway V7 → 셀 검증 → 새 v3 쓰기 재개 순서다. V7은 테이블 쓰기 락을 잡으며 실패 시 재생성이 롤백된다. v2 writer를 다시 섞으면 옛 좌표 규칙이 돌아온다. [P1 계약과 검증](PERF_STAGE2_DESIGN.md#p1-좌표전환-계약)을 따른다. 이관 완료 당시11건에 E-5 좌표 규칙·E-12 overflow 동률 정렬 개선2건을 별도로 추가한다.
+
+P1 정합성은 검증됐지만 성능 채택은 보류다.1% 조회 p95·p99 회귀10% 기준 미달,group 역조회 Seq Scan,기본 힙의 전체 viewport OOM을 [P1 실측 결과](../../perf/stage2/P1_RESULTS.md)에 기록했다.16req/s A5를 최대 지속 처리량으로 해석하지 않는다.
 
 v2·v3가 같은 DB에 장소 이미지 쓰기를 섞으면 v3의 원자적 UPDATE만으로 전체 정합성을 보장할 수 없다. v2가 앞서 읽은 배열 전체를 뒤늦게 저장하면 v3 결과를 덮어쓸 수 있다. 전환 시 POST/DELETE 장소 이미지 쓰기는 담당 서버 하나로 보내고, 개발 공유 Compose에서도 같은 장소에 양쪽 쓰기를 섞지 않는다. 비교 테스트는 v2/v3 독립 DB를 사용한다. Flutter의 순차 업로드·중복 삭제 방지는 한 클라이언트의 동작일 뿐 서버 정합성의 근거로 삼지 않는다.
 이후 선택지 답변에 **번호와 항목 이름이 함께 없으면**, 어느 결정에 대한 답인지 먼저 확인한다. 다른 주제의 답변을 연결하거나 문자 하나만으로 선택을 확정하지 않는다.

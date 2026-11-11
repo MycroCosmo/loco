@@ -1,0 +1,482 @@
+{
+  "decision": "E-33",
+  "source": "6637fff63805c7a56c4c5dab65d8fc4d65e9ffd0",
+  "startedAt": "2026-11-11T04:06:52.607Z",
+  "expectedMinutes": [
+    5,
+    8
+  ],
+  "order": [
+    {
+      "side": "a",
+      "name": "plan-1"
+    },
+    {
+      "side": "b",
+      "name": "plan-1"
+    },
+    {
+      "side": "a",
+      "name": "plan-2"
+    },
+    {
+      "side": "b",
+      "name": "plan-2"
+    },
+    {
+      "side": "a",
+      "name": "plan-3"
+    },
+    {
+      "side": "b",
+      "name": "plan-3"
+    }
+  ],
+  "criterion": "median(B root Shared Hit+Read) / median(A) <= 0.80",
+  "appsMayRemainOpen": true,
+  "sqlTimeUsed": false,
+  "oldPlansUsed": false,
+  "httpStarted": false,
+  "plans": [
+    {
+      "side": "a",
+      "name": "plan-1",
+      "rootBuffers": 3081,
+      "rootRows": 700,
+      "databaseUnchanged": true,
+      "scans": [
+        {
+          "type": "Index Scan",
+          "index": "place_marker_cells_mapId_precision_minLat_maxLat_minLng_max_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Subquery Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        }
+      ]
+    },
+    {
+      "side": "b",
+      "name": "plan-1",
+      "rootBuffers": 2623,
+      "rootRows": 700,
+      "databaseUnchanged": true,
+      "scans": [
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_bbox_gist_idx"
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_bbox_gist_idx"
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Subquery Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_bbox_gist_idx"
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        }
+      ]
+    },
+    {
+      "side": "a",
+      "name": "plan-2",
+      "rootBuffers": 3081,
+      "rootRows": 700,
+      "databaseUnchanged": true,
+      "scans": [
+        {
+          "type": "Index Scan",
+          "index": "place_marker_cells_mapId_precision_minLat_maxLat_minLng_max_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Subquery Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        }
+      ]
+    },
+    {
+      "side": "b",
+      "name": "plan-2",
+      "rootBuffers": 2623,
+      "rootRows": 700,
+      "databaseUnchanged": true,
+      "scans": [
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_bbox_gist_idx"
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_bbox_gist_idx"
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Subquery Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_bbox_gist_idx"
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        }
+      ]
+    },
+    {
+      "side": "a",
+      "name": "plan-3",
+      "rootBuffers": 3081,
+      "rootRows": 700,
+      "databaseUnchanged": true,
+      "scans": [
+        {
+          "type": "Index Scan",
+          "index": "place_marker_cells_mapId_precision_minLat_maxLat_minLng_max_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Subquery Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        }
+      ]
+    },
+    {
+      "side": "b",
+      "name": "plan-3",
+      "rootBuffers": 2623,
+      "rootRows": 700,
+      "databaseUnchanged": true,
+      "scans": [
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_bbox_gist_idx"
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_bbox_gist_idx"
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Subquery Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Heap Scan",
+          "index": null
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_bbox_gist_idx"
+        },
+        {
+          "type": "Bitmap Index Scan",
+          "index": "place_marker_cells_mapId_precision_maxLat_idx"
+        },
+        {
+          "type": "CTE Scan",
+          "index": null
+        }
+      ]
+    }
+  ],
+  "result": {
+    "a": [
+      3081,
+      3081,
+      3081
+    ],
+    "b": [
+      2623,
+      2623,
+      2623
+    ],
+    "aMedian": 3081,
+    "bMedian": 2623,
+    "ratio": 0.8513469652710159,
+    "loadEligible": false,
+    "adoption": false,
+    "outcome": "CLOSED: 이 데이터·경로에서 공간 인덱스 이점 작음, 기존 B-tree로 충분"
+  },
+  "ok": true,
+  "finishedAt": "2026-11-11T04:12:11.387Z",
+  "wallSeconds": 318.78,
+  "recovery": {
+    "backgroundRunning": 7,
+    "paused": 0,
+    "ownWorkloadsStopped": true
+  }
+}

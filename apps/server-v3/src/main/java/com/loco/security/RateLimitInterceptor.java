@@ -14,10 +14,13 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class RateLimitInterceptor implements HandlerInterceptor {
   private final RequestRateLimiter limiter;
   private final ObjectMapper json;
+  private final RequestLimitPolicy policy;
 
-  public RateLimitInterceptor(RequestRateLimiter limiter, ObjectMapper json) {
+  public RateLimitInterceptor(
+      RequestRateLimiter limiter, ObjectMapper json, RequestLimitPolicy policy) {
     this.limiter = limiter;
     this.json = json;
+    this.policy = policy;
   }
 
   @Override
@@ -28,7 +31,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
       return true;
     var annotation =
         AnnotatedElementUtils.findMergedAnnotation(method.getMethod(), RequestLimit.class);
-    int limit = annotation == null ? 120 : annotation.value();
+    int limit = policy.limit(annotation == null ? 120 : annotation.value());
     var result = limiter.check(method.getMethod(), request.getRemoteAddr(), limit);
     if (!result.allowed()) {
       response.setStatus(429);

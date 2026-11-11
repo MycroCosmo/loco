@@ -1,0 +1,4314 @@
+{
+  "notice": "Laptop relative comparison, not production capacity. Invalid runs remain; no replacement or relaxed gates.",
+  "readEvaluation": {
+    "1": {
+      "baseline": "a0",
+      "valid": true,
+      "stable": true,
+      "budget": true,
+      "gate": true,
+      "passed": true,
+      "stats": {
+        "p(95)": {
+          "a": [
+            6.983152,
+            7.404269,
+            7.465502,
+            7.385621,
+            7.387796949999999
+          ],
+          "b": [
+            7.067553,
+            7.403794,
+            7.371614,
+            7.609911,
+            7.372649
+          ],
+          "medianA": 7.387796949999999,
+          "medianB": 7.372649,
+          "regressionPercent": -0.20504015070418324,
+          "pairedRegressionPercent": [
+            1.2086375894438506,
+            -0.006415218031652348,
+            -1.2576247384301742,
+            3.0368468677176796,
+            -0.20504015070418324
+          ],
+          "rangePercentA": 6.529009977730917,
+          "rangePercentB": 7.356351835005302
+        },
+        "p(99)": {
+          "a": [
+            8.414406,
+            8.922861,
+            9.061779,
+            8.914408,
+            8.953414120000003
+          ],
+          "b": [
+            8.860342,
+            9.010616,
+            9.000396,
+            9.197729,
+            8.893965
+          ],
+          "medianA": 8.922861,
+          "medianB": 9.000396,
+          "regressionPercent": 0.8689477511753418,
+          "pairedRegressionPercent": [
+            5.299672965625857,
+            0.9834850055380429,
+            -0.6773835468730782,
+            3.1782368498278313,
+            -0.663982690884446
+          ],
+          "rangePercentA": 7.255217805141199,
+          "rangePercentB": 3.748579506946155
+        }
+      }
+    },
+    "10": {
+      "baseline": "a1",
+      "valid": true,
+      "stable": true,
+      "budget": true,
+      "gate": true,
+      "passed": true,
+      "stats": {
+        "p(95)": {
+          "a": [
+            111.391011,
+            111.21545005,
+            110.74176040000002,
+            111.095623,
+            108.841426
+          ],
+          "b": [
+            20.422013,
+            20.681489,
+            20.716069,
+            20.786658,
+            20.678881550000003
+          ],
+          "medianA": 111.095623,
+          "medianB": 20.681489,
+          "regressionPercent": -81.38406496896822,
+          "pairedRegressionPercent": [
+            -81.66637252264458,
+            -81.40412236725916,
+            -81.2933540832533,
+            -81.28939967328866,
+            -81.00090901969624
+          ],
+          "rangePercentA": 2.294946399463467,
+          "rangePercentB": 1.7631467444147735
+        },
+        "p(99)": {
+          "a": [
+            122.009581,
+            123.16672153000002,
+            121.50385926000001,
+            121.855045,
+            120.355411
+          ],
+          "b": [
+            22.940056,
+            22.621532,
+            22.541499,
+            22.94142,
+            22.57043393
+          ],
+          "medianA": 121.855045,
+          "medianB": 22.621532,
+          "regressionPercent": -81.43570338019242,
+          "pairedRegressionPercent": [
+            -81.19815197136036,
+            -81.63340574548782,
+            -81.4479152042697,
+            -81.1731881925775,
+            -81.246847364428
+          ],
+          "rangePercentA": 2.3070940805118196,
+          "rangePercentB": 1.7678776132403373
+        }
+      }
+    }
+  },
+  "intervals": 114,
+  "invalid": [
+    {
+      "side": "b",
+      "run": "explore-5-1-warmup",
+      "reasons": [
+        "sustained-background-cpu"
+      ]
+    },
+    {
+      "side": "b",
+      "run": "write-2-c1-b",
+      "reasons": [
+        "sustained-background-cpu"
+      ]
+    }
+  ],
+  "totals": {
+    "requests": 386037,
+    "failedChecks": 0,
+    "dropped": 0
+  },
+  "reads": [
+    {
+      "side": "a0",
+      "run": "pair-1-v1-a0-1",
+      "valid": true,
+      "p50": 4.775612,
+      "p95": 6.983152,
+      "p99": 8.414406,
+      "count": 15001,
+      "status": {
+        "200": 15001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.003461220018934,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12001,
+          "mean": 5.25356641863179,
+          "p50": 4.962025,
+          "p95": 7.168016,
+          "p99": 8.575972,
+          "max": 48.54567,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.6090832116666642,
+          "p50": 1.4878685,
+          "p95": 2.1958824,
+          "p99": 4.06222380999998,
+          "max": 64.62068,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.12361008152954216,
+          "cpuP95": 0.14097830864986957,
+          "workingSetMiBMean": 518.6248033766778,
+          "workingSetMiBMax": 519.63671875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.11558425418422758,
+          "cpuP95": 0.13116188203961604,
+          "workingSetMiBMean": 379.0302013422819,
+          "workingSetMiBMax": 383.07421875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a0-load": {
+          "cpuMean": 0.46023595428693037,
+          "cpuP95": 0.5104121089525033,
+          "workingSetMiBMean": 282.8164983164983,
+          "workingSetMiBMax": 305.87109375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a0",
+      "run": "pair-2-v1-a0-1",
+      "valid": true,
+      "p50": 4.746884,
+      "p95": 7.404269,
+      "p99": 8.922861,
+      "count": 15001,
+      "status": {
+        "200": 15001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.003724835330104,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12001,
+          "mean": 5.310801599450037,
+          "p50": 4.990394,
+          "p95": 7.603186,
+          "p99": 9.152763,
+          "max": 19.328985,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.6814354980000012,
+          "p50": 1.6015945,
+          "p95": 2.4671736999999996,
+          "p99": 3.3609427899999966,
+          "max": 9.356702,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.1277797321092512,
+          "cpuP95": 0.14498538093076555,
+          "workingSetMiBMean": 403.1641931438127,
+          "workingSetMiBMax": 404.34375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.1117997848945863,
+          "cpuP95": 0.1286609872496945,
+          "workingSetMiBMean": 204.99280152591973,
+          "workingSetMiBMax": 209.5,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a0-load": {
+          "cpuMean": 0.45030291343365986,
+          "cpuP95": 0.49601717008622637,
+          "workingSetMiBMean": 285.09734059343435,
+          "workingSetMiBMax": 294.02734375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a0",
+      "run": "pair-3-v1-a0-1",
+      "valid": true,
+      "p50": 4.77635,
+      "p95": 7.465502,
+      "p99": 9.061779,
+      "count": 15001,
+      "status": {
+        "200": 15001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.00276595094803,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12001,
+          "mean": 5.327999447629388,
+          "p50": 5.012874,
+          "p95": 7.692751,
+          "p99": 9.252973,
+          "max": 14.239018,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.627097468666672,
+          "p50": 1.542862,
+          "p95": 2.3345152,
+          "p99": 3.2766773399999978,
+          "max": 7.870716,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.1281818521623038,
+          "cpuP95": 0.14811944107521516,
+          "workingSetMiBMean": 404.83549331103677,
+          "workingSetMiBMax": 405.953125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.11114888683043522,
+          "cpuP95": 0.1280366866528769,
+          "workingSetMiBMean": 205.0648777173913,
+          "workingSetMiBMax": 207.87109375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a0-load": {
+          "cpuMean": 0.4554742413527511,
+          "cpuP95": 0.5040225120662047,
+          "workingSetMiBMean": 281.964041456229,
+          "workingSetMiBMax": 294.109375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a0",
+      "run": "pair-4-v1-a0-1",
+      "valid": true,
+      "p50": 4.730088,
+      "p95": 7.385621,
+      "p99": 8.914408,
+      "count": 15001,
+      "status": {
+        "200": 15001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.003604560551686,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12001,
+          "mean": 5.295410906674433,
+          "p50": 4.966016,
+          "p95": 7.635868,
+          "p99": 9.166251,
+          "max": 15.912446,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.6369476533333345,
+          "p50": 1.5356495,
+          "p95": 2.4075305999999994,
+          "p99": 4.014949029999965,
+          "max": 8.262793,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.12762247485130077,
+          "cpuP95": 0.14632173059634282,
+          "workingSetMiBMean": 398.302806229097,
+          "workingSetMiBMax": 400.0078125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.11203717626638156,
+          "cpuP95": 0.1301131150590924,
+          "workingSetMiBMean": 204.97843070652175,
+          "workingSetMiBMax": 209.796875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a0-load": {
+          "cpuMean": 0.4499072267163387,
+          "cpuP95": 0.49723247970018736,
+          "workingSetMiBMean": 283.6560527146465,
+          "workingSetMiBMax": 293.34765625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a0",
+      "run": "pair-5-v1-a0-1",
+      "valid": true,
+      "p50": 4.763054,
+      "p95": 7.387796949999999,
+      "p99": 8.953414120000003,
+      "count": 15000,
+      "status": {
+        "200": 15000
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.00200138527432,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12000,
+          "mean": 5.328738331333353,
+          "p50": 5.0184275,
+          "p95": 7.580913849999999,
+          "p99": 9.219173960000001,
+          "max": 85.186773,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.639224344333331,
+          "p50": 1.53424,
+          "p95": 2.448929049999998,
+          "p99": 3.6998918099999916,
+          "max": 7.726605,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.12820861781474654,
+          "cpuP95": 0.14535474632114054,
+          "workingSetMiBMean": 419.38374007107024,
+          "workingSetMiBMax": 422.26171875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.11260964470905514,
+          "cpuP95": 0.1301796087892926,
+          "workingSetMiBMean": 205.02564538043478,
+          "workingSetMiBMax": 207.25,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a0-load": {
+          "cpuMean": 0.4548150073177538,
+          "cpuP95": 0.510954404849244,
+          "workingSetMiBMean": 283.7326520412458,
+          "workingSetMiBMax": 295.2421875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "pair-1-v10-a1-1",
+      "valid": true,
+      "p50": 33.38204,
+      "p95": 111.391011,
+      "p99": 122.009581,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 15.997425447108338,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 45.83511089898462,
+          "p50": 34.940194,
+          "p95": 113.794472,
+          "p99": 123.2118758,
+          "max": 137.398801,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 5.127502932291666,
+          "p50": 2.37749,
+          "p95": 33.82779684999996,
+          "p99": 59.07235554999997,
+          "max": 69.495931,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.35459625237293124,
+          "cpuP95": 0.47446966453378125,
+          "workingSetMiBMean": 530.7263273411371,
+          "workingSetMiBMax": 542.5859375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.22783485294385794,
+          "cpuP95": 0.2630202150279171,
+          "workingSetMiBMean": 389.86363398829434,
+          "workingSetMiBMax": 394.94140625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.26308075500244027,
+          "cpuP95": 0.41388965487468055,
+          "workingSetMiBMean": 1070.9651583473155,
+          "workingSetMiBMax": 1096.12109375,
+          "throttleDelta": {
+            "periods": 7,
+            "nanoseconds": 11761000
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "pair-2-v10-a1-1",
+      "valid": true,
+      "p50": 32.9833615,
+      "p95": 111.21545005,
+      "p99": 123.16672153000002,
+      "count": 4800,
+      "status": {
+        "200": 4800
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.000665237844355,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3840,
+          "mean": 46.08631813671886,
+          "p50": 34.7474505,
+          "p95": 112.88751719999999,
+          "p99": 124.35042608000002,
+          "max": 143.336914,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 5.0968593010416665,
+          "p50": 2.4890660000000002,
+          "p95": 15.413325549999984,
+          "p99": 60.15918903999999,
+          "max": 82.603732,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.3601076198110497,
+          "cpuP95": 0.48348393716933025,
+          "workingSetMiBMean": 435.9746551003345,
+          "workingSetMiBMax": 450.93359375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.2215136191221046,
+          "cpuP95": 0.25422643954186874,
+          "workingSetMiBMean": 217.1197350543478,
+          "workingSetMiBMax": 222.0078125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.2566595595936279,
+          "cpuP95": 0.403824762461486,
+          "workingSetMiBMean": 1061.7438260276845,
+          "workingSetMiBMax": 1098.2734375,
+          "throttleDelta": {
+            "periods": 6,
+            "nanoseconds": 5413000
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "pair-3-v10-a1-1",
+      "valid": true,
+      "p50": 33.1392125,
+      "p95": 110.74176040000002,
+      "p99": 121.50385926000001,
+      "count": 4800,
+      "status": {
+        "200": 4800
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.000594535264526,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3840,
+          "mean": 45.32217052656254,
+          "p50": 34.7055225,
+          "p95": 112.72478674999999,
+          "p99": 122.58242481,
+          "max": 140.476567,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 4.923977009375008,
+          "p50": 2.4971595,
+          "p95": 11.204846049999976,
+          "p99": 56.96105480999991,
+          "max": 78.746213,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.3549128616034124,
+          "cpuP95": 0.45805232215724373,
+          "workingSetMiBMean": 455.2110942725752,
+          "workingSetMiBMax": 464.6796875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.22203876293056868,
+          "cpuP95": 0.25389677615242773,
+          "workingSetMiBMean": 217.10796404682273,
+          "workingSetMiBMax": 219.6328125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.2571989060661041,
+          "cpuP95": 0.39849805004714506,
+          "workingSetMiBMean": 1072.0411204907718,
+          "workingSetMiBMax": 1089.96875,
+          "throttleDelta": {
+            "periods": 2,
+            "nanoseconds": 4793000
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "pair-4-v10-a1-1",
+      "valid": true,
+      "p50": 33.239694,
+      "p95": 111.095623,
+      "p99": 121.855045,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.001937348695318,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 45.555555179120084,
+          "p50": 34.955426,
+          "p95": 113.328355,
+          "p99": 122.8242286,
+          "max": 147.197337,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 5.318451314583334,
+          "p50": 2.4165,
+          "p95": 25.068294349999768,
+          "p99": 57.30789090999998,
+          "max": 83.925956,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.3574469002262786,
+          "cpuP95": 0.46000041359491184,
+          "workingSetMiBMean": 438.4249320652174,
+          "workingSetMiBMax": 448.296875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.2230485554902329,
+          "cpuP95": 0.26053539691427724,
+          "workingSetMiBMean": 217.45807640050168,
+          "workingSetMiBMax": 221.5390625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.26344762190298643,
+          "cpuP95": 0.42635414491636864,
+          "workingSetMiBMean": 1074.5205536912752,
+          "workingSetMiBMax": 1102.75390625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "pair-5-v10-a1-1",
+      "valid": true,
+      "p50": 32.193721,
+      "p95": 108.841426,
+      "p99": 120.355411,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.001705132633187,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 43.69399729809957,
+          "p50": 33.77648,
+          "p95": 110.459657,
+          "p99": 121.44514399999998,
+          "max": 144.323107,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 5.393298657291675,
+          "p50": 2.489978,
+          "p95": 30.319619049999666,
+          "p99": 55.112804729999986,
+          "max": 84.515721,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.33890602700643313,
+          "cpuP95": 0.4353049443270743,
+          "workingSetMiBMean": 457.35701034698997,
+          "workingSetMiBMax": 468.58984375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.2209017367229213,
+          "cpuP95": 0.2572898741504081,
+          "workingSetMiBMean": 217.18526599080266,
+          "workingSetMiBMax": 219.34765625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.25660565045870865,
+          "cpuP95": 0.40383354593849313,
+          "workingSetMiBMean": 1073.87730704698,
+          "workingSetMiBMax": 1097.4140625,
+          "throttleDelta": {
+            "periods": 4,
+            "nanoseconds": 5689000
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-1-v1-b-1",
+      "valid": true,
+      "p50": 5.078807,
+      "p95": 7.067553,
+      "p99": 8.860342,
+      "count": 15001,
+      "status": {
+        "200": 15001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.003390294528714,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12001,
+          "mean": 5.546147483876334,
+          "p50": 5.287952,
+          "p95": 7.321026,
+          "p99": 9.103297,
+          "max": 101.383591,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.658175965666664,
+          "p50": 1.561672,
+          "p95": 2.2842672999999993,
+          "p99": 3.8719054199999996,
+          "max": 9.546586,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.11937476049078703,
+          "cpuP95": 0.1395265503573119,
+          "workingSetMiBMean": 539.3170986622074,
+          "workingSetMiBMax": 541.61328125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.1309694511855719,
+          "cpuP95": 0.15124779014841427,
+          "workingSetMiBMean": 386.53016565635454,
+          "workingSetMiBMax": 390.1640625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.4679172204145744,
+          "cpuP95": 0.5140953430861727,
+          "workingSetMiBMean": 284.2188157617845,
+          "workingSetMiBMax": 295.10546875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-1-v10-b-1",
+      "valid": true,
+      "p50": 17.404402,
+      "p95": 20.422013,
+      "p99": 22.940056,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.002569625100286,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 18.095220075761535,
+          "p50": 17.745985,
+          "p95": 20.710107,
+          "p99": 23.37818599999999,
+          "max": 39.196425,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 2.7377433614583335,
+          "p50": 2.5870005,
+          "p95": 4.277585799999999,
+          "p99": 5.2298044,
+          "max": 10.214875,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.0732803980304391,
+          "cpuP95": 0.13667578038247982,
+          "workingSetMiBMean": 403.22086642976586,
+          "workingSetMiBMax": 405.8828125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.1940820885915871,
+          "cpuP95": 0.2274285488613328,
+          "workingSetMiBMean": 216.74874581939798,
+          "workingSetMiBMax": 218.46875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.25488978058387723,
+          "cpuP95": 0.39948629374473404,
+          "workingSetMiBMean": 1073.8675020973155,
+          "workingSetMiBMax": 1082.1796875,
+          "throttleDelta": {
+            "periods": 1,
+            "nanoseconds": 3009000
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-2-v1-b-1",
+      "valid": true,
+      "p50": 4.810337,
+      "p95": 7.403794,
+      "p99": 9.010616,
+      "count": 15001,
+      "status": {
+        "200": 15001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.00282173112955,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12001,
+          "mean": 5.34155869660862,
+          "p50": 5.051247,
+          "p95": 7.67268,
+          "p99": 9.139707,
+          "max": 15.585699,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.7111299780000016,
+          "p50": 1.618573,
+          "p95": 2.5684793,
+          "p99": 3.5677090899999984,
+          "max": 7.119907,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.11798160090639691,
+          "cpuP95": 0.13720588345889204,
+          "workingSetMiBMean": 392.0120453595318,
+          "workingSetMiBMax": 394.3125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.12385660082996339,
+          "cpuP95": 0.14107383412157884,
+          "workingSetMiBMean": 208.69876149665552,
+          "workingSetMiBMax": 210.06640625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.4545187500484408,
+          "cpuP95": 0.5059090842382935,
+          "workingSetMiBMean": 283.72474747474746,
+          "workingSetMiBMax": 296.72265625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-2-v10-b-1",
+      "valid": true,
+      "p50": 17.410921,
+      "p95": 20.681489,
+      "p99": 22.621532,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.002315924916218,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 18.095216060921594,
+          "p50": 17.790959,
+          "p95": 20.882762,
+          "p99": 23.213872199999994,
+          "max": 44.989668,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 3.1289789333333276,
+          "p50": 2.7435905,
+          "p95": 5.698383349999999,
+          "p99": 6.546530009999999,
+          "max": 8.28243,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.07323429151110357,
+          "cpuP95": 0.14171201746458886,
+          "workingSetMiBMean": 413.62528741638795,
+          "workingSetMiBMax": 416.625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.19374264447413214,
+          "cpuP95": 0.223873594711152,
+          "workingSetMiBMean": 216.7609610158863,
+          "workingSetMiBMax": 219.22265625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.2521935221975854,
+          "cpuP95": 0.39044849027307554,
+          "workingSetMiBMean": 1074.5491689387584,
+          "workingSetMiBMax": 1086.09765625,
+          "throttleDelta": {
+            "periods": 1,
+            "nanoseconds": 865000
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-3-v1-b-1",
+      "valid": true,
+      "p50": 4.841123,
+      "p95": 7.371614,
+      "p99": 9.000396,
+      "count": 15001,
+      "status": {
+        "200": 15001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.003166106411506,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12001,
+          "mean": 5.353386184234647,
+          "p50": 5.087039,
+          "p95": 7.661912,
+          "p99": 9.20859,
+          "max": 15.22295,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.6732247553333381,
+          "p50": 1.5771929999999998,
+          "p95": 2.439412049999999,
+          "p99": 3.604621219999997,
+          "max": 8.118353,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.11672912095221992,
+          "cpuP95": 0.13375629494955768,
+          "workingSetMiBMean": 412.3036257340604,
+          "workingSetMiBMax": 413.3671875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.12442035650306718,
+          "cpuP95": 0.1424801671157471,
+          "workingSetMiBMean": 208.75252988674498,
+          "workingSetMiBMax": 211.48828125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.45290133764482426,
+          "cpuP95": 0.5067656199951693,
+          "workingSetMiBMean": 283.53226273148147,
+          "workingSetMiBMax": 297.09375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-3-v10-b-1",
+      "valid": true,
+      "p50": 17.469518,
+      "p95": 20.716069,
+      "p99": 22.541499,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.0022250058409,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 18.152823042176564,
+          "p50": 17.863994,
+          "p95": 20.911009,
+          "p99": 22.7749332,
+          "max": 38.74631,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 3.2771886187500017,
+          "p50": 2.8539325,
+          "p95": 5.8772014,
+          "p99": 6.757122619999997,
+          "max": 39.617902,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.07491519472090316,
+          "cpuP95": 0.13714751610375914,
+          "workingSetMiBMean": 415.25067934782606,
+          "workingSetMiBMax": 420.56640625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.19348031868940552,
+          "cpuP95": 0.22256416276677488,
+          "workingSetMiBMean": 216.47460284280936,
+          "workingSetMiBMax": 219.78515625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.2531192559212439,
+          "cpuP95": 0.40357522653240224,
+          "workingSetMiBMean": 1084.7627018666108,
+          "workingSetMiBMax": 1093.6796875,
+          "throttleDelta": {
+            "periods": 4,
+            "nanoseconds": 9039000
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-4-v1-b-1",
+      "valid": true,
+      "p50": 5.002237,
+      "p95": 7.609911,
+      "p99": 9.197729,
+      "count": 15001,
+      "status": {
+        "200": 15001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.001342157218666,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12001,
+          "mean": 5.525679051912323,
+          "p50": 5.250233,
+          "p95": 7.909969,
+          "p99": 9.441407,
+          "max": 15.033784,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.7099642213333337,
+          "p50": 1.601147,
+          "p95": 2.6001982499999996,
+          "p99": 3.9484897599999833,
+          "max": 8.246739,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.12236085303505001,
+          "cpuP95": 0.14037165624677597,
+          "workingSetMiBMean": 411.4372387123746,
+          "workingSetMiBMax": 412.69140625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.12553766437668798,
+          "cpuP95": 0.14399515718152925,
+          "workingSetMiBMean": 208.81018760451505,
+          "workingSetMiBMax": 212.0703125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.45428579435345245,
+          "cpuP95": 0.5053473687127167,
+          "workingSetMiBMean": 283.81999684343435,
+          "workingSetMiBMax": 294.6875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-4-v10-b-1",
+      "valid": true,
+      "p50": 17.53948,
+      "p95": 20.786658,
+      "p99": 22.94142,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.002451577981613,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 18.218266975266893,
+          "p50": 17.920828,
+          "p95": 21.088306,
+          "p99": 23.259518999999994,
+          "max": 35.076169,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 3.2456195770833327,
+          "p50": 2.8344069999999997,
+          "p95": 5.66331355,
+          "p99": 6.44156462,
+          "max": 39.00177,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.0765234923158133,
+          "cpuP95": 0.1539303306300686,
+          "workingSetMiBMean": 402.6164689590301,
+          "workingSetMiBMax": 405.1328125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.1939136341745628,
+          "cpuP95": 0.226117329627342,
+          "workingSetMiBMean": 216.5817177048495,
+          "workingSetMiBMax": 219.86328125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.2563239014855141,
+          "cpuP95": 0.4109054615707186,
+          "workingSetMiBMean": 1076.2306784815437,
+          "workingSetMiBMax": 1090.734375,
+          "throttleDelta": {
+            "periods": 4,
+            "nanoseconds": 12004000
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-5-v1-b-1",
+      "valid": true,
+      "p50": 4.919044,
+      "p95": 7.372649,
+      "p99": 8.893965,
+      "count": 15001,
+      "status": {
+        "200": 15001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.003394836842276,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 12001,
+          "mean": 5.421081897175258,
+          "p50": 5.154475,
+          "p95": 7.686901,
+          "p99": 9.145094,
+          "max": 13.855838,
+          "p99SampleSufficient": true
+        },
+        "markers-other": {
+          "n": 3000,
+          "mean": 1.7053821376666654,
+          "p50": 1.6016765,
+          "p95": 2.569714349999998,
+          "p99": 3.8608695899999543,
+          "max": 7.941203,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.11886503414491963,
+          "cpuP95": 0.14097259715649624,
+          "workingSetMiBMean": 431.74271007525084,
+          "workingSetMiBMax": 433.58203125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.12536996781663443,
+          "cpuP95": 0.1450292122152218,
+          "workingSetMiBMean": 208.73948317307693,
+          "workingSetMiBMax": 212.03515625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.4516416936949925,
+          "cpuP95": 0.5053831008471037,
+          "workingSetMiBMean": 284.1243949915825,
+          "workingSetMiBMax": 293.33984375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "pair-5-v10-b-1",
+      "valid": true,
+      "p50": 17.501851000000002,
+      "p95": 20.678881550000003,
+      "p99": 22.57043393,
+      "count": 4800,
+      "status": {
+        "200": 4800
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.000621918252957,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3840,
+          "mean": 18.161419018489575,
+          "p50": 17.887878999999998,
+          "p95": 20.954910499999997,
+          "p99": 22.98605995,
+          "max": 53.162816,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 3.2278026697916635,
+          "p50": 2.8661045,
+          "p95": 5.7161818,
+          "p99": 6.479267899999997,
+          "max": 9.246553,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.07434147121926178,
+          "cpuP95": 0.1507335110292863,
+          "workingSetMiBMean": 395.9864391722408,
+          "workingSetMiBMax": 399.26171875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.19464434391469143,
+          "cpuP95": 0.22408430435164364,
+          "workingSetMiBMean": 216.5762829222408,
+          "workingSetMiBMax": 219.0703125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.24737210918970215,
+          "cpuP95": 0.3867838592267442,
+          "workingSetMiBMean": 1076.895003145973,
+          "workingSetMiBMax": 1087.92578125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    }
+  ],
+  "fullViewport": [
+    {
+      "side": "b",
+      "run": "full-viewport-1-1",
+      "valid": true,
+      "p50": 105.409657,
+      "p95": 116.613272,
+      "p99": 126.383242,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 15.998138038100477,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 107.65337406144235,
+          "p50": 106.525228,
+          "p95": 118.240276,
+          "p99": 127.8535826,
+          "max": 163.738525,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 2.3820385541666664,
+          "p50": 2.2687195,
+          "p95": 3.2610357499999987,
+          "p99": 5.623127679999982,
+          "max": 10.524028,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.07271995643709604,
+          "cpuP95": 0.13563267595505207,
+          "workingSetMiBMean": 414.1958481396321,
+          "workingSetMiBMax": 416.6328125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 1.3357005306744636,
+          "cpuP95": 1.4800068940092164,
+          "workingSetMiBMean": 230.85254232859532,
+          "workingSetMiBMax": 234.03515625,
+          "throttleDelta": {
+            "periods": 32,
+            "nanoseconds": 219106000
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.24851469980765714,
+          "cpuP95": 0.29457242911344594,
+          "workingSetMiBMean": 294.31720585151004,
+          "workingSetMiBMax": 306.8828125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "full-viewport-2-1",
+      "valid": true,
+      "p50": 105.589175,
+      "p95": 116.708908,
+      "p99": 125.323958,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 15.997915546019152,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 107.87780536605027,
+          "p50": 106.761106,
+          "p95": 117.810507,
+          "p99": 126.00294359999995,
+          "max": 158.209351,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 2.5190103250000004,
+          "p50": 2.361215,
+          "p95": 3.4781974499999997,
+          "p99": 7.459515569999976,
+          "max": 9.655025,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.073011572920304,
+          "cpuP95": 0.13884127442745134,
+          "workingSetMiBMean": 408.44215091973246,
+          "workingSetMiBMax": 411.4921875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 1.3389735652980828,
+          "cpuP95": 1.4991443084047857,
+          "workingSetMiBMean": 230.65551839464882,
+          "workingSetMiBMax": 232.99609375,
+          "throttleDelta": {
+            "periods": 21,
+            "nanoseconds": 144477000
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.2477322111658063,
+          "cpuP95": 0.2931025874078964,
+          "workingSetMiBMean": 294.3279414848993,
+          "workingSetMiBMax": 307.34765625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "full-viewport-3-1",
+      "valid": true,
+      "p50": 105.814813,
+      "p95": 117.378605,
+      "p99": 126.35048,
+      "count": 4801,
+      "status": {
+        "200": 4801
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 15.997872858313444,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 3841,
+          "mean": 108.10103474147364,
+          "p50": 106.92262,
+          "p95": 118.437663,
+          "p99": 127.6318908,
+          "max": 151.120012,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 2.5465599,
+          "p50": 2.3611005,
+          "p95": 3.447190949999999,
+          "p99": 5.405009969999992,
+          "max": 83.188025,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.07378175339456547,
+          "cpuP95": 0.13291015357631636,
+          "workingSetMiBMean": 401.9198761496655,
+          "workingSetMiBMax": 404.484375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 1.3408006849470382,
+          "cpuP95": 1.4964691062390214,
+          "workingSetMiBMean": 230.7266539506689,
+          "workingSetMiBMax": 235.5546875,
+          "throttleDelta": {
+            "periods": 24,
+            "nanoseconds": 121915000
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.2486664635924761,
+          "cpuP95": 0.2927936138559461,
+          "workingSetMiBMean": 292.9522860738255,
+          "workingSetMiBMax": 304.32421875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    }
+  ],
+  "writes": [
+    {
+      "side": "a1",
+      "run": "write-1-c1-a1",
+      "valid": true,
+      "p50": 134.79420199999998,
+      "p95": 262.1616014,
+      "p99": 282.41951759999995,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 5.730815761865759,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 134.37536393333332,
+          "p50": 133.627572,
+          "p95": 142.24261295,
+          "p99": 146.19375244,
+          "max": 147.508689,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 257.69364286666666,
+          "p50": 254.9494115,
+          "p95": 273.93886649999996,
+          "p99": 298.1609136,
+          "max": 305.769255,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 130.90315813333333,
+          "p50": 131.195602,
+          "p95": 135.73457190000002,
+          "p99": 144.08475634,
+          "max": 147.441464,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.13143515941969477,
+          "cpuP95": 0.19395794367242228,
+          "workingSetMiBMean": 348.68543198529414,
+          "workingSetMiBMax": 351.9765625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.8481346094120674,
+          "cpuP95": 0.8955108757735933,
+          "workingSetMiBMean": 185.4308363970588,
+          "workingSetMiBMax": 186.99609375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.006956285127920105,
+          "cpuP95": 0.008154594702975401,
+          "workingSetMiBMean": 13.447135416666667,
+          "workingSetMiBMax": 14.6171875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "write-1-c16-a1",
+      "valid": true,
+      "p50": 1311.2591225,
+      "p95": 2486.8610126,
+      "p99": 2798.11166995,
+      "count": 1440,
+      "status": {
+        "200": 960,
+        "201": 480
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 10.466092526820844,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 480,
+          "mean": 1215.1496953687508,
+          "p50": 1195.318757,
+          "p95": 1689.3898717,
+          "p99": 1821.7512372899982,
+          "max": 2197.962447,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 480,
+          "mean": 2144.074867522915,
+          "p50": 2102.079313,
+          "p95": 2695.7527744500003,
+          "p99": 2908.9291070599998,
+          "max": 3402.918669,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 480,
+          "mean": 1182.571116058333,
+          "p50": 1185.936817,
+          "p95": 1601.0878432,
+          "p99": 1910.7708949,
+          "max": 2192.034159,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.13129874620520454,
+          "cpuP95": 0.23599089412126134,
+          "workingSetMiBMean": 399.25498973540147,
+          "workingSetMiBMax": 407.95703125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 1.985224495005456,
+          "cpuP95": 2.0662360533073905,
+          "workingSetMiBMean": 211.0418567518248,
+          "workingSetMiBMax": 215.51171875,
+          "throttleDelta": {
+            "periods": 1369,
+            "nanoseconds": 1060227631000
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.01224123574992039,
+          "cpuP95": 0.017392933010382198,
+          "workingSetMiBMean": 20.49951171875,
+          "workingSetMiBMax": 22.0234375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "write-1-c2-a1",
+      "valid": true,
+      "p50": 151.55379649999998,
+      "p95": 300.29109475,
+      "p99": 306.03674694,
+      "count": 180,
+      "status": {
+        "200": 120,
+        "201": 60
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 10.162120565044422,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 60,
+          "mean": 151.71830065000003,
+          "p50": 149.524563,
+          "p95": 175.03184704999998,
+          "p99": 181.89790146,
+          "max": 182.057441,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 60,
+          "mean": 289.7297860833333,
+          "p50": 288.4296765,
+          "p95": 304.8225569,
+          "p99": 311.06884433,
+          "max": 313.647093,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 60,
+          "mean": 148.39744811666665,
+          "p50": 147.80242299999998,
+          "p95": 155.09159325,
+          "p99": 165.98339353,
+          "max": 165.992204,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.21029054663650634,
+          "cpuP95": 0.2864178376460607,
+          "workingSetMiBMean": 381.9263980263158,
+          "workingSetMiBMax": 391.39453125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 1.7178508808480448,
+          "cpuP95": 1.7847668709314413,
+          "workingSetMiBMean": 188.5847039473684,
+          "workingSetMiBMax": 189.41015625,
+          "throttleDelta": {
+            "periods": 1,
+            "nanoseconds": 2429000
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.010096218777872071,
+          "cpuP95": 0.012961080776071112,
+          "workingSetMiBMean": 13.799479166666666,
+          "workingSetMiBMax": 14.30859375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "write-1-c4-a1",
+      "valid": true,
+      "p50": 289.91762900000003,
+      "p95": 587.0712281,
+      "p99": 601.21767654,
+      "count": 360,
+      "status": {
+        "200": 240,
+        "201": 120
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 10.932962345583675,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 120,
+          "mean": 276.51855553333337,
+          "p50": 282.5273235,
+          "p95": 304.9737411,
+          "p99": 324.52797713000007,
+          "max": 355.462107,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 120,
+          "mean": 544.5577829083335,
+          "p50": 530.8690125,
+          "p95": 596.5881099999999,
+          "p99": 605.62866509,
+          "max": 664.418348,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 120,
+          "mean": 271.3358505666666,
+          "p50": 279.39592849999997,
+          "p95": 301.8226617,
+          "p99": 305.51194605,
+          "max": 311.12401,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.20023093008422502,
+          "cpuP95": 0.267634446089768,
+          "workingSetMiBMean": 386.9888556985294,
+          "workingSetMiBMax": 391.90625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 1.9650923217059602,
+          "cpuP95": 2.016016770096148,
+          "workingSetMiBMean": 193.70404411764707,
+          "workingSetMiBMax": 194.40625,
+          "throttleDelta": {
+            "periods": 328,
+            "nanoseconds": 56819980000
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.011862342632946977,
+          "cpuP95": 0.014788558257809304,
+          "workingSetMiBMean": 15.530776515151516,
+          "workingSetMiBMax": 16.48828125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "write-1-c8-a1",
+      "valid": true,
+      "p50": 592.4438915000001,
+      "p95": 1189.36499005,
+      "p99": 1202.8128826099999,
+      "count": 720,
+      "status": {
+        "200": 480,
+        "201": 240
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 10.799755005289756,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 240,
+          "mean": 561.8811135166663,
+          "p50": 580.4814289999999,
+          "p95": 673.1796653,
+          "p99": 698.41224325,
+          "max": 706.881927,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 240,
+          "mean": 1111.5667596750002,
+          "p50": 1103.852149,
+          "p95": 1199.91231165,
+          "p99": 1205.5036208899999,
+          "max": 1278.95591,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 240,
+          "mean": 539.7911929458334,
+          "p50": 517.1184149999999,
+          "p95": 605.4722808500001,
+          "p99": 653.3849008399992,
+          "max": 692.103523,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.1594936324776205,
+          "cpuP95": 0.2771411297983072,
+          "workingSetMiBMean": 391.65700792910445,
+          "workingSetMiBMax": 402.1953125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 1.979347328154804,
+          "cpuP95": 2.063045583251785,
+          "workingSetMiBMean": 204.45137593283582,
+          "workingSetMiBMax": 207.8828125,
+          "throttleDelta": {
+            "periods": 662,
+            "nanoseconds": 378620313000
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.011922479786811683,
+          "cpuP95": 0.015884361000001915,
+          "workingSetMiBMean": 17.229758522727273,
+          "workingSetMiBMax": 19.07421875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "write-2-c1-a1",
+      "valid": true,
+      "p50": 147.186654,
+      "p95": 284.102981,
+      "p99": 301.65374632,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 5.32634900472313,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 146.2297957,
+          "p50": 144.182287,
+          "p95": 172.43128909999996,
+          "p99": 191.16587697,
+          "max": 195.735409,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 274.65360686666656,
+          "p50": 271.2602945,
+          "p95": 297.7217982,
+          "p99": 319.61733352000005,
+          "max": 328.299734,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 141.76203850000002,
+          "p50": 139.4133645,
+          "p95": 151.46490425,
+          "p99": 155.66768531,
+          "max": 157.358432,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.13686731585908646,
+          "cpuP95": 0.23096829878687683,
+          "workingSetMiBMean": 367.4954427083333,
+          "workingSetMiBMax": 374.59375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.8510040994273692,
+          "cpuP95": 0.896911469846404,
+          "workingSetMiBMean": 185.89366319444446,
+          "workingSetMiBMax": 186.5390625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.00766262001042875,
+          "cpuP95": 0.009763285312888578,
+          "workingSetMiBMean": 12.767003676470589,
+          "workingSetMiBMax": 13.98828125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "write-3-c1-a1",
+      "valid": true,
+      "p50": 142.262351,
+      "p95": 283.2955745,
+      "p99": 294.16405032,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 5.3925521223650374,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 142.56160313333336,
+          "p50": 140.55377900000002,
+          "p95": 162.32916804999996,
+          "p99": 168.98860641,
+          "max": 169.274045,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 271.53148699999997,
+          "p50": 267.38319,
+          "p95": 290.2198287,
+          "p99": 309.48169752,
+          "max": 316.885227,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 141.66778076666662,
+          "p50": 136.663614,
+          "p95": 160.75752194999995,
+          "p99": 216.45623729000005,
+          "max": 236.838046,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.13267926516837425,
+          "cpuP95": 0.18579564506349816,
+          "workingSetMiBMean": 349.98741319444446,
+          "workingSetMiBMax": 353.23828125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.8443111406090194,
+          "cpuP95": 0.8922366877675062,
+          "workingSetMiBMean": 186.41514756944446,
+          "workingSetMiBMax": 187.28515625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.007267521507759117,
+          "cpuP95": 0.008923783272046,
+          "workingSetMiBMean": 13.131591796875,
+          "workingSetMiBMax": 13.94140625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "write-4-c1-a1",
+      "valid": true,
+      "p50": 144.317982,
+      "p95": 295.279911,
+      "p99": 354.0169273,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 5.292790952031359,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 143.35720680000003,
+          "p50": 142.238385,
+          "p95": 151.3142397,
+          "p99": 157.07630821,
+          "max": 159.391886,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 282.11944040000003,
+          "p50": 272.7027165,
+          "p95": 336.19250679999993,
+          "p99": 375.36638530000005,
+          "max": 385.68529,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 140.7631179,
+          "p50": 140.1725455,
+          "p95": 149.45791705,
+          "p99": 155.07039921,
+          "max": 156.908753,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.14168138260392715,
+          "cpuP95": 0.23830691511713933,
+          "workingSetMiBMean": 365.81684027777777,
+          "workingSetMiBMax": 368.96484375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.8450372854199887,
+          "cpuP95": 0.8941683857499952,
+          "workingSetMiBMean": 185.81553819444446,
+          "workingSetMiBMax": 186.703125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.007635976492607082,
+          "cpuP95": 0.009605841032561681,
+          "workingSetMiBMean": 13.519071691176471,
+          "workingSetMiBMax": 14.5546875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "a1",
+      "run": "write-5-c1-a1",
+      "valid": true,
+      "p50": 147.1666405,
+      "p95": 282.69364815,
+      "p99": 306.07280246999994,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 5.345903815749052,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 145.19018166666672,
+          "p50": 143.714124,
+          "p95": 160.45125474999995,
+          "p99": 175.04786604,
+          "max": 178.782899,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 275.1208615666666,
+          "p50": 271.27632800000003,
+          "p95": 297.66627409999995,
+          "p99": 332.38020867000006,
+          "max": 345.095455,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 140.30294426666666,
+          "p50": 139.4232655,
+          "p95": 150.9604949,
+          "p99": 154.5285409,
+          "max": 155.359446,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.13714672571427955,
+          "cpuP95": 0.22848954409000172,
+          "workingSetMiBMean": 346.740234375,
+          "workingSetMiBMax": 349.9140625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.8465933399225115,
+          "cpuP95": 0.8931901173393028,
+          "workingSetMiBMean": 185.80750868055554,
+          "workingSetMiBMax": 186.265625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "a1-load": {
+          "cpuMean": 0.0077309486279682725,
+          "cpuP95": 0.009711797780404506,
+          "workingSetMiBMean": 13.89453125,
+          "workingSetMiBMax": 14.90625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "write-1-c1-b",
+      "valid": true,
+      "p50": 18.252201999999997,
+      "p95": 24.27169765,
+      "p99": 25.86518235,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 52.405306685264385,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 19.658874299999994,
+          "p50": 18.9483025,
+          "p95": 23.940465249999995,
+          "p99": 27.118533830000004,
+          "max": 28.258023,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 19.57771483333334,
+          "p50": 18.513408,
+          "p95": 24.7683405,
+          "p99": 25.353655380000003,
+          "max": 25.569438,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 17.518709966666666,
+          "p50": 17.334363500000002,
+          "p95": 21.896455649999993,
+          "p99": 23.59291333,
+          "max": 23.793542,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.7171273376893019,
+          "cpuP95": 0.79054957028034,
+          "workingSetMiBMean": 336.8932291666667,
+          "workingSetMiBMax": 341.03125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.08709657320196638,
+          "cpuP95": 0.09400729078881981,
+          "workingSetMiBMean": 183.98958333333334,
+          "workingSetMiBMax": 184.15234375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.02869796811503595,
+          "cpuP95": 0.02869796811503595,
+          "workingSetMiBMean": 12.62109375,
+          "workingSetMiBMax": 13.11328125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "write-1-c16-b",
+      "valid": true,
+      "p50": 76.8963005,
+      "p95": 124.12446444999999,
+      "p99": 185.86038527999995,
+      "count": 1440,
+      "status": {
+        "200": 960,
+        "201": 480
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 192.81390425303647,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 480,
+          "mean": 85.15795154791658,
+          "p50": 80.555279,
+          "p95": 124.21254144999999,
+          "p99": 159.67879011,
+          "max": 207.894014,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 480,
+          "mean": 81.55076341666667,
+          "p50": 74.91758999999999,
+          "p95": 126.89257,
+          "p99": 186.9575342999999,
+          "max": 204.12637,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 480,
+          "mean": 79.5702936916667,
+          "p50": 74.788351,
+          "p95": 120.02873714999998,
+          "p99": 193.29184935,
+          "max": 227.423314,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 1.6295708326378822,
+          "cpuP95": 1.9182661527328173,
+          "workingSetMiBMean": 383.58940972222223,
+          "workingSetMiBMax": 396.6953125,
+          "throttleDelta": {
+            "periods": 22,
+            "nanoseconds": 2127604000
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.45716082108283856,
+          "cpuP95": 0.5432265197889548,
+          "workingSetMiBMean": 211.40364583333334,
+          "workingSetMiBMax": 213.46484375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.10650087213243,
+          "cpuP95": 0.11195881279308537,
+          "workingSetMiBMean": 20.159040178571427,
+          "workingSetMiBMax": 21.75390625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "write-1-c2-b",
+      "valid": true,
+      "p50": 22.7063525,
+      "p95": 27.69780475,
+      "p99": 32.98867844000007,
+      "count": 180,
+      "status": {
+        "200": 120,
+        "201": 60
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 85.64415640464308,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 60,
+          "mean": 24.493521816666664,
+          "p50": 23.426477,
+          "p95": 30.059201749999996,
+          "p99": 41.23457021999999,
+          "max": 42.954563,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 60,
+          "mean": 23.13730025,
+          "p50": 23.028849,
+          "p95": 26.53641205,
+          "p99": 28.57021906,
+          "max": 28.754161,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 60,
+          "mean": 21.826910133333342,
+          "p50": 21.806594500000003,
+          "p95": 26.306963200000002,
+          "p99": 27.432435109999997,
+          "max": 27.70901,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 1.1040418828576954,
+          "cpuP95": 1.3143610422183538,
+          "workingSetMiBMean": 355.8515625,
+          "workingSetMiBMax": 361.1796875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.1670382711751156,
+          "cpuP95": 0.21556854621863514,
+          "workingSetMiBMean": 186.11588541666666,
+          "workingSetMiBMax": 186.296875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.05036508728179551,
+          "cpuP95": 0.05036508728179551,
+          "workingSetMiBMean": 13.666015625,
+          "workingSetMiBMax": 13.8984375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "write-1-c4-b",
+      "valid": true,
+      "p50": 24.6396485,
+      "p95": 36.2729127,
+      "p99": 42.882607010000044,
+      "count": 360,
+      "status": {
+        "200": 240,
+        "201": 120
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 153.38907720778357,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 120,
+          "mean": 25.998337633333346,
+          "p50": 25.173462,
+          "p95": 36.1798977,
+          "p99": 39.81738116,
+          "max": 43.992374,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 120,
+          "mean": 26.305873175000006,
+          "p50": 24.950772999999998,
+          "p95": 36.29596865,
+          "p99": 42.09247969,
+          "max": 47.046057,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 120,
+          "mean": 25.150482566666653,
+          "p50": 23.9260375,
+          "p95": 35.818907349999996,
+          "p99": 46.53517293000002,
+          "max": 52.136408,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 1.6117495453366515,
+          "cpuP95": 1.9450977991999159,
+          "workingSetMiBMean": 368.3190104166667,
+          "workingSetMiBMax": 374.16796875,
+          "throttleDelta": {
+            "periods": 14,
+            "nanoseconds": 505400000
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.2795940739398018,
+          "cpuP95": 0.35024811606522155,
+          "workingSetMiBMean": 191.61588541666666,
+          "workingSetMiBMax": 192.14453125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.08093254290171607,
+          "cpuP95": 0.08093254290171607,
+          "workingSetMiBMean": 14.619140625,
+          "workingSetMiBMax": 15.34765625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "write-1-c8-b",
+      "valid": true,
+      "p50": 37.973150000000004,
+      "p95": 67.3137284,
+      "p99": 74.02178771999999,
+      "count": 720,
+      "status": {
+        "200": 480,
+        "201": 240
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 186.64245142616204,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 240,
+          "mean": 42.84802975000003,
+          "p50": 38.1028345,
+          "p95": 67.41669265,
+          "p99": 75.63015517,
+          "max": 80.691925,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 240,
+          "mean": 41.85459559166669,
+          "p50": 37.724134,
+          "p95": 66.86658064999999,
+          "p99": 71.47712134999998,
+          "max": 75.107725,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 240,
+          "mean": 42.71279255,
+          "p50": 38.150103,
+          "p95": 66.19942879999999,
+          "p99": 72.60124418999995,
+          "max": 74.747227,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 1.7450068551486417,
+          "cpuP95": 1.9452748542073657,
+          "workingSetMiBMean": 397.0828125,
+          "workingSetMiBMax": 408.51953125,
+          "throttleDelta": {
+            "periods": 27,
+            "nanoseconds": 3404047000
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.4170215173683701,
+          "cpuP95": 0.5018485131938125,
+          "workingSetMiBMean": 203.91953125,
+          "workingSetMiBMax": 205.3359375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.10169735042925855,
+          "cpuP95": 0.10863680912304574,
+          "workingSetMiBMean": 17.380859375,
+          "workingSetMiBMax": 18.6171875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "write-2-c1-b",
+      "valid": false,
+      "p50": 23.867704,
+      "p95": 31.984062499999997,
+      "p99": 38.45887085,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 39.74341399334421,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 26.580205933333335,
+          "p50": 25.2188065,
+          "p95": 34.53761594999999,
+          "p99": 38.27446792,
+          "max": 39.049595,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 25.55643323333333,
+          "p50": 24.424683,
+          "p95": 31.204407349999993,
+          "p99": 36.55507463000001,
+          "max": 38.38586,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 22.676872133333333,
+          "p50": 22.2723385,
+          "p95": 26.5092148,
+          "p99": 30.352695880000002,
+          "max": 31.840027,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.7147517090386329,
+          "cpuP95": 0.908159654782803,
+          "workingSetMiBMean": 367.25390625,
+          "workingSetMiBMax": 369.8125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.10550499632576017,
+          "cpuP95": 0.1208075820578515,
+          "workingSetMiBMean": 182.9560546875,
+          "workingSetMiBMax": 183.85546875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.030503,
+          "cpuP95": 0.030503,
+          "workingSetMiBMean": 12.484375,
+          "workingSetMiBMax": 12.734375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "write-3-c1-b",
+      "valid": true,
+      "p50": 21.7642685,
+      "p95": 27.439323849999997,
+      "p99": 29.063213039999997,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 45.512573503052735,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 22.5887517,
+          "p50": 22.416847,
+          "p95": 26.84117054999999,
+          "p99": 28.27112083,
+          "max": 28.325546,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 22.586069766666665,
+          "p50": 21.6344705,
+          "p95": 27.74926755,
+          "p99": 32.95390616000001,
+          "max": 35.03161,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 20.15500926666667,
+          "p50": 19.60326,
+          "p95": 25.16590505,
+          "p99": 25.9748047,
+          "max": 26.272713,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.699163070004232,
+          "cpuP95": 0.9286893432121224,
+          "workingSetMiBMean": 352.1041666666667,
+          "workingSetMiBMax": 356.19140625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.09174076771634414,
+          "cpuP95": 0.1243214699604889,
+          "workingSetMiBMean": 182.6796875,
+          "workingSetMiBMax": 182.83984375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.027029597523219814,
+          "cpuP95": 0.027029597523219814,
+          "workingSetMiBMean": 11.787109375,
+          "workingSetMiBMax": 12.09765625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "write-4-c1-b",
+      "valid": true,
+      "p50": 21.1664325,
+      "p95": 27.6270754,
+      "p99": 33.43100019,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 45.075568514481,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 23.828453333333336,
+          "p50": 22.7393865,
+          "p95": 31.233282449999983,
+          "p99": 33.54267759,
+          "max": 33.596655,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 22.11414766666667,
+          "p50": 21.4711085,
+          "p95": 25.936611499999998,
+          "p99": 26.44600408,
+          "max": 26.61648,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 20.030495799999997,
+          "p50": 19.6570185,
+          "p95": 24.84954175,
+          "p99": 25.503249150000002,
+          "max": 25.662275,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.7587701715813977,
+          "cpuP95": 0.9699358963611285,
+          "workingSetMiBMean": 347.4557291666667,
+          "workingSetMiBMax": 351.453125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.09742682638666601,
+          "cpuP95": 0.10624958176693558,
+          "workingSetMiBMean": 183.31119791666666,
+          "workingSetMiBMax": 183.47265625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.029968617683686177,
+          "cpuP95": 0.029968617683686177,
+          "workingSetMiBMean": 12.65234375,
+          "workingSetMiBMax": 12.8984375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "write-5-c1-b",
+      "valid": true,
+      "p50": 21.608977000000003,
+      "p95": 25.95900265,
+      "p99": 28.02802614,
+      "count": 90,
+      "status": {
+        "200": 60,
+        "201": 30
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 45.803943417527584,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "place-create": {
+          "n": 30,
+          "mean": 22.39875253333333,
+          "p50": 21.9317425,
+          "p95": 27.27859595,
+          "p99": 27.79492002,
+          "max": 27.894379,
+          "p99SampleSufficient": false
+        },
+        "place-update": {
+          "n": 30,
+          "mean": 22.138749766666663,
+          "p50": 21.6721915,
+          "p95": 25.259441949999996,
+          "p99": 28.115831850000003,
+          "max": 29.109353,
+          "p99SampleSufficient": false
+        },
+        "place-delete": {
+          "n": 30,
+          "mean": 20.365334800000003,
+          "p50": 19.870233,
+          "p95": 24.591366599999994,
+          "p99": 25.945451690000002,
+          "max": 26.184481,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.7405477916562404,
+          "cpuP95": 0.929125349885227,
+          "workingSetMiBMean": 343.30078125,
+          "workingSetMiBMax": 346.9609375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.09579035592116886,
+          "cpuP95": 0.10562457977816339,
+          "workingSetMiBMean": 184.3515625,
+          "workingSetMiBMax": 185.03515625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.02987394540942928,
+          "cpuP95": 0.02987394540942928,
+          "workingSetMiBMean": 11.712890625,
+          "workingSetMiBMax": 12.05859375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    }
+  ],
+  "exploration": [
+    {
+      "side": "b",
+      "run": "explore-1-1",
+      "valid": true,
+      "p50": 2.278356,
+      "p95": 3.03702,
+      "p99": 3.727237,
+      "count": 3001,
+      "status": {
+        "200": 3001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.01482904765879,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 2401,
+          "mean": 2.400642390670552,
+          "p50": 2.32715,
+          "p95": 3.093946,
+          "p99": 3.828103,
+          "max": 6.501133,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 600,
+          "mean": 2.0518707016666653,
+          "p50": 1.991988,
+          "p95": 2.648463899999999,
+          "p99": 3.300691189999999,
+          "max": 4.292224,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.11571668647920984,
+          "cpuP95": 0.23190146333935635,
+          "workingSetMiBMean": 394.1553534836066,
+          "workingSetMiBMax": 411.49609375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.037200832067690114,
+          "cpuP95": 0.05078954419074467,
+          "workingSetMiBMean": 221.2665855532787,
+          "workingSetMiBMax": 222.05078125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.09421073954713247,
+          "cpuP95": 0.1077528426534416,
+          "workingSetMiBMean": 70.9143935381356,
+          "workingSetMiBMax": 72.90625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "explore-2-1",
+      "valid": true,
+      "p50": 2.150904,
+      "p95": 2.833324,
+      "p99": 3.483135,
+      "count": 3001,
+      "status": {
+        "200": 3001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.01613836620356,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 31,
+          "mean": 2.2320455806451616,
+          "p50": 2.095446,
+          "p95": 3.0226925,
+          "p99": 3.8523571999999993,
+          "max": 4.087889,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 2970,
+          "mean": 2.206964015488219,
+          "p50": 2.151535,
+          "p95": 2.8332718,
+          "p99": 3.48027909,
+          "max": 8.627891,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.11869235996456488,
+          "cpuP95": 0.2761285246628064,
+          "workingSetMiBMean": 401.61436987704917,
+          "workingSetMiBMax": 402.77734375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.03256312943649357,
+          "cpuP95": 0.045213443671896246,
+          "workingSetMiBMean": 127.61776383196721,
+          "workingSetMiBMax": 128.95703125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.044602031550932106,
+          "cpuP95": 0.05944473070982973,
+          "workingSetMiBMean": 62.34459635416667,
+          "workingSetMiBMax": 68.11328125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "explore-3-1",
+      "valid": true,
+      "p50": 2.000397,
+      "p95": 2.75809,
+      "p99": 3.270316,
+      "count": 3001,
+      "status": {
+        "200": 3001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.01636499046041,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 2401,
+          "mean": 2.0699833273635937,
+          "p50": 2.009098,
+          "p95": 2.730917,
+          "p99": 3.225474,
+          "max": 5.402147,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 600,
+          "mean": 2.0664993450000004,
+          "p50": 1.9674595,
+          "p95": 2.8372064,
+          "p99": 3.4763751999999997,
+          "max": 4.655039,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.0832141083826848,
+          "cpuP95": 0.11348258522550542,
+          "workingSetMiBMean": 416.56115522540983,
+          "workingSetMiBMax": 418.8046875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.03357631733104525,
+          "cpuP95": 0.04678083261818115,
+          "workingSetMiBMean": 361.6267930327869,
+          "workingSetMiBMax": 363.58984375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.05022358868161385,
+          "cpuP95": 0.06535609398820821,
+          "workingSetMiBMean": 204.72701822916667,
+          "workingSetMiBMax": 214.9609375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "explore-4-1",
+      "valid": true,
+      "p50": 118.012441,
+      "p95": 136.128969,
+      "p99": 152.38442359999996,
+      "count": 961,
+      "status": {
+        "200": 961
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 15.985005858512714,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 769,
+          "mean": 122.33550182834865,
+          "p50": 120.472778,
+          "p95": 138.49027839999997,
+          "p99": 155.01158735999985,
+          "max": 249.751055,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 192,
+          "mean": 3.64494160416667,
+          "p50": 3.0379,
+          "p95": 4.850606399999999,
+          "p99": 6.616849780000033,
+          "max": 76.270589,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.08740416095488494,
+          "cpuP95": 0.1433357202866462,
+          "workingSetMiBMean": 383.5997694672131,
+          "workingSetMiBMax": 384.6328125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 1.4874880043670382,
+          "cpuP95": 1.6826502261108756,
+          "workingSetMiBMean": 470.8601434426229,
+          "workingSetMiBMax": 472.00390625,
+          "throttleDelta": {
+            "periods": 60,
+            "nanoseconds": 724275000
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.28004819632889827,
+          "cpuP95": 0.3354750507564917,
+          "workingSetMiBMean": 288.883203125,
+          "workingSetMiBMax": 305.1484375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "explore-5-1",
+      "valid": false,
+      "p50": 2.190373,
+      "p95": 2.942057,
+      "p99": 3.453966,
+      "count": 3001,
+      "status": {
+        "200": 3001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.01645505788221,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 2401,
+          "mean": 2.2301623685964254,
+          "p50": 2.198129,
+          "p95": 2.96958,
+          "p99": 3.519081,
+          "max": 6.840381,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 600,
+          "mean": 2.178501333333334,
+          "p50": 2.1547165,
+          "p95": 2.8404786499999997,
+          "p99": 3.14797415,
+          "max": 6.020766,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.09048755985820046,
+          "cpuP95": 0.13860577104827543,
+          "workingSetMiBMean": 432.1497182377049,
+          "workingSetMiBMax": 433.69921875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.03659766463451446,
+          "cpuP95": 0.05608333063416226,
+          "workingSetMiBMean": 486.61853227459017,
+          "workingSetMiBMax": 488.3984375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.0534297896085179,
+          "cpuP95": 0.07800727387944349,
+          "workingSetMiBMean": 204.462109375,
+          "workingSetMiBMax": 215.47265625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "explore-6-1",
+      "valid": true,
+      "p50": 3.00476,
+      "p95": 4.221351,
+      "p99": 4.9762726,
+      "count": 961,
+      "status": {
+        "200": 961
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.016016282671856,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 769,
+          "mean": 3.126355717815344,
+          "p50": 2.999178,
+          "p95": 4.2256804,
+          "p99": 4.921220759999995,
+          "max": 6.140106,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 192,
+          "mean": 3.125796901041665,
+          "p50": 3.0200195,
+          "p95": 4.15200075,
+          "p99": 5.03527402,
+          "max": 5.109167,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.0578115816089283,
+          "cpuP95": 0.13111332396651543,
+          "workingSetMiBMean": 404.7238089139344,
+          "workingSetMiBMax": 405.92578125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.019656773652776197,
+          "cpuP95": 0.03215839678072744,
+          "workingSetMiBMean": 495.1269851434426,
+          "workingSetMiBMax": 495.95703125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.025282347741834417,
+          "cpuP95": 0.03517537739031368,
+          "workingSetMiBMean": 206.10084635416666,
+          "workingSetMiBMax": 220.05859375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "explore-7-1",
+      "valid": true,
+      "p50": 2.030257,
+      "p95": 2.939158,
+      "p99": 3.596319,
+      "count": 3001,
+      "status": {
+        "200": 3001
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 50.00592324409914,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 4,
+          "mean": 8.89059425,
+          "p50": 8.232067,
+          "p95": 11.679523349999998,
+          "p99": 12.153488669999998,
+          "max": 12.27198,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 2997,
+          "mean": 2.0870344114114086,
+          "p50": 2.028992,
+          "p95": 2.9339429999999997,
+          "p99": 3.510267439999998,
+          "max": 7.880919,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.084008286552377,
+          "cpuP95": 0.11776428677847746,
+          "workingSetMiBMean": 393.35578893442624,
+          "workingSetMiBMax": 394.17578125,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.03325970271580521,
+          "cpuP95": 0.04688828997449575,
+          "workingSetMiBMean": 465.37077356557376,
+          "workingSetMiBMax": 469.0625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.045149570542095376,
+          "cpuP95": 0.05725521575792313,
+          "workingSetMiBMean": 202.30494791666666,
+          "workingSetMiBMax": 215,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    },
+    {
+      "side": "b",
+      "run": "explore-8-1",
+      "valid": true,
+      "p50": 3.100372,
+      "p95": 4.743031,
+      "p99": 5.771972199999999,
+      "count": 961,
+      "status": {
+        "200": 961
+      },
+      "checksFailed": 0,
+      "dropped": 0,
+      "throughputPerSecond": 16.016106258303857,
+      "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+      "endpoints": {
+        "markers-hot": {
+          "n": 1,
+          "mean": 26.102265,
+          "p50": 26.102265,
+          "p95": 26.102265,
+          "p99": 26.102265,
+          "max": 26.102265,
+          "p99SampleSufficient": false
+        },
+        "markers-other": {
+          "n": 960,
+          "mean": 3.289347402083337,
+          "p50": 3.0998675,
+          "p95": 4.722466349999999,
+          "p99": 5.7389629499999995,
+          "max": 7.167076,
+          "p99SampleSufficient": false
+        }
+      },
+      "resources": {
+        "app-1": {
+          "cpuMean": 0.053743437553731156,
+          "cpuP95": 0.09119434956558174,
+          "workingSetMiBMean": 388.8782658811475,
+          "workingSetMiBMax": 391.98046875,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "db-1": {
+          "cpuMean": 0.01960495453322492,
+          "cpuP95": 0.031322818692806696,
+          "workingSetMiBMean": 457.10098616803276,
+          "workingSetMiBMax": 458.234375,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        },
+        "b-load": {
+          "cpuMean": 0.028405950010852568,
+          "cpuP95": 0.02589840815336223,
+          "workingSetMiBMean": 713.2427734375,
+          "workingSetMiBMax": 774.00390625,
+          "throttleDelta": {
+            "periods": 0,
+            "nanoseconds": 0
+          }
+        }
+      }
+    }
+  ],
+  "sql": [
+    {
+      "side": "a1",
+      "concurrency": 1,
+      "cycles": 5,
+      "httpRequests": 15,
+      "applicationSqlPerCycle": 36,
+      "cellSqlPerCycle": 24,
+      "cellSqlMsPerCycle": 431.65362620000013,
+      "cellWalBytesPerCycle": 19583.4,
+      "transactionBeginPerCycle": 16,
+      "isolationShowPerCycle": 0,
+      "lock": null
+    },
+    {
+      "side": "a1",
+      "concurrency": 2,
+      "cycles": 10,
+      "httpRequests": 30,
+      "applicationSqlPerCycle": 36,
+      "cellSqlPerCycle": 24,
+      "cellSqlMsPerCycle": 480.7529936000002,
+      "cellWalBytesPerCycle": 11453.6,
+      "transactionBeginPerCycle": 16,
+      "isolationShowPerCycle": 0,
+      "lock": null
+    },
+    {
+      "side": "a1",
+      "concurrency": 4,
+      "cycles": 20,
+      "httpRequests": 60,
+      "applicationSqlPerCycle": 36,
+      "cellSqlPerCycle": 24,
+      "cellSqlMsPerCycle": 947.1469746000005,
+      "cellWalBytesPerCycle": 8527.35,
+      "transactionBeginPerCycle": 16,
+      "isolationShowPerCycle": 0,
+      "lock": null
+    },
+    {
+      "side": "a1",
+      "concurrency": 8,
+      "cycles": 40,
+      "httpRequests": 120,
+      "applicationSqlPerCycle": 36,
+      "cellSqlPerCycle": 24,
+      "cellSqlMsPerCycle": 1911.8782998500023,
+      "cellWalBytesPerCycle": 15624.1,
+      "transactionBeginPerCycle": 16,
+      "isolationShowPerCycle": 0,
+      "lock": null
+    },
+    {
+      "side": "a1",
+      "concurrency": 16,
+      "cycles": 80,
+      "httpRequests": 240,
+      "applicationSqlPerCycle": 36,
+      "cellSqlPerCycle": 24,
+      "cellSqlMsPerCycle": 2476.154778662503,
+      "cellWalBytesPerCycle": 18768.9875,
+      "transactionBeginPerCycle": 16,
+      "isolationShowPerCycle": 0,
+      "lock": null
+    },
+    {
+      "side": "b",
+      "concurrency": 1,
+      "cycles": 5,
+      "httpRequests": 15,
+      "applicationSqlPerCycle": 30,
+      "cellSqlPerCycle": 18,
+      "cellSqlMsPerCycle": 1.2061422000000002,
+      "cellWalBytesPerCycle": 13755.8,
+      "transactionBeginPerCycle": 13,
+      "isolationShowPerCycle": 9,
+      "lock": {
+        "calls": 45,
+        "meanMsIncludingWait": 0.006395577777777779,
+        "maxMsIncludingWait": 0.013323,
+        "totalMsIncludingWait": 0.2878010000000001
+      }
+    },
+    {
+      "side": "b",
+      "concurrency": 2,
+      "cycles": 10,
+      "httpRequests": 30,
+      "applicationSqlPerCycle": 30,
+      "cellSqlPerCycle": 18,
+      "cellSqlMsPerCycle": 5.837001199999998,
+      "cellWalBytesPerCycle": 11722.9,
+      "transactionBeginPerCycle": 13,
+      "isolationShowPerCycle": 9,
+      "lock": {
+        "calls": 90,
+        "meanMsIncludingWait": 0.5395180111111111,
+        "maxMsIncludingWait": 2.180259,
+        "totalMsIncludingWait": 48.55662099999998
+      }
+    },
+    {
+      "side": "b",
+      "concurrency": 4,
+      "cycles": 20,
+      "httpRequests": 60,
+      "applicationSqlPerCycle": 30,
+      "cellSqlPerCycle": 18,
+      "cellSqlMsPerCycle": 6.631730850000001,
+      "cellWalBytesPerCycle": 7594.1,
+      "transactionBeginPerCycle": 13,
+      "isolationShowPerCycle": 9,
+      "lock": {
+        "calls": 180,
+        "meanMsIncludingWait": 0.6209446666666668,
+        "maxMsIncludingWait": 7.988797000000001,
+        "totalMsIncludingWait": 111.77004000000001
+      }
+    },
+    {
+      "side": "b",
+      "concurrency": 8,
+      "cycles": 40,
+      "httpRequests": 120,
+      "applicationSqlPerCycle": 30,
+      "cellSqlPerCycle": 18,
+      "cellSqlMsPerCycle": 53.453311225000014,
+      "cellWalBytesPerCycle": 14946.05,
+      "transactionBeginPerCycle": 13,
+      "isolationShowPerCycle": 9,
+      "lock": {
+        "calls": 360,
+        "meanMsIncludingWait": 5.817467491666668,
+        "maxMsIncludingWait": 47.017706,
+        "totalMsIncludingWait": 2094.2882970000005
+      }
+    },
+    {
+      "side": "b",
+      "concurrency": 16,
+      "cycles": 80,
+      "httpRequests": 240,
+      "applicationSqlPerCycle": 30,
+      "cellSqlPerCycle": 18,
+      "cellSqlMsPerCycle": 99.66304922500002,
+      "cellWalBytesPerCycle": 12217.6,
+      "transactionBeginPerCycle": 13,
+      "isolationShowPerCycle": 9,
+      "lock": {
+        "calls": 720,
+        "meanMsIncludingWait": 10.931825581944425,
+        "maxMsIncludingWait": 63.218859,
+        "totalMsIncludingWait": 7870.9144190000015
+      }
+    }
+  ],
+  "memory": [
+    {
+      "viewport": 1,
+      "windowStart": "2026-11-09T11:37:35.317Z",
+      "windowSeconds": 60,
+      "requests": 4670,
+      "hotRequests": 3736,
+      "hotCase": {
+        "name": "markers-hot",
+        "path": "/api/maps/4cb26e68-dd25-b27e-6334-d63f0477796c/places/markers?level=5&swLat=37.45&neLat=37.55&swLng=127.45&neLng=127.55",
+        "hash": "ee2265b13b1c3a0d9c2cfe404f57ccf00a53bf6ed431246b2fc1b829e911171c",
+        "returned": 515,
+        "total": 515,
+        "selectedPlaces": 515
+      },
+      "allocationSamples": 16921,
+      "estimatedAllThreadMiBPerRequest": 6.0135234432506355,
+      "estimatedHttpThreadMiBPerRequest": 6.00840265735569,
+      "afterGcMeanMiB": 49.88264397695555,
+      "afterGcMaxMiB": 50.702545166015625,
+      "gcCount": 282,
+      "oldGc": 0,
+      "gcPauseMs": 408.01516100000015,
+      "diagnostic": {
+        "side": "b",
+        "run": "memory-v1-diagnostic",
+        "valid": true,
+        "p50": 5.986745,
+        "p95": 7.757751149999996,
+        "p99": 8.76572847,
+        "count": 7188,
+        "status": {
+          "200": 7188
+        },
+        "checksFailed": 0,
+        "dropped": 0,
+        "throughputPerSecond": 79.8681478143685,
+        "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+        "endpoints": {
+          "markers-hot": {
+            "n": 5752,
+            "mean": 6.316326839186367,
+            "p50": 6.175181,
+            "p95": 7.92592415,
+            "p99": 8.89470194,
+            "max": 11.67499,
+            "p99SampleSufficient": false
+          },
+          "markers-other": {
+            "n": 1436,
+            "mean": 1.7279004394150421,
+            "p50": 1.7033935,
+            "p95": 2.50218725,
+            "p99": 2.9591621000000004,
+            "max": 3.578754,
+            "p99SampleSufficient": false
+          }
+        },
+        "resources": {
+          "b-jfr": {
+            "cpuMean": 0.221701610679773,
+            "cpuP95": 0.25107341146304096,
+            "workingSetMiBMean": 413.2111111111111,
+            "workingSetMiBMax": 416.27734375,
+            "throttleDelta": {
+              "periods": 0,
+              "nanoseconds": 0
+            }
+          },
+          "db-1": {
+            "cpuMean": 0.22615803098776419,
+            "cpuP95": 0.2441449015229884,
+            "workingSetMiBMean": 208.75190972222222,
+            "workingSetMiBMax": 211.7578125,
+            "throttleDelta": {
+              "periods": 0,
+              "nanoseconds": 0
+            }
+          },
+          "b-load": {
+            "cpuMean": 0.8055716213533134,
+            "cpuP95": 0.8178725565791669,
+            "workingSetMiBMean": 22.62693117977528,
+            "workingSetMiBMax": 24.52734375,
+            "throttleDelta": {
+              "periods": 0,
+              "nanoseconds": 0
+            }
+          }
+        }
+      },
+      "note": "JFR sample weights are estimates, not exact allocation counters. HTTP completions from warmup+diagnostic aligned to the 60s recording; boundary requests may straddle the window."
+    },
+    {
+      "viewport": 10,
+      "windowStart": "2026-11-09T11:42:47.595Z",
+      "windowSeconds": 60,
+      "requests": 2022,
+      "hotRequests": 1618,
+      "hotCase": {
+        "name": "markers-hot",
+        "path": "/api/maps/4cb26e68-dd25-b27e-6334-d63f0477796c/places/markers?level=5&swLat=37.34188611699158&neLat=37.65811388300842&swLng=127.34188611699157&neLng=127.65811388300843",
+        "hash": "5bce6f15dc873ebbd4b516c29f14b99e638b2907d97094808f0dbbe6c6363ed3",
+        "returned": 700,
+        "total": 4999,
+        "selectedPlaces": 4999
+      },
+      "allocationSamples": 16464,
+      "estimatedAllThreadMiBPerRequest": 7.0931316228577925,
+      "estimatedHttpThreadMiBPerRequest": 7.084885752873181,
+      "afterGcMeanMiB": 48.27226414834299,
+      "afterGcMaxMiB": 49.25713348388672,
+      "gcCount": 155,
+      "oldGc": 0,
+      "gcPauseMs": 264.178809,
+      "diagnostic": {
+        "side": "b",
+        "run": "memory-v10-diagnostic",
+        "valid": true,
+        "p50": 18.980917,
+        "p95": 21.723875599999996,
+        "p99": 23.42430882,
+        "count": 3167,
+        "status": {
+          "200": 3167
+        },
+        "checksFailed": 0,
+        "dropped": 0,
+        "throughputPerSecond": 35.18387495527605,
+        "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+        "endpoints": {
+          "markers-hot": {
+            "n": 2535,
+            "mean": 19.52554750887572,
+            "p50": 19.318403,
+            "p95": 21.960124499999996,
+            "p99": 23.575841759999992,
+            "max": 31.114862,
+            "p99SampleSufficient": false
+          },
+          "markers-other": {
+            "n": 632,
+            "mean": 1.956238492088607,
+            "p50": 1.9121705,
+            "p95": 2.9086441499999993,
+            "p99": 3.2759532899999995,
+            "max": 3.618319,
+            "p99SampleSufficient": false
+          }
+        },
+        "resources": {
+          "b-jfr": {
+            "cpuMean": 0.15950172609900048,
+            "cpuP95": 0.35970195701603586,
+            "workingSetMiBMean": 407.1583767361111,
+            "workingSetMiBMax": 410.5390625,
+            "throttleDelta": {
+              "periods": 0,
+              "nanoseconds": 0
+            }
+          },
+          "db-1": {
+            "cpuMean": 0.45960080045164853,
+            "cpuP95": 0.48254250864789255,
+            "workingSetMiBMean": 216.82200520833334,
+            "workingSetMiBMax": 219.54296875,
+            "throttleDelta": {
+              "periods": 0,
+              "nanoseconds": 0
+            }
+          },
+          "b-load": {
+            "cpuMean": 0.5852664599039474,
+            "cpuP95": 0.5997600719195774,
+            "workingSetMiBMean": 34.27681706460674,
+            "workingSetMiBMax": 35.95703125,
+            "throttleDelta": {
+              "periods": 0,
+              "nanoseconds": 0
+            }
+          }
+        }
+      },
+      "note": "JFR sample weights are estimates, not exact allocation counters. HTTP completions from warmup+diagnostic aligned to the 60s recording; boundary requests may straddle the window."
+    },
+    {
+      "viewport": 100,
+      "windowStart": "2026-11-09T11:47:58.652Z",
+      "windowSeconds": 60,
+      "requests": 574,
+      "hotRequests": 460,
+      "hotCase": {
+        "name": "markers-hot",
+        "path": "/api/maps/4cb26e68-dd25-b27e-6334-d63f0477796c/places/markers?level=5&swLat=37&neLat=38&swLng=127&neLng=128",
+        "hash": "424f73383ea31a84840e7523f66ceb469662dbb1613bdc3d3d084c8b7f50af5e",
+        "returned": 700,
+        "total": 50000,
+        "selectedPlaces": 50000
+      },
+      "allocationSamples": 14742,
+      "estimatedAllThreadMiBPerRequest": 8.309605229607028,
+      "estimatedHttpThreadMiBPerRequest": 8.293565650434859,
+      "afterGcMeanMiB": 68.04021879684093,
+      "afterGcMaxMiB": 70.35931396484375,
+      "gcCount": 43,
+      "oldGc": 0,
+      "gcPauseMs": 187.89445399999997,
+      "diagnostic": {
+        "side": "b",
+        "run": "memory-v100-diagnostic",
+        "valid": true,
+        "p50": 109.490162,
+        "p95": 120.71295715,
+        "p99": 125.29475341999999,
+        "count": 888,
+        "status": {
+          "200": 888
+        },
+        "checksFailed": 0,
+        "dropped": 0,
+        "throughputPerSecond": 9.854195074422023,
+        "throughputSource": "k6 http_reqs rate; excludes collector preparation and Docker CLI startup",
+        "endpoints": {
+          "markers-hot": {
+            "n": 712,
+            "mean": 111.82900194943815,
+            "p50": 110.79076649999999,
+            "p95": 121.61557545,
+            "p99": 127.06035430999998,
+            "max": 224.931739,
+            "p99SampleSufficient": false
+          },
+          "markers-other": {
+            "n": 176,
+            "mean": 3.0126294545454546,
+            "p50": 3.0206425,
+            "p95": 3.974736,
+            "p99": 4.7923617499999995,
+            "max": 5.272891,
+            "p99SampleSufficient": false
+          }
+        },
+        "resources": {
+          "b-jfr": {
+            "cpuMean": 0.07638574989152006,
+            "cpuP95": 0.2097196823289761,
+            "workingSetMiBMean": 391.0949519230769,
+            "workingSetMiBMax": 396.71484375,
+            "throttleDelta": {
+              "periods": 0,
+              "nanoseconds": 0
+            }
+          },
+          "db-1": {
+            "cpuMean": 0.8515117161612653,
+            "cpuP95": 0.8810469912609238,
+            "workingSetMiBMean": 231.07576407967034,
+            "workingSetMiBMax": 234.66015625,
+            "throttleDelta": {
+              "periods": 0,
+              "nanoseconds": 0
+            }
+          },
+          "b-load": {
+            "cpuMean": 0.160260919182627,
+            "cpuP95": 0.17245603505983373,
+            "workingSetMiBMean": 22.354810393258425,
+            "workingSetMiBMax": 24.3359375,
+            "throttleDelta": {
+              "periods": 0,
+              "nanoseconds": 0
+            }
+          }
+        }
+      },
+      "note": "JFR sample weights are estimates, not exact allocation counters. HTTP completions from warmup+diagnostic aligned to the 60s recording; boundary requests may straddle the window."
+    }
+  ],
+  "writeSingle": {
+    "valid": false,
+    "note": "All five original values, including the invalid run, shown descriptively. No adoption from this sample.",
+    "endpoints": {
+      "place-create": {
+        "p50": {
+          "a": 142.238385,
+          "b": 22.416847,
+          "changePercent": -84.23994549713146
+        },
+        "p95": {
+          "a": 160.45125474999995,
+          "b": 27.27859595,
+          "changePercent": -82.99882665766438
+        },
+        "p99": {
+          "a": 168.98860641,
+          "b": 28.27112083,
+          "changePercent": -83.27039826495248
+        },
+        "p95RangePercent": {
+          "a": 18.814858255260837,
+          "b": 38.84785976310483
+        }
+      },
+      "place-update": {
+        "p50": {
+          "a": 271.2602945,
+          "b": 21.6344705,
+          "changePercent": -92.0244610292569
+        },
+        "p95": {
+          "a": 297.66627409999995,
+          "b": 25.936611499999998,
+          "changePercent": -91.28668117393552
+        },
+        "p99": {
+          "a": 319.61733352000005,
+          "b": 28.115831850000003,
+          "changePercent": -91.20328314476703
+        },
+        "p95RangePercent": {
+          "a": 20.913904502021644,
+          "b": 24.81460174549013
+        }
+      },
+      "place-delete": {
+        "p50": {
+          "a": 139.4133645,
+          "b": 19.6570185,
+          "changePercent": -85.90019072382404
+        },
+        "p95": {
+          "a": 150.9604949,
+          "b": 24.84954175,
+          "changePercent": -83.53904326661028
+        },
+        "p99": {
+          "a": 155.07039921,
+          "b": 25.945451690000002,
+          "changePercent": -83.26859811919097
+        },
+        "p95RangePercent": {
+          "a": 16.575826719815513,
+          "b": 18.56275337552253
+        }
+      }
+    }
+  },
+  "fullViewportOom": [
+    {
+      "run": "full-viewport-1-1",
+      "containerOom": 0,
+      "javaOom": false
+    },
+    {
+      "run": "full-viewport-2-1",
+      "containerOom": 0,
+      "javaOom": false
+    },
+    {
+      "run": "full-viewport-3-1",
+      "containerOom": 0,
+      "javaOom": false
+    }
+  ],
+  "restoration": {
+    "read": {
+      "at": "2026-11-09T10:10:00.4247318+00:00",
+      "allRunning": true,
+      "states": [
+        {
+          "alias": "background-e889d562",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-ff59cc56",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-a7d65270",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-488ea115",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-e2be4830",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-5336624b",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-c8fc47b2",
+          "status": "running",
+          "running": true,
+          "paused": false
+        }
+      ]
+    },
+    "final": {
+      "at": "2026-11-09T12:30:01.1532217+00:00",
+      "states": [
+        {
+          "alias": "background-e889d562",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-ff59cc56",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-a7d65270",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-488ea115",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-e2be4830",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-5336624b",
+          "status": "running",
+          "running": true,
+          "paused": false
+        },
+        {
+          "alias": "background-c8fc47b2",
+          "status": "running",
+          "running": true,
+          "paused": false
+        }
+      ],
+      "allRunning": true
+    }
+  },
+  "execution": {
+    "read": {
+      "started": "2026-11-09T16:09:18.9345091+09:00",
+      "finished": "2026-11-09T19:09:39.2412217+09:00",
+      "elapsedSeconds": 10820.3067729,
+      "exitCode": 1
+    },
+    "remaining": {
+      "exitCode": 0,
+      "started": "2026-11-09T19:13:01.4150379+09:00",
+      "finished": "2026-11-09T21:29:40.9259506+09:00",
+      "elapsedSeconds": 8199.5109127
+    },
+    "wallSeconds": 19221.991
+  },
+  "adoption": "BLOCKED: mandatory write sample contains interference; no replacement run or retrospective gate change. Read gates pass separately."
+}

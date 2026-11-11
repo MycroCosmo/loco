@@ -1,0 +1,39 @@
+{
+  "release": "https://github.com/MycroCosmo/loco/releases/tag/perf-stage2-p2-20261109-formal",
+  "roles": [
+    {
+      "archive": "apps/server-v3/build/p0-p2-formal-a0-20261109.tar.gz",
+      "sha256": "7f41fcf07a454a4d3211ec9396f29344b9ee9f911b55acd54cdc462a938778a2",
+      "bytes": 15663782,
+      "files": 122
+    },
+    {
+      "archive": "apps/server-v3/build/p1-p2-formal-a1-20261109.tar.gz",
+      "sha256": "f2e8d2d87f4638e22d07d1961915ed655525206da947c1b87f1e3ec7bd942e52",
+      "bytes": 8919990,
+      "files": 371
+    },
+    {
+      "archive": "apps/server-v3/build/p2-p2-formal-b-20261109.tar.gz",
+      "sha256": "9ce9810b553d21d4b0f42348d16a6db94c1eae04b5677dd1035c2bd79d4f56d7",
+      "bytes": 43366899,
+      "files": 804
+    }
+  ],
+  "session": {
+    "checkedFiles": 1324,
+    "noApprovedBackgroundIdentifiers": true,
+    "noCredentialMaterial": true,
+    "archive": "apps/server-v3/build/p2-formal-session-20261109.tar.gz",
+    "bytes": 56249,
+    "sha256": "1f4547e428f386b651661bb138282a45d098f771ef8c5857ca115882d6bc2af4"
+  },
+  "toolTests": {
+    "failed": 0,
+    "exitCode": 0,
+    "passed": 35,
+    "elapsedSeconds": 0.3478876,
+    "skipped": 0
+  },
+  "rawJfr": "Locally preserved. Public selected event exports have stack depth 0; environment/system properties events were zero."
+}

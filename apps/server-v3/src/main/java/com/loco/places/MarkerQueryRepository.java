@@ -38,38 +38,61 @@ public class MarkerQueryRepository {
     params.put("minLng", PrismaFloats.input(Math.min(c, d)));
     params.put("maxLng", PrismaFloats.input(Math.max(c, d)));
     if (level < 6) {
-      var rows =
-          rows(
-              "SELECT id,name,latitude,longitude FROM places WHERE \"mapId\"=:map AND latitude>=:minLat AND latitude<=:maxLat AND longitude>=:minLng AND longitude<=:maxLng ORDER BY \"createdAt\" DESC,id DESC LIMIT 301",
-              params);
+      var rows = rows(CANDIDATES, params);
       if (rows.size() <= 300) return individual(rows);
     }
     params.put("precision", level >= 11 ? 1 : level >= 9 ? 2 : 3);
-    return cells(
-        rows(
-            "SELECT * FROM place_marker_cells WHERE \"mapId\"=:map AND precision=:precision AND \"maxLat\">=:minLat AND \"minLat\"<=:maxLat AND \"maxLng\">=:minLng AND \"minLng\"<=:maxLng ORDER BY count DESC",
-            params));
+    return cells(rows(BOUNDED_CELLS, params));
   }
+
+  private static final String CANDIDATES =
+      """
+      WITH marker_candidates AS MATERIALIZED (
+        SELECT id,name,latitude,longitude,"createdAt" FROM places
+        WHERE "mapId"=:map AND latitude>=:minLat AND latitude<=:maxLat AND longitude>=:minLng AND longitude<=:maxLng
+        ORDER BY "createdAt" DESC,id DESC LIMIT 301
+      )
+      SELECT id,name,latitude,longitude,
+        CASE WHEN (SELECT count(*) FROM marker_candidates)<=300 THEN ROUND(latitude::numeric,6)::text END AS "latKey",
+        CASE WHEN (SELECT count(*) FROM marker_candidates)<=300 THEN ROUND(longitude::numeric,6)::text END AS "lngKey"
+      FROM marker_candidates ORDER BY "createdAt" DESC,id DESC
+      """;
+
+  // Both key columns are NOT NULL. Tuple NOT IN can hash at most 699 visible keys,
+  // avoiding a per-cell nested-loop anti join even when table statistics are stale.
+  private static final String BOUNDED_CELLS =
+      """
+      WITH matching AS NOT MATERIALIZED (
+        SELECT precision,"cellLatKey","cellLngKey",latitude,longitude,count,"exactKeyCount","groupKey","placeId","placeName"
+        FROM place_marker_cells WHERE "mapId"=:map AND precision=:precision
+          AND "maxLat">=:minLat AND "minLat"<=:maxLat AND "maxLng">=:minLng AND "minLng"<=:maxLng
+      ), probe AS MATERIALIZED (SELECT * FROM matching LIMIT 700),
+      top_cells AS MATERIALIZED (
+        SELECT * FROM matching WHERE (SELECT count(*) FROM probe)=700
+        ORDER BY count DESC,"cellLatKey" COLLATE "C","cellLngKey" COLLATE "C" LIMIT 699
+      ), visible AS MATERIALIZED (
+        SELECT * FROM probe WHERE (SELECT count(*) FROM probe)<700
+        UNION ALL SELECT * FROM top_cells
+      )
+      SELECT visible.*,false AS "isOverflow" FROM visible
+      UNION ALL
+      SELECT NULL,NULL,NULL,
+        COALESCE(SUM(m.latitude::numeric*m.count)/NULLIF(SUM(m.count),0),0)::float8,
+        COALESCE(SUM(m.longitude::numeric*m.count)/NULLIF(SUM(m.count),0),0)::float8,
+        SUM(m.count)::bigint,NULL,NULL,NULL,NULL,true
+      FROM matching m WHERE (SELECT count(*) FROM probe)=700
+        AND (m."cellLatKey",m."cellLngKey") NOT IN (SELECT v."cellLatKey",v."cellLngKey" FROM visible v)
+      HAVING count(*)>0
+      """;
 
   public List<PlaceResponses.Read> group(String id, String user, MarkerInputs input) {
     readable(id, user);
     var keys = input.group();
     double lat = MarkerInputs.number(keys[0]), lng = MarkerInputs.number(keys[1]);
-    var params =
-        Map.<String, Object>of(
-            "map",
-            id,
-            "minLat",
-            PrismaFloats.input(lat - 0.0000005),
-            "maxLat",
-            PrismaFloats.input(lat + 0.0000005),
-            "minLng",
-            PrismaFloats.input(lng - 0.0000005),
-            "maxLng",
-            PrismaFloats.input(lng + 0.0000005));
+    var params = Map.<String, Object>of("map", id, "lat", lat, "lng", lng);
     return rows(
             PlaceQueryRepository.PROJECTION
-                + " WHERE p.\"mapId\"=:map AND p.latitude>=:minLat AND p.latitude<:maxLat AND p.longitude>=:minLng AND p.longitude<:maxLng ORDER BY p.\"createdAt\" DESC,p.id DESC",
+                + " WHERE p.\"mapId\"=:map AND ROUND(p.latitude::numeric,6)=ROUND(CAST(:lat AS float8)::numeric,6) AND ROUND(p.longitude::numeric,6)=ROUND(CAST(:lng AS float8)::numeric,6) ORDER BY p.\"createdAt\" DESC,p.id DESC",
             params)
         .stream()
         .map(t -> PlaceResponses.read(t, "list"))
@@ -79,6 +102,11 @@ public class MarkerQueryRepository {
   public Map<String, Object> cluster(String id, String user, MarkerInputs input, int precision) {
     readable(id, user);
     var keys = input.cell();
+    // Old negative-zero URLs refer to the same zero cell; nonzero stale keys require refetching
+    // markers.
+    for (int i = 0; i < keys.length; i++)
+      if (MarkerInputs.number(keys[i]) == 0)
+        keys[i] = java.math.BigDecimal.ZERO.setScale(precision).toPlainString();
     var params =
         Map.<String, Object>of("map", id, "precision", precision, "lat", keys[0], "lng", keys[1]);
     int limit = input.limit();
@@ -87,11 +115,23 @@ public class MarkerQueryRepository {
             "SELECT count FROM place_marker_cells WHERE \"mapId\"=:map AND precision=:precision AND \"cellLatKey\"=:lat AND \"cellLngKey\"=:lng",
             params);
     if (cell.isEmpty()) return Map.of("count", 0, "items", List.of(), "hasMore", false);
+    // A literal precision preserves expression-index matching even with a generic prepared plan.
+    String scale =
+        switch (precision) {
+          case 1 -> "1";
+          case 2 -> "2";
+          case 3 -> "3";
+          default -> throw new IllegalArgumentException("Unsupported marker precision");
+        };
     var ids =
         rows(
-            "SELECT id FROM places WHERE \"mapId\"=:map AND ROUND(latitude::numeric,:precision)::text=:lat AND ROUND(longitude::numeric,:precision)::text=:lng ORDER BY \"createdAt\" DESC,id DESC LIMIT "
+            "SELECT id FROM places WHERE \"mapId\"=:map AND ROUND(latitude::numeric,"
+                + scale
+                + ")::text=:lat AND ROUND(longitude::numeric,"
+                + scale
+                + ")::text=:lng ORDER BY \"createdAt\" DESC,id DESC LIMIT "
                 + (limit + 1),
-            params);
+            Map.of("map", id, "lat", keys[0], "lng", keys[1]));
     boolean more = ids.size() > limit;
     var selected = ids.stream().limit(limit).map(t -> t.get("id").toString()).toList();
     List<PlaceResponses.Read> items = List.of();
@@ -135,10 +175,7 @@ public class MarkerQueryRepository {
   private static List<Map<String, Object>> individual(List<Tuple> rows) {
     var groups = new LinkedHashMap<String, List<Tuple>>();
     for (var row : rows) {
-      String key =
-          CoordinateKeys.fixed(number(row, "latitude"), 6)
-              + ":"
-              + CoordinateKeys.fixed(number(row, "longitude"), 6);
+      String key = text(row, "latKey") + ":" + text(row, "lngKey");
       groups.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
     }
     var result = new ArrayList<Map<String, Object>>();
@@ -177,7 +214,16 @@ public class MarkerQueryRepository {
 
   private static List<Map<String, Object>> cells(List<Tuple> rows) {
     var result = new ArrayList<Map<String, Object>>();
-    for (var row : rows.subList(0, Math.min(699, rows.size()))) {
+    var visible =
+        rows.stream()
+            .filter(row -> !Boolean.TRUE.equals(row.get("isOverflow")))
+            .sorted(
+                Comparator.<Tuple>comparingLong(row -> ((Number) row.get("count")).longValue())
+                    .reversed()
+                    .thenComparing(row -> text(row, "cellLatKey"))
+                    .thenComparing(row -> text(row, "cellLngKey")))
+            .toList();
+    for (var row : visible) {
       int count = ((Number) row.get("count")).intValue(),
           exact = ((Number) row.get("exactKeyCount")).intValue();
       String place = text(row, "placeId"),
@@ -185,7 +231,8 @@ public class MarkerQueryRepository {
           group = text(row, "groupKey"),
           latKey = text(row, "cellLatKey"),
           lngKey = text(row, "cellLngKey");
-      double lat = number(row, "latitude"), lng = number(row, "longitude");
+      double lat = ((Number) row.get("latitude")).doubleValue(),
+          lng = ((Number) row.get("longitude")).doubleValue();
       Map<String, Object> m;
       if (count == 1 && place != null && !place.isEmpty() && name != null && !name.isEmpty())
         m = marker("place", place, name, lat, lng, count);
@@ -202,22 +249,16 @@ public class MarkerQueryRepository {
       }
       result.add(m);
     }
-    if (rows.size() > 699) {
-      long count = 0;
-      double lat = 0, lng = 0;
-      for (var row : rows.subList(699, rows.size())) {
-        long n = ((Number) row.get("count")).longValue();
-        count += n;
-        lat += number(row, "latitude") * n;
-        lng += number(row, "longitude") * n;
-      }
+    for (var row : rows) {
+      if (!Boolean.TRUE.equals(row.get("isOverflow"))) continue;
+      long count = ((Number) row.get("count")).longValue();
       var m =
           marker(
               "cluster",
               "overflow",
               count + "개 장소",
-              count == 0 ? 0 : lat / count,
-              count == 0 ? 0 : lng / count,
+              ((Number) row.get("latitude")).doubleValue(),
+              ((Number) row.get("longitude")).doubleValue(),
               count);
       m.put("clusterKey", "overflow");
       result.add(m);

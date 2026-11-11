@@ -1,0 +1,480 @@
+{
+  "decision": "E-22 B variant",
+  "purpose": "Functional verification only; no performance adoption or timing claims",
+  "finalExecution": {
+    "started": "2026-11-09T15:22:31.2953647+09:00",
+    "finished": "2026-11-09T15:39:43.7310498+09:00",
+    "elapsedSeconds": 1032.4357609,
+    "exitCode": 0
+  },
+  "javaTests": [
+    {
+      "tests": 451,
+      "task": "test",
+      "skipped": 1,
+      "skipReason": "Existing shared HEIC codec limitation",
+      "failed": 0,
+      "execution": "executed",
+      "passed": 450
+    },
+    {
+      "tests": 1158,
+      "task": "comparisonTest",
+      "skipped": 0,
+      "execution": "executed",
+      "failed": 0,
+      "passed": 1158
+    },
+    {
+      "tests": 125,
+      "task": "cms-core:test",
+      "skipped": 0,
+      "execution": "UP-TO-DATE, unchanged core",
+      "failed": 0,
+      "passed": 125
+    }
+  ],
+  "knownDifferences": [
+    {
+      "case": "http.runtime-header",
+      "kind": "intentional",
+      "reason": "10-1 A: omit Express runtime identification only; parser-before-Helmet/CORS preserved",
+      "decision": null
+    },
+    {
+      "case": "kakao.failure-message",
+      "kind": "intentional",
+      "reason": "8-3 B: upstream details stay out of client responses; all external/parsing failures use fixed 500",
+      "decision": null
+    },
+    {
+      "case": "kakao.socket-timeout",
+      "kind": "intentional",
+      "reason": "8-2 B: connect/TLS 2s, response socket inactivity 5s, no overall deadline or retry",
+      "decision": null
+    },
+    {
+      "case": "maps.concurrent-public-join",
+      "kind": "improved",
+      "reason": "UNIQUE/ON CONFLICT keeps both requests successful",
+      "decision": null
+    },
+    {
+      "case": "maps.concurrent-code-join",
+      "kind": "improved",
+      "reason": "UNIQUE/ON CONFLICT keeps both requests successful",
+      "decision": null
+    },
+    {
+      "case": "maps.invite-code-generator",
+      "kind": "intentional",
+      "reason": null,
+      "decision": null
+    },
+    {
+      "case": "notifications.token-replacement",
+      "kind": "improved",
+      "reason": "9-6 B: conditional UPDATE preserves a replacement FCM token",
+      "decision": null
+    },
+    {
+      "case": "tokens.cleanup-timezone",
+      "kind": "intentional",
+      "reason": "9-5 B: Korean dawn intended; explicit Asia/Seoul 03:00 instead of UTC container 03:00",
+      "decision": null
+    },
+    {
+      "case": "markers.pg-derived-centers",
+      "kind": "intentional",
+      "reason": null,
+      "decision": "E-20 A: PG aggregate centers; only latitude/longitude centers may differ by <=1e-10; keys/counts/extents remain exact"
+    },
+    {
+      "case": "markers.pg-coordinate-rule",
+      "kind": "improved",
+      "reason": null,
+      "decision": "E-5 A: PostgreSQL numeric ROUND and normalized zero for stored keys and six-digit groups"
+    },
+    {
+      "case": "markers.deterministic-overflow",
+      "kind": "improved",
+      "reason": null,
+      "decision": "E-12 A: count DESC, cellLatKey C ASC, cellLngKey C ASC; physical reorder preserves visible 699 and overflow"
+    },
+    {
+      "case": "markers.refresh-serialization",
+      "kind": "improved",
+      "reason": null,
+      "decision": "E-22 B variant: separate map+precision lock statement then READ COMMITTED DML; all writers must participate"
+    },
+    {
+      "case": "images.concurrent-limit",
+      "kind": "improved",
+      "reason": null,
+      "decision": null
+    },
+    {
+      "case": "images.concurrent-delete",
+      "kind": "improved",
+      "reason": null,
+      "decision": null
+    },
+    {
+      "case": "images.concurrent-upload-delete",
+      "kind": "improved",
+      "reason": null,
+      "decision": null
+    },
+    {
+      "case": "markers.precision-commit",
+      "kind": "improved",
+      "reason": null,
+      "decision": "E-17 A: old/new cells commit together per precision; place remains committed"
+    }
+  ],
+  "v2Restarts": 17,
+  "nodeTests": {
+    "durationMs": 129.6414,
+    "failed": 0,
+    "passed": 25
+  },
+  "artifactChecks": {
+    "checks": 4,
+    "results": [
+      {
+        "artifact": "loco-server-v3-0.0.1-SNAPSHOT.jar",
+        "profile": "perf",
+        "rejectedBeforeDatabase": true,
+        "status": 1
+      },
+      {
+        "artifact": "loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar",
+        "profile": "production",
+        "rejectedBeforeDatabase": true,
+        "status": 1
+      },
+      {
+        "artifact": "loco-server-v3-0.0.1-SNAPSHOT-perf-local-only.jar",
+        "profile": "perf,production",
+        "rejectedBeforeDatabase": true,
+        "status": 1
+      }
+    ],
+    "normalJarExcludesPerf": true
+  },
+  "artifactExecution": {
+    "elapsedSeconds": 3.4673425,
+    "exitCode": 0
+  },
+  "firstFullRun": {
+    "failed": 2,
+    "elapsedSeconds": 1045.0891533,
+    "reason": "Legacy exact-center assertions at overflow701 and level6; fixed to approved E-20 center-only tolerance, with strict non-center checks"
+  },
+  "evidence": {
+    "e22-create-delete-16": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        201,
+        200,
+        201,
+        200,
+        201,
+        200,
+        201,
+        200,
+        201,
+        200,
+        201,
+        200,
+        201,
+        200,
+        201
+      ],
+      "operation": "create-delete",
+      "requests": 16
+    },
+    "e22-create-delete-2": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        201
+      ],
+      "operation": "create-delete",
+      "requests": 2
+    },
+    "e22-create-delete-4": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        201,
+        200,
+        201
+      ],
+      "operation": "create-delete",
+      "requests": 4
+    },
+    "e22-create-delete-8": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        201,
+        200,
+        201,
+        200,
+        201,
+        200,
+        201
+      ],
+      "operation": "create-delete",
+      "requests": 8
+    },
+    "e22-cross-move-v2": {
+      "cells": [
+        {
+          "precision": 1,
+          "count": 1,
+          "key": "37.0"
+        },
+        {
+          "precision": 1,
+          "count": 1,
+          "key": "38.0"
+        },
+        {
+          "precision": 2,
+          "count": 1,
+          "key": "37.00"
+        },
+        {
+          "precision": 2,
+          "count": 1,
+          "key": "38.00"
+        },
+        {
+          "precision": 3,
+          "count": 1,
+          "key": "37.000"
+        },
+        {
+          "precision": 3,
+          "count": 1,
+          "key": "38.000"
+        }
+      ],
+      "statuses": [
+        200,
+        200
+      ],
+      "side": "V2"
+    },
+    "e22-cross-move-v3": {
+      "cells": [
+        {
+          "precision": 1,
+          "count": 1,
+          "key": "37.0"
+        },
+        {
+          "precision": 1,
+          "count": 1,
+          "key": "38.0"
+        },
+        {
+          "precision": 2,
+          "count": 1,
+          "key": "37.00"
+        },
+        {
+          "precision": 2,
+          "count": 1,
+          "key": "38.00"
+        },
+        {
+          "precision": 3,
+          "count": 1,
+          "key": "37.000"
+        },
+        {
+          "precision": 3,
+          "count": 1,
+          "key": "38.000"
+        }
+      ],
+      "statuses": [
+        200,
+        200
+      ],
+      "side": "V3"
+    },
+    "e22-delete-16": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "operation": "delete",
+      "requests": 16
+    },
+    "e22-delete-2": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        200
+      ],
+      "operation": "delete",
+      "requests": 2
+    },
+    "e22-delete-4": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "operation": "delete",
+      "requests": 4
+    },
+    "e22-delete-8": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "operation": "delete",
+      "requests": 8
+    },
+    "e22-move-16": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "operation": "move",
+      "requests": 16
+    },
+    "e22-move-2": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        200
+      ],
+      "operation": "move",
+      "requests": 2
+    },
+    "e22-move-4": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "operation": "move",
+      "requests": 4
+    },
+    "e22-move-8": {
+      "staleCells": 0,
+      "statuses": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+      ],
+      "operation": "move",
+      "requests": 8
+    },
+    "e22-race-16": {
+      "limit": "E-22: separate transaction advisory lock then READ COMMITTED aggregate; all participating writers completed",
+      "errors": 0,
+      "requests": 16,
+      "counts": [
+        16,
+        16,
+        16
+      ],
+      "staleCells": 0,
+      "expectedCount": 16,
+      "success": 16
+    },
+    "e22-race-2": {
+      "limit": "E-22: separate transaction advisory lock then READ COMMITTED aggregate; all participating writers completed",
+      "errors": 0,
+      "requests": 2,
+      "counts": [
+        2,
+        2,
+        2
+      ],
+      "staleCells": 0,
+      "expectedCount": 2,
+      "success": 2
+    },
+    "e22-race-4": {
+      "limit": "E-22: separate transaction advisory lock then READ COMMITTED aggregate; all participating writers completed",
+      "errors": 0,
+      "requests": 4,
+      "counts": [
+        4,
+        4,
+        4
+      ],
+      "staleCells": 0,
+      "expectedCount": 4,
+      "success": 4
+    },
+    "e22-race-8": {
+      "limit": "E-22: separate transaction advisory lock then READ COMMITTED aggregate; all participating writers completed",
+      "errors": 0,
+      "requests": 8,
+      "counts": [
+        8,
+        8,
+        8
+      ],
+      "staleCells": 0,
+      "expectedCount": 8,
+      "success": 8
+    }
+  }
+}

@@ -1,0 +1,1111 @@
+[
+  {
+    "run": "cms",
+    "role": "single exploratory run",
+    "rate": 10,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "avg": 19.336262910666726,
+      "min": 2.162388,
+      "med": 17.744469000000002,
+      "p(95)": 36.34470315,
+      "p(99)": 39.713391709999996,
+      "max": 54.073688
+    },
+    "requests": {
+      "count": 3000,
+      "rate": 10.000462456752304
+    },
+    "status": {
+      "200": 3000
+    },
+    "checks": {
+      "rate": 1,
+      "passes": 3000,
+      "fails": 0
+    },
+    "dropped": 0,
+    "endpoints": {
+      "users-first": {
+        "n": 177,
+        "mean": 18.033804892655358,
+        "p50": 17.868603,
+        "p95": 20.727978,
+        "p99": 21.7301946,
+        "max": 23.364383,
+        "p99SampleSufficient": false
+      },
+      "users-deep": {
+        "n": 177,
+        "mean": 14.169016824858755,
+        "p50": 13.736792,
+        "p95": 17.154798599999996,
+        "p99": 18.340951720000007,
+        "max": 19.713944,
+        "p99SampleSufficient": false
+      },
+      "users-search": {
+        "n": 177,
+        "mean": 28.440265926553675,
+        "p50": 28.169318,
+        "p95": 31.3737514,
+        "p99": 34.495418640000004,
+        "max": 34.946802,
+        "p99SampleSufficient": false
+      },
+      "users-detail": {
+        "n": 177,
+        "mean": 4.098666485875707,
+        "p50": 3.881507,
+        "p95": 6.5507614,
+        "p99": 7.52921968,
+        "max": 8.263446,
+        "p99SampleSufficient": false
+      },
+      "maps-first": {
+        "n": 177,
+        "mean": 18.748427338983046,
+        "p50": 18.573356,
+        "p95": 21.400554,
+        "p99": 22.00443796,
+        "max": 25.178722,
+        "p99SampleSufficient": false
+      },
+      "maps-deep": {
+        "n": 177,
+        "mean": 14.725805186440676,
+        "p50": 14.356964,
+        "p95": 17.4951546,
+        "p99": 18.04368916,
+        "max": 18.963699,
+        "p99SampleSufficient": false
+      },
+      "maps-search": {
+        "n": 177,
+        "mean": 28.358936632768362,
+        "p50": 28.433037,
+        "p95": 31.4609818,
+        "p99": 32.91326968000001,
+        "max": 34.5469,
+        "p99SampleSufficient": false
+      },
+      "maps-detail": {
+        "n": 177,
+        "mean": 4.230819514124293,
+        "p50": 4.005511,
+        "p95": 6.5430588,
+        "p99": 7.395730440000001,
+        "max": 7.514395,
+        "p99SampleSufficient": false
+      },
+      "places-first": {
+        "n": 176,
+        "mean": 16.48105071590909,
+        "p50": 16.105483999999997,
+        "p95": 19.17687875,
+        "p99": 20.0401115,
+        "max": 20.657616,
+        "p99SampleSufficient": false
+      },
+      "places-deep": {
+        "n": 176,
+        "mean": 14.232992920454542,
+        "p50": 14.0478175,
+        "p95": 17.09311925,
+        "p99": 17.933806750000002,
+        "max": 18.722903,
+        "p99SampleSufficient": false
+      },
+      "places-search": {
+        "n": 176,
+        "mean": 23.933092937500007,
+        "p50": 23.718957500000002,
+        "p95": 27.527140000000003,
+        "p99": 29.312015499999998,
+        "max": 29.998952,
+        "p99SampleSufficient": false
+      },
+      "places-detail": {
+        "n": 176,
+        "mean": 4.424938727272729,
+        "p50": 4.2200115,
+        "p95": 6.919532,
+        "p99": 7.3025455,
+        "max": 7.81825,
+        "p99SampleSufficient": false
+      },
+      "reports-first": {
+        "n": 176,
+        "mean": 34.66073978977271,
+        "p50": 34.125046,
+        "p95": 39.650132,
+        "p99": 48.782430250000004,
+        "max": 49.721567,
+        "p99SampleSufficient": false
+      },
+      "reports-deep": {
+        "n": 176,
+        "mean": 28.129588840909083,
+        "p50": 27.9943775,
+        "p95": 31.474182499999998,
+        "p99": 37.95144,
+        "max": 39.239063,
+        "p99SampleSufficient": false
+      },
+      "reports-received": {
+        "n": 176,
+        "mean": 35.22168740340909,
+        "p50": 35.121159500000005,
+        "p95": 38.9974735,
+        "p99": 41.342777250000005,
+        "max": 44.906711,
+        "p99SampleSufficient": false
+      },
+      "reports-in-review": {
+        "n": 176,
+        "mean": 36.53131454545456,
+        "p50": 36.2968645,
+        "p95": 40.69863325,
+        "p99": 43.63371425,
+        "max": 54.073688,
+        "p99SampleSufficient": false
+      },
+      "reports-detail": {
+        "n": 176,
+        "mean": 4.431027392045454,
+        "p50": 4.1271629999999995,
+        "p95": 6.991593,
+        "p99": 7.57756,
+        "max": 8.219657,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-plan": {
+        "cpuMeanCores": 0.052764770895479284,
+        "cpuP95Cores": 0.10071943019461004,
+        "peakWorkingSetBytes": 405573632,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.2610586569450722,
+        "cpuP95Cores": 0.32402153720241417,
+        "peakWorkingSetBytes": 744452096,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.020661175428318003,
+        "cpuP95Cores": 0.05502112520652134,
+        "peakWorkingSetBytes": 962859008,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.03252195223954336,
+        "cpuP95Cores": 0.042374083929900254,
+        "peakWorkingSetBytes": 61452288,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 5.188275599950817,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.019,
+    "execution": {
+      "run": "cms",
+      "exitCode": 0,
+      "elapsedSeconds": 300.782
+    }
+  },
+  {
+    "run": "primary-1",
+    "role": "primary A baseline",
+    "rate": 50,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "med": 4.649218,
+      "p(95)": 7.340846,
+      "p(99)": 9.037964,
+      "max": 16.643971,
+      "avg": 4.523809665622295,
+      "min": 0.874648
+    },
+    "requests": {
+      "count": 15001,
+      "rate": 50.00336482511914
+    },
+    "status": {
+      "200": 15001
+    },
+    "checks": {
+      "fails": 0,
+      "rate": 1,
+      "passes": 15001
+    },
+    "dropped": 0,
+    "endpoints": {
+      "markers-hot": {
+        "n": 12001,
+        "mean": 5.242169808765939,
+        "p50": 4.91487,
+        "p95": 7.563253,
+        "p99": 9.295074,
+        "max": 16.643971,
+        "p99SampleSufficient": true
+      },
+      "markers-other": {
+        "n": 3000,
+        "mean": 1.6501296396666667,
+        "p50": 1.5755474999999999,
+        "p95": 2.3553466,
+        "p99": 3.5684338199999965,
+        "max": 8.308953,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 0.12281067711043192,
+        "cpuP95Cores": 0.13936743332591217,
+        "peakWorkingSetBytes": 424366080,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.11342572765838625,
+        "cpuP95Cores": 0.1311709510875109,
+        "peakWorkingSetBytes": 475238400,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.018676264181619242,
+        "cpuP95Cores": 0.06962884477840704,
+        "peakWorkingSetBytes": 963174400,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.4571064686761656,
+        "cpuP95Cores": 0.5011644202295951,
+        "peakWorkingSetBytes": 305987584,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 5.947573907142217,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.017,
+    "execution": {
+      "run": "primary-1",
+      "exitCode": 0,
+      "elapsedSeconds": 300.811
+    }
+  },
+  {
+    "run": "primary-2",
+    "role": "primary A baseline",
+    "rate": 50,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "p(95)": 7.35218,
+      "p(99)": 8.830588,
+      "max": 13.298839,
+      "avg": 4.520291946403548,
+      "min": 0.81493,
+      "med": 4.676941
+    },
+    "requests": {
+      "count": 15001,
+      "rate": 50.00281504265477
+    },
+    "status": {
+      "200": 15001
+    },
+    "checks": {
+      "fails": 0,
+      "rate": 1,
+      "passes": 15001
+    },
+    "dropped": 0,
+    "endpoints": {
+      "markers-hot": {
+        "n": 12001,
+        "mean": 5.2553419468377545,
+        "p50": 4.929035,
+        "p95": 7.593029,
+        "p99": 9.06161,
+        "max": 13.298839,
+        "p99SampleSufficient": true
+      },
+      "markers-other": {
+        "n": 3000,
+        "mean": 1.579846928000003,
+        "p50": 1.467173,
+        "p95": 2.3001459499999997,
+        "p99": 4.532891389999954,
+        "max": 8.023018,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 0.11967335313317841,
+        "cpuP95Cores": 0.13402733132477382,
+        "peakWorkingSetBytes": 425254912,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.11415648670657054,
+        "cpuP95Cores": 0.1317257758750153,
+        "peakWorkingSetBytes": 477364224,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.018985456546151927,
+        "cpuP95Cores": 0.05633235267850082,
+        "peakWorkingSetBytes": 961736704,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.4621851915840475,
+        "cpuP95Cores": 0.513720811453664,
+        "peakWorkingSetBytes": 303943680,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 6.126818571978612,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.048,
+    "execution": {
+      "run": "primary-2",
+      "exitCode": 0,
+      "elapsedSeconds": 301.755
+    }
+  },
+  {
+    "run": "primary-3",
+    "role": "primary A baseline",
+    "rate": 50,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "avg": 4.552032097460198,
+      "min": 0.096869,
+      "med": 4.67593,
+      "p(95)": 7.39471,
+      "p(99)": 8.989705,
+      "max": 14.825599
+    },
+    "requests": {
+      "count": 15001,
+      "rate": 50.00334525096396
+    },
+    "status": {
+      "200": 15001
+    },
+    "checks": {
+      "rate": 1,
+      "passes": 15001,
+      "fails": 0
+    },
+    "dropped": 0,
+    "endpoints": {
+      "markers-hot": {
+        "n": 12001,
+        "mean": 5.276015948670958,
+        "p50": 4.936463,
+        "p95": 7.626336,
+        "p99": 9.27858,
+        "max": 14.825599,
+        "p99SampleSufficient": true
+      },
+      "markers-other": {
+        "n": 3000,
+        "mean": 1.6558553646666698,
+        "p50": 1.5444335,
+        "p95": 2.4564958999999993,
+        "p99": 4.513381989999986,
+        "max": 9.127005,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 0.1221456182795112,
+        "cpuP95Cores": 0.13855562377795258,
+        "peakWorkingSetBytes": 430931968,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.1142894797722471,
+        "cpuP95Cores": 0.13354585276288422,
+        "peakWorkingSetBytes": 473960448,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.0191706866973012,
+        "cpuP95Cores": 0.05120187122243448,
+        "peakWorkingSetBytes": 961204224,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.4639758324226315,
+        "cpuP95Cores": 0.5185816503563347,
+        "peakWorkingSetBytes": 305299456,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 6.370061253954686,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.045,
+    "execution": {
+      "run": "primary-3",
+      "exitCode": 0,
+      "elapsedSeconds": 301.773
+    }
+  },
+  {
+    "run": "primary-4",
+    "role": "primary A baseline",
+    "rate": 50,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "p(99)": 8.761155,
+      "max": 20.197093,
+      "avg": 4.536031412039204,
+      "min": 0.833422,
+      "med": 4.676229,
+      "p(95)": 7.23375
+    },
+    "requests": {
+      "count": 15001,
+      "rate": 50.00394292973479
+    },
+    "status": {
+      "200": 15001
+    },
+    "checks": {
+      "passes": 15001,
+      "fails": 0,
+      "rate": 1
+    },
+    "dropped": 0,
+    "endpoints": {
+      "markers-hot": {
+        "n": 12001,
+        "mean": 5.245998185901177,
+        "p50": 4.947665,
+        "p95": 7.48097,
+        "p99": 8.972785,
+        "max": 20.197093,
+        "p99SampleSufficient": true
+      },
+      "markers-other": {
+        "n": 3000,
+        "mean": 1.6959276610000023,
+        "p50": 1.6223515,
+        "p95": 2.45589705,
+        "p99": 4.0317903,
+        "max": 8.012569,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 0.12150474780921189,
+        "cpuP95Cores": 0.13612635410036145,
+        "peakWorkingSetBytes": 438603776,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.11321544611213875,
+        "cpuP95Cores": 0.13169721161132913,
+        "peakWorkingSetBytes": 460165120,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.019054696171566545,
+        "cpuP95Cores": 0.05223858743077673,
+        "peakWorkingSetBytes": 961597440,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.461045836701302,
+        "cpuP95Cores": 0.5057143337932187,
+        "peakWorkingSetBytes": 307675136,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 6.512263834947056,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.05,
+    "execution": {
+      "run": "primary-4",
+      "exitCode": 0,
+      "elapsedSeconds": 301.797
+    }
+  },
+  {
+    "run": "primary-5",
+    "role": "primary A baseline",
+    "rate": 50,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "min": 0.762282,
+      "med": 4.6771864999999995,
+      "p(95)": 7.196627799999997,
+      "p(99)": 8.778759710000001,
+      "max": 136.135731,
+      "avg": 4.548657968933342
+    },
+    "requests": {
+      "count": 15000,
+      "rate": 50.00249698402569
+    },
+    "status": {
+      "200": 15000
+    },
+    "checks": {
+      "rate": 1,
+      "passes": 15000,
+      "fails": 0
+    },
+    "dropped": 0,
+    "endpoints": {
+      "markers-hot": {
+        "n": 12000,
+        "mean": 5.254466679999998,
+        "p50": 4.9350875,
+        "p95": 7.3997666499999974,
+        "p99": 9.019780710000004,
+        "max": 136.135731,
+        "p99SampleSufficient": true
+      },
+      "markers-other": {
+        "n": 3000,
+        "mean": 1.7254231246666665,
+        "p50": 1.5523310000000001,
+        "p95": 2.461081549999999,
+        "p99": 4.481797449999995,
+        "max": 122.271462,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 0.12005664247519589,
+        "cpuP95Cores": 0.13910121788890242,
+        "peakWorkingSetBytes": 445517824,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.1139546353163017,
+        "cpuP95Cores": 0.13263077408956975,
+        "peakWorkingSetBytes": 463994880,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.01915735035187851,
+        "cpuP95Cores": 0.06356173251066734,
+        "peakWorkingSetBytes": 964710400,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.4667047088743892,
+        "cpuP95Cores": 0.5218378066865584,
+        "peakWorkingSetBytes": 313593856,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 6.5794014189374685,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.05,
+    "execution": {
+      "run": "primary-5",
+      "exitCode": 0,
+      "elapsedSeconds": 301.813
+    }
+  },
+  {
+    "run": "small-data-1",
+    "role": "single exploratory run",
+    "rate": 50,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "min": 0.609511,
+      "med": 2.240083,
+      "p(95)": 3.74698,
+      "p(99)": 4.379631,
+      "max": 6.834122,
+      "avg": 2.3812287976134843
+    },
+    "requests": {
+      "count": 15001,
+      "rate": 50.00519344468764
+    },
+    "status": {
+      "200": 15001
+    },
+    "checks": {
+      "rate": 1,
+      "passes": 15001,
+      "fails": 0
+    },
+    "dropped": 0,
+    "endpoints": {
+      "markers-hot": {
+        "n": 12001,
+        "mean": 2.4386389044246246,
+        "p50": 2.300964,
+        "p95": 3.805387,
+        "p99": 4.442729,
+        "max": 6.834122,
+        "p99SampleSufficient": true
+      },
+      "markers-other": {
+        "n": 3000,
+        "mean": 2.151569233666667,
+        "p50": 1.9997045,
+        "p95": 3.4757070499999996,
+        "p99": 4.074204429999998,
+        "max": 6.630576,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 0.08559678114496878,
+        "cpuP95Cores": 0.09658969389724907,
+        "peakWorkingSetBytes": 426897408,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.036889428339892616,
+        "cpuP95Cores": 0.050489541742241434,
+        "peakWorkingSetBytes": 463810560,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.02000083837024466,
+        "cpuP95Cores": 0.055103548379755125,
+        "peakWorkingSetBytes": 963043328,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.10573198849258252,
+        "cpuP95Cores": 0.12337572830558727,
+        "peakWorkingSetBytes": 79155200,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 5.175844740403774,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.018,
+    "execution": {
+      "run": "small-data-1",
+      "exitCode": 0,
+      "elapsedSeconds": 300.648
+    }
+  },
+  {
+    "run": "uniform-data-1",
+    "role": "single exploratory run",
+    "rate": 50,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "med": 2.056529,
+      "p(95)": 3.789575,
+      "p(99)": 4.468575,
+      "max": 6.793403,
+      "avg": 2.2568980281314612,
+      "min": 0.658798
+    },
+    "requests": {
+      "count": 15001,
+      "rate": 50.00525511779618
+    },
+    "status": {
+      "200": 15001
+    },
+    "checks": {
+      "rate": 1,
+      "passes": 15001,
+      "fails": 0
+    },
+    "dropped": 0,
+    "endpoints": {
+      "markers-hot": {
+        "n": 12001,
+        "mean": 2.258016094075497,
+        "p50": 2.065174,
+        "p95": 3.783399,
+        "p99": 4.478971,
+        "max": 6.793403,
+        "p99SampleSufficient": true
+      },
+      "markers-other": {
+        "n": 3000,
+        "mean": 2.2524253916666677,
+        "p50": 2.0344935,
+        "p95": 3.815325549999999,
+        "p99": 4.43617521,
+        "max": 6.304686,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 0.08061907933997735,
+        "cpuP95Cores": 0.09573947317191371,
+        "peakWorkingSetBytes": 429359104,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.034449156800673966,
+        "cpuP95Cores": 0.04824854390624669,
+        "peakWorkingSetBytes": 474505216,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.020413807387674534,
+        "cpuP95Cores": 0.06698293364600122,
+        "peakWorkingSetBytes": 962584576,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.05545463782248742,
+        "cpuP95Cores": 0.06810728826924897,
+        "peakWorkingSetBytes": 253075456,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 5.034440473043772,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.018,
+    "execution": {
+      "run": "uniform-data-1",
+      "exitCode": 0,
+      "elapsedSeconds": 300.774
+    }
+  },
+  {
+    "run": "uniform-requests-1",
+    "role": "single exploratory run",
+    "rate": 50,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "avg": 2.3594200448666602,
+      "min": 0.813846,
+      "med": 2.186955,
+      "p(95)": 3.89533095,
+      "p(99)": 4.58327012,
+      "max": 11.663511
+    },
+    "requests": {
+      "count": 15000,
+      "rate": 50.00225617913563
+    },
+    "status": {
+      "200": 15000
+    },
+    "checks": {
+      "rate": 1,
+      "passes": 15000,
+      "fails": 0
+    },
+    "dropped": 0,
+    "endpoints": {
+      "markers-hot": {
+        "n": 15,
+        "mean": 7.817024733333333,
+        "p50": 7.594505,
+        "p95": 10.421044599999998,
+        "p99": 11.415017719999998,
+        "max": 11.663511,
+        "p99SampleSufficient": false
+      },
+      "markers-other": {
+        "n": 14985,
+        "mean": 2.353956977110437,
+        "p50": 2.185218,
+        "p95": 3.8849226,
+        "p99": 4.55183236,
+        "max": 6.836805,
+        "p99SampleSufficient": true
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 0.08627603366735409,
+        "cpuP95Cores": 0.10066745454762356,
+        "peakWorkingSetBytes": 424644608,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.033355197152367136,
+        "cpuP95Cores": 0.046677873411323054,
+        "peakWorkingSetBytes": 468017152,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.020071287246827035,
+        "cpuP95Cores": 0.05148893627760468,
+        "peakWorkingSetBytes": 970702848,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.053918672415640426,
+        "cpuP95Cores": 0.06633661199918875,
+        "peakWorkingSetBytes": 252784640,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 4.817415422134186,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.078,
+    "execution": {
+      "run": "uniform-requests-1",
+      "exitCode": 0,
+      "elapsedSeconds": 301.765
+    }
+  },
+  {
+    "run": "viewport-full-1-warmup",
+    "role": "failed exploration, warmup only",
+    "rate": 50,
+    "seconds": 120,
+    "httpMilliseconds": {
+      "avg": 1663.9534559342753,
+      "min": 0,
+      "med": 0,
+      "p(95)": 10000.014256299999,
+      "p(99)": 10000.55655712,
+      "max": 10000.796718
+    },
+    "requests": {
+      "count": 1202,
+      "rate": 9.833517788572935
+    },
+    "status": {
+      "0": 1200,
+      "200": 2
+    },
+    "checks": {
+      "rate": 0.0016638935108153079,
+      "passes": 2,
+      "fails": 1200
+    },
+    "dropped": 4799,
+    "endpoints": {
+      "markers-other": {
+        "n": 240,
+        "mean": 1583.9027081916663,
+        "p50": 0,
+        "p95": 10000.03773805,
+        "p99": 10000.390233720002,
+        "max": 10000.612143,
+        "p99SampleSufficient": false
+      },
+      "markers-hot": {
+        "n": 962,
+        "mean": 1683.924536452182,
+        "p50": 0,
+        "p95": 10000.00321805,
+        "p99": 10000.57614949,
+        "max": 10000.796718,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 1.0705265391776655,
+        "cpuP95Cores": 1.6306308707953474,
+        "peakWorkingSetBytes": 810602496,
+        "throttledNanosecondsDelta": 98239498000
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.033861273030523775,
+        "cpuP95Cores": 0.13532286857494613,
+        "peakWorkingSetBytes": 536903680,
+        "throttledNanosecondsDelta": 136843000
+      },
+      "background": {
+        "cpuMeanCores": 0.0198708756901267,
+        "cpuP95Cores": 0.07157815893073018,
+        "peakWorkingSetBytes": 964501504,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.01512212141865005,
+        "cpuP95Cores": 0.03450444325024309,
+        "peakWorkingSetBytes": 207626240,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 9.535788490944157,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.018,
+    "execution": {
+      "run": "viewport-full-1-warmup",
+      "exitCode": 99,
+      "elapsedSeconds": 123.114
+    }
+  },
+  {
+    "run": "viewport-large-1-warmup",
+    "role": "failed exploration, warmup only",
+    "rate": 50,
+    "seconds": 120,
+    "httpMilliseconds": {
+      "max": 10014.725839,
+      "avg": 4226.31977737372,
+      "min": 2.636924,
+      "med": 4004.059756,
+      "p(95)": 7818.091779599999,
+      "p(99)": 9820.97392377999
+    },
+    "requests": {
+      "count": 2839,
+      "rate": 22.361872197060478
+    },
+    "status": {
+      "0": 28,
+      "200": 2811
+    },
+    "checks": {
+      "rate": 0.23036280380415639,
+      "passes": 654,
+      "fails": 2185
+    },
+    "dropped": 3162,
+    "endpoints": {
+      "markers-other": {
+        "n": 567,
+        "mean": 3243.9970899400328,
+        "p50": 3047.197982,
+        "p95": 6492.724652199997,
+        "p99": 8370.559599040005,
+        "max": 10000.443044,
+        "p99SampleSufficient": false
+      },
+      "markers-hot": {
+        "n": 2272,
+        "mean": 4471.468088894363,
+        "p50": 4228.361849,
+        "p95": 7991.172667199999,
+        "p99": 9998.77788668,
+        "max": 10014.725839,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 1.4773420335036052,
+        "cpuP95Cores": 1.6090279047804354,
+        "peakWorkingSetBytes": 744960000,
+        "throttledNanosecondsDelta": 52642362000
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.24030799107176246,
+        "cpuP95Cores": 0.3503147820777587,
+        "peakWorkingSetBytes": 485597184,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.020033954034341158,
+        "cpuP95Cores": 0.06188894254222753,
+        "peakWorkingSetBytes": 961347584,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.39477556000061714,
+        "cpuP95Cores": 0.537347321173286,
+        "peakWorkingSetBytes": 450916352,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 11.508988426658654,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.019,
+    "execution": {
+      "run": "viewport-large-1-warmup",
+      "exitCode": 99,
+      "elapsedSeconds": 128.177
+    }
+  },
+  {
+    "run": "viewport-small-1",
+    "role": "single exploratory run",
+    "rate": 50,
+    "seconds": 300,
+    "httpMilliseconds": {
+      "avg": 2.3253237854143114,
+      "min": 0.767062,
+      "med": 2.160607,
+      "p(95)": 3.820701,
+      "p(99)": 4.430895,
+      "max": 6.522952
+    },
+    "requests": {
+      "count": 15001,
+      "rate": 50.0053776058422
+    },
+    "status": {
+      "200": 15001
+    },
+    "checks": {
+      "rate": 1,
+      "passes": 15001,
+      "fails": 0
+    },
+    "dropped": 0,
+    "endpoints": {
+      "markers-hot": {
+        "n": 12001,
+        "mean": 2.321892741021588,
+        "p50": 2.148537,
+        "p95": 3.81998,
+        "p99": 4.478968,
+        "max": 6.318837,
+        "p99SampleSufficient": true
+      },
+      "markers-other": {
+        "n": 3000,
+        "mean": 2.339049106666665,
+        "p50": 2.2287875,
+        "p95": 3.8252146999999983,
+        "p99": 4.311890589999998,
+        "max": 6.522952,
+        "p99SampleSufficient": false
+      }
+    },
+    "resources": {
+      "/loco-perf-p0-perf-app-1": {
+        "cpuMeanCores": 0.08128781749680393,
+        "cpuP95Cores": 0.09354685437589123,
+        "peakWorkingSetBytes": 447037440,
+        "throttledNanosecondsDelta": 0
+      },
+      "/loco-perf-p0-perf-db-1": {
+        "cpuMeanCores": 0.03452260153642779,
+        "cpuP95Cores": 0.04750289532365207,
+        "peakWorkingSetBytes": 460828672,
+        "throttledNanosecondsDelta": 0
+      },
+      "background": {
+        "cpuMeanCores": 0.019938579407882906,
+        "cpuP95Cores": 0.053739037051894416,
+        "peakWorkingSetBytes": 967278592,
+        "throttledNanosecondsDelta": null
+      },
+      "/loco-perf-p0-load": {
+        "cpuMeanCores": 0.05608955648115808,
+        "cpuP95Cores": 0.07135088084871609,
+        "peakWorkingSetBytes": 249360384,
+        "throttledNanosecondsDelta": 0
+      }
+    },
+    "hostCpuMeanPercent": 4.92067035891949,
+    "collectorErrors": [],
+    "sampleGapMaxSeconds": 1.018,
+    "execution": {
+      "run": "viewport-small-1",
+      "exitCode": 0,
+      "elapsedSeconds": 301.782
+    }
+  }
+]

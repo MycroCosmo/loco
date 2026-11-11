@@ -1,0 +1,53 @@
+name: loco-perf-p0
+services:
+  perf-db:
+    image: postgis/postgis:17-3.6@sha256:1ac10b2551ba84ae05db8e7da477afcd0a3fede99bcb7705da2ee157390cb095
+    cpus: 2
+    mem_limit: 4g
+    command: [postgres, -c, shared_buffers=1GB, -c, shared_preload_libraries=pg_stat_statements]
+    environment:
+      POSTGRES_DB: loco_perf
+      POSTGRES_USER: perf
+      POSTGRES_PASSWORD: ${PERF_DB_PASSWORD:?ephemeral password required}
+    # Empty init directory: P0 must not enable PostGIS before P3.
+    tmpfs: [/docker-entrypoint-initdb.d]
+    volumes: [data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U perf -d loco_perf]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  perf-app:
+    image: ${PERF_APP_IMAGE:-loco-perf-p0:local}
+    cpus: 2
+    mem_limit: 1536m
+    environment:
+      SPRING_PROFILES_ACTIVE: perf
+      LOCO_PERF_ISOLATED: 'true'
+      DB_URL: jdbc:postgresql://perf-db:5432/loco_perf
+      DB_USERNAME: perf
+      DB_PASSWORD: ${PERF_DB_PASSWORD:?ephemeral password required}
+      JWT_SECRET: ${PERF_JWT_SECRET:?ephemeral secret required}
+    volumes:
+      - ${PERF_OUTPUT_DIR:-../../apps/server-v3/build/perf-stage2}/runtime:/results
+    depends_on:
+      perf-db: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, curl, -fsS, http://localhost:8081/api/health]
+      interval: 2s
+      timeout: 2s
+      retries: 90
+  load:
+    image: grafana/k6:2.3.0@sha256:2dd4756ec6e14e62778916e1eb850108e4b499304c02df56760fa0bdb0fba0b8
+    profiles: [load]
+    cpus: 2
+    mem_limit: 2g
+    user: '0:0'
+    volumes:
+      - ./:/scripts:ro
+      - ${PERF_OUTPUT_DIR:-../../apps/server-v3/build/perf-stage2}:/results
+networks:
+  default:
+    internal: true
+volumes:
+  data:

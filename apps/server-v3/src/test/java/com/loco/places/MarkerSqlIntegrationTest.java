@@ -59,16 +59,9 @@ class MarkerSqlIntegrationTest extends MarkerTestSupport {
           List<Object> params;
           if (api.equals("markers-places")) params = List.of(map, 37d, 38d, 127d, 129d);
           else if (api.equals("markers-cells")) params = List.of(map, 3, 37d, 38d, 127d, 129d);
-          else if (api.equals("marker-group"))
-            params =
-                List.of(
-                    map,
-                    PrismaFloats.input(37.4444 - 0.0000005),
-                    PrismaFloats.input(37.4444 + 0.0000005),
-                    PrismaFloats.input(127.8888 - 0.0000005),
-                    PrismaFloats.input(127.8888 + 0.0000005));
+          else if (api.equals("marker-group")) params = List.of(map, 37.4444, 127.8888);
           else if (i == 2) params = List.of(map, 3, "37.444", "127.889");
-          else if (i == 3) params = List.of(map, 3, "37.444", 3, "127.889");
+          else if (i == 3) params = List.of(map, "37.444", "127.889");
           else {
             params = new ArrayList<>();
             for (var item : response.getBody().path("items")) params.add(item.path("id").asText());

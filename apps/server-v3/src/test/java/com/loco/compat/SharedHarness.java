@@ -77,7 +77,22 @@ public final class SharedHarness implements BeforeAllCallback {
     private final long started = System.nanoTime();
     private final boolean v2Enabled = Boolean.getBoolean("compat.v2.enabled");
     private final List<Side> activeSides = v2Enabled ? List.of(Side.values()) : List.of(Side.V3);
-    private final Network network = Network.newNetwork();
+    private final Network network = testNetwork();
+
+    private static Network testNetwork() {
+      String subnet = System.getenv("LOCO_TEST_NETWORK_SUBNET");
+      if (subnet == null || subnet.isBlank()) return Network.newNetwork();
+      return Network.builder()
+          .createNetworkCmdModifier(
+              command ->
+                  command.withIpam(
+                      new com.github.dockerjava.api.model.Network.Ipam()
+                          .withConfig(
+                              new com.github.dockerjava.api.model.Network.Ipam.Config()
+                                  .withSubnet(subnet))))
+          .build();
+    }
+
     private final PostgreSQLContainer<?> postgres =
         new PostgreSQLContainer<>(
                 DockerImageName.parse("postgis/postgis:17-3.6")
