@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/network/dio_client.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../notifications/notification_service.dart';
 import '../../../core/utils/image_utils.dart';
 import '../../../shared/models/user_model.dart';
 
@@ -44,6 +45,7 @@ class UserService {
 
   Future<void> deleteAccount() async {
     await _client.dio.delete(ApiConstants.me);
+    await NotificationService.instance.deleteToken(clearServer: false);
     await DioClient.clearToken();
   }
 }

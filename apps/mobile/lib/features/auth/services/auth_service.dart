@@ -1,11 +1,18 @@
+import 'dart:async';
+
 import '../../../core/network/dio_client.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../notifications/notification_service.dart';
 
 class AuthService {
-  final _client = DioClient();
+  AuthService({NotificationService? notifications})
+      : _notifications = notifications ?? NotificationService.instance;
 
-  Future<String> register(String email, String password, String nickname) async {
+  final _client = DioClient();
+  final NotificationService _notifications;
+
+  Future<String> register(
+      String email, String password, String nickname) async {
     final response = await _client.dio.post(
       ApiConstants.register,
       data: {'email': email, 'password': password, 'nickname': nickname},
@@ -43,7 +50,7 @@ class AuthService {
 
   Future<void> logout() async {
     // FCM 토큰 먼저 삭제 (조용히 실패해도 됨)
-    await NotificationService.instance.deleteToken();
+    await _notifications.deleteToken();
 
     final refreshToken = await DioClient.getRefreshToken();
     if (refreshToken != null && refreshToken.isNotEmpty) {
@@ -62,7 +69,9 @@ class AuthService {
   Future<bool> isLoggedIn() async {
     final token = await DioClient.getToken();
     final refreshToken = await DioClient.getRefreshToken();
-    return token != null || refreshToken != null;
+    final loggedIn = token != null || refreshToken != null;
+    if (loggedIn) unawaited(_notifications.init());
+    return loggedIn;
   }
 
   Future<String> _saveTokenPair(Map<String, dynamic> data) async {
@@ -72,6 +81,7 @@ class AuthService {
       accessToken: accessToken,
       refreshToken: refreshToken,
     );
+    unawaited(_notifications.init());
     return accessToken;
   }
 }

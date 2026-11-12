@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_client.dart';
 import '../services/auth_service.dart';
@@ -42,7 +44,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<bool>> {
       await _authService.login(email, password);
       _clearSessionProviders();
       state = const AsyncValue.data(true);
-      NotificationService.instance.init();
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -76,6 +77,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<bool>> {
   }
 
   Future<void> _handleUnauthorized() async {
+    // 401 처리 중인 등록 요청이 끝나야 정리되므로 여기서 큐를 기다리지 않는다.
+    unawaited(NotificationService.instance.deleteToken(clearServer: false));
     _clearSessionProviders();
     if (mounted) {
       state = const AsyncValue.data(false);
