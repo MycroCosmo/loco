@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/constants/api_constants.dart';
@@ -34,7 +35,7 @@ class _FeedbackModalState extends State<FeedbackModal> {
     final content = _ctrl.text.trim();
     if (content.length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('10자 이상 입력해주세요.')),
+        const SnackBar(content: Text('10자 이상 입력해 주세요.')),
       );
       return;
     }
@@ -45,14 +46,14 @@ class _FeedbackModalState extends State<FeedbackModal> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('피드백이 제출되었습니다. 감사합니다!')),
+          const SnackBar(content: Text('의견을 보냈어요. 고마워요!')),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('제출 실패: $e'), backgroundColor: Colors.red),
+              content: Text(userErrorMessage(e, action: '의견을 보내지 못했어요.')), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -77,21 +78,22 @@ class _FeedbackModalState extends State<FeedbackModal> {
               const Text('피드백 보내기',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               IconButton(
+                      tooltip: '닫기',
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          const Text('서비스 개선을 위한 의견을 자유롭게 남겨주세요.',
-              style: TextStyle(color: Colors.grey, fontSize: 13)),
+          Text('서비스 개선을 위한 의견을 자유롭게 남겨주세요.',
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
           const SizedBox(height: 16),
           TextField(
             controller: _ctrl,
             maxLines: 5,
             maxLength: 1000,
             decoration: const InputDecoration(
-              hintText: '최소 10자 이상 입력해주세요.',
+              hintText: '최소 10자 이상 입력해 주세요.',
               border: OutlineInputBorder(),
             ),
           ),
@@ -99,15 +101,15 @@ class _FeedbackModalState extends State<FeedbackModal> {
           FilledButton(
             onPressed: _loading ? null : _submit,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
             child: _loading
-                ? const SizedBox(
+                ? SizedBox(
                     height: 20,
                     width: 20,
                     child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2))
+                        color: Theme.of(context).colorScheme.onPrimary, strokeWidth: 2))
                 : const Text('제출하기', style: TextStyle(fontSize: 16)),
           ),
         ],

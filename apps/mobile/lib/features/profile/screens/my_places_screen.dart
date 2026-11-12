@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,13 +19,13 @@ class MyPlacesScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('등록한 장소')),
       body: placesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('불러오기 실패: $error')),
+        error: (error, _) => Center(child: Text(userErrorMessage(error, action: '내용을 불러오지 못했어요.'))),
         data: (places) {
           if (places.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                '등록한 장소가 없습니다.',
-                style: TextStyle(color: Colors.grey),
+                '등록한 장소가 없어요.',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             );
           }
@@ -69,15 +70,15 @@ class _MyPlaceCard extends StatelessWidget {
             width: 58,
             height: 58,
             child: imageUrl == null
-                ? const ColoredBox(
-                    color: Color(0xFFEFF6FF),
-                    child: Icon(Icons.place, color: Color(0xFF2563EB)),
+                ? ColoredBox(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    child: Icon(Icons.place, color: Theme.of(context).colorScheme.primary),
                   )
                 : CachedImage(
                     url: ApiConstants.imageUrl(imageUrl),
-                    errorWidget: const ColoredBox(
-                      color: Color(0xFFEFF6FF),
-                      child: Icon(Icons.place, color: Color(0xFF2563EB)),
+                    errorWidget: ColoredBox(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      child: Icon(Icons.place, color: Theme.of(context).colorScheme.primary),
                     ),
                   ),
           ),

@@ -70,6 +70,7 @@ for (const client of [api, locoApi]) client.onFailure(async error => {
   else if (error.code === 'CSRF_INVALID') {
     csrfRefresh ??= api.csrf().finally(() => { csrfRefresh = undefined })
     await csrfRefresh
+    error.csrfRefreshed = true
   }
   if (error.status === 403) invalidateGrants()
 })

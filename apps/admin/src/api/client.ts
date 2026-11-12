@@ -1,6 +1,7 @@
 import { object } from './contracts'
 
 export class ApiError extends Error {
+  csrfRefreshed = false
   constructor(readonly status: number, readonly code: string, message: string) { super(message) }
 }
 export function csrfCookie(cookie: string): string {
@@ -8,9 +9,10 @@ export function csrfCookie(cookie: string): string {
   return part ? decodeURIComponent(part.substring('XSRF-TOKEN='.length)) : ''
 }
 export function message(error: unknown): string {
+  if (error instanceof TypeError) return '연결하지 못했습니다. 연결 상태를 확인한 뒤 다시 시도하세요.'
   if (!(error instanceof ApiError)) return error instanceof Error ? error.message : '요청을 완료하지 못했습니다.'
   const labels: Record<string, string> = {
-    CSRF_INVALID: '보안 토큰이 만료되었습니다. 갱신 후 내용을 확인하고 다시 시도하세요.',
+    CSRF_INVALID: error.csrfRefreshed ? '보안 확인 정보를 새로 받았습니다. 입력 내용을 확인한 뒤 다시 시도하세요.' : '보안 확인에 실패했습니다. 화면을 새로고침한 뒤 다시 시도하세요.',
     SESSION_EXPIRED: '세션이 만료되었습니다. 다시 로그인하세요.',
     AUTHENTICATION_REQUIRED: '로그인이 필요합니다.', UNAUTHORIZED: '인증 정보를 확인하세요.',
     PASSWORD_CHANGE_REQUIRED: '먼저 비밀번호를 변경하세요.', PERMISSION_DENIED: '이 작업의 권한이 없습니다. 내 접근 근거를 확인하세요.',
@@ -20,7 +22,9 @@ export function message(error: unknown): string {
     HISTORY_CONTRACT_UNAVAILABLE: '이력 계약을 확인할 수 없습니다. 관리자에게 문의하세요.',
     RATE_LIMITED: '로그인은 IP·계정별 분당 5회까지입니다. 잠시 후 다시 시도하세요.',
   }
-  return labels[error.code] ?? error.message
+  if (labels[error.code]) return labels[error.code]!
+  if (error.status >= 500) return '서버에서 요청을 완료하지 못했습니다. 잠시 후 다시 시도하세요.'
+  return error.message
 }
 export function createClient(transport: typeof fetch, cookie: () => string, base: '/admin/api/core' | '/admin/api/loco' = '/admin/api/core') {
   const reads = new Map<string, Promise<Response>>()

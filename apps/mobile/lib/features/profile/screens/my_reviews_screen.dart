@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,13 +17,13 @@ class MyReviewsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('작성한 리뷰')),
       body: reviewsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('불러오기 실패: $error')),
+        error: (error, _) => Center(child: Text(userErrorMessage(error, action: '내용을 불러오지 못했어요.'))),
         data: (reviews) {
           if (reviews.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                '작성한 리뷰가 없습니다.',
-                style: TextStyle(color: Colors.grey),
+                '작성한 리뷰가 없어요.',
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             );
           }
@@ -84,7 +85,7 @@ class _MyReviewCard extends StatelessWidget {
                             ? Icons.star
                             : Icons.star_border,
                         size: 16,
-                        color: const Color(0xFFF59E0B),
+                        color: Theme.of(context).colorScheme.tertiary,
                       );
                     }),
                   ),
@@ -94,7 +95,7 @@ class _MyReviewCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   place!.map!.title,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall!.fontSize, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
               const SizedBox(height: 8),

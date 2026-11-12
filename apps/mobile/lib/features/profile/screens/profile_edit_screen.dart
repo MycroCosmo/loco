@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -56,8 +57,10 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _loading = true);
+    var nicknameSaved = false;
     try {
       await UserService().updateMe(nickname: _nicknameCtrl.text.trim());
+      nicknameSaved = true;
       final selectedImage = _selectedImage;
       if (selectedImage != null) {
         await UserService().uploadProfileImage(selectedImage);
@@ -67,13 +70,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       if (mounted) {
         context.pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('프로필이 수정되었습니다.')),
+          const SnackBar(content: Text('프로필을 수정했어요.')),
         );
       }
     } catch (e) {
+      if (nicknameSaved) ref.invalidate(userProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('수정 실패: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text(nicknameSaved ? '닉네임은 저장됐어요. 프로필 사진을 올리지 못했어요. 현재 사진을 확인한 뒤 다시 선택해 주세요.' : userErrorMessage(e, action: '변경 내용을 저장하지 못했어요.')), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -113,17 +117,17 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                   children: [
                     CircleAvatar(
                       radius: 48,
-                      backgroundColor: const Color(0xFF2563EB).withOpacity(0.1),
+                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                       backgroundImage: profileImage,
                       child: profileImage == null
                           ? Text(
                               (user?.nickname.isNotEmpty ?? false)
                                   ? user!.nickname[0].toUpperCase()
                                   : '?',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 34,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF2563EB),
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             )
                           : null,
@@ -157,8 +161,8 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 ),
                 validator: (value) {
                   final nickname = value?.trim() ?? '';
-                  if (nickname.length < 2) return '2자 이상 입력하세요.';
-                  if (nickname.length > 30) return '30자 이하로 입력하세요.';
+                  if (nickname.length < 2) return '2자 이상 입력해 주세요.';
+                  if (nickname.length > 30) return '30자 이하로 입력해 주세요.';
                   return null;
                 },
               ),
@@ -167,14 +171,14 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
                 onPressed: _loading ? null : _submit,
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                 ),
                 child: _loading
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           strokeWidth: 2,
                         ),
                       )

@@ -64,6 +64,12 @@ class _KakaoMapWidgetState extends State<KakaoMapWidget> {
     _mobileController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..addJavaScriptChannel(
+        'MapLoadFailureBridge',
+        onMessageReceived: (_) {
+          debugPrint('Kakao Maps SDK script load failed. Check network, app key and registered domain.');
+        },
+      )
+      ..addJavaScriptChannel(
         'FlutterBridge',
         onMessageReceived: (msg) {
           if (widget.onMarkerTap == null) return;
@@ -420,8 +426,9 @@ class _KakaoMapWidgetState extends State<KakaoMapWidget> {
         });
       };
       script.onerror = function() {
+        MapLoadFailureBridge.postMessage('sdk-load-failed');
         document.getElementById('map').innerHTML =
-          '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9CA3AF;font-size:14px;">지도를 불러올 수 없습니다.<br>도메인 등록을 확인하세요.</div>';
+          '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#9CA3AF;font-size:14px;">지도를 불러오지 못했어요.<br>인터넷 연결을 확인하고 화면을 다시 열어 주세요.</div>';
       };
       document.head.appendChild(script);
     })();

@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,16 +17,16 @@ class FavoritesScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('즐겨찾기')),
       body: favAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('불러오기 실패: $e')),
+        error: (e, _) => Center(child: Text(userErrorMessage(e, action: '내용을 불러오지 못했어요.'))),
         data: (favorites) => favorites.isEmpty
-            ? const Center(
+            ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.bookmark_border, size: 64, color: Colors.grey),
-                    SizedBox(height: 12),
-                    Text('즐겨찾기한 지도가 없어요.',
-                        style: TextStyle(color: Colors.grey)),
+                    Icon(Icons.bookmark_border, size: 64, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    const SizedBox(height: 12),
+                    Text('즐겨찾기한 지도방가 없어요.',
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                   ],
                 ),
               )
@@ -41,8 +42,9 @@ class FavoritesScreen extends ConsumerWidget {
                       map: fav.map!,
                       onTap: () => context.push('/maps/${fav.mapId}'),
                       trailing: IconButton(
-                        icon: const Icon(Icons.bookmark,
-                            color: Color(0xFF2563EB)),
+                      tooltip: '즐겨찾기 해제',
+                        icon: Icon(Icons.bookmark,
+                            color: Theme.of(context).colorScheme.primary),
                         onPressed: () async {
                           await FavoritesService().removeFavorite(fav.id);
                           ref.invalidate(favoritesProvider);

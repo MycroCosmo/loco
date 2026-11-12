@@ -1,3 +1,4 @@
+import '../../../core/utils/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -52,7 +53,7 @@ class _MyPageScreenState extends ConsumerState<MyPageScreen> {
       appBar: AppBar(title: const Text('마이페이지')),
       body: userAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('불러오기 실패: $error')),
+        error: (error, _) => Center(child: Text(userErrorMessage(error, action: '내용을 불러오지 못했어요.'))),
         data: (user) {
           final profileImageUrl = user.profileImageUrl;
           final ImageProvider? profileImage =
@@ -78,17 +79,17 @@ class _MyPageScreenState extends ConsumerState<MyPageScreen> {
                       CircleAvatar(
                         radius: 36,
                         backgroundColor:
-                            const Color(0xFF2563EB).withOpacity(0.1),
+                            Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                         backgroundImage: profileImage,
                         child: profileImage == null
                             ? Text(
                                 user.nickname.isNotEmpty
                                     ? user.nickname[0].toUpperCase()
                                     : '?',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF2563EB),
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               )
                             : null,
@@ -108,8 +109,8 @@ class _MyPageScreenState extends ConsumerState<MyPageScreen> {
                             const SizedBox(height: 4),
                             Text(
                               user.email,
-                              style: const TextStyle(
-                                color: Colors.grey,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 fontSize: 13,
                               ),
                             ),
@@ -192,9 +193,9 @@ class _MyPageScreenState extends ConsumerState<MyPageScreen> {
                 children: [
                   _MenuTile(
                     icon: Icons.logout,
-                    iconColor: Colors.orange,
+                    iconColor: Theme.of(context).colorScheme.tertiary,
                     title: '로그아웃',
-                    titleColor: Colors.orange,
+                    titleColor: Theme.of(context).colorScheme.tertiary,
                     onTap: () async {
                       await ref.read(authStateProvider.notifier).logout();
                       if (context.mounted) context.go('/login');
@@ -202,16 +203,16 @@ class _MyPageScreenState extends ConsumerState<MyPageScreen> {
                   ),
                   _MenuTile(
                     icon: Icons.delete_outline,
-                    iconColor: Colors.red,
+                    iconColor: Theme.of(context).colorScheme.error,
                     title: '회원 탈퇴',
-                    titleColor: Colors.red,
+                    titleColor: Theme.of(context).colorScheme.error,
                     onTap: () async {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (_) => AlertDialog(
                           title: const Text('회원 탈퇴'),
                           content: const Text(
-                            '정말 탈퇴하시겠어요? 이 작업은 되돌릴 수 없습니다.',
+                            '탈퇴하면 다시 로그인할 수 없고 되돌릴 수 없어요. 작성한 지도방·장소·리뷰는 남아요. 탈퇴하시겠어요?',
                           ),
                           actions: [
                             TextButton(
@@ -220,17 +221,24 @@ class _MyPageScreenState extends ConsumerState<MyPageScreen> {
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text(
+                              child: Text(
                                 '탈퇴',
-                                style: TextStyle(color: Colors.red),
+                                style: TextStyle(color: Theme.of(context).colorScheme.error),
                               ),
                             ),
                           ],
                         ),
                       );
                       if (confirm == true && context.mounted) {
-                        await UserService().deleteAccount();
-                        if (context.mounted) context.go('/login');
+                        try {
+                          await UserService().deleteAccount();
+                          if (context.mounted) context.go('/login');
+                        } catch (error) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(userErrorMessage(error, action: '탈퇴를 완료하지 못했어요.')),
+                          ));
+                        }
                       }
                     },
                   ),
@@ -265,7 +273,7 @@ class _MenuSection extends StatelessWidget {
             child: Text(
               title,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w800,
                   ),
             ),

@@ -27,11 +27,8 @@ class KakaoPlaceSearchService {
       return documents
           .map((e) => KakaoPlaceResult.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
-      final serverMessage = e.response?.data is Map
-          ? (e.response!.data as Map)['message']?.toString()
-          : null;
-      throw Exception(serverMessage ?? '서버 연결 실패 (${e.response?.statusCode ?? '네트워크 오류'})');
+    } on DioException {
+      rethrow;
     }
   }
 }
